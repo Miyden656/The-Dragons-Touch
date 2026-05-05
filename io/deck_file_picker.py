@@ -1,4 +1,4 @@
-"""Deck file selection helpers."""
+"""Deck file selection helpers. :D """
 
 from __future__ import annotations
 
