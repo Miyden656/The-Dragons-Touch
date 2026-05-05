@@ -1,4 +1,4 @@
-"""Round 2 starter entry point.
+"""Round 2 starter entry point. :D
 
 This file is intentionally not the full deck helper yet.
 Round 2 only separates runtime config, file picking, output helpers, and batch helpers.
