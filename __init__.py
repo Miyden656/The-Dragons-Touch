@@ -1,3 +1,3 @@
 """MTG Commander Deck Helper cleanup package."""
 
-__version__ = "v0.6.2-clean.1"
+__version__ = "0.6.2-clean.5"

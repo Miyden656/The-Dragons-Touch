@@ -1,2 +1,3 @@
 *.txt
-scryfall_cards.json
+*.json
+*.pyc
