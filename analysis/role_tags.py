@@ -16,13 +16,13 @@ from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any
 
-from deck_helper.data.card_lookup import (
+from data.card_lookup import (
     get_face_aware_major_types,
     get_full_oracle_text,
     normalize_text,
 )
-from deck_helper.legality.commander_detection import CommandZoneSummary
-from deck_helper.parsing.deck_parser import ParsedDeck
+from legality.commander_detection import CommandZoneSummary
+from parsing.deck_parser import ParsedDeck
 
 NON_TRIBAL_REFERENCE_WORDS = {
     "time", "times", "turn", "turns", "phase", "phases", "combat", "card", "cards",
@@ -48,6 +48,7 @@ ROLE_TAG_DISPLAY_ORDER = [
     "lifedrain_payoff", "toughness_payoff", "defender_payoff", "high_toughness", "activated_ability_synergy",
     "mana_sink", "copy_clone_value", "dragon_typal", "dragon_copy_value", "mutate", "mutate_payoff",
     "cast_from_outside_hand", "nonhand_casting", "foretell", "plot", "suspend_synergy", "adventure_synergy",
+    "draw_punisher", "forced_draw", "wheel", "group_slug", "table_damage", "punisher",
     "fast_mana", "efficient_tutor", "free_interaction", "high_bracket_pressure", "bracket_pressure",
     "combo_piece_possible", "win_condition", "manual_review",
 ]
@@ -199,6 +200,15 @@ def infer_card_role_tags(card: dict[str, Any], commander_cards: list[dict[str, A
         tags.update(["ritual", "ramp", "fast_mana", "bracket_pressure"])
     if _has_any(text, ["double the amount of", "if you tap a permanent for mana", "whenever you tap a land for mana, add"]):
         tags.update(["mana_doubler", "ramp"])
+
+    # Draw-punisher / wheels / group-slug support.
+    if _has_any(text, ["whenever an opponent draws", "whenever a player draws", "draws a card", "draws their second card"]):
+        if _has_any(text, ["deals 1 damage", "loses 1 life", "each opponent loses", "damage to that player"]):
+            tags.update(["draw_punisher", "group_slug", "table_damage", "punisher", "damage_payoff", "synergy_piece"])
+    if _has_any(text, ["each player discards their hand", "then draws seven", "draw seven cards", "wheel", "each player draws", "discard their hand, then draw"]):
+        tags.update(["wheel", "forced_draw", "card_advantage", "draw_punisher"])
+    if _has_any(text, ["opponent draws", "each opponent draws", "target opponent draws"]):
+        tags.update(["forced_draw", "political_card"])
 
     # Card advantage and selection.
     if _has_any(text, ["draw a card", "draw two cards", "draw three cards", "draw cards", "draw that many cards"]):

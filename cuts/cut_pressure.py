@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from deck_helper.config import RuntimeConfig
-from deck_helper.cuts.replaceability import ReplaceabilityEntry
+from config import RuntimeConfig
+from cuts.replaceability import ReplaceabilityEntry
 
 @dataclass(slots=True)
 class CutPressureSummary:

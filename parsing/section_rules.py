@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from deck_helper.data.card_lookup import normalize_text
+from data.card_lookup import normalize_text
 
 
 SECTION_HEADERS: dict[str, str] = {

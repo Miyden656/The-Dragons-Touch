@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from deck_helper.analysis.plan_fit import CardPlanFitEntry, PlanFitSummary
-from deck_helper.analysis.role_tags import CardRoleEntry
-from deck_helper.legality.commander_detection import CommandZoneSummary
+from analysis.plan_fit import CardPlanFitEntry, PlanFitSummary
+from analysis.role_tags import CardRoleEntry
+from legality.commander_detection import CommandZoneSummary
 
 PROTECTED_ROLE_TAGS = {
     "commander_protection", "protection", "commander_resource_support",

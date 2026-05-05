@@ -9,8 +9,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from deck_helper.analysis.role_tags import CardRoleEntry
-from deck_helper.analysis.strategy_scoring import ARCHETYPE_DEFINITIONS, StrategySummary
+from analysis.role_tags import CardRoleEntry
+from analysis.strategy_scoring import ARCHETYPE_DEFINITIONS, StrategySummary
 
 @dataclass(slots=True)
 class CardPlanFitEntry:
@@ -34,8 +34,9 @@ def get_strategy_tag_set(strategy_name: str) -> set[str]:
     return set(definition.get("anchors", set())) | set(definition.get("payoffs", set())) | set(definition.get("enablers", set()))
 
 
-def classify_card_plan_fit(card_entry: CardRoleEntry, strategy_summary: StrategySummary) -> CardPlanFitEntry:
+def classify_card_plan_fit(card_entry: CardRoleEntry, strategy_summary: StrategySummary, commander_names: set[str] | None = None) -> CardPlanFitEntry:
     tags = set(card_entry.detected_roles)
+    commander_names = commander_names or set()
     primary_tags = get_strategy_tag_set(strategy_summary.primary_strategy)
     secondary_tags = get_strategy_tag_set(strategy_summary.secondary_strategy)
 
@@ -57,7 +58,12 @@ def classify_card_plan_fit(card_entry: CardRoleEntry, strategy_summary: Strategy
     if tags & core_role_tags:
         reasons.append("Fills a generic Commander infrastructure role.")
 
-    if supports_primary:
+    if card_entry.card_name in commander_names:
+        supports_primary = True
+        plan_fit = "Commander / command-zone engine"
+        if not reasons:
+            reasons.append("Commander card; never treat as off-plan in its own deck.")
+    elif supports_primary:
         plan_fit = "Primary plan support"
     elif supports_secondary:
         plan_fit = "Secondary plan support"
@@ -83,8 +89,9 @@ def classify_card_plan_fit(card_entry: CardRoleEntry, strategy_summary: Strategy
     )
 
 
-def build_plan_fit_summary(card_roles: list[CardRoleEntry], strategy_summary: StrategySummary) -> PlanFitSummary:
-    entries = [classify_card_plan_fit(entry, strategy_summary) for entry in card_roles]
+def build_plan_fit_summary(card_roles: list[CardRoleEntry], strategy_summary: StrategySummary, commander_names: list[str] | None = None) -> PlanFitSummary:
+    commander_name_set = set(commander_names or [])
+    entries = [classify_card_plan_fit(entry, strategy_summary, commander_name_set) for entry in card_roles]
     strong_synergy_cards = [entry for entry in entries if entry.supports_primary][:12]
     possible_off_plan_cards = [entry for entry in entries if entry.possible_off_plan][:12]
     return PlanFitSummary(

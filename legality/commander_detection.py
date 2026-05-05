@@ -11,8 +11,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from deck_helper.data.card_lookup import format_color_identity, get_full_oracle_text, normalize_text
-from deck_helper.parsing.deck_parser import ParsedDeck
+from data.card_lookup import format_color_identity, get_full_oracle_text, normalize_text
+from parsing.deck_parser import ParsedDeck
 
 
 @dataclass(slots=True)

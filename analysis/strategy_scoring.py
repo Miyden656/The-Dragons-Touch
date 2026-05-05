@@ -11,8 +11,8 @@ from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any
 
-from deck_helper.analysis.strategy_gates import gate_strategy_candidate, suppress_broad_if_narrower_exists
-from deck_helper.data.card_lookup import get_full_oracle_text, normalize_text
+from analysis.strategy_gates import gate_strategy_candidate, suppress_broad_if_narrower_exists
+from data.card_lookup import get_full_oracle_text, normalize_text
 
 @dataclass(slots=True)
 class StrategyCandidate:
@@ -125,6 +125,31 @@ ARCHETYPE_DEFINITIONS: dict[str, dict[str, Any]] = {
         "payoffs": {"tribal_payoff", "typal_payoff", "tribal_dependency"},
         "enablers": {"token_maker", "recursion", "cost_reducer"},
     },
+
+    "Dragon Typal / Token-Copy Value": {
+        "layer": "commander_defined_emergent",
+        "anchors": {"dragon_typal", "copy_clone_value", "dragon_copy_value", "token_maker"},
+        "payoffs": {"tribal_payoff", "typal_payoff", "copy_clone_value", "token_maker", "combat_synergy"},
+        "enablers": {"ramp", "mana_rock", "cost_reducer", "card_draw", "protection"},
+    },
+    "Equipment / Artifact Combat": {
+        "layer": "mechanical_micro_archetype",
+        "anchors": {"equipment_synergy", "artifact_combat", "artifact", "go_tall_support", "combat_synergy"},
+        "payoffs": {"equipment_payoff", "combat_synergy", "attack_trigger_payoff", "commander_damage_support", "win_condition"},
+        "enablers": {"protection", "evasion", "ramp", "card_draw", "artifact"},
+    },
+    "Graveyard Setup / Commander Engine": {
+        "layer": "commander_defined_emergent",
+        "anchors": {"graveyard_enabler", "self_mill", "discard_outlet", "recursion"},
+        "payoffs": {"reanimation", "copy_clone_value", "graveyard_payoff", "mana_sink", "card_advantage"},
+        "enablers": {"card_selection", "self_mill", "discard_outlet", "ramp"},
+    },
+    "Draw-Punisher / Wheels / Group Slug": {
+        "layer": "commander_defined_emergent",
+        "anchors": {"draw_punisher", "forced_draw", "wheel", "group_slug", "table_damage", "punisher"},
+        "payoffs": {"damage_payoff", "lifedrain_payoff", "win_condition", "draw_punisher"},
+        "enablers": {"card_draw", "wheel", "forced_draw", "card_advantage"},
+    },
     "Mutate / Creature Stack Value": {
         "layer": "niche_theme",
         "anchors": {"mutate", "mutate_payoff", "mutate_enabler"},
@@ -167,6 +192,10 @@ def _commander_support_for_strategy(name: str, commander_cards: list[dict[str, A
         "Mutate": ["mutate"],
         "Cast From Outside": ["exile", "anywhere other than your hand", "foretell", "plot", "suspend"],
         "Typal": ["creature type", "creatures you control", "dragon", "elf", "goblin", "vampire", "zombie"],
+        "Dragon Typal": ["dragon", "token that is a copy", "create a token that's a copy", "legend rule"],
+        "Equipment / Artifact Combat": ["equipment", "equipped", "attach", "artifact"],
+        "Graveyard Setup": ["graveyard", "becomes a copy", "copy of target creature", "put into a graveyard"],
+        "Draw-Punisher": ["whenever an opponent draws", "draws a card", "deals 1 damage", "each opponent draws"],
     }
     for key, phrases in strategy_checks.items():
         if key in name and any(phrase in text for phrase in phrases):
@@ -272,13 +301,52 @@ def get_strategy_confidence(primary: StrategyCandidate | None, secondary: Strate
 def get_core_synergy_packages(candidates: list[StrategyCandidate], limit: int = 5) -> list[str]:
     packages = []
     for candidate in candidates:
-        if candidate.score <= 0:
+        if candidate.score <= 0 or not candidate.gate_passed:
             continue
-        if candidate.gate_passed or candidate.score >= 12:
-            packages.append(f"{candidate.name} ({candidate.layer}, score {candidate.score})")
+        if candidate.layer == "macro_archetype" and not candidate.primary_eligible:
+            continue
+        packages.append(f"{candidate.name} ({candidate.layer}, score {candidate.score})")
         if len(packages) >= limit:
             break
     return packages
+
+
+def _generic_primary_name(name: str) -> bool:
+    return name in {"Ramp / Big Mana", "Midrange / Value", "Control", "Combo-Adjacent Value"}
+
+
+def _prefer_specific_commander_plans(candidates: list[StrategyCandidate]) -> list[StrategyCandidate]:
+    """Final cleanup pass to prevent generic macro labels from hiding clear commander plans."""
+    boosted: list[StrategyCandidate] = []
+    for candidate in candidates:
+        # Rename generic Typal Strategy when the evidence is overwhelmingly Dragon + copy/token value.
+        if candidate.name == "Typal Strategy":
+            continue
+        boosted.append(candidate)
+
+    by_name = {candidate.name: candidate for candidate in candidates}
+    typal = by_name.get("Typal Strategy")
+    dragon = by_name.get("Dragon Typal / Token-Copy Value")
+    if typal and dragon:
+        if typal.gate_passed and dragon.score >= max(1, int(typal.score * 0.55)):
+            # Make the specific label the primary-eligible version of the typal plan.
+            dragon.score = max(dragon.score, typal.score + 1)
+            dragon.gate_passed = True
+            dragon.primary_eligible = True
+            dragon.gate_reason = "Specific Dragon typal/token-copy commander plan preferred over generic Typal Strategy."
+            dragon.evidence = list(dict.fromkeys(dragon.evidence + typal.evidence + ["specific strategy label avoids generic Typal Strategy"]))
+        elif typal.gate_passed:
+            boosted.append(typal)
+    elif typal:
+        boosted.append(typal)
+
+    # If any commander-defined/non-macro plan is strong enough, push generic macros below it.
+    best_specific = max((c.score for c in boosted if c.layer != "macro_archetype" and c.gate_passed), default=0)
+    for candidate in boosted:
+        if _generic_primary_name(candidate.name) and best_specific and candidate.score <= int(best_specific * 1.25):
+            candidate.primary_eligible = False
+            candidate.gate_reason = "Suppressed as broad fallback because a narrower commander-defined/mechanical plan is supported."
+    return sorted(boosted, key=lambda item: item.score, reverse=True)
 
 
 def build_strategy_summary(
@@ -286,7 +354,7 @@ def build_strategy_summary(
     type_counts: Counter[str],
     commander_cards: list[dict[str, Any]] | None = None,
 ) -> StrategySummary:
-    candidates = score_archetypes(role_counts, type_counts, commander_cards)
+    candidates = _prefer_specific_commander_plans(score_archetypes(role_counts, type_counts, commander_cards))
     primary, secondary, warnings = choose_primary_secondary_strategy(candidates)
     confidence = get_strategy_confidence(primary, secondary)
     return StrategySummary(

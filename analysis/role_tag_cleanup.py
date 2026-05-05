@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections import Counter
 
-from deck_helper.analysis.role_tags import CardRoleEntry, RoleAnalysisSummary
+from analysis.role_tags import CardRoleEntry, RoleAnalysisSummary
 
 USER_FACING_TAG_RENAMES = {
     "targeted_removal": "targeted removal",

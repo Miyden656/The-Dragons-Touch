@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from deck_helper.analysis.plan_fit import CardPlanFitEntry, PlanFitSummary
-from deck_helper.analysis.role_tags import CardRoleEntry
-from deck_helper.cuts.protected_cards import ProtectedCardEntry
+from analysis.plan_fit import CardPlanFitEntry, PlanFitSummary
+from analysis.role_tags import CardRoleEntry
+from cuts.protected_cards import ProtectedCardEntry
 
 HIGH_PRESSURE_TAGS = {"bracket_pressure", "high_bracket_pressure"}
 INFRASTRUCTURE_TAGS = {"ramp", "mana_rock", "mana_dork", "card_draw", "card_advantage", "targeted_removal", "board_wipe", "counterspell", "mana_source"}

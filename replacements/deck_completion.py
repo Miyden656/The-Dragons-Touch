@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from deck_helper.analysis.strategy_scoring import StrategySummary
-from deck_helper.config import RuntimeConfig
-from deck_helper.cuts.replacement_categories import ReplacementNeedSummary
-from deck_helper.parsing.deck_parser import ParsedDeck
+from analysis.strategy_scoring import StrategySummary
+from config import RuntimeConfig
+from cuts.replacement_categories import ReplacementNeedSummary
+from parsing.deck_parser import ParsedDeck
 
 
 @dataclass(slots=True)

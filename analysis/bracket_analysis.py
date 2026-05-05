@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass, field
 
-from deck_helper.analysis.role_tags import CardRoleEntry, RoleAnalysisSummary
+from analysis.role_tags import CardRoleEntry, RoleAnalysisSummary
 
 @dataclass(slots=True)
 class BracketPressureCard:

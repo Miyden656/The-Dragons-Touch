@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass, field
 
-from deck_helper.analysis.strategy_scoring import StrategySummary
+from analysis.strategy_scoring import StrategySummary
 
 @dataclass(slots=True)
 class ReplacementNeedSummary:

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from deck_helper.cuts.cut_pressure import CutPressureSummary
-from deck_helper.cuts.replaceability import ReplaceabilityEntry
+from cuts.cut_pressure import CutPressureSummary
+from cuts.replaceability import ReplaceabilityEntry
 
 @dataclass(slots=True)
 class PossibleCutReviewSummary:

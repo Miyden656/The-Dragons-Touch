@@ -111,6 +111,22 @@ def main() -> int:
                 if marker not in output_text:
                     raise AssertionError(f"Expected an output path containing {marker!r}. Got:\n{output_text}")
 
+            deck_root = (tmp_path / "outputs" / "Test_Commander").resolve()
+            normal_dir = (deck_root / "normal").resolve()
+            debug_dir = (deck_root / "debug").resolve()
+            if not normal_dir.is_dir() or not debug_dir.is_dir():
+                raise AssertionError("Expected normal/ and debug/ output folders were not created.")
+            root_files = [p for p in deck_root.iterdir() if p.is_file()]
+            if root_files:
+                raise AssertionError(f"Output files were incorrectly written directly into the deck root: {root_files}")
+            for p in written:
+                name = Path(p).name.lower()
+                parent = Path(p).resolve().parent
+                if (name.endswith("_debug.md") or name.endswith("_full_debug_report.txt")) and parent != debug_dir:
+                    raise AssertionError(f"Debug file routed outside debug folder: {p}")
+                if not (name.endswith("_debug.md") or name.endswith("_full_debug_report.txt")) and parent != normal_dir:
+                    raise AssertionError(f"Normal file routed outside normal folder: {p}")
+
             print("Round 8 smoke test passed.")
             print("Files written:")
             for path in written:

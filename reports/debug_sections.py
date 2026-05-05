@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from deck_helper.io.output_writer import get_unique_output_path, write_text_file
+from app_io.output_writer import get_unique_output_path, write_text_file
 
 
 @dataclass(slots=True)

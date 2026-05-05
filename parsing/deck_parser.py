@@ -13,9 +13,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from deck_helper.data.card_lookup import format_color_identity, normalize_text
-from deck_helper.io.output_writer import make_safe_filename
-from deck_helper.parsing.section_rules import (
+from data.card_lookup import format_color_identity, normalize_text
+from app_io.output_writer import make_safe_filename
+from parsing.section_rules import (
     NON_MAINBOARD_SECTION_HEADERS,
     REFERENCE_ONLY_SECTION_HEADERS,
     SECTION_HEADERS,

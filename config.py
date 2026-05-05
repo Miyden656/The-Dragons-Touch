@@ -109,6 +109,12 @@ CUT_DEPTH_LABELS = {
 REVIEW_DIRECTION_LABELS = {
     "1": "build_up",
     "2": "cut_down",
+    "3": "batch_auto",
+    "auto": "batch_auto",
+    "batch": "batch_auto",
+    "batch auto": "batch_auto",
+    "auto batch": "batch_auto",
+    "batch_auto": "batch_auto",
     "build": "build_up",
     "build up": "build_up",
     "build_up": "build_up",
@@ -210,6 +216,8 @@ def get_review_direction_from_user() -> str:
     print("Choose review direction:")
     print("1. Build up / complete a deck to 100 cards")
     print("2. Cut down / tune an existing deck or card pool")
+    print("3. Auto batch mode — detect from deck size and use default choices")
+    print("   Note: under 100 cards = build-up; 100+ cards = cut-down; defaults are used automatically.")
     choice = input("Review direction [2=Cut down]: ").strip().lower()
     return REVIEW_DIRECTION_LABELS.get(choice, "cut_down")
 
@@ -371,18 +379,79 @@ def get_cut_strictness_from_user() -> dict:
 
 
 
+def get_default_cut_depth_config_normal() -> dict:
+    return {
+        "mode": "normal",
+        "optional_cut_target": 5,
+        "include_low_confidence": False,
+        "include_bracket_pressure": False,
+        "include_removal": False,
+        "include_manual_review": True,
+        "include_playable_replaceable": True,
+    }
+
+
+def auto_build_up_config_for_deck_size(deck_card_count: int) -> dict:
+    cards_needed = max(0, 100 - int(deck_card_count or 0))
+    if deck_card_count <= 1 or cards_needed >= 99:
+        mode = "build_from_scratch"
+    elif cards_needed >= 30:
+        mode = "point_direction_30_plus"
+    elif cards_needed >= 11:
+        mode = "help_get_there_11_to_30"
+    else:
+        mode = "finalize_10_or_less"
+    labels = {
+        "build_from_scratch": "Build from Scratch — commander only (Alpha)",
+        "point_direction_30_plus": "Point me in the right direction — 30+ cards needed",
+        "help_get_there_11_to_30": "Help me get there — 11 to 30 cards needed",
+        "finalize_10_or_less": "Finalize — 10 or fewer cards needed",
+    }
+    return {"mode": mode, "label": labels[mode], "alpha": mode == "build_from_scratch", "auto_selected": True}
+
+
+def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_card_count: int) -> RuntimeConfig:
+    if runtime_config.review_direction != "batch_auto":
+        return runtime_config
+    if deck_card_count < 100:
+        return RuntimeConfig(
+            output_mode=runtime_config.output_mode,
+            review_direction="build_up",
+            build_up_config=auto_build_up_config_for_deck_size(deck_card_count),
+            cut_depth_config=get_default_cut_depth_config_for_build_up(),
+            prompt_interaction_mode=runtime_config.prompt_interaction_mode,
+        )
+    return RuntimeConfig(
+        output_mode=runtime_config.output_mode,
+        review_direction="cut_down",
+        build_up_config={"mode": "not_applicable", "label": "Not applicable", "alpha": False},
+        cut_depth_config=get_default_cut_depth_config_normal(),
+        prompt_interaction_mode=runtime_config.prompt_interaction_mode,
+    )
+
+
 def get_runtime_config() -> RuntimeConfig:
     output_mode = get_output_mode_from_user()
     review_direction = get_review_direction_from_user()
 
-    if review_direction == "build_up":
+    if review_direction == "batch_auto":
+        print()
+        print("Auto batch mode selected. Using default choices and routing each deck by deck size.")
+        print("- Output mode: " + output_mode)
+        print("- Prompt interaction mode: interactive")
+        print("- Cut depth for 100+ card decks: normal")
+        print("- Build-up level for under-100 decks: auto-selected by cards missing")
+        build_up_config = {"mode": "auto_by_deck_size", "label": "Auto-selected by deck size", "alpha": False}
+        cut_depth_config = get_default_cut_depth_config_normal()
+        prompt_interaction_mode = "interactive"
+    elif review_direction == "build_up":
         build_up_config = get_build_up_mode_from_user()
         cut_depth_config = get_default_cut_depth_config_for_build_up()
+        prompt_interaction_mode = get_prompt_interaction_mode_from_user()
     else:
         build_up_config = {"mode": "not_applicable", "label": "Not applicable", "alpha": False}
         cut_depth_config = get_cut_strictness_from_user()
-
-    prompt_interaction_mode = get_prompt_interaction_mode_from_user()
+        prompt_interaction_mode = get_prompt_interaction_mode_from_user()
 
     return RuntimeConfig(
         output_mode=output_mode,
@@ -403,6 +472,8 @@ def print_runtime_config_summary(runtime_config: RuntimeConfig) -> None:
     )
     if runtime_config.review_direction == "build_up":
         print(f"Build-up mode: {runtime_config.build_up_config['label']}")
+    elif runtime_config.review_direction == "batch_auto":
+        print("Batch auto: deck size selects build-up vs cut-down; defaults used")
     else:
         print(
             f"Cut depth mode: {runtime_config.cut_depth_config['mode']} "

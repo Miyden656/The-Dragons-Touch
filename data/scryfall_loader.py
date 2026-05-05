@@ -6,8 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from deck_helper.config import SCRYFALL_FILE
-from deck_helper.data.card_lookup import build_scryfall_lookup
+from config import SCRYFALL_FILE
+from data.card_lookup import build_scryfall_lookup
 
 
 class ScryfallDataError(RuntimeError):
