@@ -71,12 +71,6 @@ ARCHETYPE_DEFINITIONS: dict[str, dict[str, Any]] = {
         "payoffs": {"anthem", "combat_synergy", "attack_trigger_payoff", "win_condition"},
         "enablers": {"protection", "card_draw", "token_resource_engine"},
     },
-    "Token Combat / Go-Wide-Go-Tall": {
-        "layer": "mechanical_micro_archetype",
-        "anchors": {"token_maker", "go_wide_token_engine", "go_tall_support", "counter_synergy"},
-        "payoffs": {"combat_synergy", "attack_trigger_payoff", "anthem", "win_condition"},
-        "enablers": {"ramp", "protection", "card_draw", "token_resource_engine"},
-    },
     "Voltron / Go-Tall Combat": {
         "layer": "mechanical_micro_archetype",
         "anchors": {"equipment_synergy", "aura_synergy", "go_tall_support", "commander_damage_support"},
@@ -140,9 +134,7 @@ ARCHETYPE_DEFINITIONS: dict[str, dict[str, Any]] = {
     },
     "Equipment / Artifact Combat": {
         "layer": "mechanical_micro_archetype",
-        # Artifact count, generic combat, and go-tall tags are only support evidence here.
-        # They must not make this strategy primary without real Equipment/artifact-combat density.
-        "anchors": {"equipment_synergy", "equipment_payoff", "artifact_combat", "attachment_synergy", "commander_damage_support"},
+        "anchors": {"equipment_synergy", "artifact_combat", "artifact", "go_tall_support", "combat_synergy"},
         "payoffs": {"equipment_payoff", "combat_synergy", "attack_trigger_payoff", "commander_damage_support", "win_condition"},
         "enablers": {"protection", "evasion", "ramp", "card_draw", "artifact"},
     },
@@ -192,7 +184,6 @@ def _commander_support_for_strategy(name: str, commander_cards: list[dict[str, A
         "Commander-Created Landfall": ["land enters", "rock artifact token"],
         "Artifacts": ["artifact", "treasure", "clue", "food"],
         "Tokens": ["create", "token"],
-        "Token Combat": ["create", "token", "attack", "attacks", "power", "+1/+1 counter"],
         "Aristocrats": ["sacrifice", "dies", "graveyard"],
         "Spellslinger": ["instant", "sorcery", "noncreature spell", "cast or copy"],
         "Blink": ["exile", "return it to the battlefield"],
@@ -209,11 +200,8 @@ def _commander_support_for_strategy(name: str, commander_cards: list[dict[str, A
     for key, phrases in strategy_checks.items():
         if key in name and any(phrase in text for phrase in phrases):
             return "strong"
-    # Generic triggered-ability text should not grant moderate support to every
-    # strategy. Strategy-specific phrase checks above should carry the commander
-    # support signal; otherwise this is only light contextual support.
     if any(phrase in text for phrase in ["whenever", "create", "draw", "cast", "attack", "sacrifice"]):
-        return "light"
+        return "moderate"
     return "light"
 
 
@@ -272,26 +260,6 @@ def score_archetypes(
     return sorted(candidates, key=lambda item: item.score, reverse=True)
 
 
-def _strategy_priority(candidate: StrategyCandidate) -> tuple[int, int]:
-    """Tie-breaker that prefers specific commander/mechanical plans over broad or noisy packages."""
-    priority = 0
-    if candidate.layer == "commander_defined_emergent":
-        priority += 30
-    elif candidate.layer in {"mechanical_micro_archetype", "typal_strategy_shape", "niche_theme"}:
-        priority += 20
-    if candidate.commander_support == "strong":
-        priority += 10
-    elif candidate.commander_support == "moderate":
-        priority += 5
-    if candidate.name in {"Token Combat / Go-Wide-Go-Tall", "Dragon Typal / Token-Copy Value", "Mutate / Creature Stack Value"}:
-        priority += 8
-    if candidate.name in {"Equipment / Artifact Combat", "Commander-Created Landfall / Artifact Token Landfall"}:
-        priority -= 4
-    if candidate.layer == "macro_archetype":
-        priority -= 15
-    return (priority, candidate.score)
-
-
 def choose_primary_secondary_strategy(candidates: list[StrategyCandidate]) -> tuple[StrategyCandidate | None, StrategyCandidate | None, list[str]]:
     warnings: list[str] = []
     passing = [candidate for candidate in candidates if candidate.primary_eligible]
@@ -307,21 +275,12 @@ def choose_primary_secondary_strategy(candidates: list[StrategyCandidate]) -> tu
             warnings.append(f"Suppressed broad fallback '{top.name}' because a narrower supported plan was close enough.")
             passing = sorted(narrower + [c for c in passing if c not in narrower], key=lambda item: item.score, reverse=True)
 
-    # Among close non-macro candidates, use strategy specificity as the tie-breaker.
-    if passing:
-        top_score = passing[0].score
-        close = [c for c in passing if c.score >= max(1, int(top_score * 0.78))]
-        distant = [c for c in passing if c not in close]
-        passing = sorted(close, key=_strategy_priority, reverse=True) + distant
-
     primary = passing[0] if passing else None
     secondary = None
-    # Secondary strategy may be a broad support package that was suppressed from
-    # primary consideration. Use all gated candidates for secondary selection.
-    secondary_pool = [c for c in candidates if c.gate_passed and (not primary or c.name != primary.name)]
-    secondary_pool = sorted(secondary_pool, key=_strategy_priority, reverse=True)
-    if secondary_pool:
-        secondary = secondary_pool[0]
+    for candidate in passing[1:]:
+        if primary and candidate.name != primary.name:
+            secondary = candidate
+            break
     if primary and secondary and secondary.score >= primary.score * 0.90:
         warnings.append("Primary and secondary strategy scores are within 10%; confirm pilot intent before aggressive cuts/additions.")
     return primary, secondary, warnings
@@ -369,25 +328,17 @@ def _prefer_specific_commander_plans(candidates: list[StrategyCandidate]) -> lis
     typal = by_name.get("Typal Strategy")
     dragon = by_name.get("Dragon Typal / Token-Copy Value")
     if typal and dragon:
-        # Only replace generic typal with Dragon token/copy when the strict Dragon gate passed.
-        if typal.gate_passed and dragon.gate_passed and dragon.score >= max(1, int(typal.score * 0.55)):
+        if typal.gate_passed and dragon.score >= max(1, int(typal.score * 0.55)):
+            # Make the specific label the primary-eligible version of the typal plan.
             dragon.score = max(dragon.score, typal.score + 1)
+            dragon.gate_passed = True
             dragon.primary_eligible = True
-            dragon.gate_reason = "Specific Dragon typal/token-copy plan preferred over generic Typal Strategy."
+            dragon.gate_reason = "Specific Dragon typal/token-copy commander plan preferred over generic Typal Strategy."
             dragon.evidence = list(dict.fromkeys(dragon.evidence + typal.evidence + ["specific strategy label avoids generic Typal Strategy"]))
         elif typal.gate_passed:
             boosted.append(typal)
     elif typal:
         boosted.append(typal)
-
-    # If Token Combat is a stronger explanation than generic Tokens, prefer the hybrid label.
-    token_hybrid = by_name.get("Token Combat / Go-Wide-Go-Tall")
-    generic_tokens = by_name.get("Tokens / Go-Wide Combat")
-    if token_hybrid and generic_tokens and token_hybrid.gate_passed and generic_tokens in boosted:
-        try:
-            boosted.remove(generic_tokens)
-        except ValueError:
-            pass
 
     # If any commander-defined/non-macro plan is strong enough, push generic macros below it.
     best_specific = max((c.score for c in boosted if c.layer != "macro_archetype" and c.gate_passed), default=0)

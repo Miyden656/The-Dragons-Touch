@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from analysis.bracket_analysis import build_bracket_analysis
+from analysis.deck_building_philosophies import build_philosophy_context
 from analysis.plan_fit import build_plan_fit_summary
 from analysis.role_tag_cleanup import apply_role_tag_cleanup
 from analysis.role_tags import build_role_analysis
@@ -49,7 +50,7 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.2-clean.8.5 — output routing rebuild"
+VERSION_LABEL = "v0.6.2-clean.8.6 — philosophy layer MVP"
 
 
 def build_analysis_context(parsed_deck: ParsedDeck, runtime_config: RuntimeConfig, scryfall_lookup: dict[str, dict[str, Any]]) -> dict[str, Any]:
@@ -68,6 +69,10 @@ def build_analysis_context(parsed_deck: ParsedDeck, runtime_config: RuntimeConfi
     replacement_needs = build_replacement_need_summary(role_summary.role_counts, strategy_summary, parsed_deck.deck_card_count)
     deck_completion = build_deck_completion_summary(parsed_deck, resolved_config, strategy_summary, replacement_needs)
     collection_candidates = build_collection_candidate_summary()
+    philosophy_context = build_philosophy_context(
+        key=resolved_config.philosophy_key,
+        guide_preference=resolved_config.guide_preference,
+    )
 
     return {
         "version_label": VERSION_LABEL,
@@ -87,6 +92,7 @@ def build_analysis_context(parsed_deck: ParsedDeck, runtime_config: RuntimeConfi
         "replacement_needs": replacement_needs,
         "deck_completion": deck_completion,
         "collection_candidates": collection_candidates,
+        "philosophy_context": philosophy_context,
     }
 
 

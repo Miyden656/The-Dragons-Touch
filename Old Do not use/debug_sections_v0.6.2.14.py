@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Any
 
 from app_io.output_writer import get_unique_output_path, write_text_file
-from analysis.deck_building_philosophies import render_philosophy_diagnostics_section
 
 
 @dataclass(slots=True)
@@ -173,15 +172,10 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
         f"Build-up config: {runtime_config.build_up_config}",
         f"Cut-depth config: {runtime_config.cut_depth_config}",
         "",
-    ]
-    if philosophy_context:
-        lines.extend(render_philosophy_diagnostics_section(philosophy_context).splitlines())
-        lines.append("")
-    lines.extend([
         "## Parser hygiene",
         f"- Ignored/unparsed lines: {len(parsed.ignored_lines)}",
         f"- Reference/non-mainboard cards ignored: {parsed.reference_card_count}",
-    ])
+    ]
     if parsed.ignored_lines:
         lines.extend(["", "## Ignored lines"])
         lines.extend(_bullet_list(parsed.ignored_lines[:30]))

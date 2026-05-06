@@ -32,8 +32,6 @@ def _confident_cut_candidates(entries: list[ReplaceabilityEntry]) -> list[Replac
         and not entry.protected
         and entry.cut_confidence in {"Medium", "High"}
         and not entry.cut_type.startswith("Protected")
-        and "land-aura ramp" not in " ".join(entry.reasons).lower()
-        and "mana infrastructure" not in " ".join(entry.reasons).lower()
     ]
 
 

@@ -2,198 +2,167 @@
 
 ## Purpose
 
-Define how **The Dragon’s Touch** should use deck-building philosophy as a review lens during Commander deck analysis.
+This file defines how **The Dragon’s Touch** should use Timmy/Tammy, Johnny/Jenny, Spike, their subtype philosophies, and Balanced / Unknown as a review lens for Commander deck analysis.
 
-This rule file introduces the core player-philosophy layer:
+This philosophy layer must **not** replace strategy detection.
 
-- Timmy / Tammy
-- Johnny / Jenny
-- Spike
-- Balanced / Unknown
-
-These philosophies help the system understand **why** the pilot may value certain cards, lines, inefficiencies, packages, or deck-building choices.
-
-This philosophy layer is a modifier. It must never replace strategy detection.
-
----
-
-## Philosophy Layer Placement
-
-### Core Rule
-
-Deck-building philosophy is a review lens, not a strategy engine.
-
-The system must still determine the deck’s primary strategy from:
-
+The deck’s primary strategy should still come from:
 - commander text
-- partner commander interaction
+- command-zone relationship
 - decklist roles
 - archetype gates
-- mechanical theme density
-- payoff and enabler counts
-- user-stated intent
-- known Commander strategy patterns
+- card density
+- payoff/enabler structure
+- role tags
+- user intent
 
-The philosophy layer modifies how the system interprets and presents the review after strategy detection has already happened.
-
-### What Philosophy May Modify
-
-The philosophy layer may affect:
-
+The philosophy layer modifies:
 - cut pressure
-- optional optimization cuts
 - replacement priorities
 - report tone
 - pet-card tolerance
-- tolerance for inefficiency
 - power optimization pressure
-- how aggressively generically strong upgrades are recommended
-- how aggressively narrow cards are protected or questioned
-- how much the report prioritizes experience, expression, power, or elegance
+- acceptable inefficiency
+- guide-specific questions
+- protected-card explanation
+- optional optimization focus
 
-### What Philosophy Must Not Modify
+If philosophy is unknown, use **Balanced / Unknown** and avoid strong assumptions.
 
-The philosophy layer must not:
+## Core Design Rule
 
-- override the commander’s actual mechanical identity
-- invent a strategy not supported by the decklist
-- force a deck into a philosophy that the user did not choose
-- treat philosophy as an archetype
-- make primary strategy names include the commander name
-- excuse required legality fixes
-- protect cards that violate the user’s stated goals
-- ignore user instructions about power level, budget, pet cards, or desired play experience
+> Strategy tells The Dragon’s Touch what the deck is trying to do.  
+> Philosophy tells The Dragon’s Touch how the pilot wants that deck to be judged, protected, challenged, and guided.
 
----
-
-## Unknown Philosophy Default
-
-If the user does not provide a deck-building philosophy, use:
-
-**Balanced / Unknown**
-
-When philosophy is unknown, the system should avoid strong assumptions about the pilot’s motivation.
-
-Do not assume the pilot wants maximum power.
-Do not assume the pilot wants maximum spectacle.
-Do not assume the pilot wants elaborate combo expression.
-Do not assume the pilot wants to keep inefficient cards for emotional reasons.
-
-Instead, use normal strategy-aware Commander review logic and explain uncertain cases as review points rather than hard conclusions.
+A selected philosophy should never override:
+- Commander legality
+- color identity
+- deck size rules
+- required cuts
+- user-declared constraints
+- budget
+- combo tolerance
+- bracket/table goals
+- strategy detection
 
 ---
 
-# Philosophy Definitions
+# Philosophy Depth
+
+The system should support three philosophy depths.
+
+## 1. Balanced / Unknown
+
+Use when:
+- the user does not choose a philosophy
+- batch mode is running without a global philosophy setting
+- the deck’s pilot is unsure what they want
+- the tool is discovering the deck’s natural direction
+
+Balanced / Unknown should:
+- avoid strong assumptions
+- apply no subtype-specific protection by default
+- review the deck through strategy, role balance, legality, and user intent
+- optionally report possible philosophy lean without treating it as selected
+
+## 2. Big 3 Philosophy
+
+The user chooses one broad philosophy:
+- Timmy / Tammy
+- Johnny / Jenny
+- Spike
+
+This changes the broad review lens without applying a specific subtype.
+
+## 3. Specific Philosophy Subtype
+
+The user chooses one of the 18 subtypes.
+
+The subtype is the rules object.  
+The persona is the user-facing mentor voice.
 
 ---
+
+# Big 3 Philosophies
 
 ## Timmy / Tammy
 
 ### Core Motivation
 
-Timmy / Tammy players are motivated by big experiences, emotional payoff, memorable moments, splashy plays, and the feeling of doing something awesome.
+Timmy / Tammy wants the deck to feel good to play.
 
-They often value the story created by the deck as much as the raw win percentage.
+The deck is judged by the experience it creates: spectacle, theme, emotional resonance, big moments, favorite cards, table stories, and personal satisfaction.
 
-The deck does not need to be perfectly efficient if it creates the kind of game experience the pilot wants.
+### What The Player Values
 
-### What the Player Values
+- memorable plays
+- emotional payoff
+- theme and vibe
+- splashy cards
+- big board states
+- favorite cards
+- personal expression
+- table reactions
+- getting to do the thing
 
-Timmy / Tammy players often value:
+### What The System Should Protect
 
-- huge creatures
-- dramatic board states
-- big combat steps
-- memorable haymakers
-- splashy spells
-- high-impact finishers
-- cards with emotional attachment
-- cards that create table reactions
-- pet cards with personal meaning
-- win conditions that feel earned or cinematic
-- funny, ridiculous, or once-in-a-lifetime plays
+- declared pet cards
+- theme-defining cards
+- big payoff cards
+- splashy finishers
+- cards that create the desired experience
+- support cards that help the deck reach the experience
+- flavor cards with real mechanical role
 
-### What the System Should Protect
+### What The System Should Review More Aggressively
 
-The system should be more willing to protect:
-
-- pet cards the user identifies as emotionally important
-- splashy finishers that support the deck’s intended experience
-- large threats that align with the primary strategy
-- high-mana cards that are inefficient but meaningful to the deck’s goal
-- cards that create the pilot’s desired memorable moment
-- cards that are not optimal but are central to the deck’s identity
-- cards that support a clear table-story or big-play payoff
-
-Protection does not mean the card is always correct. It means the system should avoid casually cutting it only because it is inefficient.
-
-### What the System Should Review More Aggressively
-
-The system should review more aggressively:
-
-- low-impact cards that do not contribute to the big-play experience
-- filler cards that neither ramp into nor protect the deck’s payoffs
-- expensive cards that are not exciting, synergistic, or important
-- cards that slow the deck down without increasing spectacle
-- redundant small effects that do not help the deck reach its big moments
-- generically efficient cards that make the deck less fun for this pilot
+- cards that are big but not meaningful
+- theme cards that prevent the deck from functioning
+- splashy cards with too little support
+- unsupported haymakers
+- cards that do not help the pilot experience the deck’s goal
+- generic upgrades that erase the deck’s identity
 
 ### Replacement Bias
 
-Replacement recommendations should lean toward:
-
-- bigger payoffs
-- stronger finishers
-- more ramp to reach expensive cards
-- more protection for signature threats
-- more ways to enable the deck’s biggest turns
-- more dramatic win conditions
-- more cards that support the pilot’s stated favorite play pattern
-
-The system should avoid replacing every inefficient card with the most efficient staple unless the user requests optimization.
+Prefer cards that:
+- preserve the deck’s experience
+- make the desired moment happen more often
+- support the theme
+- protect important payoffs
+- improve function without erasing joy
 
 ### Cut-Pressure Bias
 
-Timmy / Tammy decks should apply lower optional cut pressure to cards that are:
+Lower cut pressure on:
+- cards that create the intended experience
+- declared pet cards
+- theme-defining cards
+- payoff cards central to the deck’s identity
 
-- emotionally important
-- splashy
-- memorable
-- on-plan
-- tied to the pilot’s desired experience
-- inefficient but functional in the deck’s intended game plan
-
-They should apply higher cut pressure to cards that are:
-
-- small and forgettable
-- off-plan
-- low-impact
-- neither enabling nor rewarding the big-play plan
-- efficient but emotionally or strategically irrelevant
+Increase cut pressure on:
+- off-theme cards
+- unsupported expensive cards
+- cards that delay the deck’s desired experience
+- generic good-stuff that weakens identity
 
 ### Report Tone
 
-The report tone should be encouraging, experience-aware, and careful not to flatten the deck into pure optimization.
-
-The system should acknowledge the pilot’s desired moments and frame improvements around helping those moments happen more often.
+Warm, encouraging, emotionally validating, and honest about function.
 
 ### Common False Positives
 
-The system should avoid these mistakes:
-
-- treating every expensive spell as a bad card
-- cutting a beloved pet card because it is inefficient
-- assuming the pilot wants the lowest possible curve
-- replacing splashy finishers with generic value staples
-- calling big, emotional cards wrong when they are central to the deck’s fun
-- over-prioritizing competitive efficiency in a casual spectacle-focused deck
+Avoid:
+- treating Timmy/Tammy as bad deck-building
+- cutting every expensive card
+- assuming the user does not care about winning
+- protecting every splashy card automatically
+- ignoring curve, ramp, draw, or interaction
 
 ### Example Report Language
 
-- “This card is not the most efficient option, but it clearly supports the kind of big moment this deck wants to create.”
-- “I would not cut this just for curve reasons unless you decide the deck is failing to reach its late-game payoffs.”
-- “The better upgrade path is not to make the deck smaller emotionally, but to add more ramp and protection so your biggest cards actually matter.”
-- “This is a reasonable keep for a Timmy/Tammy build because it supports the deck’s table-impact goal.”
+> This card is not the most efficient option, but it strongly supports the deck’s intended experience. I would only cut it if it consistently prevents the deck from functioning or fails to create the moment the pilot wants.
 
 ---
 
@@ -201,117 +170,85 @@ The system should avoid these mistakes:
 
 ### Core Motivation
 
-Johnny / Jenny players are motivated by creativity, expression, clever interactions, unusual lines, hidden synergy, and making the deck do something distinctive.
+Johnny / Jenny wants the deck to prove an idea.
 
-They often value proving that a strange card or unusual package has a purpose.
+The deck is judged by whether it expresses and supports a specific engine, interaction, combo, constraint, commander exploit, weird card, or mechanical concept.
 
-The deck does not need to use the most obvious route if it expresses the pilot’s idea well.
+### What The Player Values
 
-### What the Player Values
+- clever interactions
+- engines
+- combos
+- unusual cards
+- hidden synergies
+- self-imposed restrictions
+- commander-specific text
+- mechanical invention
+- proving an idea works
 
-Johnny / Jenny players often value:
+### What The System Should Protect
 
-- unusual synergies
-- build-around cards
-- clever engines
-- strange interactions
-- alternate win conditions
-- puzzle-like sequencing
-- cards that look weak until the deck context explains them
-- hidden role compression
-- unique commander interpretations
-- synergy density over raw rate
-- expressive deck identity
+- declared build-around cards
+- engine pieces
+- combo pieces
+- connector cards
+- weird cards with clear contextual purpose
+- cards that bridge multiple themes
+- constraint-compliant role-fillers
+- low-power cards that are essential in context
 
-### What the System Should Protect
+### What The System Should Review More Aggressively
 
-The system should be more willing to protect:
-
-- narrow synergy pieces with clear deck relevance
-- cards that enable the deck’s unique engine
-- cards that look weak generically but are strong in context
-- build-around cards named by the user
-- unusual payoffs that support the user’s intended line
-- combo-adjacent value pieces that are not obvious staples
-- cards that bridge multiple internal packages
-- role-players that support a nonstandard plan
-
-Protection should be based on actual synergy evidence, not merely on the card being strange.
-
-### What the System Should Review More Aggressively
-
-The system should review more aggressively:
-
-- generic goodstuff that does not support the deck’s unique idea
-- cards that dilute the central engine
-- redundant staples that crowd out synergy pieces
-- cards that only increase raw power but weaken expression
-- cards that appear clever but have too few enablers or payoffs
-- cute interactions that are too unsupported to matter
-- narrow cards with no clear path to usefulness
+- synergy cards that do not actually connect
+- unsupported build-arounds
+- partial combos with no support
+- weird cards that are just weird
+- isolated mini-packages
+- overcomplicated lines with too little payoff
+- cards that violate the chosen restriction
 
 ### Replacement Bias
 
-Replacement recommendations should lean toward:
-
-- better enablers
-- better payoffs for the unique engine
-- more tutors or selection if appropriate for the power level
-- more redundancy for the key interaction
-- more protection for fragile engine pieces
-- more card flow that helps assemble the deck’s idea
-- exact role replacements that preserve the deck’s identity
-
-The system should prefer replacements that make the idea work better, not replacements that erase the idea.
+Prefer cards that:
+- strengthen the deck’s idea
+- improve engine consistency
+- add redundancy for key interactions
+- bridge packages together
+- support the commander’s exact text
+- preserve constraints
+- make weird cards function
 
 ### Cut-Pressure Bias
 
-Johnny / Jenny decks should apply lower optional cut pressure to cards that are:
+Lower cut pressure on:
+- weak-alone but strong-in-context cards
+- engine connectors
+- declared combo pieces
+- bridge cards
+- constraint-compliant role-fillers
 
-- narrow but clearly synergistic
-- strange but intentional
-- low-power but engine-critical
-- part of the user’s stated build-around concept
-- useful in a specific interaction that the deck can realistically assemble
-
-They should apply higher cut pressure to cards that are:
-
-- generically strong but off-plan
-- unrelated staples
-- cute but unsupported
-- redundant without helping the core engine
-- included only because they are powerful in other decks
+Increase cut pressure on:
+- unsupported oddities
+- disconnected packages
+- dead combo fragments
+- clever-looking cards with no real function
 
 ### Report Tone
 
-The report tone should be curious, precise, and synergy-aware.
-
-The system should explain what the card appears to be doing before recommending it as a cut.
-
-The report should separate:
-
-- “this is weak”
-- “this is unsupported”
-- “this is clever but needs more density”
-- “this is strange, but it belongs”
+Curious, precise, puzzle-oriented, and careful with context-dependent cards.
 
 ### Common False Positives
 
-The system should avoid these mistakes:
-
-- cutting narrow cards before checking the engine they support
-- mistaking low raw power for low synergy
-- recommending generic staples that reduce deck expression
-- treating unusual win conditions as mistakes
-- assuming every weird card is a pet card rather than a role-player
-- calling a card off-theme because it supports the strategy indirectly
+Avoid:
+- assuming Johnny/Jenny only means combo
+- cutting weak-looking cards without checking their role
+- calling every strange card synergy
+- forcing the deck into a stock archetype
+- ignoring density and support requirements
 
 ### Example Report Language
 
-- “This looks weak by generic standards, but it appears to be part of the deck’s engine, so I would not treat it as a normal cut.”
-- “This card is clever, but the deck may need more enablers before it becomes reliable.”
-- “The better replacement is not a generic staple; it is another card that performs the same engine role more consistently.”
-- “This is a Johnny/Jenny-style keep: narrow, intentional, and worth protecting if this interaction is part of the deck’s identity.”
+> This card looks weak by generic standards, but it may be a key connector in the deck’s engine. I would only cut it if the surrounding support does not make the interaction reliable.
 
 ---
 
@@ -319,622 +256,891 @@ The system should avoid these mistakes:
 
 ### Core Motivation
 
-Spike players are motivated by performance, consistency, clean decision-making, strong card quality, efficient wins, and improving the deck’s ability to execute its plan.
+Spike wants the deck to perform.
 
-Spike does not always mean competitive or cEDH. A casual Spike may still want the deck to perform as well as possible within a chosen power band, budget, or table agreement.
+The deck is judged by how well its choices convert into consistency, efficiency, interaction, win conversion, resilience, and appropriate power for the intended table.
 
-### What the Player Values
+Spike does not automatically mean cEDH.
 
-Spike players often value:
+### What The Player Values
 
 - consistency
 - efficiency
+- role compression
+- smooth mana
 - strong card quality
-- low dead-card count
-- clean mana curve
-- reliable engines
-- optimized role balance
-- powerful interaction
+- interaction
 - clear win conditions
-- reduced variance
-- cards that perform well from behind, at parity, or ahead
-- upgrades that increase the deck’s actual win rate within constraints
+- table-appropriate power
+- reducing dead draws
+- avoiding preventable losses
 
-### What the System Should Protect
-
-The system should be more willing to protect:
+### What The System Should Protect
 
 - efficient ramp
 - efficient draw
-- premium interaction
-- compact win conditions
-- high-impact synergy pieces
-- cards that increase consistency
-- cards that improve velocity
-- cards that protect the deck’s main path to victory
-- flexible role-compression cards
-- proven staples that strongly support the deck’s plan
+- flexible interaction
+- clean role-fillers
+- strong finishers
+- reliable mana
+- redundancy for the main plan
+- power-level appropriate cards
+- cards that improve the deck’s performance without violating constraints
 
-Protection should be based on performance and relevance to the actual strategy, not name recognition alone.
+### What The System Should Review More Aggressively
 
-### What the System Should Review More Aggressively
-
-The system should review more aggressively:
-
-- inefficient pet cards
+- overcosted effects
+- narrow cards
+- unsupported payoffs
 - win-more cards
-- high-cost cards with low immediate impact
-- narrow effects without enough payoff
-- unsupported subthemes
-- cards that are only good when already ahead
-- redundant expensive finishers
-- slow engines that do not match the chosen power level
-- cards included for flavor but not function
-- cute lines that reduce consistency
+- clunky top-end
+- low-impact cards
+- bad-from-behind cards
+- cards mismatched to the table
+- cards that cannot justify their slot
 
 ### Replacement Bias
 
-Replacement recommendations should lean toward:
-
-- lower curve
-- more efficient ramp
-- more efficient draw
-- better interaction
-- stronger protection
-- better mana base consistency
-- more reliable finishers
-- higher synergy density
-- cleaner win paths
-- cards that increase the deck’s ability to execute its primary plan
-
-The system may recommend exact stronger cards more often for Spike decks, especially when the user welcomes optimization.
+Prefer cards that:
+- improve consistency
+- lower curve pressure
+- increase interaction quality
+- convert advantage into wins
+- improve role compression
+- reduce dead draws
+- fit the stated power band
 
 ### Cut-Pressure Bias
 
-Spike decks should apply higher optional cut pressure to cards that are:
+Lower cut pressure on:
+- efficient role-fillers
+- key interaction
+- strong infrastructure
+- consistent enablers
+- clean finishers
 
-- inefficient
-- overly narrow
-- slow
-- redundant
-- unsupported
-- low-impact
-- mostly emotional inclusions
-- inconsistent with the stated power target
-
-They should apply lower cut pressure to cards that are:
-
-- efficient
-- role-dense
-- strategically necessary
-- high-impact
-- core to the deck’s primary game plan
-- strong within the user’s chosen power band
+Increase cut pressure on:
+- inefficient, narrow, clunky, unsupported, or low-impact cards
 
 ### Report Tone
 
-The report tone should be direct, practical, and performance-focused.
-
-The system should still avoid insulting the user’s choices. It should frame cuts around performance pressure, not personal taste.
+Direct, practical, performance-focused, and still respectful of user intent.
 
 ### Common False Positives
 
-The system should avoid these mistakes:
-
-- assuming Spike always means cEDH
-- ignoring budget, table expectations, or user constraints
-- cutting synergy cards only because they are not staples
-- recommending raw power that conflicts with the deck’s actual plan
-- overcorrecting a casual deck into a different power band
-- treating every pet card as automatically wrong
+Avoid:
+- applying cEDH standards unless requested
+- cutting synergy pieces only because they look weak alone
+- assuming stronger always means better
+- ignoring table fit
+- erasing the deck’s identity
 
 ### Example Report Language
 
-- “This card is playable, but it has higher cut pressure in a Spike-leaning review because it is slower than the deck’s other options.”
-- “The replacement should improve consistency rather than simply add another payoff.”
-- “This is a good card, but it may be the wrong card if the goal is tighter execution of the primary plan.”
-- “Within your stated power band, this upgrade increases reliability without changing the deck’s identity.”
+> This card is playable, but it has high replaceability because it costs more mana than comparable effects and does not provide enough commander-specific synergy to justify the slot.
 
 ---
 
-## Balanced / Unknown
+# Specific Philosophy Subtypes
 
-### Core Motivation
+## Timmy / Tammy Subtypes
 
-Balanced / Unknown represents either an unknown philosophy or a pilot who wants a middle-ground review.
+### 1. Big Moment
 
-The system should use the deck’s stated strategy, power target, budget, and user preferences without strongly weighting toward spectacle, expression, or optimization.
+Guide persona: Michael / Michelle
 
-### What the Player Values
+Core philosophy:
+The player wants the deck to create one unforgettable, table-shaking payoff moment.
 
-Balanced / Unknown players may value:
+Protect:
+- declared big-moment cards
+- splashy finishers
+- high-impact haymakers central to the deck’s desired experience
+- X-spells or scalable payoffs
+- copy, doubling, or amplification effects
+- ramp and protection that make the big moment realistic
 
-- functional deck performance
-- commander synergy
-- reasonable consistency
-- keeping the deck’s identity intact
-- avoiding obvious weak points
-- preserving some fun or pet-card space
-- improving the deck without over-optimizing it
+Challenge:
+- expensive cards that do not create a memorable payoff
+- unsupported haymakers
+- win-more cards
+- large cards unrelated to the intended moment
+- clunky cards that do not improve the payoff
 
-### What the System Should Protect
+Recommendation bias:
+- better ramp
+- payoff support
+- protection
+- haste/evasion/trample for combat moments
+- copy/doubling effects
+- card draw or selection to find the payoff
 
-The system should protect:
+Example:
+> This card is expensive, but it supports the deck’s Big Moment philosophy because it creates the table-shaking payoff the pilot wants.
 
-- commander support cards
-- primary-plan enablers
-- primary-plan payoffs
-- important ramp and fixing
-- important draw engines
-- important interaction
-- user-identified pet cards
-- cards with clear contextual synergy
-- cards that support the stated deck experience
+---
 
-### What the System Should Review More Aggressively
+### 2. Big Creature / Stompy
 
-The system should review more aggressively:
+Guide persona: Alexander / Alexandria
 
-- clearly off-plan cards
-- low-impact cards
-- unsupported subthemes
-- replaceable filler
-- redundant effects beyond the deck’s needs
-- expensive cards with unclear payoff
-- generically good cards that do not fit the deck
+Core philosophy:
+The player wants to cast huge threats, dominate combat, and win through overwhelming board presence.
 
-### Replacement Bias
+Protect:
+- large creatures central to the deck’s identity
+- ramp into major threats
+- trample, haste, evasion, and protection support
+- power/toughness payoff cards
+- creature-based card draw or removal
+- attack/combat damage payoffs
 
-Replacement recommendations should lean toward:
+Challenge:
+- large creatures with no evasion, protection, or immediate impact
+- redundant top-end threats
+- ramp-light builds with too many expensive cards
+- small value cards that dilute the stompy plan
+- big creatures disconnected from the commander or strategy
 
+Recommendation bias:
+- ramp
+- creature-based draw
+- trample/evasion/haste
+- protection
+- more impactful threats
+- cards that convert size into damage, draw, or removal
+
+Example:
+> This card fits the deck’s Big Creature / Stompy philosophy because it turns mana into visible board pressure.
+
+---
+
+### 3. Theme / Vibe
+
+Guide persona: Benjamin / Bethany
+
+Core philosophy:
+The player wants the deck to feel like a specific story, aesthetic, tribe, character, joke, or emotional concept.
+
+Protect:
+- declared theme cards
+- commander-lore cards
+- typal identity pieces
+- flavor cards with mechanical relevance
+- cards that preserve the deck’s emotional identity
+- cards that make the pilot happy to draw them
+
+Challenge:
+- flavorful but nonfunctional cards
+- vague theme inclusions
+- too many low-impact theme cards in key role slots
+- generic staples that clash with the deck’s stated theme
+- cards that pull the deck into the wrong identity
+
+Recommendation bias:
+- on-theme role-fillers
+- flavorful removal/draw/ramp
+- mechanically useful cards that preserve vibe
+- finishers that match the deck’s story
+- upgrades that improve function without erasing identity
+
+Example:
+> This card may be below rate, but it strongly supports the deck’s Theme / Vibe philosophy.
+
+---
+
+### 4. Pet Card
+
+Guide persona: Milo / Mia
+
+Core philosophy:
+The player wants specific beloved cards protected because they matter personally, even if they are not optimal.
+
+Protect:
+- explicitly declared pet cards
+- cards the pilot refuses to cut
+- cards the pilot wants to experience at least once
+- cards with stated personal or emotional value
+- support pieces that intentionally make the pet card functional
+
+Challenge:
+- undeclared cards that look like pet cards but lack support
+- pet-card packages that consume too much space
+- support cards that are weak everywhere except one pet-card line
+- pet cards that cause severe mana, curve, or color issues
+
+Recommendation bias:
+- improve the surrounding shell
+- support the pet card if requested
+- cut unrelated cards before declared pet cards
+- clearly label performance cost without shaming the pilot
+
+Example:
+> This is a declared pet card, so I would not treat it as a normal cut candidate.
+
+---
+
+### 5. Let Me Do My Thing
+
+Guide persona: William / Willow
+
+Core philosophy:
+The player wants the deck to reliably reach and execute the experience it was built to create.
+
+Protect:
+- core enablers
+- ramp
+- card draw
+- protection
+- redundancy for the stated plan
+- setup pieces that make the deck function
+- interaction that prevents the deck from being shut out
+
+Challenge:
+- off-plan cards that delay the main experience
+- cute cards that do not help the deck do its thing
+- splashy unrelated cards
+- redundant payoffs without enablers
+- packages that distract from the core plan
+
+Recommendation bias:
+- reliable enablers
+- ramp/draw/protection
+- commander support
+- redundancy
+- interaction that keeps the pilot alive long enough to participate
+
+Example:
+> This card supports the Let Me Do My Thing philosophy because it helps the deck reach its intended experience more often.
+
+---
+
+### 6. Battlecruiser
+
+Guide persona: Aaron / Ariana
+
+Core philosophy:
+The player wants longer, larger Commander games where players build boards, cast powerful spells, and experience dramatic late-game turns.
+
+Protect:
+- big mana engines
+- expensive payoffs that define the late game
+- splashy fair finishers
+- scalable spells
+- recovery tools
+- late-game card draw engines
+- resilient threats
+- interaction that keeps the game from ending too early
+
+Challenge:
+- fast combos that bypass the desired experience
+- oppressive locks
+- slow cards that are not impactful
+- too many high-cost cards without enough ramp
+- low-impact setup with no payoff
+- upgrades that erase the Battlecruiser identity
+
+Recommendation bias:
+- better ramp
+- late-game draw
+- fair finishers
+- board-based wins
+- recovery tools
+- splashy but functional interaction
+
+Example:
+> This card is slow by optimized standards, but it supports the deck’s Battlecruiser philosophy by creating a large-scale late-game Commander experience.
+
+---
+
+## Johnny / Jenny Subtypes
+
+### 7. Engine Builder
+
+Guide persona: Brad / Bria
+
+Core philosophy:
+The player wants the deck to assemble a repeatable machine where resources convert into more resources, value, inevitability, or a win.
+
+Protect:
+- core engine pieces
+- repeatable enablers
+- repeatable payoffs
+- resource converters
+- sacrifice outlets
+- recursion pieces
+- draw/mana engines
+- weak-alone engine connectors
+
+Challenge:
+- one-shot effects that do not feed the engine
+- payoffs without enough enablers
+- enablers without enough payoffs
+- resources the deck cannot use
+- cards that only look synergistic
+
+Recommendation bias:
+- engine redundancy
+- lower-cost enablers
+- repeatable effects
+- bridge cards
+- protection/recursion for engine pieces
+- finishers that emerge from the engine
+
+Example:
+> This card may look low-impact by itself, but it acts as an engine connector.
+
+---
+
+### 8. Commander Exploiter
+
+Guide persona: Kyle / Katie
+
+Core philosophy:
+The player wants to push the commander’s specific text, wording, trigger, activated ability, restriction, or unusual angle as far as possible.
+
+Protect:
+- cards that directly interact with commander text
+- trigger amplifiers
+- ability enablers
+- commander protection
+- copy, untap, blink, recur, or reset effects when relevant
+- cards that convert commander-generated resources
+- backup pieces that imitate the commander’s role
+
+Challenge:
+- generic staples that ignore commander text
+- cards that match colors but not the commander’s plan
+- support for commander abilities the deck is not using
+- commander-dependent cards without protection or backup
+
+Recommendation bias:
 - stronger commander synergy
-- better role balance
-- more consistent ramp and draw
-- enough interaction for the stated power level
-- replacements that support the primary and secondary strategy
-- upgrades that respect budget and user preference
+- commander protection
+- redundancy for key commander effects
+- cards that multiply commander triggers or abilities
+- backup engines for commander removal
 
-### Cut-Pressure Bias
+Example:
+> This card supports the Commander Exploiter philosophy because it interacts with the commander’s specific text rather than just the broader archetype.
 
-Balanced / Unknown decks should use normal cut pressure.
+---
 
-Do not protect cards only because they might be emotional.
-Do not cut cards only because they are inefficient.
-Do not assume the pilot wants maximum power.
-Do not assume the pilot wants maximum uniqueness.
+### 9. Weird Card Rescuer
 
-### Report Tone
+Guide persona: Elund / Emily
 
-The report tone should be neutral, helpful, and strategy-first.
+Core philosophy:
+The player wants to make an overlooked, strange, bad-looking, or dismissed card meaningful in the right shell.
 
-The system should explain when a card is a possible cut, when it is protected, and when it needs manual review.
+Protect:
+- declared weird-card build-arounds
+- strange cards with unique effects the deck clearly supports
+- low-power cards with a specific engine role
+- unusual cards with commander-specific relevance
+- cards that are part of the declared experiment
 
-### Common False Positives
+Challenge:
+- weird cards with no visible support
+- unusual cards that do not advance the deck
+- build-arounds requiring too much support for too little payoff
+- cards that look clever but do not function
+- support packages that weaken the deck without making the experiment reliable
 
-The system should avoid these mistakes:
+Recommendation bias:
+- support for the rescued card
+- redundancy for its role
+- protection/recursion for the build-around
+- bridge cards that connect the weird card to the main strategy
+- replacements that preserve the experiment
 
-- assuming an unknown pilot is a Spike
-- assuming an unknown pilot wants to protect every pet card
-- assuming an unknown pilot values weird synergy over consistency
-- making strong claims without user-provided philosophy
-- pushing the deck into a different identity
+Example:
+> This card looks weak by normal Commander standards, but it appears to be part of the deck’s Weird Card Rescuer philosophy.
 
-### Example Report Language
+---
 
-- “With no philosophy selected, I would treat this as a normal optional optimization candidate rather than a required cut.”
-- “This card is not clearly wrong, but it is replaceable if you want to tighten the deck.”
-- “I would review this manually because it may be a pet card, but the decklist alone does not prove that.”
-- “This recommendation is based on strategy fit rather than an assumed player preference.”
+### 10. Theme Mechanic Inventor
+
+Guide persona: Brandon / Brenda
+
+Core philosophy:
+The player wants to combine mechanics, archetypes, or themes that do not normally go together and make the overlap work.
+
+Protect:
+- bridge cards
+- hybrid payoffs
+- flexible enablers
+- cards that count toward multiple packages
+- commander-specific cards that justify the blend
+- support pieces that keep the hybrid identity coherent
+
+Challenge:
+- isolated mini-packages
+- cards that only support one half of the deck
+- themes that compete without overlap
+- payoffs with too few enablers
+- hybrid concepts where one side is ornamental
+- cards that make the deck feel like two half-decks
+
+Recommendation bias:
+- cards that support both themes
+- bridge payoffs
+- overlap enablers
+- flexible role-fillers
+- cards that reduce theme dilution
+
+Example:
+> This card is valuable because it bridges the deck’s two mechanical themes rather than supporting one isolated package.
+
+---
+
+### 11. Self-Imposed Constraint Builder
+
+Guide persona: Clark / Clarissa
+
+Core philosophy:
+The player wants the deck to succeed while obeying a chosen restriction, limitation, budget, card pool, or deck-building rule.
+
+Protect:
+- constraint-compliant role-fillers
+- scarce legal options for needed roles
+- unusual choices required by the limitation
+- cards that preserve the premise
+- weaker cards that are correct within the restricted pool
+
+Challenge:
+- cards that violate the stated restriction
+- recommendations that ignore the restriction
+- cards that technically fit but do not help the deck function
+- weak role-fillers when better legal options exist within the constraint
+- constraints that create structural weakness
+
+Recommendation bias:
+- legal upgrades inside the constraint
+- creative substitutes
+- constraint-compliant ramp/draw/removal/fixing
+- honest weakness notes caused by the constraint
+
+Example:
+> This card is weaker than the unrestricted best-in-slot option, but it satisfies the deck’s constraint while filling a necessary role.
+
+---
+
+### 12. Combo Builder
+
+Guide persona: Jasper / Jennifer
+
+Core philosophy:
+The player wants the deck to assemble specific card interactions, loops, or packages that produce a planned payoff.
+
+Protect:
+- declared combo pieces
+- combo enablers
+- tutors if allowed
+- combo redundancy
+- protection for the combo turn
+- recursion for removed pieces
+- weak-alone combo role players
+- mana converters, sacrifice outlets, untappers, cost reducers, token converters, and win outlets required by the combo
+
+Challenge:
+- unsupported combo fragments
+- combo cards dead outside one narrow line
+- packages that consume too many slots
+- combos that violate user tolerance
+- combo pieces that pull away from the commander’s plan
+- redundant combo pieces after enough support exists
+- cards that look like combo pieces but do not complete a functional line
+
+Recommendation bias:
+- missing combo pieces
+- redundancy
+- power-appropriate tutors
+- protection
+- recursion
+- lower-cost enablers
+- clear win outlets
+- cards that overlap with the main strategy when not comboing
+
+Example:
+> This card has low standalone impact, but it appears to be a required combo role-player.
+
+---
+
+## Spike Subtypes
+
+### 13. Consistency Maximizer
+
+Guide persona: Avery
+
+Core philosophy:
+The player wants the deck to do its intended thing more often by reducing non-games, dead draws, awkward hands, unsupported packages, and high-variance choices.
+
+Protect:
+- role-fillers that make the deck function
+- ramp and fixing
+- draw and selection
+- redundant enablers
+- backup versions of key effects
+- flexible interaction
+- cards that reduce fail states
+
+Challenge:
+- high-variance cards
+- unsupported payoffs
+- cards good only in ideal states
+- bad-from-behind cards
+- narrow dead cards
+- isolated packages
+- redundant top-end without setup
+
+Recommendation bias:
+- redundancy
+- draw/selection
+- reliable ramp/fixing
+- lower-curve setup
+- flexible interaction
+- backup enablers
+- higher-floor cards
+
+Example:
+> This card is powerful when everything lines up, but it creates consistency pressure because the deck does not have enough support to make that scenario happen often.
+
+---
+
+### 14. Efficiency Optimizer
+
+Guide persona: Jordan
+
+Core philosophy:
+The player wants every card to justify its slot through strong rate, low opportunity cost, flexibility, clean role fulfillment, and meaningful contribution.
+
+Protect:
+- efficient ramp
+- efficient draw
+- flexible removal
+- role-compression cards
+- low-cost enablers
+- strong floor/useful ceiling cards
+- efficient synergy pieces
+
+Challenge:
+- overcosted effects
+- narrow cards
+- win-more cards
+- low-impact haymakers
+- cards requiring too much setup
+- weaker versions of available effects
+- playable but highly replaceable cards
+
+Recommendation bias:
+- lower mana value
+- flexible effects
+- better rate
+- stronger role compression
+- cheaper interaction
+- efficient card advantage
+- upgrades that reduce dead slots
+
+Example:
+> This card is playable, but it has high replaceability because it costs more mana than comparable effects.
+
+---
+
+### 15. Curve and Mana Discipline
+
+Guide persona: River
+
+Core philosophy:
+The player wants the deck’s mana base, ramp, curve, and sequencing to support the plan cleanly from opening hand through late game.
+
+Protect:
+- lands and fixing
+- ramp that matches the curve
+- early setup
+- cheap role-fillers
+- curve bridges
+- mana sinks when supported
+- meaningful cost reducers
+- boring infrastructure that prevents stumbling
+
+Challenge:
+- too many cards at five or more mana
+- redundant expensive payoffs
+- low land counts
+- ramp that does not match deck needs
+- color-intensive cards in shaky mana bases
+- tapped lands in faster/color-sensitive decks
+- early turns with nothing to do
+- crowded curve slots
+
+Recommendation bias:
+- correct land count
+- better fixing
+- appropriate ramp
+- curve smoothing
+- early interaction/setup
+- color requirement cleanup
+- reducing top-end crowding
+
+Example:
+> This card may be powerful, but it adds pressure to an already crowded mana value.
+
+---
+
+### 16. Competitive Closer
+
+Guide persona: Charlie
+
+Core philosophy:
+The player wants the deck to convert advantage into a decisive win instead of endlessly generating value without closing.
+
+Protect:
+- clear finishers
+- compact win packages if allowed
+- resource-to-lethal conversion
+- combat closers
+- inevitability pieces
+- payoff cards that end games
+- commander-damage support
+- drain, burn, mill, overrun, alternate-win, or combo outlets when appropriate
+
+Challenge:
+- value engines with no payoff
+- redundant setup after enough exists
+- cards that prolong the game without advancing a win
+- slow win conditions
+- unrealistic payoff states
+- finishers that violate power or combo tolerance
+
+Recommendation bias:
+- clearer finishers
+- payoff cards that convert the main resource into victory
+- compact win outlets
+- combat finishers for board decks
+- evasion/haste/trample for combat kills
+- fewer pure value cards after enough setup exists
+
+Example:
+> The deck appears able to generate resources, but this card adds more value without helping convert that value into a win.
+
+---
+
+### 17. Power-Level Calibrator
+
+Guide persona: Kai
+
+Core philosophy:
+The player wants the deck to land at the correct strength for the intended table, not simply become as strong as possible.
+
+Protect:
+- cards that fit the stated power band
+- fair but effective win conditions
+- table-appropriate interaction
+- cards that preserve identity
+- synergy pieces correct for the target environment
+- pet/theme/splashy cards if the user accepts the performance cost
+- cards aligned with pod expectations
+
+Challenge:
+- cards too weak for the stated power level
+- cards too strong for the stated table
+- compact combos that violate tolerance
+- oppressive stax/lock/denial pieces if socially mismatched
+- fast mana/tutors that overshoot
+- slow cards in faster environments
+- upgrades that erase deck identity
+
+Recommendation bias:
+- power-appropriate upgrades
+- synergy and consistency over raw power when requested
+- table-speed interaction
+- finishers that fit combo tolerance
+- alternatives that improve without overshooting
+- optional upgrade tiers
+
+Example:
+> This card is powerful, but it may push the deck above the stated table expectation.
+
+---
+
+### 18. Interaction Controller
+
+Guide persona: Riley
+
+Core philosophy:
+The player wants the deck to survive, answer threats, protect its plan, and avoid losing to preventable problems.
+
+Protect:
+- efficient removal
+- flexible answers
+- protection spells
+- appropriate board wipes
+- graveyard hate when relevant
+- artifact/enchantment answers
+- stack interaction when appropriate
+- commander or engine protection
+- interaction stapled to synergy pieces
+
+Challenge:
+- decks with too little interaction
+- narrow answers without meta reason
+- expensive removal
+- sorcery-speed answers where instant speed matters
+- commander-dependent decks with little protection
+- decks that fold to common threats
+- excessive interaction that erases the proactive plan
+
+Recommendation bias:
+- flexible removal
+- efficient protection
+- interaction matching deck colors
+- answers that support the main strategy
+- board wipes that spare or benefit the deck when possible
+- resilience against likely failure points
+
+Example:
+> This deck is proactive, but it currently has limited ways to answer opposing engines once they resolve.
 
 ---
 
 # Interaction With Cut Logic
 
-## General Rule
-
-Philosophy modifies cut logic only after the system has already identified:
-
-- required cuts
-- optional optimization cuts
-- protected cards
-- possible cuts
-- recommended cuts
-- manual-review cards
-- primary and secondary strategy fit
-- role balance concerns
-
-Philosophy should adjust the pressure and wording, not erase the underlying analysis.
-
----
+Philosophy modifies optional cut logic, but it must not override required deck legality.
 
 ## Required Cuts
 
-Required cuts are legality fixes.
-
-If a deck is over 100 cards, the system must still identify enough cuts to reach a legal Commander deck size.
-
-Philosophy may change which cards are preferred as cuts, but it must not remove the need for required cuts.
-
-### Timmy / Tammy Required Cuts
-
-When required cuts are needed, avoid cutting the deck’s biggest emotional payoffs first unless they are completely unsupported.
-
-Prefer cutting:
-
-- low-impact filler
-- off-plan utility cards
-- small effects that do not help the deck reach its big moments
-- redundant pieces that do not support the desired experience
-
-### Johnny / Jenny Required Cuts
-
-When required cuts are needed, avoid cutting unusual synergy pieces before checking whether they support the deck’s engine.
-
-Prefer cutting:
-
-- generic goodstuff that dilutes the concept
-- unsupported clever cards
-- off-plan staples
-- redundant pieces that do not help assemble or protect the engine
-
-### Spike Required Cuts
-
-When required cuts are needed, prioritize performance and role efficiency.
-
-Prefer cutting:
-
-- slow cards
-- low-impact cards
-- inefficient pet cards
-- redundant expensive cards
-- narrow cards without enough payoff
-- cards that lower consistency
-
-### Balanced / Unknown Required Cuts
-
-When required cuts are needed, use normal strategy-aware cut logic.
-
-Prefer cutting:
-
-- off-plan cards
-- low-impact cards
-- redundant cards
-- unsupported packages
-- cards with weak commander or strategy support
-
----
+If the deck is over 100 cards:
+- required cuts remain mandatory
+- philosophy should help choose the least painful cuts
+- protected cards should be cut only after lower-priority options are exhausted
+- if all remaining cuts conflict with philosophy protection, label the conflict clearly
 
 ## Optional Optimization Cuts
 
-Optional optimization cuts are not legality fixes.
-
-They should be presented as review candidates, not mandatory changes.
-
-### Timmy / Tammy Optional Cuts
-
-Optional cut pressure should be lighter on splashy, memorable, or emotionally important cards.
-
-The system should ask whether the card helps create the desired moment before treating it as replaceable.
-
-### Johnny / Jenny Optional Cuts
-
-Optional cut pressure should be lighter on narrow synergy pieces with clear engine relevance.
-
-The system should distinguish unsupported clever cards from hidden-role synergy cards.
-
-### Spike Optional Cuts
-
-Optional cut pressure should be stronger.
-
-The system should more readily identify replaceable cards when they reduce consistency, speed, or efficiency.
-
-### Balanced / Unknown Optional Cuts
-
-Optional cut pressure should remain moderate.
-
-The system should identify possible optimization cuts without assuming the user wants an aggressively optimized list.
-
----
+If the deck is legal:
+- philosophy can increase or reduce optional cut pressure
+- Timmy/Tammy should be more tolerant of emotionally important or experiential cards
+- Johnny/Jenny should be more tolerant of weak-alone context cards
+- Spike should apply more pressure to inefficient, narrow, or low-impact cards
+- Balanced / Unknown should avoid aggressive assumptions
 
 ## Pet-Card Treatment
 
-User-identified pet cards should always be handled carefully.
-
-### Timmy / Tammy
-
-Pet-card tolerance is high.
-
-The system should protect pet cards unless they directly undermine the deck’s stated goals or required cuts leave no better options.
-
-### Johnny / Jenny
-
-Pet-card tolerance is moderate to high if the pet card also supports the deck’s concept, engine, or unique expression.
-
-If the pet card is unsupported, recommend building more around it or clearly labeling it as a protected personal inclusion.
-
-### Spike
-
-Pet-card tolerance is lower, but not zero.
-
-The system may recommend keeping a pet card if the user explicitly wants it, but should clearly explain the performance cost.
-
-### Balanced / Unknown
-
-Pet-card tolerance is moderate when the user identifies the card.
-
-If the user has not identified pet cards, do not assume emotional attachment from the decklist alone.
-
----
+Declared pet cards:
+- should be protected from normal cut recommendations
+- may receive performance notes
+- may be listed as protected or manual-review cards
+- should only be recommended as cuts if the user asks for no-mercy optimization
 
 ## Synergy Protection
 
-Philosophy changes how aggressively synergy pieces are protected.
-
-### Timmy / Tammy
-
-Protect synergy pieces that help create the deck’s biggest, most memorable moments.
-
-### Johnny / Jenny
-
-Protect synergy pieces that are part of the deck’s unique engine, even if they look weak generically.
-
-### Spike
-
-Protect synergy pieces that are efficient, consistent, and materially improve the deck’s ability to win.
-
-### Balanced / Unknown
-
-Protect synergy pieces that clearly support the commander, primary strategy, or secondary strategy.
-
----
+High-synergy, low-raw-power cards:
+- should not be cut by raw power logic alone
+- should be protected if they serve the commander, primary strategy, or selected philosophy
+- should be reviewed if the support package is too thin
 
 ## Power-First Recommendations
 
-Power-first recommendations should be filtered through philosophy.
+Power-first recommendations should be filtered by:
+- selected philosophy
+- table power level
+- combo tolerance
+- budget
+- user constraints
+- deck identity
 
-### Timmy / Tammy
-
-Do not recommend pure efficiency upgrades if they make the deck less exciting or remove the intended big-play experience.
-
-### Johnny / Jenny
-
-Do not recommend generic staples if they erase the deck’s unique engine or expression.
-
-### Spike
-
-Power-first recommendations are more acceptable, but still must respect power band, budget, table norms, and the deck’s actual plan.
-
-### Balanced / Unknown
-
-Power-first recommendations should be offered cautiously and framed as optional.
+Stronger does not always mean better for the selected philosophy.
 
 ---
 
 # Interaction With Build-Up Mode
 
-## General Rule
-
-In Build-Up Mode, philosophy modifies how the system fills missing deck slots.
-
-The system must still satisfy basic Commander construction needs:
-
-- legal color identity
-- sufficient lands
-- sufficient ramp
-- sufficient card draw
-- sufficient interaction
-- coherent primary strategy
-- clear win conditions
-- support for commander function
-- respect for budget and power target
-
-Philosophy should influence the flavor and priority of recommendations, not replace deck-building fundamentals.
-
----
+In build-up mode, philosophy shapes what missing pieces matter most.
 
 ## Timmy / Tammy Build-Up Bias
 
-When the deck is under 100 cards, recommendations should help the deck create bigger and more memorable moments.
-
-Prioritize:
-
-- ramp that reaches large payoffs
-- protection for signature threats
-- splashy finishers
-- big creatures or spells that support the strategy
-- effects that multiply the deck’s best moments
-- cards that help the pilot actually cast and enjoy expensive payoffs
-
-Avoid overfilling with low-impact efficiency pieces unless they help the deck reach its big turns.
-
-Example build-up language:
-
-- “Because this is Timmy/Tammy-leaning, I would use some of the open slots to make sure your biggest payoffs actually happen, not just to lower the curve.”
-
----
+Recommend cards that:
+- create the desired experience
+- support big moments
+- preserve theme
+- protect pet cards
+- make the deck feel like itself
+- let the deck do its thing
 
 ## Johnny / Jenny Build-Up Bias
 
-When the deck is under 100 cards, recommendations should help the deck’s unique idea become more consistent and expressive.
-
-Prioritize:
-
-- additional enablers
-- additional payoffs
-- redundancy for the unusual interaction
-- role-players that support the central engine
-- card selection or tutors if appropriate
-- protection for fragile build-around pieces
-- cards that make the deck’s unique line clearer
-
-Avoid replacing the deck’s concept with generic goodstuff.
-
-Example build-up language:
-
-- “Because this is Johnny/Jenny-leaning, the open slots should reinforce the engine rather than simply add generically strong Commander staples.”
-
----
+Recommend cards that:
+- complete engines
+- support unusual interactions
+- add redundancy to build-arounds
+- preserve constraints
+- bridge hybrid themes
+- clarify combo lines
 
 ## Spike Build-Up Bias
 
-When the deck is under 100 cards, recommendations should improve consistency, efficiency, and execution.
-
-Prioritize:
-
-- efficient ramp
-- efficient card draw
-- low-cost interaction
-- clean win conditions
-- mana consistency
-- curve discipline
-- role compression
-- reliable redundancy for the main plan
-
-Avoid adding expensive or cute cards unless they clearly improve the deck’s performance within the chosen power band.
-
-Example build-up language:
-
-- “Because this is Spike-leaning, I would use the open slots to tighten execution: more efficient ramp, cleaner interaction, and more reliable access to the primary game plan.”
-
----
+Recommend cards that:
+- improve consistency
+- fill role gaps
+- smooth curve and mana
+- increase interaction
+- add clearer finishers
+- match intended power level
 
 ## Balanced / Unknown Build-Up Bias
 
-When the deck is under 100 cards and no philosophy is provided, use normal Commander role-balance logic.
+Recommend broadly useful role-fillers while identifying possible philosophy directions.
 
-Prioritize:
-
-- commander synergy
-- primary-strategy support
-- enough lands
-- enough ramp
-- enough draw
-- enough interaction
-- clear finishers
-- budget-conscious upgrades
-
-Example build-up language:
-
-- “With no philosophy selected, I would fill the open slots based on role balance and primary-strategy support first.”
+Do not overcommit to a philosophy unless the user chooses one.
 
 ---
 
 # Interaction With Batch Mode
 
-## Batch Auto Default
+Batch auto should default to **Balanced / Unknown** unless a philosophy is provided globally.
 
-Batch auto mode should default to:
+If batch mode has no philosophy:
+- use Rowan / Balanced Unknown
+- avoid strong assumptions
+- do not apply subtype-specific protection
+- may report likely philosophy lean
+- may recommend that the user rerun a deck with a specific guide if desired
 
-**Balanced / Unknown**
+If batch mode has a global philosophy:
+- apply that philosophy to every deck
+- clearly label the global philosophy in each report
+- avoid assuming individual deck pilots share that philosophy unless the user says so
 
-unless a philosophy is provided globally or included in the deck’s input metadata.
-
-The system must not infer a player philosophy from a decklist alone with high confidence.
-
-It may identify possible tendencies, but it should not apply strong philosophy-based cut or replacement pressure unless the user explicitly provides the philosophy.
-
----
-
-## Global Philosophy Setting
-
-If the user provides a global philosophy for a batch run, apply that philosophy consistently to every deck in the batch unless an individual deck overrides it.
-
-Example:
-
-- Global philosophy: Spike
-- Deck-specific philosophy: Timmy / Tammy
-
-In this case, the deck-specific philosophy wins for that deck.
+If batch mode has per-deck philosophy metadata:
+- apply each deck’s selected philosophy independently
+- include the selected guide in each report
 
 ---
 
-## Batch Reporting
+# Report Requirements
 
-Batch reports should include the philosophy used for each deck.
+Every report with philosophy enabled should include:
 
-Recommended wording:
+```md
+## Philosophy Guide
 
-- “Philosophy lens used: Balanced / Unknown.”
-- “Philosophy lens used: Timmy / Tammy.”
-- “Philosophy lens used: Johnny / Jenny.”
-- “Philosophy lens used: Spike.”
+**Selected Lens:** <philosophy or subtype>
+**Guide:** <resolved persona name or none>
+**Parent Philosophy:** <Timmy/Tammy, Johnny/Jenny, Spike, or Balanced/Unknown>
+**Primary Question:** <guide question>
 
-If philosophy is Balanced / Unknown, the report should avoid statements like:
-
-- “You clearly want maximum power.”
-- “This is obviously a pet-card deck.”
-- “The pilot is trying to express a unique combo puzzle.”
-
-Instead, use neutral wording:
-
-- “Based on the decklist alone, this card is a possible review point.”
-- “Without a selected philosophy, I would treat this as an optional optimization candidate.”
-- “This may be intentional, but the batch input does not provide enough pilot context to assume that.”
-
----
-
-# Future Expansion: Philosophy Subsets
-
-The three core philosophies are the foundation layer.
-
-Future versions may define subsets within each philosophy.
-
-Possible future branches may include, but are not limited to:
-
-- Timmy / Tammy combat spectacle
-- Timmy / Tammy battlecruiser
-- Timmy / Tammy pet-card storyteller
-- Johnny / Jenny combo architect
-- Johnny / Jenny theme expressionist
-- Johnny / Jenny engine tinkerer
-- Spike efficiency optimizer
-- Spike metagame tuner
-- Spike high-power casual grinder
-
-Until subsets are formally defined, the system should only apply the core philosophy rules in this file.
-
-Do not invent subset rules during normal review.
-
----
-
-# Implementation Notes
-
-## Suggested Data Shape
-
-The philosophy layer can be represented as structured rule data rather than hard-coded scattered logic.
-
-Recommended conceptual fields:
-
-```yaml
-philosophy:
-  id: timmy_tammy | johnny_jenny | spike | balanced_unknown
-  display_name: string
-  cut_pressure_modifier: low | normal | high
-  pet_card_tolerance: low | moderate | high
-  inefficiency_tolerance: low | moderate | high
-  optimization_pressure: low | normal | high
-  replacement_biases:
-    - string
-  protect_biases:
-    - string
-  aggressive_review_biases:
-    - string
-  report_tone: string
+<brief explanation of how the guide affects this review>
 ```
 
-This makes the philosophy layer easier to expand when subsets are added later.
+If no philosophy is selected:
 
-## Rule Priority
+```md
+## Philosophy Guide
 
-When rules conflict, use this priority order:
+**Selected Lens:** Balanced / Unknown
+**Guide:** Rowan
+**Primary Question:** What path does this deck naturally want to follow?
 
-1. Commander legality and color identity
-2. User explicit instructions
-3. Required cuts to reach legal deck size
-4. Commander text and primary strategy
-5. Deck role balance
-6. Pet-card protections explicitly named by the user
-7. Philosophy lens
-8. Generic optimization heuristics
-
-The philosophy lens should influence review behavior, but it should not override higher-priority requirements.
+No specific philosophy was selected, so this report avoids strong assumptions and reviews the deck through a balanced exploratory lens.
+```

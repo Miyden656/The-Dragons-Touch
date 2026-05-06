@@ -1,10 +1,4 @@
-"""Deck-size and cut-pressure summary helpers.
-
-Patch Batch 4 cleanup:
-- Keep required legality cuts separate from optional tuning.
-- Avoid forcing weak advice when confident candidates are insufficient.
-- Make build-up mode explicitly addition-first.
-"""
+"""Deck-size and cut-pressure summary helpers."""
 
 from __future__ import annotations
 
@@ -12,7 +6,6 @@ from dataclasses import dataclass, field
 
 from config import RuntimeConfig
 from cuts.replaceability import ReplaceabilityEntry
-
 
 @dataclass(slots=True)
 class CutPressureSummary:
@@ -25,18 +18,6 @@ class CutPressureSummary:
     notes: list[str] = field(default_factory=list)
 
 
-def _confident_cut_candidates(entries: list[ReplaceabilityEntry]) -> list[ReplaceabilityEntry]:
-    return [
-        entry for entry in entries
-        if entry.score >= 4
-        and not entry.protected
-        and entry.cut_confidence in {"Medium", "High"}
-        and not entry.cut_type.startswith("Protected")
-        and "land-aura ramp" not in " ".join(entry.reasons).lower()
-        and "mana infrastructure" not in " ".join(entry.reasons).lower()
-    ]
-
-
 def build_cut_pressure_summary(deck_card_count: int, runtime_config: RuntimeConfig, replaceability_entries: list[ReplaceabilityEntry]) -> CutPressureSummary:
     required_cuts = max(0, deck_card_count - 100)
     short_cards = max(0, 100 - deck_card_count)
@@ -45,22 +26,16 @@ def build_cut_pressure_summary(deck_card_count: int, runtime_config: RuntimeConf
     cut_mode = str(cut_config.get("mode", "normal"))
     notes: list[str] = []
 
-    if runtime_config.review_direction == "build_up":
-        # Build-up reports may still include optional optimization language in the
-        # user-guided prompt, but the code should not produce cut pressure first.
-        optional_cut_target = 0 if deck_card_count <= 100 else optional_cut_target
-
     if deck_card_count > 100:
         status = "Over 100 — required cuts needed"
         notes.append(f"Deck is over Commander size by {required_cuts} card(s). Required cuts are mandatory for legality.")
-        notes.append("Required cuts are legality fixes first; optional tuning should be treated separately.")
-        confident = _confident_cut_candidates(replaceability_entries)
+        confident = [entry for entry in replaceability_entries if entry.score >= 4 and not entry.protected]
         if len(confident) < required_cuts:
             notes.append("Confident cut candidates are fewer than required cuts; remaining cuts should be manual review instead of forced bad advice.")
     elif deck_card_count < 100:
         status = "Under 100 — addition-first"
-        notes.append(f"Deck is short {short_cards} card(s). Prioritize additions before cuts unless the user is intentionally rebuilding.")
-        optional_cut_target = 0
+        notes.append(f"Deck is short {short_cards} card(s). Do not produce required cuts unless the user is intentionally rebuilding.")
+        optional_cut_target = 0 if runtime_config.review_direction == "build_up" else optional_cut_target
     else:
         status = "Legal 100-card deck — optional optimization only"
         notes.append("Legal does not mean optimized. Optional cuts are review candidates, not mandatory cuts.")

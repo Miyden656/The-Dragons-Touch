@@ -71,11 +71,10 @@ def _help_depth_options() -> str:
 
 
 def _build_goal_options() -> str:
-    return """1. This is correct.
-2. No, Build from Scratch — Commander(s) only; create a complete plan and card recommendation path.
-3. No, Point me in the right direction — the deck needs 30+ cards and mainly needs structure.
-4. No, Help me get there — the deck needs 11 to 30 cards and needs role completion.
-5. No, Finalize — the deck needs 10 or fewer cards and needs finishing touches."""
+    return """1. Build from Scratch — Commander(s) only; create a complete plan and card recommendation path.
+2. Point me in the right direction — the deck needs 30+ cards and mainly needs structure.
+3. Help me get there — the deck needs 11 to 30 cards and needs role completion.
+4. Finalize — the deck needs 10 or fewer cards and needs finishing touches."""
 
 
 def _commander_role_options() -> str:
@@ -277,6 +276,7 @@ def _cut_down_sections(context: dict[str, Any], worksheet: bool = False) -> str:
 3. Is the reported secondary strategy correct? Script says: **{strategy.secondary_strategy}**. If not, what should it be?
 
 4. Are there specific mechanics, themes, packages, or play patterns you want to preserve?
+{PACKAGE_DEFINITION_NOTE}
 
 5. How should the deck usually win? This should remain player-defined.
 
@@ -430,6 +430,7 @@ This section exists because build-up mode may still need optional optimization s
 3. Is the reported secondary strategy correct? Script says: **{strategy.secondary_strategy}**. If not, what should it be?
 
 4. Are there specific mechanics, themes, packages, or play patterns you want to build around?
+{PACKAGE_DEFINITION_NOTE}
 
 5. How should the deck usually win? This should remain player-defined.
 
@@ -487,16 +488,10 @@ A simple **No**, **N/A**, or **None** can cover this whole section if nothing ap
 {_final_output_style_options()}
 
 ### Final Confirmation Step
-After Section 7, provide a full intent summary titled **{parsed.commander_name} Review Intent Summary**. Ask the user to confirm or correct the summary before final recommendations.
-
-When the user confirms, produce the final output based on Section 7, question 7. The final response must begin with the requested report title and a brief status summary, then immediately provide the copy/paste-ready recommendation list before the detailed explanation.
+After Section 7, provide a full intent summary titled **{parsed.commander_name} Review Intent Summary**. Ask the user to confirm or correct the summary before final recommendations. After confirmation, produce the final output based on Section 7, question 7.
 
 ### Required Build-Up Final Output Rule
-The final build-up output must include a copy/paste-ready card recommendation list directly after the opening summary. This list must get the user to a complete and legal 100-card Commander deck when the requested build task requires completion. The list should be easy to paste into Archidekt, Moxfield, MTGGoldfish, or another decklist site.
-
-If the deck report says the deck is already a legal 100-card deck, clearly state that there are 0 required cuts and that the build-up review is upgrade-swap or tuning focused. In that case, the copy/paste-ready list should be presented as recommended swaps or additions/removals, not as required deck-completion cards.
-
-Do not include cards already in the deck unless the card is a legal duplicate exception or the user explicitly asks for duplicates where legal.
+The final build-up output must include a copy/paste-ready card recommendation list that gets the user to a complete and legal 100-card Commander deck. The list should be easy to paste into Archidekt, Moxfield, MTGGoldfish, or another decklist site. Do not include cards already in the deck unless the card is a legal duplicate exception or the user explicitly asks for duplicates where legal.
 """.strip()
 
 

@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from app_io.output_writer import get_unique_output_path, write_text_file
+from analysis.deck_building_philosophies import render_philosophy_guide_section
 
 
 def _section(title: str) -> list[str]:
@@ -72,6 +73,11 @@ def build_normal_report(context: dict[str, Any]) -> str:
     else:
         lines.append(f"- Cut depth mode: {runtime_config.cut_depth_config.get('mode', 'normal')}")
         lines.append(f"- Optional cut target: {runtime_config.cut_depth_config.get('optional_cut_target', 5)}")
+
+    philosophy_context = context.get("philosophy_context")
+    if philosophy_context:
+        lines.append("")
+        lines.append(render_philosophy_guide_section(philosophy_context).rstrip())
 
     lines += _section("Deck / Command Zone")
     lines.extend([

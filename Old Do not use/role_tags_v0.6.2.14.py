@@ -43,7 +43,7 @@ ROLE_TAG_DISPLAY_ORDER = [
     "synergy_piece", "extra_combat", "combat_synergy", "attack_trigger_payoff", "damage_payoff",
     "sacrifice_payoff", "artifact_payoff", "counter_synergy", "equipment_synergy", "aura_synergy",
     "go_tall_support", "spell_payoff", "spell_recursion_possible", "blink_flicker", "etb_value",
-    "ltb_value", "landfall", "landfall_payoff", "extra_land_play", "lands_matter", "land_aura_ramp", "enchant_land_ramp", "mana_infrastructure", "land_token",
+    "ltb_value", "landfall", "landfall_payoff", "extra_land_play", "lands_matter", "land_token",
     "artifact_token_synergy", "treasure_synergy", "clue_synergy", "food_synergy", "lifegain_payoff",
     "lifedrain_payoff", "toughness_payoff", "defender_payoff", "high_toughness", "activated_ability_synergy",
     "mana_sink", "copy_clone_value", "dragon_typal", "dragon_copy_value", "mutate", "mutate_payoff",
@@ -154,48 +154,6 @@ def _is_only_land(type_line: str) -> bool:
     return "land" in tl and all(t not in tl for t in ["creature", "artifact", "enchantment", "instant", "sorcery", "battle", "planeswalker"])
 
 
-def _is_enchant_land_ramp(type_line: str, text: str) -> bool:
-    """Detect Aura-based land ramp such as Utopia Sprawl and Wild Growth.
-
-    These cards often use wording like "enchanted land/Forest is tapped for
-    mana, its controller adds an additional ..." which older generic mana
-    detection can miss because it says "adds" instead of "add".
-    """
-    tl = type_line.lower()
-    if "enchantment" not in tl or "aura" not in tl:
-        return False
-
-    has_land_enchant_clause = any(phrase in text for phrase in (
-        "enchant land",
-        "enchant forest",
-        "enchant plains",
-        "enchant island",
-        "enchant swamp",
-        "enchant mountain",
-    ))
-    if not has_land_enchant_clause:
-        return False
-
-    enchanted_land_reference = any(phrase in text for phrase in (
-        "enchanted land",
-        "enchanted forest",
-        "enchanted plains",
-        "enchanted island",
-        "enchanted swamp",
-        "enchanted mountain",
-    ))
-    mana_boost_reference = any(phrase in text for phrase in (
-        "is tapped for mana",
-        "adds an additional",
-        "add an additional",
-        "has \"{t}: add",
-        "has '{t}: add",
-        "has “{t}: add",
-        "has ‘{t}: add",
-    ))
-    return enchanted_land_reference and mana_boost_reference
-
-
 def infer_card_role_tags(card: dict[str, Any], commander_cards: list[dict[str, Any]] | None = None) -> list[str]:
     """Infer role tags from Scryfall-style card data.
 
@@ -228,20 +186,10 @@ def infer_card_role_tags(card: dict[str, Any], commander_cards: list[dict[str, A
         or "search your library for a land card" in text
         or ("put" in text and "land" in text and "onto the battlefield" in text)
     )
-    enchant_land_ramp = _is_enchant_land_ramp(type_line, text)
     if produces_mana and not is_only_land:
         tags.add("ramp")
     if land_ramp or "you may play an additional land" in text or "untap all lands" in text:
         tags.update(["ramp", "lands_matter"])
-    if enchant_land_ramp:
-        tags.update([
-            "ramp",
-            "mana_source",
-            "mana_infrastructure",
-            "land_aura_ramp",
-            "enchant_land_ramp",
-            "aura_synergy",
-        ])
     if "artifact" in tl and produces_mana:
         tags.add("mana_rock")
     if "creature" in tl and produces_mana:

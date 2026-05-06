@@ -3,12 +3,6 @@
 Round 5 cleanup goal:
 - Keep card/plan relationship logic separate from raw tags and strategy scoring.
 - This module does not make final cut recommendations; it only labels plan fit.
-
-Patch Batch 3 cleanup:
-- Make plan-fit aware of newer specific strategy labels.
-- Never treat the commander as off-plan in its own deck.
-- Treat core infrastructure as support, not as off-plan, even when it does not
-  directly overlap with the selected archetype tag set.
 """
 
 from __future__ import annotations
@@ -37,27 +31,12 @@ class PlanFitSummary:
 
 def get_strategy_tag_set(strategy_name: str) -> set[str]:
     definition = ARCHETYPE_DEFINITIONS.get(strategy_name, {})
-    tags = set(definition.get("anchors", set())) | set(definition.get("payoffs", set())) | set(definition.get("enablers", set()))
-
-    # Specific strategy labels sometimes need family tags that should not be
-    # standalone strategy proof but do matter for plan-fit.
-    if strategy_name == "Dragon Typal / Token-Copy Value":
-        tags |= {"dragon_typal", "tribal_payoff", "typal_payoff", "copy_clone_value", "dragon_copy_value", "token_maker", "ramp", "mana_rock", "card_draw", "protection"}
-    elif strategy_name == "Token Combat / Go-Wide-Go-Tall":
-        tags |= {"token_maker", "counter_synergy", "go_tall_support", "combat_synergy", "attack_trigger_payoff", "anthem", "protection", "ramp", "card_draw"}
-    elif strategy_name == "Equipment / Artifact Combat":
-        tags |= {"equipment_synergy", "equipment_payoff", "artifact_combat", "attachment_synergy", "commander_damage_support", "combat_synergy", "protection", "evasion"}
-    elif strategy_name == "Graveyard Setup / Commander Engine":
-        tags |= {"graveyard_enabler", "self_mill", "discard_outlet", "recursion", "reanimation", "copy_clone_value", "card_selection"}
-    elif strategy_name == "Draw-Punisher / Wheels / Group Slug":
-        tags |= {"draw_punisher", "forced_draw", "wheel", "group_slug", "table_damage", "punisher", "damage_payoff", "lifedrain_payoff"}
-    return tags
+    return set(definition.get("anchors", set())) | set(definition.get("payoffs", set())) | set(definition.get("enablers", set()))
 
 
 def classify_card_plan_fit(card_entry: CardRoleEntry, strategy_summary: StrategySummary, commander_names: set[str] | None = None) -> CardPlanFitEntry:
     tags = set(card_entry.detected_roles)
-    commander_names = {name.strip().lower() for name in (commander_names or set())}
-    card_name_normalized = card_entry.card_name.strip().lower()
+    commander_names = commander_names or set()
     primary_tags = get_strategy_tag_set(strategy_summary.primary_strategy)
     secondary_tags = get_strategy_tag_set(strategy_summary.secondary_strategy)
 
@@ -75,21 +54,20 @@ def classify_card_plan_fit(card_entry: CardRoleEntry, strategy_summary: Strategy
     core_role_tags = {
         "ramp", "mana_rock", "mana_dork", "card_draw", "card_advantage", "targeted_removal",
         "board_wipe", "counterspell", "protection", "recursion", "tutor", "mana_source",
-        "land_ramp", "extra_land_play", "cost_reducer", "evasion",
     }
-    is_infrastructure = bool(tags & core_role_tags)
-    if is_infrastructure:
-        reasons.append("Fills a Commander infrastructure role; not automatically off-plan.")
+    if tags & core_role_tags:
+        reasons.append("Fills a generic Commander infrastructure role.")
 
-    if card_name_normalized in commander_names:
+    if card_entry.card_name in commander_names:
         supports_primary = True
         plan_fit = "Commander / command-zone engine"
-        reasons = ["Commander card; never treat as off-plan in its own deck."] + [r for r in reasons if "No clear overlap" not in r]
+        if not reasons:
+            reasons.append("Commander card; never treat as off-plan in its own deck.")
     elif supports_primary:
         plan_fit = "Primary plan support"
     elif supports_secondary:
         plan_fit = "Secondary plan support"
-    elif is_infrastructure:
+    elif tags & core_role_tags:
         plan_fit = "Support / infrastructure"
     elif "manual_review" in tags:
         plan_fit = "Manual review"

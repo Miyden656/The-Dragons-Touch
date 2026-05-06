@@ -284,15 +284,23 @@ def get_build_up_mode_from_user() -> dict:
     if not mode:
         print()
         print("Choose build-up mode:")
-        print("1. Build from Scratch — Commander(s) only")
+        print("1. Build from Scratch — commander only; Alpha feature, may not be ready yet")
         print("2. Point me in the right direction — 30+ cards needed")
         print("3. Help me get there — 11 to 30 cards needed")
         print("4. Finalize — 10 or fewer cards needed")
         choice = input("Build-up mode [4=Finalize]: ").strip().lower()
         mode = BUILD_UP_MODE_LABELS.get(choice, "finalize_10_or_less")
 
+    if mode == "build_from_scratch":
+        print()
+        print(
+            "Alpha warning: Build from Scratch is experimental. It can create a "
+            "direction and role plan, but the final 99-card list still needs "
+            "human review and color-identity checks."
+        )
+
     labels = {
-        "build_from_scratch": "Build from Scratch — Commander(s) only",
+        "build_from_scratch": "Build from Scratch — commander only (Alpha)",
         "point_direction_30_plus": "Point me in the right direction — 30+ cards needed",
         "help_get_there_11_to_30": "Help me get there — 11 to 30 cards needed",
         "finalize_10_or_less": "Finalize — 10 or fewer cards needed",
@@ -300,7 +308,7 @@ def get_build_up_mode_from_user() -> dict:
     return {
         "mode": mode,
         "label": labels.get(mode, mode),
-        "alpha": False,
+        "alpha": mode == "build_from_scratch",
     }
 
 
@@ -449,12 +457,12 @@ def auto_build_up_config_for_deck_size(deck_card_count: int) -> dict:
     else:
         mode = "finalize_10_or_less"
     labels = {
-        "build_from_scratch": "Build from Scratch — Commander(s) only",
+        "build_from_scratch": "Build from Scratch — commander only (Alpha)",
         "point_direction_30_plus": "Point me in the right direction — 30+ cards needed",
         "help_get_there_11_to_30": "Help me get there — 11 to 30 cards needed",
         "finalize_10_or_less": "Finalize — 10 or fewer cards needed",
     }
-    return {"mode": mode, "label": labels[mode], "alpha": False, "auto_selected": True}
+    return {"mode": mode, "label": labels[mode], "alpha": mode == "build_from_scratch", "auto_selected": True}
 
 
 def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_card_count: int) -> RuntimeConfig:

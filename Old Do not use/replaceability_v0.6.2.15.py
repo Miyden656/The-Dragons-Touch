@@ -28,7 +28,7 @@ INFRASTRUCTURE_TAGS = {
     "card_draw", "repeatable_card_draw", "card_advantage", "card_selection", "tutor",
     "targeted_removal", "repeatable_removal", "board_wipe", "counterspell", "stack_interaction",
     "protection", "commander_protection", "board_protection", "recursion", "land_recursion",
-    "extra_land_play", "land_aura_ramp", "enchant_land_ramp", "mana_infrastructure", "fixing", "mana_fixing", "evasion",
+    "extra_land_play", "fixing", "mana_fixing", "evasion",
 }
 
 # Strategy and package cards are context-sensitive. They should usually become
@@ -128,10 +128,6 @@ def _is_functional_infrastructure(tags: set[str]) -> bool:
     return bool(tags & INFRASTRUCTURE_TAGS)
 
 
-def _is_land_aura_ramp(tags: set[str]) -> bool:
-    return bool(tags & {"land_aura_ramp", "enchant_land_ramp"})
-
-
 def _is_context_synergy(tags: set[str]) -> bool:
     return bool(tags & SYNERGY_TAGS)
 
@@ -163,7 +159,6 @@ def build_replaceability_review(
         reasons: list[str] = []
         protected = role_entry.card_name in protected_names
         is_infrastructure = _is_functional_infrastructure(tags)
-        is_land_aura_ramp = _is_land_aura_ramp(tags)
         is_context_synergy = _is_context_synergy(tags)
         has_plan_support = _has_meaningful_plan_support(plan_entry)
 
@@ -180,10 +175,7 @@ def build_replaceability_review(
 
         # Off-plan pressure should not hit infrastructure/synergy cards as hard.
         if plan_entry and plan_entry.possible_off_plan:
-            if is_land_aura_ramp:
-                score -= 1
-                reasons.append("Initial flag: possible off-plan, but this is land-aura ramp/mana infrastructure.")
-            elif is_infrastructure:
+            if is_infrastructure:
                 score += 1
                 reasons.append("Initial flag: possible off-plan, but this card fills a Commander infrastructure role.")
             elif is_context_synergy:
@@ -201,10 +193,7 @@ def build_replaceability_review(
             score += 2
             reasons.append("Bracket pressure; review for table fit, not automatic cut.")
 
-        if is_land_aura_ramp:
-            score -= 4
-            reasons.append("Land-aura ramp is mana infrastructure; do not treat as off-plan unless the mana package is intentionally being reduced.")
-        elif is_infrastructure:
+        if is_infrastructure:
             score -= 2 if has_plan_support else 1
             reasons.append("Fills infrastructure role; cut only if overfilled or replaced by a better role match.")
 

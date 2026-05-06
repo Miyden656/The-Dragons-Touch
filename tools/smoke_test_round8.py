@@ -127,6 +127,17 @@ def main() -> int:
                 if not (name.endswith("_debug.md") or name.endswith("_full_debug_report.txt")) and parent != normal_dir:
                     raise AssertionError(f"Normal file routed outside normal folder: {p}")
 
+            report_text = (normal_dir / "Test_Commander_deck_report.md").read_text(encoding="utf-8")
+            prompt_text = (normal_dir / "Test_Commander_user_guided_prompt.md").read_text(encoding="utf-8")
+            diagnostics_text = (debug_dir / "Test_Commander_diagnostics_debug.md").read_text(encoding="utf-8")
+            for expected in ["## Philosophy Guide", "Balanced / Unknown", "Rowan"]:
+                if expected not in report_text:
+                    raise AssertionError(f"Philosophy guide missing from report: {expected}")
+            if "Philosophy Guide Add-On" not in prompt_text:
+                raise AssertionError("Philosophy add-on missing from generated user-guided prompt.")
+            if "Resolved philosophy lens: Balanced / Unknown" not in diagnostics_text:
+                raise AssertionError("Philosophy diagnostics missing or incorrect.")
+
             print("Round 8 smoke test passed.")
             print("Files written:")
             for path in written:
