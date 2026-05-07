@@ -18,12 +18,6 @@ from data.card_lookup import (
     is_basic_land,
 )
 from legality.commander_detection import CommandZoneSummary
-from legality.companion_rules import (
-    check_card_against_companion,
-    companion_rule_is_implemented,
-    get_companion_replacement_filter_note,
-    get_companion_restriction_summary,
-)
 from parsing.deck_parser import ParsedDeck
 
 
@@ -41,12 +35,6 @@ class CommanderLegalitySummary:
     allowed_duplicate_cards: list[dict[str, Any]] = field(default_factory=list)
     illegal_duplicate_cards: list[dict[str, Any]] = field(default_factory=list)
     manual_review_duplicate_cards: list[dict[str, Any]] = field(default_factory=list)
-    companion_legality_checked: bool = False
-    companion_legality_legal: bool | None = None
-    companion_legality_violations: list[dict[str, Any]] = field(default_factory=list)
-    manual_review_companion_cards: list[dict[str, Any]] = field(default_factory=list)
-    companion_legality_notes: list[str] = field(default_factory=list)
-    companion_replacement_filter_notes: list[str] = field(default_factory=list)
 
     @property
     def has_color_identity_issues(self) -> bool:
@@ -61,17 +49,12 @@ class CommanderLegalitySummary:
         return bool(self.illegal_duplicate_cards or self.manual_review_duplicate_cards)
 
     @property
-    def has_companion_issues(self) -> bool:
-        return bool(self.companion_legality_violations or self.manual_review_companion_cards)
-
-    @property
     def has_any_issues(self) -> bool:
         return (
             not self.deck_size_legal
             or self.has_color_identity_issues
             or self.has_banned_card_issues
             or self.has_duplicate_issues
-            or self.has_companion_issues
         )
 
 
@@ -190,62 +173,6 @@ def check_duplicates(
     return allowed_duplicate_cards, illegal_duplicate_cards, manual_review_duplicate_cards
 
 
-
-def check_companion_legality(
-    parsed_deck: ParsedDeck,
-    command_zone: CommandZoneSummary,
-    scryfall_lookup: dict[str, dict[str, Any]],
-) -> tuple[bool, bool | None, list[dict[str, Any]], list[dict[str, Any]], list[str], list[str]]:
-    """Validate implemented companion restrictions for confirmed companions.
-
-    Returns:
-    (checked, legal_or_none, violations, manual_reviews, notes, replacement_filter_notes)
-    """
-    companion_names = list(getattr(command_zone, "companion_names", []) or [])
-    possible_reference_companions = list(getattr(command_zone, "possible_reference_companion_names", []) or [])
-
-    notes: list[str] = []
-    replacement_filter_notes: list[str] = []
-    violations: list[dict[str, Any]] = []
-    manual_reviews: list[dict[str, Any]] = []
-
-    if not companion_names:
-        if possible_reference_companions:
-            notes.append(
-                "Possible companion detected in reference/non-mainboard cards; restriction is not enforced until the pilot confirms it is a companion."
-            )
-            for name in possible_reference_companions:
-                notes.append(f"Possible companion: {name}. {get_companion_restriction_summary(name)}")
-                replacement_filter_notes.append(get_companion_replacement_filter_note(name))
-        return False, None, violations, manual_reviews, notes, replacement_filter_notes
-
-    checked = True
-    for companion_name in companion_names:
-        notes.append(f"Confirmed companion: {companion_name}. {get_companion_restriction_summary(companion_name)}")
-        replacement_filter_notes.append(get_companion_replacement_filter_note(companion_name))
-
-        if not companion_rule_is_implemented(companion_name):
-            manual_reviews.append({
-                "companion_name": companion_name,
-                "card_name": "ALL",
-                "reason": "This companion restriction is not implemented yet; manual companion-legality review required.",
-            })
-            continue
-
-        for card_name, quantity in parsed_deck.unique_cards.items():
-            card = scryfall_lookup.get(card_name.lower())
-            violation, manual_review = check_card_against_companion(companion_name, card_name, card)
-            if violation:
-                violation["quantity"] = quantity
-                violations.append(violation)
-            if manual_review:
-                manual_review["quantity"] = quantity
-                manual_reviews.append(manual_review)
-
-    legal = not violations and not manual_reviews
-    return checked, legal, violations, manual_reviews, notes, replacement_filter_notes
-
-
 def build_commander_legality_summary(
     parsed_deck: ParsedDeck,
     command_zone: CommandZoneSummary,
@@ -266,14 +193,6 @@ def build_commander_legality_summary(
         parsed_deck,
         scryfall_lookup,
     )
-    (
-        companion_legality_checked,
-        companion_legality_legal,
-        companion_legality_violations,
-        manual_review_companion_cards,
-        companion_legality_notes,
-        companion_replacement_filter_notes,
-    ) = check_companion_legality(parsed_deck, command_zone, scryfall_lookup)
 
     return CommanderLegalitySummary(
         deck_card_count=parsed_deck.deck_card_count,
@@ -287,12 +206,6 @@ def build_commander_legality_summary(
         allowed_duplicate_cards=allowed_duplicate_cards,
         illegal_duplicate_cards=illegal_duplicate_cards,
         manual_review_duplicate_cards=manual_review_duplicate_cards,
-        companion_legality_checked=companion_legality_checked,
-        companion_legality_legal=companion_legality_legal,
-        companion_legality_violations=companion_legality_violations,
-        manual_review_companion_cards=manual_review_companion_cards,
-        companion_legality_notes=companion_legality_notes,
-        companion_replacement_filter_notes=companion_replacement_filter_notes,
     )
 
 
@@ -315,9 +228,6 @@ def format_legality_checkpoint_lines(
         f"- Banned cards/commanders: {len(legality.banned_cards) + len(legality.banned_commanders)}",
         f"- Illegal duplicate groups: {len(legality.illegal_duplicate_cards)}",
         f"- Manual duplicate reviews: {len(legality.manual_review_duplicate_cards)}",
-        f"- Companion legality checked: {'Yes' if legality.companion_legality_checked else 'No'}",
-        f"- Companion legality violations: {len(legality.companion_legality_violations)}",
-        f"- Manual companion reviews: {len(legality.manual_review_companion_cards)}",
     ]
 
     if command_zone.commander_cards_not_found:
@@ -336,13 +246,5 @@ def format_legality_checkpoint_lines(
             lines.append(f"  - {duplicate['card_name']}: {duplicate['quantity']} copies. {duplicate['reason']}")
         if len(legality.illegal_duplicate_cards) > 10:
             lines.append(f"  - ...and {len(legality.illegal_duplicate_cards) - 10} more")
-    if legality.companion_legality_notes:
-        lines.append("- Companion notes:")
-        for note in legality.companion_legality_notes:
-            lines.append(f"  - {note}")
-    if legality.companion_legality_violations:
-        lines.append("- Companion legality violations:")
-        for violation in legality.companion_legality_violations[:10]:
-            lines.append(f"  - {violation.get('card_name')}: {violation.get('reason')}")
 
     return lines

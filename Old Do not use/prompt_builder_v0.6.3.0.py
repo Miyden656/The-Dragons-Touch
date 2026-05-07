@@ -181,8 +181,6 @@ def _script_context_block(context: dict[str, Any]) -> list[str]:
         "## Script Context From The Dragon's Touch",
         "",
         f"- Command zone card(s): {parsed.commander_name}",
-        f"- Companion(s): {', '.join(getattr(context.get('command_zone'), 'companion_names', []) or []) if getattr(context.get('command_zone'), 'companion_names', []) else 'None'}",
-        f"- Possible reference companion(s): {', '.join(getattr(context.get('command_zone'), 'possible_reference_companion_names', []) or []) if getattr(context.get('command_zone'), 'possible_reference_companion_names', []) else 'None'}",
         f"- Prompt mode: {runtime_config.prompt_interaction_mode}",
         f"- Review direction: {runtime_config.review_direction}",
         f"- Script-reported primary strategy: {strategy.primary_strategy}",
@@ -204,14 +202,6 @@ def _script_context_block(context: dict[str, Any]) -> list[str]:
         lines.extend(["", "Script-reported replacement/addition categories:"])
         lines.extend(f"- {category}" for category in replacement.priority_categories)
 
-    legality = context.get("legality")
-    companion_filter_notes = list(getattr(legality, "companion_replacement_filter_notes", []) or []) if legality else []
-    companion_legality_notes = list(getattr(legality, "companion_legality_notes", []) or []) if legality else []
-    if companion_legality_notes or companion_filter_notes:
-        lines.extend(["", "Script-reported companion legality / recommendation filters:"])
-        lines.extend(f"- {note}" for note in companion_legality_notes)
-        lines.extend(f"- {note}" for note in companion_filter_notes)
-
     core_packages = []
     for candidate in getattr(strategy, "candidates", [])[:6]:
         name = getattr(candidate, "name", None) or getattr(candidate, "strategy", None)
@@ -228,53 +218,22 @@ def _global_prompt_rules(context: dict[str, Any]) -> list[str]:
     return [
         "## Required Workflow Rules For The Reviewing AI",
         "",
-        "### Phase 0 — Required Deck Report Intake",
-        "",
-        "1. Your first response must only ask the user to paste or upload the generated deck report. Do not ask Section 1 in that first response.",
-        "2. Do not provide cuts, replacements, additions, strategy corrections, or playtest recommendations before the deck report is provided.",
-        "3. Even though the intake sections are printed below, they are for later use only. Do not begin the questionnaire until after the deck report is provided and verified.",
-        "",
-        "### Phase 1 — Report Verification and Brief Summary",
-        "",
-        "4. After the deck report is provided, confirm receipt and check that it includes these handoff sections:",
-        "   - Full Decklist / Main Deck Cards for AI Review",
-        "   - Annotated Decklist / Card Role Notes for AI Review",
-        "   - Reference / Non-Mainboard / Ignored Cards",
-        "   - Companion Intake Check, if the report detected a possible companion in reference/non-mainboard cards",
-        "5. If the Full Decklist section is missing, ask the user to paste the full decklist before making final cut, replacement, or completion recommendations.",
-        "6. If the Annotated Decklist section is missing, explain that card-specific reasoning may be weaker and ask the user to provide the missing report section if available.",
-        "7. If the report lists a confirmed Companion in the Deck / Command Zone or Companion Legality / Replacement Filter section, apply that companion restriction immediately to all cuts, builds, replacements, and card recommendations.",
-        "8. If a Companion Intake Check is present, ask the pilot to confirm whether each listed card is: 1. Companion, 2. Sideboard/maybeboard, or 3. Reference-only. Do this before final recommendations.",
-        "9. If a companion is confirmed during the guided review, apply that companion restriction to every cut, build, replacement, and recommendation decision. Do not recommend cards that would break the confirmed companion restriction. If the report says the companion rule is not fully automated, manually enforce the printed restriction from the Companion Intake Check.",
-        "10. If the Reference / Non-Mainboard / Ignored Cards section contains cards but there is no companion warning, still ask whether any listed card is intended as a companion, sideboard/maybeboard card, or reference-only card before final recommendations.",
-        "11. If a confirmed or user-confirmed companion has a recommendation filter in the report, treat that filter as a hard recommendation constraint unless the pilot explicitly removes the companion requirement. If the Companion Intake Check flags the companion as banned, illegal, or manual/house-rule only, ask the pilot whether they are intentionally using a house rule before proceeding.",
-        "12. Give a brief initial summary of what the report appears to say: commander, deck size, legality/cut pressure, primary strategy, secondary strategy, companion status, and any obvious mismatch to verify.",
-        "13. Companion intake is not optional when a possible companion is detected. The pilot must confirm companion, sideboard/maybeboard, or reference-only before final cuts, builds, replacements, or card recommendations.",
-        "",
-        "### Phase 2 — Guide Introduction",
-        "",
-        f"14. {_philosophy_intro_instruction(context)}",
-        "",
-        "### Phase 3 — Section-by-Section Intake",
-        "",
-        "15. Then immediately ask Section 1 only. Do not ask multiple sections at once in interactive mode.",
-        "16. The user may answer using just numbers, short phrases, or N/A. Accept numbered answers without forcing long explanations.",
-        "17. After each section, summarize the user's answers in 3 to 6 bullets, then immediately ask the next section.",
-        "18. Do not make final cut, addition, or replacement recommendations until all required sections are complete.",
-        "",
-        "### Phase 4 — Final Intent Summary",
-        "",
-        "19. Do not assume the script's strategy read is correct if the pilot corrects it.",
-        "20. Separate required legality cuts from optional optimization cuts.",
-        "21. Do not recommend cutting cards the pilot refuses to cut.",
-        "22. Treat bracket pressure as table-fit information, not an automatic cut.",
-        "23. Do not recommend cards already in the deck unless the card is a legal duplicate exception.",
-        "24. Before final recommendations, provide a full intent summary titled '<Commander Name> Review Intent Summary' and ask the user to confirm or correct it.",
-        "",
-        "### Phase 5 — Final Recommendations",
-        "",
-        "25. Only after confirmation should you produce the final recommendations in the user's selected output style.",
-        "26. Final recommendations are decision support, not final authority. The pilot makes the final keep/cut/build decisions.",
+        "1. First, ask the user to paste or upload the generated deck report. Do not begin Section 1 until the report is provided.",
+        "2. The deck report should include a section titled 'Full Decklist / Main Deck Cards for AI Review'. If that section is missing, ask the user to paste the full decklist before making final cut, replacement, or completion recommendations.",
+        "3. Also check for a 'Reference / Non-Mainboard / Ignored Cards' section. If present, ask whether any listed card is intended as a companion, sideboard/maybeboard card, or reference-only card before making final recommendations.",
+        "4. After the deck report is provided, confirm receipt and give a brief initial summary of what the report appears to say.",
+        f"5. {_philosophy_intro_instruction(context)}",
+        "6. Then immediately ask Section 1 only. Do not ask multiple sections at once in interactive mode.",
+        "7. The user may answer using just numbers, short phrases, or N/A. Accept numbered answers without forcing long explanations.",
+        "8. After each section, summarize the user's answers in 3 to 6 bullets, then immediately ask the next section.",
+        "9. Do not make final cut, addition, or replacement recommendations until all required sections are complete.",
+        "10. Do not assume the script's strategy read is correct if the pilot corrects it.",
+        "11. Separate required legality cuts from optional optimization cuts.",
+        "12. Do not recommend cutting cards the pilot refuses to cut.",
+        "13. Treat bracket pressure as table-fit information, not an automatic cut.",
+        "14. Do not recommend cards already in the deck unless the card is a legal duplicate exception.",
+        "15. Before final recommendations, provide a full intent summary titled '<Commander Name> Review Intent Summary' and ask the user to confirm or correct it.",
+        "16. Only after confirmation should you produce the final recommendations in the user's selected output style.",
     ]
 
 
@@ -331,7 +290,6 @@ A simple **No**, **N/A**, or **None** can cover this whole section if nothing ap
 3. Cards you want to build around:
 4. Cards you are uncertain about:
 5. Cards you specifically want reviewed:
-6. Companion requirement to preserve, if any:
 
 ### Section 5 — Bracket / Table Intent
 1. What bracket or power level are you aiming for?
@@ -485,7 +443,6 @@ A simple **No**, **N/A**, or **None** can cover this whole section if nothing ap
 3. Cards you want to build around:
 4. Cards you are uncertain about:
 5. Cards you specifically want reviewed:
-6. Companion requirement to preserve, if any:
 
 ### Section 5 — Bracket / Table Intent
 1. What bracket or power level are you aiming for?

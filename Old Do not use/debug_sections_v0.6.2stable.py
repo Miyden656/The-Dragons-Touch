@@ -12,26 +12,6 @@ from typing import Any
 
 from app_io.output_writer import get_unique_output_path, write_text_file
 from analysis.deck_building_philosophies import render_philosophy_diagnostics_section
-from legality.companion_rules import (
-    COMPANION_CARD_NAMES,
-    companion_is_banned_as_companion,
-    get_companion_banned_note,
-    get_companion_replacement_filter_note,
-    get_companion_restriction_summary,
-)
-
-
-def _possible_companion_names_from_reference(context: dict[str, Any]) -> list[str]:
-    parsed = context["parsed_deck"]
-    command_zone = context.get("command_zone")
-    known_companions = {str(name).lower() for name in getattr(command_zone, "companion_names", []) or []}
-    candidates: list[str] = []
-    for name in getattr(parsed, "reference_cards", []) or []:
-        clean_name = str(name).strip()
-        if clean_name in COMPANION_CARD_NAMES and clean_name.lower() not in known_companions:
-            if clean_name not in candidates:
-                candidates.append(clean_name)
-    return candidates
 
 
 @dataclass(slots=True)
@@ -63,12 +43,6 @@ def build_legality_debug_section(context: dict[str, Any]) -> str:
         f"Command-zone rule: {command_zone.command_zone_rule_detected}",
         f"Commander color identity: {command_zone.commander_color_identity_text}",
         f"Deck size legal: {legality.deck_size_legal}",
-        f"Companion(s): {', '.join(getattr(command_zone, 'companion_names', []) or []) if getattr(command_zone, 'companion_names', []) else 'None'}",
-        f"Possible reference companion(s): {', '.join(getattr(command_zone, 'possible_reference_companion_names', []) or []) if getattr(command_zone, 'possible_reference_companion_names', []) else 'None'}",
-        f"Companion legality checked: {getattr(legality, 'companion_legality_checked', False)}",
-        f"Companion legality legal: {getattr(legality, 'companion_legality_legal', None)}",
-        f"Companion legality violations: {len(getattr(legality, 'companion_legality_violations', []) or [])}",
-        f"Manual companion reviews: {len(getattr(legality, 'manual_review_companion_cards', []) or [])}",
         "",
         "## Cards not found",
         *_bullet_list(legality.cards_not_found),
@@ -86,31 +60,6 @@ def build_legality_debug_section(context: dict[str, Any]) -> str:
             lines.append(f"- {item.get('card_name')}: {item.get('quantity')} copies")
     else:
         lines.append("- None")
-
-    lines.extend(["", "## Companion legality notes"])
-    companion_notes = list(getattr(legality, "companion_legality_notes", []) or [])
-    lines.extend(_bullet_list(companion_notes))
-
-    lines.extend(["", "## Companion recommendation filters"])
-    filter_notes = list(getattr(legality, "companion_replacement_filter_notes", []) or [])
-    lines.extend(_bullet_list(filter_notes))
-
-    lines.extend(["", "## Companion legality violations"])
-    violations = list(getattr(legality, "companion_legality_violations", []) or [])
-    if violations:
-        for item in violations:
-            lines.append(f"- {item.get('card_name')} x{item.get('quantity', 1)}: {item.get('reason')}")
-    else:
-        lines.append("- None")
-
-    lines.extend(["", "## Manual companion reviews"])
-    manual_reviews = list(getattr(legality, "manual_review_companion_cards", []) or [])
-    if manual_reviews:
-        for item in manual_reviews:
-            lines.append(f"- {item.get('card_name')}: {item.get('reason')}")
-    else:
-        lines.append("- None")
-
     return "\n".join(lines)
 
 
@@ -195,14 +144,10 @@ def build_cut_pressure_debug_section(context: dict[str, Any]) -> str:
 def build_replacement_prompt_debug_section(context: dict[str, Any]) -> str:
     replacement = context["replacement_needs"]
     completion = context.get("deck_completion")
-    legality = context.get("legality")
     lines = ["# Debug — Replacement / Completion", "", "## Priority categories"]
     lines.extend(_bullet_list(replacement.priority_categories))
     lines.extend(["", "## Replacement notes"])
     lines.extend(_bullet_list(replacement.notes))
-    companion_filters = list(getattr(legality, "companion_replacement_filter_notes", []) or []) if legality else []
-    lines.extend(["", "## Companion-aware recommendation filters"])
-    lines.extend(_bullet_list(companion_filters))
     if completion:
         lines.extend(["", "## Completion notes"])
         lines.append(f"- Cards needed: {completion.cards_needed}")
@@ -232,38 +177,7 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
     if philosophy_context:
         lines.extend(render_philosophy_diagnostics_section(philosophy_context).splitlines())
         lines.append("")
-    cards_by_section = getattr(parsed, "cards_by_section", {}) or {}
-    reference_by_section = getattr(parsed, "reference_cards_by_section", {}) or {}
-    card_roles = getattr(context.get("role_summary"), "card_roles", []) if context.get("role_summary") else []
-    possible_companions = _possible_companion_names_from_reference(context)
     lines.extend([
-        "## AI Handoff Export Checks",
-        "- Full decklist expected in normal report: Yes",
-        "- Annotated card role notes expected in normal report: Yes",
-        "- Companion verification warning expected when reference companion is detected: Yes",
-        f"- Main deck card count available to report: {parsed.deck_card_count}",
-        f"- Unique main deck cards available to report: {len(parsed.unique_cards)}",
-        f"- Sectioned main-deck groups available to report: {len(cards_by_section)}",
-        f"- Annotated role entries available to report: {len(card_roles)}",
-        f"- Reference/non-mainboard cards available to report: {parsed.reference_card_count}",
-        f"- Reference/non-mainboard section groups available to report: {len(reference_by_section)}",
-        f"- Possible companion detected in reference/non-mainboard cards: {'Yes' if possible_companions else 'No'}",
-        f"- Possible companion names: {', '.join(possible_companions) if possible_companions else 'None'}",
-        f"- Confirmed companion names: {', '.join(getattr(context.get('command_zone'), 'companion_names', []) or []) if getattr(context.get('command_zone'), 'companion_names', []) else 'None'}",
-        f"- Companion legality checked: {'Yes' if getattr(context.get('legality'), 'companion_legality_checked', False) else 'No'}",
-        f"- Companion legality violations: {len(getattr(context.get('legality'), 'companion_legality_violations', []) or [])}",
-        f"- Manual companion reviews: {len(getattr(context.get('legality'), 'manual_review_companion_cards', []) or [])}",
-    ])
-    companion_debug_names = list(dict.fromkeys(possible_companions + list(getattr(context.get('command_zone'), 'companion_names', []) or [])))
-    if companion_debug_names:
-        lines.extend(["", "## Companion Intake Diagnostics"])
-        for name in companion_debug_names:
-            lines.append(f"### {name}")
-            lines.append(f"- Restriction summary: {get_companion_restriction_summary(name)}")
-            lines.append(f"- Recommendation filter: {get_companion_replacement_filter_note(name)}")
-            lines.append(f"- Banned/manual warning: {get_companion_banned_note(name) if companion_is_banned_as_companion(name) else 'None'}")
-    lines.extend([
-        "",
         "## Parser hygiene",
         f"- Ignored/unparsed lines: {len(parsed.ignored_lines)}",
         f"- Reference/non-mainboard cards ignored: {parsed.reference_card_count}",

@@ -15,14 +15,7 @@ from typing import Any, Iterable
 
 from app_io.output_writer import get_unique_output_path, write_text_file
 from analysis.deck_building_philosophies import render_philosophy_guide_section
-from legality.companion_rules import (
-    OFFICIAL_COMPANION_CARD_NAMES as COMPANION_CARD_NAMES,
-    companion_is_banned_as_companion,
-    get_companion_banned_note,
-    get_companion_intake_lines,
-    get_companion_replacement_filter_note,
-    get_companion_restriction_summary,
-)
+from legality.companion_rules import OFFICIAL_COMPANION_CARD_NAMES as COMPANION_CARD_NAMES
 
 
 # Companion card names are imported from legality.companion_rules.
@@ -46,31 +39,27 @@ def _build_companion_verification_warning(context: dict[str, Any]) -> list[str]:
     if not candidates:
         return []
 
-    lines = _section("Companion Intake Check")
+    lines = _section("Companion Verification Warning")
     lines.extend([
-        "The report detected one or more possible companion cards in **Reference / Non-Mainboard / Ignored Cards**.",
-        "These cards are not treated as confirmed companions until the pilot confirms them.",
+        "A card was detected in **Reference / Non-Mainboard / Ignored Cards** that may be intended as a companion.",
         "",
         "Detected possible companion(s):",
     ])
     lines.extend(f"- {name}" for name in candidates)
     lines.extend([
         "",
-        "Before any final recommendations, confirm one for each listed card:",
-        "1. This card is my companion.",
-        "2. This card is sideboard / maybeboard only.",
-        "3. This card is reference-only.",
+        "Before final review, confirm whether each listed card is:",
+        "1. Companion",
+        "2. Sideboard / maybeboard",
+        "3. Reference-only",
         "",
-        "If confirmed as companion, apply the appropriate companion legality, cut protection, replacement filter, and card recommendation restriction.",
-    ])
-
-    for name in candidates:
-        lines.extend(["", f"### {name}"])
-        lines.extend(get_companion_intake_lines(name))
-
-    lines.extend([
+        "If a companion is confirmed, companion legality should affect:",
+        "- deck validation",
+        "- cut logic",
+        "- replacement logic",
+        "- card recommendation filters",
         "",
-        "> Patch note: confirmed companions are checked where implemented. Unconfirmed reference companions remain a verification checkpoint until the pilot confirms companion status.",
+        "Patch note: confirmed companions are now checked where implemented. Unconfirmed reference companions remain a verification checkpoint until the pilot confirms them.",
     ])
     return lines
 
@@ -92,17 +81,11 @@ def _build_companion_legality_section(context: dict[str, Any]) -> list[str]:
 
     if companion_names:
         lines.append(f"Confirmed companion(s): {', '.join(companion_names)}")
-        for name in companion_names:
-            lines.append(f"- {get_companion_restriction_summary(name)}")
-            lines.append(f"- {get_companion_replacement_filter_note(name)}")
-            if companion_is_banned_as_companion(name):
-                lines.append(f"- Companion legality warning: {get_companion_banned_note(name)}")
     else:
         lines.append("Confirmed companion(s): None detected in a Companion section.")
 
     if possible_reference:
         lines.append(f"Possible reference companion(s): {', '.join(possible_reference)}")
-        lines.append("Possible reference companions require pilot confirmation before companion restrictions are enforced.")
 
     checked = getattr(legality, "companion_legality_checked", False)
     legal = getattr(legality, "companion_legality_legal", None)

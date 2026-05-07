@@ -166,8 +166,6 @@ def parse_deck_file(deck_file: Path | str, scryfall_lookup: dict[str, dict[str, 
     commander_cards = cards_by_section.get("Commander", [])
     companion_cards = (
         cards_by_section.get("Companion", [])
-        + reference_cards_by_section.get("Companion", [])
-        + reference_cards_by_section.get("companion", [])
         + reference_cards_by_section.get("Reference: Companion", [])
         + reference_cards_by_section.get("Reference: companion", [])
     )

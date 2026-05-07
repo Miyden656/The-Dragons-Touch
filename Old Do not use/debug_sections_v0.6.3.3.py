@@ -12,13 +12,21 @@ from typing import Any
 
 from app_io.output_writer import get_unique_output_path, write_text_file
 from analysis.deck_building_philosophies import render_philosophy_diagnostics_section
-from legality.companion_rules import (
-    COMPANION_CARD_NAMES,
-    companion_is_banned_as_companion,
-    get_companion_banned_note,
-    get_companion_replacement_filter_note,
-    get_companion_restriction_summary,
-)
+from legality.companion_rules import COMPANION_CARD_NAMES
+
+
+COMPANION_CARD_NAMES: set[str] = {
+    "Gyruda, Doom of Depths",
+    "Jegantha, the Wellspring",
+    "Kaheera, the Orphanguard",
+    "Keruga, the Macrosage",
+    "Lurrus of the Dream-Den",
+    "Lutri, the Spellchaser",
+    "Obosh, the Preypiercer",
+    "Umori, the Collector",
+    "Yorion, Sky Nomad",
+    "Zirda, the Dawnwaker",
+}
 
 
 def _possible_companion_names_from_reference(context: dict[str, Any]) -> list[str]:
@@ -253,16 +261,6 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
         f"- Companion legality checked: {'Yes' if getattr(context.get('legality'), 'companion_legality_checked', False) else 'No'}",
         f"- Companion legality violations: {len(getattr(context.get('legality'), 'companion_legality_violations', []) or [])}",
         f"- Manual companion reviews: {len(getattr(context.get('legality'), 'manual_review_companion_cards', []) or [])}",
-    ])
-    companion_debug_names = list(dict.fromkeys(possible_companions + list(getattr(context.get('command_zone'), 'companion_names', []) or [])))
-    if companion_debug_names:
-        lines.extend(["", "## Companion Intake Diagnostics"])
-        for name in companion_debug_names:
-            lines.append(f"### {name}")
-            lines.append(f"- Restriction summary: {get_companion_restriction_summary(name)}")
-            lines.append(f"- Recommendation filter: {get_companion_replacement_filter_note(name)}")
-            lines.append(f"- Banned/manual warning: {get_companion_banned_note(name) if companion_is_banned_as_companion(name) else 'None'}")
-    lines.extend([
         "",
         "## Parser hygiene",
         f"- Ignored/unparsed lines: {len(parsed.ignored_lines)}",

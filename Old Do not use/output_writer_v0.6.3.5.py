@@ -1,11 +1,10 @@
 """Output filename, folder routing, and file-writing helpers for The Dragon's Touch.
 
-Patch Batch 8 note:
+Clean.8.5 rebuild note:
 - There is exactly one output routing path.
 - Normal reports always go to outputs/<Deck>/normal/.
 - Debug/stress-test reports always go to outputs/<Deck>/debug/.
 - Existing root-level files from older runs never cause a new numbered deck folder.
-- Batch mode can use deck-file-aware folder names to prevent collisions when multiple deck files share the same commander.
 """
 
 from __future__ import annotations
@@ -47,29 +46,6 @@ def make_safe_filename(name: object) -> str:
 
 def shorten_output_stem(name: object, max_length: int = MAX_OUTPUT_STEM_LENGTH) -> str:
     return sanitize_filename(name or "Unknown_Deck", max_length=max_length) or "Unknown_Deck"
-
-
-def make_batch_output_deck_name(commander_name: object, deck_file: Path | str | None = None) -> str:
-    """Return a batch-safe deck folder name.
-
-    Single-deck mode should keep the clean commander-only folder name. In batch
-    mode, two different files can share the same commander, so include the
-    source deck file stem to prevent the second deck's reports from landing in
-    the first deck's folder.
-
-    The stem is intentionally preserved at the end of the name because test
-    decks often share commander names but differ by file labels such as
-    ``Companion Section`` or ``Reference Test``.
-    """
-    commander_part = shorten_output_stem(commander_name or "Unknown_Deck", max_length=60)
-    if not deck_file:
-        return commander_part
-
-    remaining = max(20, MAX_OUTPUT_STEM_LENGTH - len(commander_part) - 2)
-    file_part = shorten_output_stem(Path(deck_file).stem, max_length=remaining)
-    if not file_part or file_part == commander_part:
-        return commander_part
-    return f"{commander_part}__{file_part}"
 
 
 def safe_output_filename(base_name: object, extension: str = ".txt", max_length: int = MAX_OUTPUT_FILENAME_LENGTH) -> str:
@@ -149,27 +125,13 @@ def merge_debug_reports(debug_folder: Path | str, deck_name: object, debug_file_
     return merged_path
 
 
-def _is_debug_output_file(path: Path) -> bool:
-    """Return True for all debug output filename variants.
-
-    Unique-path suffixes produce names like ``deck_legality_debug_2.md``. The
-    older check only recognized names ending exactly in ``_debug.md``, which
-    caused valid debug files in the debug folder to be misclassified as normal
-    outputs during batch reruns or duplicate commander tests.
-    """
-    stem = path.stem.lower()
-    suffix = path.suffix.lower()
-    return (suffix == ".md" and (stem.endswith("_debug") or "_debug_" in stem)) or (
-        suffix == ".txt" and (stem.endswith("_full_debug_report") or "_full_debug_report_" in stem)
-    )
-
-
 def assert_output_routing(paths: Iterable[Path | str], normal_folder: Path | str, debug_folder: Path | str) -> None:
     normal_folder = Path(normal_folder).resolve()
     debug_folder = Path(debug_folder).resolve()
     for raw in paths:
         path = Path(raw).resolve()
-        is_debug = _is_debug_output_file(path)
+        name = path.name.lower()
+        is_debug = name.endswith("_debug.md") or name.endswith("_full_debug_report.txt")
         if is_debug and path.parent != debug_folder:
             raise RuntimeError(f"Debug output routed incorrectly: {path}")
         if (not is_debug) and path.parent != normal_folder:

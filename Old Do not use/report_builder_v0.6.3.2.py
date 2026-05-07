@@ -15,17 +15,22 @@ from typing import Any, Iterable
 
 from app_io.output_writer import get_unique_output_path, write_text_file
 from analysis.deck_building_philosophies import render_philosophy_guide_section
-from legality.companion_rules import (
-    OFFICIAL_COMPANION_CARD_NAMES as COMPANION_CARD_NAMES,
-    companion_is_banned_as_companion,
-    get_companion_banned_note,
-    get_companion_intake_lines,
-    get_companion_replacement_filter_note,
-    get_companion_restriction_summary,
-)
 
 
-# Companion card names are imported from legality.companion_rules.
+# Official Magic companion cards. Used only for report/prompt verification in Patch Batch 6.
+# Full companion legality enforcement is intentionally left for a later patch.
+COMPANION_CARD_NAMES: set[str] = {
+    "Gyruda, Doom of Depths",
+    "Jegantha, the Wellspring",
+    "Kaheera, the Orphanguard",
+    "Keruga, the Macrosage",
+    "Lurrus of the Dream-Den",
+    "Lutri, the Spellchaser",
+    "Obosh, the Preypiercer",
+    "Umori, the Collector",
+    "Yorion, Sky Nomad",
+    "Zirda, the Dawnwaker",
+}
 
 
 def _possible_companion_names_from_reference(context: dict[str, Any]) -> list[str]:
@@ -46,98 +51,28 @@ def _build_companion_verification_warning(context: dict[str, Any]) -> list[str]:
     if not candidates:
         return []
 
-    lines = _section("Companion Intake Check")
+    lines = _section("Companion Verification Warning")
     lines.extend([
-        "The report detected one or more possible companion cards in **Reference / Non-Mainboard / Ignored Cards**.",
-        "These cards are not treated as confirmed companions until the pilot confirms them.",
+        "A card was detected in **Reference / Non-Mainboard / Ignored Cards** that may be intended as a companion.",
         "",
         "Detected possible companion(s):",
     ])
     lines.extend(f"- {name}" for name in candidates)
     lines.extend([
         "",
-        "Before any final recommendations, confirm one for each listed card:",
-        "1. This card is my companion.",
-        "2. This card is sideboard / maybeboard only.",
-        "3. This card is reference-only.",
+        "Before final review, confirm whether each listed card is:",
+        "1. Companion",
+        "2. Sideboard / maybeboard",
+        "3. Reference-only",
         "",
-        "If confirmed as companion, apply the appropriate companion legality, cut protection, replacement filter, and card recommendation restriction.",
-    ])
-
-    for name in candidates:
-        lines.extend(["", f"### {name}"])
-        lines.extend(get_companion_intake_lines(name))
-
-    lines.extend([
+        "If a companion is confirmed, companion legality should affect:",
+        "- deck validation",
+        "- cut logic",
+        "- replacement logic",
+        "- card recommendation filters",
         "",
-        "> Patch note: confirmed companions are checked where implemented. Unconfirmed reference companions remain a verification checkpoint until the pilot confirms companion status.",
+        "Patch note: this warning is a verification checkpoint only. Full companion legality and replacement filtering should be implemented in a later companion-enforcement patch.",
     ])
-    return lines
-
-
-def _build_companion_legality_section(context: dict[str, Any]) -> list[str]:
-    command_zone = context.get("command_zone")
-    legality = context.get("legality")
-    companion_names = list(getattr(command_zone, "companion_names", []) or [])
-    possible_reference = list(getattr(command_zone, "possible_reference_companion_names", []) or [])
-    notes = list(getattr(legality, "companion_legality_notes", []) or [])
-    filter_notes = list(getattr(legality, "companion_replacement_filter_notes", []) or [])
-    violations = list(getattr(legality, "companion_legality_violations", []) or [])
-    manual_reviews = list(getattr(legality, "manual_review_companion_cards", []) or [])
-
-    if not companion_names and not possible_reference and not notes and not filter_notes:
-        return []
-
-    lines = _section("Companion Legality / Replacement Filter")
-
-    if companion_names:
-        lines.append(f"Confirmed companion(s): {', '.join(companion_names)}")
-        for name in companion_names:
-            lines.append(f"- {get_companion_restriction_summary(name)}")
-            lines.append(f"- {get_companion_replacement_filter_note(name)}")
-            if companion_is_banned_as_companion(name):
-                lines.append(f"- Companion legality warning: {get_companion_banned_note(name)}")
-    else:
-        lines.append("Confirmed companion(s): None detected in a Companion section.")
-
-    if possible_reference:
-        lines.append(f"Possible reference companion(s): {', '.join(possible_reference)}")
-        lines.append("Possible reference companions require pilot confirmation before companion restrictions are enforced.")
-
-    checked = getattr(legality, "companion_legality_checked", False)
-    legal = getattr(legality, "companion_legality_legal", None)
-    lines.append(f"Companion legality checked: {'Yes' if checked else 'No'}")
-    if checked:
-        lines.append(f"Companion legality result: {'Pass' if legal else 'Needs review / violation found'}")
-
-    if notes:
-        lines.append("")
-        lines.append("Companion notes:")
-        lines.extend(f"- {note}" for note in notes)
-
-    if filter_notes:
-        lines.append("")
-        lines.append("Companion-aware recommendation filters:")
-        lines.extend(f"- {note}" for note in filter_notes)
-
-    if violations:
-        lines.append("")
-        lines.append("Companion legality violations:")
-        for item in violations[:20]:
-            mv = item.get("mana_value")
-            mv_text = f"; mana value {mv:g}" if isinstance(mv, (int, float)) else ""
-            lines.append(f"- {item.get('card_name')} x{item.get('quantity', 1)}{mv_text}: {item.get('reason')}")
-
-    if manual_reviews:
-        lines.append("")
-        lines.append("Manual companion reviews:")
-        for item in manual_reviews[:20]:
-            lines.append(f"- {item.get('card_name')}: {item.get('reason')}")
-
-    if possible_reference and not companion_names:
-        lines.append("")
-        lines.append("> Replacement filtering is not automatically enforced for reference-only companion candidates until the pilot confirms companion status in the guided review.")
-
     return lines
 
 
@@ -428,15 +363,12 @@ def build_normal_report(context: dict[str, Any]) -> str:
         f"- Unique main deck cards: {len(parsed.unique_cards)}",
         f"- Commander(s): {', '.join(command_zone.commander_names) if command_zone.commander_names else 'Unknown'}",
         f"- Companion(s): {', '.join(command_zone.companion_names) if command_zone.companion_names else 'None'}",
-        f"- Possible reference companion(s): {', '.join(getattr(command_zone, 'possible_reference_companion_names', []) or []) if getattr(command_zone, 'possible_reference_companion_names', []) else 'None'}",
-        f"- Companion note: {getattr(command_zone, 'companion_note', 'No companion detected.')} ",
         f"- Command-zone rule detected: {command_zone.command_zone_rule_detected}",
         f"- Commander color identity: {command_zone.commander_color_identity_text}",
         f"- Commander type line: {command_zone.commander_type_line}",
     ])
 
     lines.extend(_build_companion_verification_warning(context))
-    lines.extend(_build_companion_legality_section(context))
 
     lines += _section("Legality Checkpoint")
     lines.extend([
@@ -445,9 +377,6 @@ def build_normal_report(context: dict[str, Any]) -> str:
         f"- Color identity violations: {len(legality.color_identity_violations)}",
         f"- Banned cards detected: {len(legality.banned_cards) + len(legality.banned_commanders)}",
         f"- Illegal duplicate cards: {len(legality.illegal_duplicate_cards)}",
-        f"- Companion legality checked: {'Yes' if getattr(legality, 'companion_legality_checked', False) else 'No'}",
-        f"- Companion legality violations: {len(getattr(legality, 'companion_legality_violations', []) or [])}",
-        f"- Manual companion reviews: {len(getattr(legality, 'manual_review_companion_cards', []) or [])}",
     ])
     if legality.cards_not_found:
         lines.append("- Manual review cards: " + ", ".join(legality.cards_not_found[:12]))
@@ -545,12 +474,6 @@ def build_normal_report(context: dict[str, Any]) -> str:
         lines.append("- No urgent replacement category was detected by the checkpoint heuristics.")
     for note in replacement.notes:
         lines.append(f"- Note: {note}")
-    companion_filter_notes = list(getattr(legality, "companion_replacement_filter_notes", []) or [])
-    if companion_filter_notes:
-        lines.append("")
-        lines.append("### Companion-Aware Recommendation Filters")
-        for note in companion_filter_notes:
-            lines.append(f"- {note}")
     if completion and completion.addition_first:
         lines.append("")
         lines.append("### Deck Completion Notes")

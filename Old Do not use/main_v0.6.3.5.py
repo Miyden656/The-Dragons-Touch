@@ -1,10 +1,9 @@
 """The Dragon's Touch — modular cleanup entry point.
 
-Patch Batch 8 rebuild goals:
+Clean.8.5 rebuild goals:
 - Use only top-level packages; no nested deck_helper package imports.
 - Route normal and debug outputs through one enforced output-folder API.
 - Auto batch mode uses deck size and never prompts per deck.
-- Batch mode uses deck-file-aware output folders to avoid duplicate commander collisions.
 """
 
 from __future__ import annotations
@@ -24,7 +23,6 @@ from app_io.output_writer import (
     create_deck_output_folder,
     create_deck_output_folders,
     get_unique_output_path,
-    make_batch_output_deck_name,
     merge_debug_reports,
     write_text_file,
 )
@@ -52,7 +50,7 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.3.5 — batch output collision fix"
+VERSION_LABEL = "v0.6.2-clean.8.6 — philosophy layer MVP"
 
 
 def build_analysis_context(parsed_deck: ParsedDeck, runtime_config: RuntimeConfig, scryfall_lookup: dict[str, dict[str, Any]]) -> dict[str, Any]:
@@ -118,21 +116,10 @@ def write_parser_only_checkpoint(deck_folder: Path, parsed_deck: ParsedDeck, err
     return write_text_file(path, "\n".join(lines))
 
 
-def process_single_deck(
-    deck_file: Path,
-    runtime_config: RuntimeConfig,
-    scryfall_lookup: dict[str, dict[str, Any]] | None = None,
-    *,
-    batch_output_folder: bool = False,
-) -> list[Path]:
+def process_single_deck(deck_file: Path, runtime_config: RuntimeConfig, scryfall_lookup: dict[str, dict[str, Any]] | None = None) -> list[Path]:
     scryfall_lookup = scryfall_lookup or {}
     parsed_deck = parse_deck_file(deck_file, scryfall_lookup=scryfall_lookup)
-    output_deck_name = (
-        make_batch_output_deck_name(parsed_deck.safe_commander_name, deck_file)
-        if batch_output_folder
-        else parsed_deck.safe_commander_name
-    )
-    folders = create_deck_output_folders(output_deck_name, OUTPUT_FOLDER)
+    folders = create_deck_output_folders(parsed_deck.safe_commander_name, OUTPUT_FOLDER)
     written_paths: list[Path] = []
 
     if not scryfall_lookup:
@@ -186,7 +173,7 @@ def run_many_decks(deck_files: list[Path], runtime_config: RuntimeConfig, scryfa
     for deck_file in deck_files:
         print(f"Running deck helper for: {deck_file}")
         try:
-            written = process_single_deck(deck_file, runtime_config, scryfall_lookup, batch_output_folder=True)
+            written = process_single_deck(deck_file, runtime_config, scryfall_lookup)
             successes += 1
             print(f"  Success. Files written: {len(written)}")
         except Exception as exc:  # noqa: BLE001 - stress-test mode should continue.

@@ -12,11 +12,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from data.card_lookup import format_color_identity, get_full_oracle_text, normalize_text
-from legality.companion_rules import (
-    find_companion_names,
-    get_companion_replacement_filter_note,
-    get_companion_restriction_summary,
-)
 from parsing.deck_parser import ParsedDeck
 
 
@@ -33,11 +28,6 @@ class CommandZoneSummary:
     commander_color_identity: list[str] = field(default_factory=list)
     commander_color_identity_text: str = "Unknown"
     commander_color_identity_set: set[str] = field(default_factory=set)
-    companion_cards_scryfall: list[dict[str, Any]] = field(default_factory=list)
-    companion_cards_not_found: list[str] = field(default_factory=list)
-    possible_reference_companion_names: list[str] = field(default_factory=list)
-    companion_restriction_notes: list[str] = field(default_factory=list)
-    companion_replacement_filter_notes: list[str] = field(default_factory=list)
     command_zone_rule_detected: str = "Unknown / manual review"
     companion_note: str = "No companion detected. Companion legality check not applicable."
 
@@ -54,7 +44,7 @@ def detect_command_zone_rule(
     """
     companion_names = companion_names or []
     if companion_names:
-        return "Companion present / implemented companion legality checks applied where available"
+        return "Companion present / companion legality not fully checked"
 
     if not commander_cards_scryfall:
         return "Unknown / manual review"
@@ -82,13 +72,9 @@ def detect_command_zone_rule(
     return "Multiple command-zone cards / manual review"
 
 
-def companion_legality_note(companion_names: list[str] | None, possible_reference_companions: list[str] | None = None) -> str:
-    companion_names = companion_names or []
-    possible_reference_companions = possible_reference_companions or []
+def companion_legality_note(companion_names: list[str] | None) -> str:
     if companion_names:
-        return "Companion detected. Implemented companion legality checks are applied where available."
-    if possible_reference_companions:
-        return "Possible companion detected in reference/non-mainboard cards. Confirm companion status before final recommendations."
+        return "Companion detected. Companion legality is reported but not fully validated in v0.5.7."
     return "No companion detected. Companion legality check not applicable."
 
 
@@ -107,29 +93,6 @@ def build_command_zone_summary(
             commander_cards_not_found.append(name)
 
     commander_found = bool(parsed_deck.commander_names) and not commander_cards_not_found
-
-    companion_cards_scryfall: list[dict[str, Any]] = []
-    companion_cards_not_found: list[str] = []
-    for name in parsed_deck.companion_names:
-        card = scryfall_lookup.get(name.lower())
-        if card:
-            companion_cards_scryfall.append(card)
-        else:
-            companion_cards_not_found.append(name)
-
-    possible_reference_companion_names = find_companion_names(parsed_deck.reference_cards, scryfall_lookup)
-    known_actual_companions = {name.lower() for name in parsed_deck.companion_names}
-    possible_reference_companion_names = [
-        name for name in possible_reference_companion_names
-        if name.lower() not in known_actual_companions
-    ]
-
-    companion_restriction_notes = [
-        get_companion_restriction_summary(name) for name in parsed_deck.companion_names
-    ]
-    companion_replacement_filter_notes = [
-        get_companion_replacement_filter_note(name) for name in parsed_deck.companion_names
-    ]
 
     if commander_cards_scryfall:
         commander_type_line = " + ".join(
@@ -164,11 +127,6 @@ def build_command_zone_summary(
         commander_color_identity=commander_color_identity,
         commander_color_identity_text=commander_color_identity_text,
         commander_color_identity_set=set(commander_color_identity),
-        companion_cards_scryfall=companion_cards_scryfall,
-        companion_cards_not_found=companion_cards_not_found,
-        possible_reference_companion_names=possible_reference_companion_names,
-        companion_restriction_notes=companion_restriction_notes,
-        companion_replacement_filter_notes=companion_replacement_filter_notes,
         command_zone_rule_detected=command_zone_rule_detected,
-        companion_note=companion_legality_note(parsed_deck.companion_names, possible_reference_companion_names),
+        companion_note=companion_legality_note(parsed_deck.companion_names),
     )
