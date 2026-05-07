@@ -41,7 +41,6 @@ from cuts.possible_cut_review import build_possible_cut_review
 from cuts.protected_cards import build_protected_cards
 from cuts.replaceability import build_replaceability_review
 from cuts.replacement_categories import build_replacement_need_summary
-from data.collection_loader import CollectionLoadSummary, load_collection_sources
 from data.scryfall_loader import ScryfallDataError, load_scryfall_lookup
 from legality.commander_detection import build_command_zone_summary
 from legality.commander_legality import build_commander_legality_summary
@@ -53,15 +52,10 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.4.2 — collection Scryfall resolution improvement"
+VERSION_LABEL = "v0.6.3.5 — batch output collision fix"
 
 
-def build_analysis_context(
-    parsed_deck: ParsedDeck,
-    runtime_config: RuntimeConfig,
-    scryfall_lookup: dict[str, dict[str, Any]],
-    collection_summary: CollectionLoadSummary | None = None,
-) -> dict[str, Any]:
+def build_analysis_context(parsed_deck: ParsedDeck, runtime_config: RuntimeConfig, scryfall_lookup: dict[str, dict[str, Any]]) -> dict[str, Any]:
     resolved_config = resolve_runtime_config_for_deck_size(runtime_config, parsed_deck.deck_card_count)
     command_zone = build_command_zone_summary(parsed_deck, scryfall_lookup)
     legality = build_commander_legality_summary(parsed_deck, command_zone, scryfall_lookup)
@@ -100,7 +94,6 @@ def build_analysis_context(
         "replacement_needs": replacement_needs,
         "deck_completion": deck_completion,
         "collection_candidates": collection_candidates,
-        "collection_summary": collection_summary or CollectionLoadSummary(),
         "philosophy_context": philosophy_context,
     }
 
@@ -129,7 +122,6 @@ def process_single_deck(
     deck_file: Path,
     runtime_config: RuntimeConfig,
     scryfall_lookup: dict[str, dict[str, Any]] | None = None,
-    collection_summary: CollectionLoadSummary | None = None,
     *,
     batch_output_folder: bool = False,
 ) -> list[Path]:
@@ -148,7 +140,7 @@ def process_single_deck(
         assert_output_routing(written_paths, folders.normal, folders.debug)
         return written_paths
 
-    context = build_analysis_context(parsed_deck, runtime_config, scryfall_lookup, collection_summary)
+    context = build_analysis_context(parsed_deck, runtime_config, scryfall_lookup)
     resolved_config: RuntimeConfig = context["runtime_config"]
     output_mode = resolved_config.output_mode
 
@@ -173,61 +165,18 @@ def process_single_deck(
     return written_paths
 
 
-def load_scryfall_or_none() -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]], Exception | None]:
+def load_scryfall_or_none() -> tuple[dict[str, dict[str, Any]], Exception | None]:
     try:
         scryfall_cards, scryfall_lookup = load_scryfall_lookup(SCRYFALL_FILE)
         print(f"Scryfall data loaded: {len(scryfall_cards)} cards")
-        return scryfall_cards, scryfall_lookup, None
+        return scryfall_lookup, None
     except ScryfallDataError as exc:
         print(f"Scryfall data not loaded: {exc}")
         print("A parser-only checkpoint will be written.")
-        return [], {}, exc
+        return {}, exc
 
 
-def load_collection_summary(
-    runtime_config: RuntimeConfig,
-    scryfall_lookup: dict[str, dict[str, Any]],
-    scryfall_cards: list[dict[str, Any]] | None = None,
-) -> CollectionLoadSummary:
-    summary = load_collection_sources(
-        runtime_config.collection_files,
-        mode=runtime_config.collection_mode,
-        scryfall_lookup=scryfall_lookup,
-        scryfall_cards=scryfall_cards,
-        source_mode=getattr(runtime_config, "collection_source_mode", "selected_files"),
-        collection_folder=getattr(runtime_config, "collection_file", ""),
-    )
-    if runtime_config.collection_mode == "none":
-        print("Collection mode: off")
-        return summary
-
-    print(f"Collection mode: {runtime_config.collection_mode}")
-    print(f"Collection source mode: {getattr(runtime_config, 'collection_source_mode', 'selected_files')}")
-    if getattr(runtime_config, "collection_source_mode", "") == "entire_collection_folder":
-        print(f"Collection folder: {runtime_config.collection_file}")
-        print(f"Collection text files selected: {len(runtime_config.collection_files)}")
-    else:
-        print(f"Selected collection files: {len(runtime_config.collection_files)}")
-        for path in runtime_config.collection_files[:5]:
-            print(f"  - {Path(path).name}")
-        if len(runtime_config.collection_files) > 5:
-            print(f"  - ...and {len(runtime_config.collection_files) - 5} more")
-
-    if not summary.file_exists:
-        print("Collection file(s) not found; collection candidates will be unavailable.")
-    elif summary.loaded:
-        print(f"Collection loaded: {summary.total_cards} total cards; {summary.unique_cards} unique names")
-        if summary.not_found_cards:
-            print(f"Collection cards not found in Scryfall: {len(summary.not_found_cards)}")
-    return summary
-
-
-def run_many_decks(
-    deck_files: list[Path],
-    runtime_config: RuntimeConfig,
-    scryfall_lookup: dict[str, dict[str, Any]],
-    collection_summary: CollectionLoadSummary | None = None,
-) -> None:
+def run_many_decks(deck_files: list[Path], runtime_config: RuntimeConfig, scryfall_lookup: dict[str, dict[str, Any]]) -> None:
     print()
     print(f"Batch mode: {len(deck_files)} deck files selected.")
     print_runtime_config_summary(runtime_config)
@@ -237,7 +186,7 @@ def run_many_decks(
     for deck_file in deck_files:
         print(f"Running deck helper for: {deck_file}")
         try:
-            written = process_single_deck(deck_file, runtime_config, scryfall_lookup, collection_summary, batch_output_folder=True)
+            written = process_single_deck(deck_file, runtime_config, scryfall_lookup, batch_output_folder=True)
             successes += 1
             print(f"  Success. Files written: {len(written)}")
         except Exception as exc:  # noqa: BLE001 - stress-test mode should continue.
@@ -257,11 +206,10 @@ def main() -> None:
     print(f"RUNNING THE DRAGON'S TOUCH {VERSION_LABEL}")
     deck_files = resolve_deck_files()
     runtime_config = get_runtime_config()
-    scryfall_cards, scryfall_lookup, scryfall_error = load_scryfall_or_none()
-    collection_summary = load_collection_summary(runtime_config, scryfall_lookup, scryfall_cards)
+    scryfall_lookup, scryfall_error = load_scryfall_or_none()
 
     if len(deck_files) > 1:
-        run_many_decks(deck_files, runtime_config, scryfall_lookup, collection_summary)
+        run_many_decks(deck_files, runtime_config, scryfall_lookup)
         return
 
     print()
@@ -273,7 +221,7 @@ def main() -> None:
         folders = create_deck_output_folders(parsed_deck.safe_commander_name, OUTPUT_FOLDER)
         written_paths = [write_parser_only_checkpoint(folders.normal, parsed_deck, scryfall_error)]
     else:
-        written_paths = process_single_deck(deck_files[0], runtime_config, scryfall_lookup, collection_summary)
+        written_paths = process_single_deck(deck_files[0], runtime_config, scryfall_lookup)
 
     print()
     print("The Dragon's Touch output complete.")

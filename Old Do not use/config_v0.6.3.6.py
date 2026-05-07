@@ -14,8 +14,7 @@ from pathlib import Path
 
 SCRYFALL_FILE = Path("data/scryfall_cards.json")
 OUTPUT_FOLDER = Path("outputs")
-COLLECTION_FOLDER = Path("collection")
-DEFAULT_COLLECTION_FILE = COLLECTION_FOLDER / "Cards in Phyrexian Bundle Box at Desk.txt"
+COLLECTION_FOLDER = Path("collections")
 MAX_OUTPUT_STEM_LENGTH = 72
 MAX_OUTPUT_FILENAME_LENGTH = 96
 
@@ -225,55 +224,6 @@ GUIDE_PREFERENCE_LABELS = {
     "no": "none",
 }
 
-COLLECTION_MODE_LABELS = {
-    "0": "none",
-    "1": "none",
-    "2": "prefer",
-    "3": "only",
-    "4": "shakeup",
-    "none": "none",
-    "no": "none",
-    "off": "none",
-    "false": "none",
-    "prefer": "prefer",
-    "preferred": "prefer",
-    "collection first": "prefer",
-    "prefer collection first": "prefer",
-    "only": "only",
-    "collection only": "only",
-    "shakeup": "shakeup",
-    "shake up": "shakeup",
-    "best available": "shakeup",
-}
-
-COLLECTION_MODE_DISPLAY = {
-    "none": "No collection/card-pool file loaded",
-    "prefer": "Prefer collection first — owned cards may be suggested when they are a real fit",
-    "only": "Collection only — do not suggest outside cards",
-    "shakeup": "Collection shakeup — show best available owned experiment candidates, clearly labeled",
-}
-
-COLLECTION_SOURCE_MODE_LABELS = {
-    "1": "entire_collection_folder",
-    "2": "selected_files",
-    "all": "entire_collection_folder",
-    "entire": "entire_collection_folder",
-    "entire collection": "entire_collection_folder",
-    "folder": "entire_collection_folder",
-    "collection folder": "entire_collection_folder",
-    "selected": "selected_files",
-    "select": "selected_files",
-    "files": "selected_files",
-    "specific": "selected_files",
-    "specific files": "selected_files",
-}
-
-COLLECTION_SOURCE_MODE_DISPLAY = {
-    "none": "No collection source selected",
-    "entire_collection_folder": "Entire collection folder — use every .txt file in collection/",
-    "selected_files": "Selected collection files — use one or more chosen .txt files",
-}
-
 
 @dataclass(frozen=True)
 class RuntimeConfig:
@@ -286,10 +236,6 @@ class RuntimeConfig:
     prompt_interaction_mode: str
     philosophy_key: str = "balanced_unknown"
     guide_preference: str = "either"
-    collection_mode: str = "none"
-    collection_file: str = ""
-    collection_source_mode: str = "none"
-    collection_files: tuple[str, ...] = ()
 
 
 
@@ -523,10 +469,6 @@ def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_car
             prompt_interaction_mode=runtime_config.prompt_interaction_mode,
             philosophy_key=runtime_config.philosophy_key,
             guide_preference=runtime_config.guide_preference,
-            collection_mode=runtime_config.collection_mode,
-            collection_file=runtime_config.collection_file,
-            collection_source_mode=runtime_config.collection_source_mode,
-            collection_files=runtime_config.collection_files,
         )
     return RuntimeConfig(
         output_mode=runtime_config.output_mode,
@@ -536,10 +478,6 @@ def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_car
         prompt_interaction_mode=runtime_config.prompt_interaction_mode,
         philosophy_key=runtime_config.philosophy_key,
         guide_preference=runtime_config.guide_preference,
-        collection_mode=runtime_config.collection_mode,
-        collection_file=runtime_config.collection_file,
-        collection_source_mode=runtime_config.collection_source_mode,
-        collection_files=runtime_config.collection_files,
     )
 
 
@@ -617,129 +555,6 @@ def get_philosophy_selection_from_user(review_direction: str) -> tuple[str, str]
 
     return philosophy_key, guide_preference
 
-
-
-def _resolve_collection_path(path_text: str) -> Path:
-    """Resolve user/env collection paths relative to the project folder.
-
-    A bare filename like "Cards.txt" is treated as collection/Cards.txt,
-    which avoids the v0.6.4.1 path issue where the project root was checked.
-    """
-    path = Path(path_text).expanduser()
-    if path.is_absolute():
-        return path
-    if len(path.parts) == 1:
-        return COLLECTION_FOLDER / path
-    return path
-
-
-def _collection_txt_files_in_folder(folder: Path = COLLECTION_FOLDER) -> tuple[str, ...]:
-    folder = Path(folder).expanduser()
-    if not folder.is_absolute():
-        folder = Path.cwd() / folder
-    if not folder.exists():
-        return ()
-    return tuple(str(path) for path in sorted(folder.glob("*.txt")))
-
-
-def _open_collection_file_picker(folder: Path = COLLECTION_FOLDER) -> tuple[str, ...]:
-    """Open a Tkinter multi-file picker rooted in the collection folder.
-
-    If Tkinter is unavailable or the user cancels, return an empty tuple so the
-    caller can fall back gracefully instead of crashing the run.
-    """
-    try:
-        import tkinter as tk
-        from tkinter import filedialog
-    except Exception as exc:  # noqa: BLE001 - optional UI helper.
-        print(f"Tkinter collection picker unavailable: {exc}")
-        return ()
-
-    initial_dir = Path(folder).expanduser()
-    if not initial_dir.is_absolute():
-        initial_dir = Path.cwd() / initial_dir
-    initial_dir.mkdir(parents=True, exist_ok=True)
-
-    root = tk.Tk()
-    root.withdraw()
-    root.update()
-    try:
-        selected = filedialog.askopenfilenames(
-            title="Select one or more collection TXT files",
-            initialdir=str(initial_dir),
-            filetypes=[("Text collection files", "*.txt"), ("All files", "*.*")],
-        )
-    finally:
-        root.destroy()
-    return tuple(str(Path(item)) for item in selected)
-
-
-def get_collection_settings_from_user(review_direction: str) -> tuple[str, str, str, tuple[str, ...]]:
-    """Return collection mode, display path, source mode, and selected files.
-
-    v0.6.4.1.1 makes collection source selection usable:
-    - Entire collection folder = every .txt file in collection/
-    - Selected collection files = Tkinter multi-select rooted in collection/
-    """
-    env_mode = os.environ.get("MTG_COLLECTION_MODE", "").strip().lower()
-    env_file = os.environ.get("MTG_COLLECTION_FILE", "").strip()
-    env_files = os.environ.get("MTG_COLLECTION_FILES", "").strip()
-    env_source = os.environ.get("MTG_COLLECTION_SOURCE_MODE", "").strip().lower()
-
-    if env_mode:
-        mode = COLLECTION_MODE_LABELS.get(env_mode, "none")
-        if mode == "none":
-            return "none", "", "none", ()
-        source_mode = COLLECTION_SOURCE_MODE_LABELS.get(env_source, "selected_files" if (env_files or env_file) else "entire_collection_folder")
-        if source_mode == "entire_collection_folder":
-            files = _collection_txt_files_in_folder(COLLECTION_FOLDER)
-            return mode, str(COLLECTION_FOLDER), source_mode, files
-        raw_files = []
-        if env_files:
-            raw_files.extend(part.strip() for part in env_files.split(";") if part.strip())
-        elif env_file:
-            raw_files.append(env_file)
-        else:
-            raw_files.append(str(DEFAULT_COLLECTION_FILE))
-        files = tuple(str(_resolve_collection_path(path)) for path in raw_files)
-        return mode, "; ".join(files), "selected_files", files
-
-    if review_direction == "batch_auto":
-        return "none", "", "none", ()
-
-    print()
-    print("Use collection/card pool for future recommendations?")
-    print("1. No — ignore collection for this run")
-    print("2. Prefer collection first — owned cards only if they are a real fit")
-    print("3. Collection only — do not suggest outside cards later")
-    print("4. Collection shakeup — show best available owned experiments later, clearly labeled")
-    choice = input("Collection mode [1=No]: ").strip().lower()
-    mode = COLLECTION_MODE_LABELS.get(choice, "none")
-    if mode == "none":
-        return "none", "", "none", ()
-
-    print()
-    print("Choose collection source:")
-    print("1. Entire collection folder — use every .txt file in the collection folder")
-    print("2. Select collection files — choose one or more specific .txt files")
-    source_choice = input("Collection source [1=Entire collection folder]: ").strip().lower()
-    source_mode = COLLECTION_SOURCE_MODE_LABELS.get(source_choice, "entire_collection_folder")
-
-    if source_mode == "selected_files":
-        files = _open_collection_file_picker(COLLECTION_FOLDER)
-        if not files:
-            print("No collection files selected. Collection mode will be treated as off for this run.")
-            return "none", "", "none", ()
-        return mode, "; ".join(files), source_mode, files
-
-    files = _collection_txt_files_in_folder(COLLECTION_FOLDER)
-    if not files:
-        print(f"No .txt files were found in {COLLECTION_FOLDER}. Collection mode will be treated as off for this run.")
-        return "none", str(COLLECTION_FOLDER), "entire_collection_folder", ()
-    print(f"Collection source: entire collection folder ({len(files)} .txt file(s) found)")
-    return mode, str(COLLECTION_FOLDER), "entire_collection_folder", files
-
-
 def get_runtime_config() -> RuntimeConfig:
     output_mode = get_output_mode_from_user()
     review_direction = get_review_direction_from_user()
@@ -764,7 +579,6 @@ def get_runtime_config() -> RuntimeConfig:
         prompt_interaction_mode = get_prompt_interaction_mode_from_user()
 
     philosophy_key, guide_preference = get_philosophy_selection_from_user(review_direction)
-    collection_mode, collection_file, collection_source_mode, collection_files = get_collection_settings_from_user(review_direction)
 
     return RuntimeConfig(
         output_mode=output_mode,
@@ -774,10 +588,6 @@ def get_runtime_config() -> RuntimeConfig:
         prompt_interaction_mode=prompt_interaction_mode,
         philosophy_key=philosophy_key,
         guide_preference=guide_preference,
-        collection_mode=collection_mode,
-        collection_file=collection_file,
-        collection_source_mode=collection_source_mode,
-        collection_files=collection_files,
     )
 
 
@@ -791,18 +601,6 @@ def print_runtime_config_summary(runtime_config: RuntimeConfig) -> None:
     )
     print(f"Philosophy lens: {runtime_config.philosophy_key}")
     print(f"Guide preference: {runtime_config.guide_preference}")
-    print(f"Collection mode: {COLLECTION_MODE_DISPLAY.get(runtime_config.collection_mode, runtime_config.collection_mode)}")
-    if runtime_config.collection_mode != "none":
-        print(f"Collection source: {COLLECTION_SOURCE_MODE_DISPLAY.get(runtime_config.collection_source_mode, runtime_config.collection_source_mode)}")
-        if runtime_config.collection_source_mode == "selected_files":
-            print(f"Selected collection files: {len(runtime_config.collection_files)}")
-            for path in runtime_config.collection_files[:5]:
-                print(f"  - {Path(path).name}")
-            if len(runtime_config.collection_files) > 5:
-                print(f"  - ...and {len(runtime_config.collection_files) - 5} more")
-        elif runtime_config.collection_source_mode == "entire_collection_folder":
-            print(f"Collection folder: {runtime_config.collection_file}")
-            print(f"Collection text files found: {len(runtime_config.collection_files)}")
     if runtime_config.review_direction == "build_up":
         print(f"Build-up mode: {runtime_config.build_up_config['label']}")
     elif runtime_config.review_direction == "batch_auto":

@@ -208,11 +208,7 @@ def build_replacement_prompt_debug_section(context: dict[str, Any]) -> str:
     if collection_summary:
         lines.extend(["", "## Collection loader status"])
         lines.append(f"- Collection mode: {getattr(collection_summary, 'mode', 'none')}")
-        lines.append(f"- Collection source mode: {getattr(collection_summary, 'source_mode', 'none')}")
-        lines.append(f"- Collection folder: {getattr(collection_summary, 'collection_folder', None) or 'None'}")
-        lines.append(f"- Selected collection files: {len(getattr(collection_summary, 'selected_files', []) or [])}")
-        for file_path in list(getattr(collection_summary, 'selected_files', []) or [])[:5]:
-            lines.append(f"  - {Path(file_path).name}")
+        lines.append(f"- Collection file: {getattr(collection_summary, 'collection_file', None) or 'None'}")
         lines.append(f"- Collection loaded: {'Yes' if getattr(collection_summary, 'loaded', False) else 'No'}")
         lines.append(f"- Total owned cards loaded: {getattr(collection_summary, 'total_cards', 0)}")
         lines.append(f"- Unique owned card names: {getattr(collection_summary, 'unique_cards', 0)}")
@@ -242,9 +238,7 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
         f"Build-up config: {runtime_config.build_up_config}",
         f"Cut-depth config: {runtime_config.cut_depth_config}",
         f"Collection mode: {getattr(runtime_config, 'collection_mode', 'none')}",
-        f"Collection source mode: {getattr(runtime_config, 'collection_source_mode', 'none')}",
-        f"Collection file/folder: {getattr(runtime_config, 'collection_file', '') or 'None'}",
-        f"Selected collection files: {len(getattr(runtime_config, 'collection_files', ()) or ())}",
+        f"Collection file: {getattr(runtime_config, 'collection_file', '') or 'None'}",
         "",
     ]
     if philosophy_context:
@@ -253,42 +247,22 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
 
     collection_summary = context.get("collection_summary")
     if collection_summary:
-        selected_files = list(getattr(collection_summary, 'selected_files', []) or [])
         lines.extend([
             "## Collection Loader Diagnostics",
             f"- Collection mode: {getattr(collection_summary, 'mode', 'none')}",
-            f"- Collection source mode: {getattr(collection_summary, 'source_mode', 'none')}",
-            f"- Collection folder: {getattr(collection_summary, 'collection_folder', None) or 'None'}",
-            f"- Selected collection files: {len(selected_files)}",
-        ])
-        for file_path in selected_files[:12]:
-            lines.append(f"  - {Path(file_path).name}")
-        if len(selected_files) > 12:
-            lines.append(f"  - ...and {len(selected_files) - 12} more")
-        lines.extend([
-            f"- At least one collection file exists: {'Yes' if getattr(collection_summary, 'file_exists', False) else 'No'}",
+            f"- Collection file: {getattr(collection_summary, 'collection_file', None) or 'None'}",
+            f"- File exists: {'Yes' if getattr(collection_summary, 'file_exists', False) else 'No'}",
             f"- Loaded: {'Yes' if getattr(collection_summary, 'loaded', False) else 'No'}",
             f"- Total owned cards loaded: {getattr(collection_summary, 'total_cards', 0)}",
             f"- Unique owned card names: {getattr(collection_summary, 'unique_cards', 0)}",
             f"- Collection entries matched to Scryfall: {getattr(collection_summary, 'found_cards', 0)}",
             f"- Collection cards not found in Scryfall: {len(getattr(collection_summary, 'not_found_cards', []) or [])}",
-            "- Candidate matching active: No — v0.6.4.2 improves collection resolution only; recommendations come in v0.6.4.3.",
-            "",
-            "### Collection Scryfall Resolution",
-            f"- Exact-name matches: {getattr(collection_summary, 'exact_name_matches', 0)}",
-            f"- Normalized-name matches: {getattr(collection_summary, 'normalized_name_matches', 0)}",
-            f"- Set-code / collector-number matches: {getattr(collection_summary, 'set_collector_matches', 0)}",
-            f"- Printed/alternate-name matches: {getattr(collection_summary, 'printed_or_alternate_name_matches', 0)}",
-            f"- Unresolved entries: {getattr(collection_summary, 'unresolved_entries', 0)}",
+            "- Candidate matching active: No — v0.6.4.1 loads the collection only; recommendations come in later collection patches.",
         ])
-        resolved_examples = list(getattr(collection_summary, 'resolved_name_examples', []) or [])
         not_found = list(getattr(collection_summary, 'not_found_cards', []) or [])
         warnings = list(getattr(collection_summary, 'parse_warnings', []) or [])
-        if resolved_examples:
-            lines.append("- Resolved alternate/export-name examples: " + " | ".join(resolved_examples[:8]))
         if not_found:
             lines.append("- Not-found examples: " + ", ".join(not_found[:12]))
-            lines.append("- Not-found note: These entries were not fuzzy-corrected. Fix scanner/export spelling or confirm that the card exists in the local Scryfall data.")
         if warnings:
             lines.append("- Parse warning examples: " + " | ".join(warnings[:5]))
         lines.append("")

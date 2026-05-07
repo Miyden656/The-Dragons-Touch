@@ -53,7 +53,7 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.4.2 — collection Scryfall resolution improvement"
+VERSION_LABEL = "v0.6.4.1 — collection TXT loader MVP"
 
 
 def build_analysis_context(
@@ -173,27 +173,22 @@ def process_single_deck(
     return written_paths
 
 
-def load_scryfall_or_none() -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]], Exception | None]:
+def load_scryfall_or_none() -> tuple[dict[str, dict[str, Any]], Exception | None]:
     try:
         scryfall_cards, scryfall_lookup = load_scryfall_lookup(SCRYFALL_FILE)
         print(f"Scryfall data loaded: {len(scryfall_cards)} cards")
-        return scryfall_cards, scryfall_lookup, None
+        return scryfall_lookup, None
     except ScryfallDataError as exc:
         print(f"Scryfall data not loaded: {exc}")
         print("A parser-only checkpoint will be written.")
-        return [], {}, exc
+        return {}, exc
 
 
-def load_collection_summary(
-    runtime_config: RuntimeConfig,
-    scryfall_lookup: dict[str, dict[str, Any]],
-    scryfall_cards: list[dict[str, Any]] | None = None,
-) -> CollectionLoadSummary:
+def load_collection_summary(runtime_config: RuntimeConfig, scryfall_lookup: dict[str, dict[str, Any]]) -> CollectionLoadSummary:
     summary = load_collection_sources(
         runtime_config.collection_files,
         mode=runtime_config.collection_mode,
         scryfall_lookup=scryfall_lookup,
-        scryfall_cards=scryfall_cards,
         source_mode=getattr(runtime_config, "collection_source_mode", "selected_files"),
         collection_folder=getattr(runtime_config, "collection_file", ""),
     )
@@ -257,8 +252,8 @@ def main() -> None:
     print(f"RUNNING THE DRAGON'S TOUCH {VERSION_LABEL}")
     deck_files = resolve_deck_files()
     runtime_config = get_runtime_config()
-    scryfall_cards, scryfall_lookup, scryfall_error = load_scryfall_or_none()
-    collection_summary = load_collection_summary(runtime_config, scryfall_lookup, scryfall_cards)
+    scryfall_lookup, scryfall_error = load_scryfall_or_none()
+    collection_summary = load_collection_summary(runtime_config, scryfall_lookup)
 
     if len(deck_files) > 1:
         run_many_decks(deck_files, runtime_config, scryfall_lookup, collection_summary)

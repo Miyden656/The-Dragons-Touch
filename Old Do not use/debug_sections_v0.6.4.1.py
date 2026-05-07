@@ -272,23 +272,12 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             f"- Unique owned card names: {getattr(collection_summary, 'unique_cards', 0)}",
             f"- Collection entries matched to Scryfall: {getattr(collection_summary, 'found_cards', 0)}",
             f"- Collection cards not found in Scryfall: {len(getattr(collection_summary, 'not_found_cards', []) or [])}",
-            "- Candidate matching active: No — v0.6.4.2 improves collection resolution only; recommendations come in v0.6.4.3.",
-            "",
-            "### Collection Scryfall Resolution",
-            f"- Exact-name matches: {getattr(collection_summary, 'exact_name_matches', 0)}",
-            f"- Normalized-name matches: {getattr(collection_summary, 'normalized_name_matches', 0)}",
-            f"- Set-code / collector-number matches: {getattr(collection_summary, 'set_collector_matches', 0)}",
-            f"- Printed/alternate-name matches: {getattr(collection_summary, 'printed_or_alternate_name_matches', 0)}",
-            f"- Unresolved entries: {getattr(collection_summary, 'unresolved_entries', 0)}",
+            "- Candidate matching active: No — v0.6.4.1.1 loads the collection only; recommendations come in later collection patches.",
         ])
-        resolved_examples = list(getattr(collection_summary, 'resolved_name_examples', []) or [])
         not_found = list(getattr(collection_summary, 'not_found_cards', []) or [])
         warnings = list(getattr(collection_summary, 'parse_warnings', []) or [])
-        if resolved_examples:
-            lines.append("- Resolved alternate/export-name examples: " + " | ".join(resolved_examples[:8]))
         if not_found:
             lines.append("- Not-found examples: " + ", ".join(not_found[:12]))
-            lines.append("- Not-found note: These entries were not fuzzy-corrected. Fix scanner/export spelling or confirm that the card exists in the local Scryfall data.")
         if warnings:
             lines.append("- Parse warning examples: " + " | ".join(warnings[:5]))
         lines.append("")
