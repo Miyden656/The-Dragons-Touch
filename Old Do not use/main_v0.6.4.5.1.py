@@ -29,7 +29,6 @@ from app_io.output_writer import (
     write_text_file,
 )
 from config import (
-    BATCH_AGGREGATE_OUTPUT_FOLDER,
     OUTPUT_FOLDER,
     SCRYFALL_FILE,
     RuntimeConfig,
@@ -49,13 +48,12 @@ from legality.commander_legality import build_commander_legality_summary
 from parsing.deck_parser import ParsedDeck, parse_deck_file
 from replacements.collection_candidates import build_collection_candidate_summary
 from replacements.deck_completion import build_deck_completion_summary
-from reports.batch_aggregate import BatchAggregateWriter
 from reports.debug_sections import DebugSectionPaths, write_debug_sections
 from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.4.6 — batch aggregate report export"
+VERSION_LABEL = "v0.6.4.5 — auto-batch selection control"
 
 
 def build_analysis_context(
@@ -243,33 +241,18 @@ def run_many_decks(
     print(f"Batch mode: {len(deck_files)} deck files selected.")
     print_runtime_config_summary(runtime_config)
     print()
-
-    aggregate_writer = BatchAggregateWriter.create(
-        base_folder=BATCH_AGGREGATE_OUTPUT_FOLDER,
-        version_label=VERSION_LABEL,
-        runtime_config=runtime_config,
-        deck_count=len(deck_files),
-    )
-    print(f"Batch aggregate folder: {aggregate_writer.run_folder}")
-    print()
-
     successes = 0
     failures: list[tuple[Path, str]] = []
-    for index, deck_file in enumerate(deck_files, start=1):
+    for deck_file in deck_files:
         print(f"Running deck helper for: {deck_file}")
         try:
             written = process_single_deck(deck_file, runtime_config, scryfall_lookup, collection_summary, batch_output_folder=True)
             successes += 1
-            aggregate_writer.add_success(index=index, deck_file=deck_file, written_paths=written)
             print(f"  Success. Files written: {len(written)}")
         except Exception as exc:  # noqa: BLE001 - stress-test mode should continue.
             failures.append((deck_file, str(exc)))
-            aggregate_writer.add_failure(index=index, deck_file=deck_file, error=exc)
             print(f"  FAILED: {exc}")
         print()
-
-    aggregate_paths = aggregate_writer.finalize(success_count=successes, failures=failures)
-
     print("Batch run complete.")
     print("Final Summary:")
     print(f"- Decks processed: {len(deck_files)}")
@@ -277,9 +260,6 @@ def run_many_decks(
     print(f"- Failures: {len(failures)}")
     for path, error in failures:
         print(f"  - {path.name}: {error}")
-    print("- Batch aggregate reports:")
-    print(f"  - Deck reports: {aggregate_paths.deck_reports}")
-    print(f"  - Debug reports: {aggregate_paths.debug_reports}")
 
 
 def main() -> None:

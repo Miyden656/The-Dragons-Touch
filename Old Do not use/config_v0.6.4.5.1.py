@@ -15,7 +15,6 @@ from pathlib import Path
 SCRYFALL_FILE = Path("data/scryfall_cards.json")
 OUTPUT_FOLDER = Path("outputs")
 COLLECTION_FOLDER = Path("collection")
-BATCH_AGGREGATE_OUTPUT_FOLDER = OUTPUT_FOLDER / "_batch_reports"
 DEFAULT_COLLECTION_FILE = COLLECTION_FOLDER / "Cards in Phyrexian Bundle Box at Desk.txt"
 MAX_OUTPUT_STEM_LENGTH = 72
 MAX_OUTPUT_FILENAME_LENGTH = 96
