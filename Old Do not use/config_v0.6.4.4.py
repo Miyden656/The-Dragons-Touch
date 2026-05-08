@@ -325,9 +325,8 @@ def get_review_direction_from_user() -> str:
     print("Choose review direction:")
     print("1. Build up / complete a deck to 100 cards")
     print("2. Cut down / tune an existing deck or card pool")
-    print("3. Auto batch mode — detect review direction/build-up level from each deck size")
-    print("   Note: under 100 cards = build-up; 100+ cards = cut-down.")
-    print("   You will still choose global defaults for cut strictness, prompt mode, philosophy, guide style, and collection behavior.")
+    print("3. Auto batch mode — detect from deck size and use default choices")
+    print("   Note: under 100 cards = build-up; 100+ cards = cut-down; defaults are used automatically.")
     choice = input("Review direction [2=Cut down]: ").strip().lower()
     return REVIEW_DIRECTION_LABELS.get(choice, "cut_down")
 
@@ -495,7 +494,7 @@ def get_default_cut_depth_config_normal() -> dict:
 
 def auto_build_up_config_for_deck_size(deck_card_count: int) -> dict:
     cards_needed = max(0, 100 - int(deck_card_count or 0))
-    if deck_card_count <= 2 or cards_needed >= 98:
+    if deck_card_count <= 1 or cards_needed >= 99:
         mode = "build_from_scratch"
     elif cards_needed >= 30:
         mode = "point_direction_30_plus"
@@ -513,36 +512,14 @@ def auto_build_up_config_for_deck_size(deck_card_count: int) -> dict:
 
 
 def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_card_count: int) -> RuntimeConfig:
-    """Resolve batch-auto settings for a specific deck size.
-
-    v0.6.4.5 keeps auto-batch automated per deck, but preserves the
-    user's global choices for cut strictness, prompt mode, philosophy, guide
-    style, and collection behavior. Deck size only decides build-up vs
-    cut-down and, for build-up decks, which build-up level applies.
-    """
     if runtime_config.review_direction != "batch_auto":
         return runtime_config
-
-    deck_card_count = int(deck_card_count or 0)
     if deck_card_count < 100:
-        build_config = auto_build_up_config_for_deck_size(deck_card_count)
-        build_config.update({
-            "auto_batch": True,
-            "auto_batch_source": "deck_size",
-            "detected_deck_size": deck_card_count,
-            "cards_needed": max(0, 100 - deck_card_count),
-        })
-        cut_config = get_default_cut_depth_config_for_build_up()
-        cut_config.update({
-            "auto_batch": True,
-            "auto_batch_source": "deck_size",
-            "global_cut_depth_held_for_cut_down_decks": runtime_config.cut_depth_config.get("mode", "normal"),
-        })
         return RuntimeConfig(
             output_mode=runtime_config.output_mode,
             review_direction="build_up",
-            build_up_config=build_config,
-            cut_depth_config=cut_config,
+            build_up_config=auto_build_up_config_for_deck_size(deck_card_count),
+            cut_depth_config=get_default_cut_depth_config_for_build_up(),
             prompt_interaction_mode=runtime_config.prompt_interaction_mode,
             philosophy_key=runtime_config.philosophy_key,
             guide_preference=runtime_config.guide_preference,
@@ -551,30 +528,11 @@ def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_car
             collection_source_mode=runtime_config.collection_source_mode,
             collection_files=runtime_config.collection_files,
         )
-
-    cut_config = dict(runtime_config.cut_depth_config)
-    cut_config.update({
-        "auto_batch": True,
-        "auto_batch_source": "deck_size",
-        "detected_deck_size": deck_card_count,
-    })
-    if deck_card_count >= 130:
-        cut_config.setdefault("auto_batch_pool_note", "130+ cards detected; treat as a large card pool/rebuild-pressure review if the selected cut depth is too light.")
-    elif deck_card_count >= 110:
-        cut_config.setdefault("auto_batch_pool_note", "110+ cards detected; strict or brutal review may be more useful than light/normal review.")
-
     return RuntimeConfig(
         output_mode=runtime_config.output_mode,
         review_direction="cut_down",
-        build_up_config={
-            "mode": "not_applicable",
-            "label": "Not applicable",
-            "alpha": False,
-            "auto_batch": True,
-            "auto_batch_source": "deck_size",
-            "detected_deck_size": deck_card_count,
-        },
-        cut_depth_config=cut_config,
+        build_up_config={"mode": "not_applicable", "label": "Not applicable", "alpha": False},
+        cut_depth_config=get_default_cut_depth_config_normal(),
         prompt_interaction_mode=runtime_config.prompt_interaction_mode,
         philosophy_key=runtime_config.philosophy_key,
         guide_preference=runtime_config.guide_preference,
@@ -590,8 +548,8 @@ def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_car
 def get_philosophy_selection_from_user(review_direction: str) -> tuple[str, str]:
     """Return selected philosophy key and guide presentation preference.
 
-    v0.6.4.5 allows auto-batch runs to keep one global philosophy/guide
-    selection instead of silently forcing Balanced / Unknown.
+    Auto batch intentionally defaults to Balanced / Unknown unless MTG_PHILOSOPHY
+    is supplied. This keeps batch runs non-interactive.
     """
     env_key = os.environ.get("MTG_PHILOSOPHY", "").strip().lower()
     env_pref = os.environ.get("MTG_GUIDE_PREFERENCE", "").strip().lower()
@@ -601,6 +559,9 @@ def get_philosophy_selection_from_user(review_direction: str) -> tuple[str, str]
         philosophy_key = PHILOSOPHY_MODE_LABELS.get(env_key) or PHILOSOPHY_SUBTYPE_LABELS.get(env_key) or env_key
         guide_preference = GUIDE_PREFERENCE_LABELS.get(env_pref, env_pref or "either")
         return philosophy_key, guide_preference
+
+    if review_direction == "batch_auto":
+        return "balanced_unknown", GUIDE_PREFERENCE_LABELS.get(env_pref, env_pref or "either")
 
     print()
     print("Choose deck-building philosophy lens:")
@@ -743,6 +704,9 @@ def get_collection_settings_from_user(review_direction: str) -> tuple[str, str, 
         files = tuple(str(_resolve_collection_path(path)) for path in raw_files)
         return mode, "; ".join(files), "selected_files", files
 
+    if review_direction == "batch_auto":
+        return "none", "", "none", ()
+
     print()
     print("Use collection/card pool for future recommendations?")
     print("1. No — ignore collection for this run")
@@ -782,20 +746,14 @@ def get_runtime_config() -> RuntimeConfig:
 
     if review_direction == "batch_auto":
         print()
-        print("Auto batch mode selected.")
-        print("- Deck size will choose build-up vs cut-down for each deck.")
-        print("- Under 100 cards = build-up; 100+ cards = cut-down.")
-        print("- Build-up level is auto-selected per deck by cards missing.")
-        print("- You still choose global defaults for cut strictness, prompt mode, philosophy, guide style, and collection behavior.")
-        build_up_config = {
-            "mode": "auto_by_deck_size",
-            "label": "Auto-selected by deck size",
-            "alpha": False,
-            "auto_batch": True,
-            "auto_batch_source": "deck_size",
-        }
-        cut_depth_config = get_cut_strictness_from_user()
-        prompt_interaction_mode = get_prompt_interaction_mode_from_user()
+        print("Auto batch mode selected. Using default choices and routing each deck by deck size.")
+        print("- Output mode: " + output_mode)
+        print("- Prompt interaction mode: interactive")
+        print("- Cut depth for 100+ card decks: normal")
+        print("- Build-up level for under-100 decks: auto-selected by cards missing")
+        build_up_config = {"mode": "auto_by_deck_size", "label": "Auto-selected by deck size", "alpha": False}
+        cut_depth_config = get_default_cut_depth_config_normal()
+        prompt_interaction_mode = "interactive"
     elif review_direction == "build_up":
         build_up_config = get_build_up_mode_from_user()
         cut_depth_config = get_default_cut_depth_config_for_build_up()
@@ -848,9 +806,7 @@ def print_runtime_config_summary(runtime_config: RuntimeConfig) -> None:
     if runtime_config.review_direction == "build_up":
         print(f"Build-up mode: {runtime_config.build_up_config['label']}")
     elif runtime_config.review_direction == "batch_auto":
-        print("Batch auto: deck size selects build-up vs cut-down per deck")
-        print(f"Cut depth for 100+ card decks: {runtime_config.cut_depth_config['mode']} (target {runtime_config.cut_depth_config['optional_cut_target']})")
-        print("Build-up level for under-100 decks: auto-selected by cards missing")
+        print("Batch auto: deck size selects build-up vs cut-down; defaults used")
     else:
         print(
             f"Cut depth mode: {runtime_config.cut_depth_config['mode']} "

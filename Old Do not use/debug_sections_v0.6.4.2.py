@@ -228,16 +228,12 @@ def build_replacement_prompt_debug_section(context: dict[str, Any]) -> str:
 def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
     parsed = context["parsed_deck"]
     runtime_config = context["runtime_config"]
-    original_runtime_config = context.get("original_runtime_config", runtime_config)
     philosophy_context = context.get("philosophy_context") or {}
     lines = [
         "# Debug — Diagnostics",
         "",
         f"Output mode: {runtime_config.output_mode}",
         f"Review direction: {runtime_config.review_direction}",
-        f"Original review direction: {getattr(original_runtime_config, 'review_direction', runtime_config.review_direction)}",
-        f"Auto-batch source: {'deck_size' if getattr(original_runtime_config, 'review_direction', '') == 'batch_auto' else 'not_applicable'}",
-        f"Auto-batch detected deck size: {parsed.deck_card_count if getattr(original_runtime_config, 'review_direction', '') == 'batch_auto' else 'not_applicable'}",
         f"Prompt interaction mode: {runtime_config.prompt_interaction_mode}",
         f"Philosophy key: {getattr(runtime_config, 'philosophy_key', 'balanced_unknown')}",
         f"Guide preference: {getattr(runtime_config, 'guide_preference', 'either')}",
@@ -245,7 +241,6 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
         f"Resolved guide: {philosophy_context.get('guide_name') or 'No named guide selected'}",
         f"Build-up config: {runtime_config.build_up_config}",
         f"Cut-depth config: {runtime_config.cut_depth_config}",
-        f"Auto-batch pool note: {runtime_config.cut_depth_config.get('auto_batch_pool_note', 'None')}",
         f"Collection mode: {getattr(runtime_config, 'collection_mode', 'none')}",
         f"Collection source mode: {getattr(runtime_config, 'collection_source_mode', 'none')}",
         f"Collection file/folder: {getattr(runtime_config, 'collection_file', '') or 'None'}",
@@ -277,7 +272,7 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             f"- Unique owned card names: {getattr(collection_summary, 'unique_cards', 0)}",
             f"- Collection entries matched to Scryfall: {getattr(collection_summary, 'found_cards', 0)}",
             f"- Collection cards not found in Scryfall: {len(getattr(collection_summary, 'not_found_cards', []) or [])}",
-            "- Candidate matching active: Yes — v0.6.4.3 matches loaded collection cards to current deck needs.",
+            "- Candidate matching active: No — v0.6.4.2 improves collection resolution only; recommendations come in v0.6.4.3.",
             "",
             "### Collection Scryfall Resolution",
             f"- Exact-name matches: {getattr(collection_summary, 'exact_name_matches', 0)}",
@@ -296,54 +291,6 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             lines.append("- Not-found note: These entries were not fuzzy-corrected. Fix scanner/export spelling or confirm that the card exists in the local Scryfall data.")
         if warnings:
             lines.append("- Parse warning examples: " + " | ".join(warnings[:5]))
-        lines.append("")
-
-    collection_candidates = context.get("collection_candidates")
-    if collection_candidates:
-        lines.extend([
-            "## Collection Candidate Matching Diagnostics",
-            f"- Candidate matching active: {'Yes' if getattr(collection_candidates, 'candidate_matching_active', False) else 'No'}",
-            f"- Collection mode: {getattr(collection_candidates, 'mode', 'none')}",
-            f"- Strong owned candidates: {len(getattr(collection_candidates, 'strong_candidates', []) or [])}",
-            f"- Possible owned candidates: {len(getattr(collection_candidates, 'possible_candidates', []) or [])}",
-            f"- Shakeup-only candidates: {len(getattr(collection_candidates, 'shakeup_candidates', []) or [])}",
-            f"- Rejected / filtered owned cards tracked: {len(getattr(collection_candidates, 'rejected_candidates', []) or [])}",
-            "- Quality gate active: Yes — broad role overlap alone is not enough for Strong candidates.",
-            "- Semantic gate active: Yes — support-only matches are not displayed as matched deck needs.",
-            "- Role mapping hardening active: Yes — evasion/trample, board wipe, token, and combat categories use exact semantic gates.",
-            "- Strong promotion gate active: Yes — standalone beaters, generic colorless bodies, and self-protection cards are usually capped at Possible.",
-            "- v0.6.4.4 report/prompt integration active: Yes — candidates are review candidates, not automatic swaps.",
-            "- Artifact-context cap active: Yes — artifact-context-dependent cards require artifact deck support before Strong.",
-            "- Role-by-role gap tracking active: Yes — Possible and Shakeup candidates do not close strong-fit gaps.",
-            f"- Strong candidates considered: {getattr(collection_candidates, 'strong_candidates_considered', 0)}",
-            f"- Strong candidates accepted: {getattr(collection_candidates, 'strong_candidates_accepted', 0)}",
-            f"- Downgraded to Possible: {getattr(collection_candidates, 'downgraded_to_possible', 0)}",
-            f"- Downgraded to Shakeup: {getattr(collection_candidates, 'downgraded_to_shakeup', 0)}",
-        ])
-        no_fit = list(getattr(collection_candidates, 'no_strong_fit_categories', []) or [])
-        notes = list(getattr(collection_candidates, 'notes', []) or [])
-        quality_notes = list(getattr(collection_candidates, 'quality_gate_notes', []) or [])
-        strong = list(getattr(collection_candidates, 'strong_candidates', []) or [])
-        possible = list(getattr(collection_candidates, 'possible_candidates', []) or [])
-        shakeup = list(getattr(collection_candidates, 'shakeup_candidates', []) or [])
-        category_counts = list(getattr(collection_candidates, 'category_strong_fit_counts', []) or [])
-        if category_counts:
-            lines.append("- Strong-fit coverage by category: " + ", ".join(f"{cat}={count}" for cat, count in category_counts[:12]))
-        if no_fit:
-            lines.append("- Needs with no strong owned fit: " + ", ".join(no_fit[:12]))
-        if notes:
-            lines.append("- Candidate notes: " + " | ".join(notes[:4]))
-        if quality_notes:
-            lines.append("- Quality gate notes: " + " | ".join(quality_notes[:4]))
-        downgrade_counts = list(getattr(collection_candidates, 'downgrade_reason_counts', []) or [])
-        if downgrade_counts:
-            lines.append("- Downgrade reasons: " + ", ".join(f"{reason}={count}" for reason, count in downgrade_counts[:8]))
-        if strong:
-            lines.append("- Strong owned examples: " + ", ".join(candidate.card_name for candidate in strong[:8]))
-        if possible:
-            lines.append("- Possible owned examples: " + ", ".join(candidate.card_name for candidate in possible[:8]))
-        if shakeup:
-            lines.append("- Shakeup examples: " + ", ".join(candidate.card_name for candidate in shakeup[:8]))
         lines.append("")
 
     cards_by_section = getattr(parsed, "cards_by_section", {}) or {}

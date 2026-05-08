@@ -1,11 +1,10 @@
 """Collection candidate matching for The Dragon's Touch.
 
-v0.6.4.4 scope:
-- Integrate Collection Pull quality into report/prompt guidance.
-- Keep owned-card recommendations honest: candidates are review candidates, not automatic swaps.
-- Track collection gaps per replacement category using stricter strong-fit evidence.
-- Cap artifact-context-dependent cards at Possible unless the deck actually supports artifact context.
-- Add early swap-guidance labels for owned candidates without forcing exact one-for-one swaps.
+v0.6.4.3.2 scope:
+- Add a semantic gate on top of the first quality gate.
+- Fix support-only category matches such as ramp cards showing as evasion/trample candidates.
+- Keep broad/generic utility from becoming a Strong owned-card recommendation.
+- Continue refusing to force bad recommendations when the collection does not contain a true fit.
 """
 
 from __future__ import annotations
@@ -37,8 +36,6 @@ class CollectionCandidate:
     mana_value: float | int | None = None
     warnings: list[str] = field(default_factory=list)
     quality_gate: str = ""
-    swap_guidance: list[str] = field(default_factory=list)
-    strong_fit_needs: list[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -61,7 +58,6 @@ class CollectionCandidateSummary:
     shakeup_candidates: list[CollectionCandidate] = field(default_factory=list)
     rejected_candidates: list[CollectionRejectedCard] = field(default_factory=list)
     no_strong_fit_categories: list[str] = field(default_factory=list)
-    category_strong_fit_counts: list[tuple[str, int]] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
     quality_gate_notes: list[str] = field(default_factory=list)
     strong_candidates_considered: int = 0
@@ -88,17 +84,8 @@ REMOVAL_PHRASES = [
     "tap target creature", "doesn't untap", "fight target", "target creature gets -", "target opponent sacrifices",
 ]
 WIPE_PHRASES = [
-    # Keep this list intentionally narrow. Do not include generic phrases like
-    # "return all" because graveyard cards such as Splendid Reclamation return
-    # all lands and are not board wipes.
-    "destroy all creatures", "destroy all artifacts", "destroy all enchantments",
-    "destroy all nonland permanents", "destroy all permanents",
-    "exile all creatures", "exile all artifacts", "exile all enchantments",
-    "exile all nonland permanents", "exile all permanents",
-    "return all creatures", "return all nonland permanents", "return all permanents",
-    "destroy each creature", "destroy each nonland permanent",
-    "exile each creature", "exile each nonland permanent",
-    "deals damage to each creature", "damage to each creature",
+    "destroy all", "exile all", "return all", "each opponent sacrifices",
+    "destroy each", "exile each", "deals damage to each", "damage to each creature",
     "creatures get -", "all creatures get -",
 ]
 PROTECTION_PHRASES = [
@@ -118,12 +105,10 @@ SPELL_PAYOFF_PHRASES = [
     "instant or sorcery", "noncreature spell", "whenever you cast", "copy target instant", "copy target sorcery",
 ]
 EVASION_PHRASES = [
-    "trample", "flying", "menace", "double strike", "first strike",
-    "can't be blocked", "unblockable", "horsemanship",
+    "trample", "flying", "menace", "double strike", "first strike", "can't be blocked", "haste", "vigilance",
 ]
 COMBAT_PHRASES = [
-    "trample", "haste", "double strike", "menace", "flying",
-    "can't be blocked", "unblockable", "attacks", "combat damage",
+    "trample", "haste", "double strike", "menace", "flying", "can't be blocked", "attacks", "combat damage",
 ]
 COUNTER_PHRASES = ["+1/+1 counter", "proliferate", "counter on", "counters on"]
 SACRIFICE_PHRASES = ["sacrifice", "dies", "whenever another creature dies", "death trigger"]
@@ -136,37 +121,12 @@ NARROW_TYPAL_REQUIREMENT_PHRASES = [
     "vampire you control", "dinosaurs you control", "artifact creature you control",
 ]
 
-TEAM_WIDE_COMBAT_PHRASES = [
-    "creatures you control", "creature you control gets", "each creature you control",
-    "attacking creatures", "whenever one or more creatures you control", "creatures with power",
-    "creatures you control have", "creatures you control gain",
-]
-LAND_PLAN_PHRASES = [
-    "landfall", "whenever a land enters", "land enters the battlefield",
-    "land card from your graveyard", "play an additional land", "additional land",
-    "lands you control", "forests you control", "search your library for a land",
-    "put a land card", "for each land you control",
-]
-BOARD_PROTECTION_PHRASES = [
-    "creatures you control gain indestructible", "creatures you control have hexproof",
-    "permanents you control gain", "permanents you control have",
-    "creatures you control get", "prevent all damage",
-]
-
-ARTIFACT_CONTEXT_PHRASES = [
-    "artifact creatures you control", "artifact creature you control",
-    "artifacts you control", "artifact you control",
-    "for each artifact", "five artifact creatures", "artifact tokens",
-    "sacrifice an artifact", "whenever an artifact", "vehicles you control",
-]
-
 BROAD_ROLES = {"artifact", "creature", "enchantment", "instant", "sorcery", "land", "mana_source", "combat_support"}
 GENERIC_UTILITY_ROLES = {"ramp", "card_draw", "card_advantage", "targeted_removal", "protection"}
 SPECIFIC_PLAN_ROLES = {
     "token_production", "evasion_support", "finisher_or_payoff", "counter_synergy",
     "sacrifice_synergy", "recursion", "graveyard_setup", "spell_payoff",
     "typal_or_theme_support", "board_wipe", "mana_doubler", "treasure_synergy",
-    "team_wide_combat_support", "land_plan_support", "board_protection_specific",
 }
 
 
@@ -224,16 +184,10 @@ def _infer_collection_roles(card: dict[str, Any]) -> list[str]:
         roles.update({"card_draw", "card_advantage"})
     if _contains_any(text, REMOVAL_PHRASES):
         roles.add("targeted_removal")
-    if _is_true_board_wipe_text(text):
+    if _contains_any(text, WIPE_PHRASES):
         roles.add("board_wipe")
     if _contains_any(text, PROTECTION_PHRASES):
         roles.add("protection")
-    if _contains_any(text, TEAM_WIDE_COMBAT_PHRASES):
-        roles.add("team_wide_combat_support")
-    if _contains_any(text, LAND_PLAN_PHRASES):
-        roles.add("land_plan_support")
-    if _contains_any(text, BOARD_PROTECTION_PHRASES):
-        roles.add("board_protection_specific")
     if "treasure token" in text or "treasure tokens" in text:
         roles.update({"ramp", "mana_source", "treasure_synergy"})
     # Treat creature-token production as a deck-plan token role. Treasure, clue,
@@ -266,8 +220,6 @@ def _infer_collection_roles(card: dict[str, Any]) -> list[str]:
         roles.add("finisher_or_payoff")
     if _contains_any(text, NARROW_TYPAL_REQUIREMENT_PHRASES):
         roles.add("narrow_typal_requirement")
-    if _contains_any(text, ARTIFACT_CONTEXT_PHRASES):
-        roles.add("artifact_context_dependent")
 
     # Common typal/payoff words. This is intentionally broad but never enough by
     # itself to make a card a strong collection recommendation.
@@ -277,35 +229,6 @@ def _infer_collection_roles(card: dict[str, Any]) -> list[str]:
         roles.add("finisher_or_payoff")
 
     return sorted(roles)
-
-
-def _is_true_board_wipe_text(text: str) -> bool:
-    """Return True only for real mass-removal wording.
-
-    This deliberately rejects graveyard/value phrases such as "return all land
-    cards from your graveyard" and discard-storage cards that happen to use
-    broad words like "return all".
-    """
-    if not _contains_any(text, WIPE_PHRASES):
-        return False
-    # These are common false-positive contexts from collection testing.
-    false_positive_fragments = [
-        "return all land cards from your graveyard",
-        "return all land cards",
-        "return all creature cards from your graveyard",
-        "put all land cards",
-        "exiled with",
-        "bag of holding",
-    ]
-    if _contains_any(text, false_positive_fragments):
-        return False
-    # A true wipe should refer to a mass object class or all/each creatures.
-    true_object_fragments = [
-        "all creatures", "each creature", "all nonland permanents",
-        "each nonland permanent", "all permanents", "all artifacts",
-        "all enchantments", "damage to each creature", "creatures get -",
-    ]
-    return _contains_any(text, true_object_fragments)
 
 
 def _category_role_needs(category: str) -> CategoryNeed:
@@ -356,160 +279,17 @@ def _category_role_needs(category: str) -> CategoryNeed:
     return CategoryNeed(frozenset(), frozenset(), "unknown")
 
 
-def _safe_direct_overlap(category: str, need: CategoryNeed, role_set: set[str]) -> set[str]:
-    """Apply hard category gates so similar words cannot leak across roles."""
-    cat = category.lower()
-    overlap = role_set & set(need.direct)
-
-    if "evasion" in cat or "trample" in cat:
-        return overlap & {"evasion_support"}
-    if "board wipe" in cat:
-        return overlap & {"board_wipe"}
-    if "token" in cat:
-        return overlap & {"token_production"}
-    if "combat finisher" in cat or "finisher" in cat:
-        return overlap & {"finisher_or_payoff", "evasion_support"}
-    if "combat payoff" in cat or "combat" in cat:
-        return overlap & {"finisher_or_payoff", "evasion_support", "token_production"}
-    if "ramp" in cat or ("mana" in cat and "trample" not in cat):
-        return overlap & {"ramp", "mana_source", "land"}
-    if "table-stabilizing" in cat or "targeted removal" in cat or "interaction" in cat or "answer" in cat:
-        return overlap & {"targeted_removal", "board_wipe"}
-    if "board protection" in cat or "protection" in cat:
-        return overlap & {"protection"}
-    return overlap
-
-
-def _safe_support_overlap(category: str, need: CategoryNeed, role_set: set[str]) -> set[str]:
-    """Support overlaps are deliberately conservative for noisy categories."""
-    cat = category.lower()
-    overlap = role_set & set(need.support)
-    if "evasion" in cat or "trample" in cat:
-        return set()
-    if "board wipe" in cat:
-        return set()
-    if "token" in cat:
-        # Generic creatures/finishers are not evidence that a card supplies tokens.
-        return set()
-    if "combat finisher" in cat or "combat payoff" in cat or "combat" in cat:
-        # Generic combat text can be too noisy; keep it from counting as a match.
-        return overlap & {"token_production"}
-    return overlap
-
-
-
-def _strong_fit_categories(categories: list[str], role_set: set[str]) -> list[str]:
-    """Return categories this card can honestly close as a strong owned fit.
-
-This is stricter than matched_needs. A card can be Possible for a category but
-not close that category as solved by the selected collection.
-"""
-    strong: list[str] = []
-    for category in categories:
-        cat = category.lower()
-        if "table-stabilizing" in cat or "targeted removal" in cat or "interaction" in cat or "answer" in cat:
-            if role_set & {"targeted_removal", "board_wipe"}:
-                strong.append(category)
-            continue
-        if "board protection" in cat:
-            if role_set & {"board_protection_specific", "team_wide_combat_support"}:
-                strong.append(category)
-            continue
-        if "protection" in cat:
-            if role_set & {"board_protection_specific", "team_wide_combat_support"}:
-                strong.append(category)
-            continue
-        if "evasion" in cat or "trample" in cat:
-            if role_set & {"evasion_support", "team_wide_combat_support"}:
-                strong.append(category)
-            continue
-        if "token" in cat:
-            if "token_production" in role_set:
-                strong.append(category)
-            continue
-        if "combat finisher" in cat or "finisher" in cat:
-            if role_set & {"finisher_or_payoff", "team_wide_combat_support", "token_production"}:
-                strong.append(category)
-            continue
-        if "combat payoff" in cat or "combat" in cat:
-            if role_set & {"finisher_or_payoff", "team_wide_combat_support", "token_production"}:
-                strong.append(category)
-            continue
-        if "board wipe" in cat:
-            if "board_wipe" in role_set:
-                strong.append(category)
-            continue
-        if _strong_category_allowed(category, role_set):
-            strong.append(category)
-    return strong
-
-
-def _is_artifact_context_dependent(card: dict[str, Any], role_set: set[str]) -> bool:
-    if "artifact_context_dependent" in role_set:
-        return True
-    if not has_type_on_any_face(card, "Artifact"):
-        return False
-    text = _card_text(card)
-    return _contains_any(text, ARTIFACT_CONTEXT_PHRASES)
-
-
-def _deck_has_artifact_context(primary_strategy: str, secondary_strategy: str, strategy_roles: set[str]) -> bool:
-    joined = f"{primary_strategy} {secondary_strategy}".lower()
-    return any(token in joined for token in ["artifact", "vehicle", "equipment"]) or "artifact" in strategy_roles or "artifact_token_synergy" in strategy_roles
-
-
-def _swap_guidance_for_candidate(matched_categories: list[str], role_set: set[str], confidence: str) -> list[str]:
-    guidance: list[str] = []
-    if not matched_categories:
-        return ["No direct swap role identified; treat as a shakeup/playtest idea."]
-    for category in matched_categories[:4]:
-        cat = category.lower()
-        if "token" in cat:
-            guidance.append("Review against low-impact token makers or cards meant to create board presence.")
-        elif "combat" in cat or "finisher" in cat or "evasion" in cat or "trample" in cat:
-            guidance.append("Review against replaceable combat payoffs, standalone beaters, or evasion slots.")
-        elif "protection" in cat:
-            guidance.append("Review against protection slots, but prefer board/commander protection over self-protection.")
-        elif "interaction" in cat or "removal" in cat or "table-stabilizing" in cat:
-            guidance.append("Review against flexible interaction slots, not core engine pieces.")
-        elif "ramp" in cat or "mana" in cat:
-            guidance.append("Review against slower ramp/fixing slots only if curve and role balance support it.")
-        elif "draw" in cat or "card advantage" in cat:
-            guidance.append("Review against lower-impact card-advantage slots.")
-    if confidence.lower().startswith("strong"):
-        guidance.append("Do not treat as an automatic swap; confirm it improves the deck's stated plan first.")
-    else:
-        guidance.append("Pilot review required before treating this as an upgrade.")
-    # De-duplicate while preserving order.
-    return list(dict.fromkeys(guidance))[:4]
-
-def _strong_category_allowed(category: str, role_set: set[str]) -> bool:
-    """A final strong-candidate guardrail per replacement category."""
-    cat = category.lower()
-    if "evasion" in cat or "trample" in cat:
-        return "evasion_support" in role_set
-    if "board wipe" in cat:
-        return "board_wipe" in role_set
-    if "token" in cat:
-        return "token_production" in role_set
-    if "combat finisher" in cat or "finisher" in cat:
-        return bool(role_set & {"finisher_or_payoff", "evasion_support"})
-    if "combat payoff" in cat or "combat" in cat:
-        return bool(role_set & {"finisher_or_payoff", "evasion_support", "token_production"})
-    return True
-
-
 def _strategy_bonus_roles(primary: str, secondary: str) -> set[str]:
     joined = f"{primary} {secondary}".lower()
     roles: set[str] = set()
     if any(token in joined for token in ["token", "go-wide", "go-tall"]):
-        roles.update({"token_production", "finisher_or_payoff", "protection", "team_wide_combat_support"})
+        roles.update({"token_production", "combat_support", "evasion_support", "finisher_or_payoff", "protection", "creature"})
     if "combat" in joined or "voltron" in joined or "stompy" in joined:
-        roles.update({"finisher_or_payoff", "evasion_support", "protection", "team_wide_combat_support"})
+        roles.update({"combat_support", "evasion_support", "finisher_or_payoff", "protection", "creature"})
     if "landfall" in joined or "lands" in joined:
-        roles.update({"ramp", "land", "mana_source", "token_production", "land_plan_support"})
+        roles.update({"ramp", "land", "mana_source", "token_production"})
     if "typal" in joined or "tribal" in joined or "dragon" in joined:
-        roles.update({"typal_or_theme_support", "finisher_or_payoff"})
+        roles.update({"typal_or_theme_support", "creature", "finisher_or_payoff"})
     if "spellslinger" in joined or "noncreature" in joined:
         roles.update({"instant", "sorcery", "spell_payoff", "card_draw", "targeted_removal"})
     if "graveyard" in joined:
@@ -550,8 +330,6 @@ def _make_candidate(
     source_files: list[str],
     warnings: list[str] | None = None,
     quality_gate: str = "",
-    swap_guidance: list[str] | None = None,
-    strong_fit_needs: list[str] | None = None,
 ) -> CollectionCandidate:
     return CollectionCandidate(
         card_name=card_name,
@@ -566,8 +344,6 @@ def _make_candidate(
         mana_value=get_representative_nonland_mana_value(card),
         warnings=warnings or [],
         quality_gate=quality_gate,
-        swap_guidance=swap_guidance or [],
-        strong_fit_needs=strong_fit_needs or [],
     )
 
 
@@ -576,82 +352,11 @@ def _is_generic_colorless_artifact(card: dict[str, Any], role_set: set[str]) -> 
         return False
     if not has_type_on_any_face(card, "Artifact"):
         return False
-    # Colorless artifacts can be useful, but in collection pull they should not
-    # be promoted to Strong unless they solve a very specific role such as a real
-    # board wipe, true token engine, or explicit land-plan support.
-    if role_set & {"board_wipe", "token_production", "land_plan_support", "team_wide_combat_support"}:
+    # Lands and obvious finishers can still be real fits. Generic artifacts with
+    # broad utility roles should not be called strong upgrades by default.
+    if "land" in role_set or "finisher_or_payoff" in role_set or "board_wipe" in role_set:
         return False
     return True
-
-
-def _is_generic_colorless_creature(card: dict[str, Any], role_set: set[str]) -> bool:
-    if _card_color_identity(card):
-        return False
-    if not has_type_on_any_face(card, "Creature"):
-        return False
-    if role_set & {"board_wipe", "token_production", "land_plan_support", "team_wide_combat_support", "board_protection_specific"}:
-        return False
-    return True
-
-
-def _is_standalone_beater(card: dict[str, Any], role_set: set[str]) -> bool:
-    if not has_type_on_any_face(card, "Creature"):
-        return False
-    if not (role_set & {"combat_support", "evasion_support", "finisher_or_payoff", "protection"}):
-        return False
-    # If the card helps the whole board, makes tokens, draws cards, or directly
-    # supports lands/commander infrastructure, it is more than a standalone body.
-    if role_set & {"team_wide_combat_support", "token_production", "card_draw", "card_advantage", "land_plan_support", "board_protection_specific"}:
-        return False
-    return True
-
-
-def _strong_promotion_allowed(
-    card: dict[str, Any],
-    role_set: set[str],
-    matched_categories: list[str],
-    primary_strategy: str,
-    secondary_strategy: str,
-) -> tuple[bool, str]:
-    """Final gate for Strong Owned Candidates.
-
-    The earlier gates answer: does the card match a role? This answers: is it
-    deck-specific enough to be called a strong owned recommendation?
-    """
-    joined = f"{primary_strategy} {secondary_strategy}".lower()
-    categories = " ".join(matched_categories).lower()
-
-    if not matched_categories:
-        return False, "no direct matched category"
-
-    if _is_generic_colorless_creature(card, role_set):
-        return False, "generic/colorless creature is capped at Possible without a deck-specific engine role"
-
-    if _is_standalone_beater(card, role_set):
-        return False, "standalone combat body is capped at Possible unless the pilot specifically wants more independent beaters"
-
-    # Board wipes in non-control shells should usually be Possible, not Strong.
-    if "board wipe" in categories and "control" not in joined:
-        return False, "board wipe is a possible role fit but not a clear strategy-specific upgrade"
-
-    # Protection is Strong only when it protects the board/commander plan, not
-    # when the card mostly protects itself.
-    if "protection" in categories and "board_protection_specific" not in role_set and "team_wide_combat_support" not in role_set:
-        return False, "self-protection or generic protection is not enough for Strong"
-
-    # Combat/evasion categories need board-wide payoff, token relevance, land-plan
-    # relevance, or explicit card advantage. A lone efficient attacker is Possible.
-    if any(token in categories for token in ["combat", "evasion", "trample", "finisher"]):
-        if not (role_set & {"team_wide_combat_support", "token_production", "land_plan_support", "board_protection_specific", "card_draw", "card_advantage"}):
-            return False, "combat/evasion card lacks board-wide or deck-engine relevance"
-
-    # Landfall/Lands decks should prefer land-plan or token/go-tall cards over
-    # generic combat bodies.
-    if ("landfall" in joined or "lands" in joined) and any(token in categories for token in ["combat", "evasion", "trample", "finisher", "token"]):
-        if not (role_set & {"land_plan_support", "token_production", "team_wide_combat_support", "card_draw", "card_advantage"}):
-            return False, "lands-matter shell needs land-plan, token, card-flow, or board-wide evidence for Strong"
-
-    return True, "passes strong promotion gate"
 
 
 def _card_has_narrow_requirement(card: dict[str, Any]) -> bool:
@@ -686,10 +391,6 @@ def build_collection_candidate_summary(
         "Support-only category overlap is not displayed as a matched deck need.",
         "Broad role overlap alone is capped at Possible or Shakeup.",
         "Generic/colorless artifacts and narrow typal cards are not promoted to Strong without a clear deck-specific reason.",
-        "Role mapping hardening is active: evasion/trample, board wipe, token, and combat categories use exact semantic gates.",
-        "Strong promotion gate is active: standalone beaters, generic colorless bodies, and self-protection cards are usually capped at Possible.",
-        "Collection gaps are tracked per replacement category using strict strong-fit evidence, not broad multi-category overlap.",
-        "Artifact-context-dependent cards are capped at Possible unless the deck has artifact-token/artifact-creature/artifact-strategy support.",
     ])
 
     if not active:
@@ -760,8 +461,8 @@ def build_collection_candidate_summary(
         score = 0
 
         for category, need in category_needs.items():
-            direct_overlap = _safe_direct_overlap(category, need, role_set)
-            support_overlap = _safe_support_overlap(category, need, role_set)
+            direct_overlap = role_set & set(need.direct)
+            support_overlap = role_set & set(need.support)
             if direct_overlap:
                 matched_categories.append(category)
                 any_category_hits[category] += 1
@@ -814,32 +515,6 @@ def build_collection_candidate_summary(
             warnings.append(msg)
             quality_gate_parts.append(msg)
             downgrade_reasons["generic_colorless_artifact"] += 1
-        if _is_generic_colorless_creature(card, role_set):
-            cap_to_possible = True
-            msg = "generic/colorless creature fit needs pilot review before being treated as an upgrade"
-            warnings.append(msg)
-            quality_gate_parts.append(msg)
-            downgrade_reasons["generic_colorless_creature"] += 1
-        if _is_standalone_beater(card, role_set) and matched_categories:
-            cap_to_possible = True
-            msg = "standalone combat body; possible role fit but not enough for Strong without pilot intent"
-            warnings.append(msg)
-            quality_gate_parts.append(msg)
-            downgrade_reasons["standalone_beater"] += 1
-        if (
-            _is_artifact_context_dependent(card, role_set)
-            and matched_categories
-            and not _deck_has_artifact_context(
-                getattr(strategy_summary, "primary_strategy", ""),
-                getattr(strategy_summary, "secondary_strategy", ""),
-                strategy_roles,
-            )
-        ):
-            cap_to_possible = True
-            msg = "artifact-context card needs artifact support before it can be Strong"
-            warnings.append(msg)
-            quality_gate_parts.append(msg)
-            downgrade_reasons["artifact_context_dependent"] += 1
         if "narrow_typal_requirement" in role_set:
             cap_to_possible = True
             msg = "card appears to require narrow typal/support context"
@@ -858,28 +533,8 @@ def build_collection_candidate_summary(
         # A semantic strong fit requires a direct need match and at least one
         # specific deck-plan reason. This prevents broadly useful cards from
         # being presented as clear upgrades merely because they are playable.
-        strong_allowed_categories = _strong_fit_categories(matched_categories, role_set)
-        if matched_categories and not strong_allowed_categories:
-            cap_to_possible = True
-            quality_gate_parts.append("category-specific semantic gate failed")
-            downgrade_reasons["category_semantic_gate_failed"] += 1
-
-        if matched_categories and direct_hits >= 1 and (strategy_specific_overlap or direct_specific_roles) and strong_allowed_categories:
+        if matched_categories and direct_hits >= 1 and (strategy_specific_overlap or direct_specific_roles):
             semantic_strong_fit = True
-
-        promotion_allowed, promotion_reason = _strong_promotion_allowed(
-            card,
-            role_set,
-            matched_categories,
-            getattr(strategy_summary, "primary_strategy", ""),
-            getattr(strategy_summary, "secondary_strategy", ""),
-        )
-        if semantic_strong_fit and not promotion_allowed:
-            cap_to_possible = True
-            quality_gate_parts.append(promotion_reason)
-            downgrade_reasons["strong_promotion_gate"] += 1
-        elif semantic_strong_fit and promotion_allowed:
-            quality_gate_parts.append(promotion_reason)
 
         quality_gate = "; ".join(dict.fromkeys(quality_gate_parts))
         if not quality_gate:
@@ -894,43 +549,30 @@ def build_collection_candidate_summary(
             summary.strong_candidates_considered += 1
 
         if matched_categories and direct_hits >= 1 and score >= 8 and semantic_strong_fit and not warnings and not cap_to_possible and not cap_to_shakeup:
-            strong_matched_categories = _strong_fit_categories(matched_categories, role_set)
-            for category in strong_matched_categories:
+            for category in matched_categories:
                 strong_category_hits[category] += 1
             summary.strong_candidates_accepted += 1
-            swap_guidance = _swap_guidance_for_candidate(strong_matched_categories, role_set, "Strong")
-            candidate = _make_candidate(card_name, quantity, "Strong", "Owned card directly supports a current deck need and the deck's specific plan", strong_matched_categories, roles, reason, card, source_files, quality_gate=quality_gate, swap_guidance=swap_guidance, strong_fit_needs=strong_matched_categories)
+            candidate = _make_candidate(card_name, quantity, "Strong", "Owned card directly supports a current deck need and the deck's specific plan", matched_categories, roles, reason, card, source_files, quality_gate=quality_gate)
             strong.append((score, candidate))
         elif matched_categories and score >= 3 and not cap_to_shakeup:
             summary.downgraded_to_possible += 1
-            swap_guidance = _swap_guidance_for_candidate(matched_categories, role_set, "Possible")
-            candidate = _make_candidate(card_name, quantity, "Possible", "Owned card may fit current deck needs; pilot review recommended", matched_categories, roles, reason, card, source_files, warnings, quality_gate=quality_gate, swap_guidance=swap_guidance, strong_fit_needs=_strong_fit_categories(matched_categories, role_set))
+            candidate = _make_candidate(card_name, quantity, "Possible", "Owned card may fit current deck needs; pilot review recommended", matched_categories, roles, reason, card, source_files, warnings, quality_gate=quality_gate)
             possible.append((score, candidate))
         else:
             if score >= 2 or mode == "shakeup":
                 summary.downgraded_to_shakeup += 1
-                swap_guidance = _swap_guidance_for_candidate(matched_categories, role_set, "Shakeup")
-                candidate = _make_candidate(card_name, quantity, "Shakeup only", "Best available / experiment, not a confirmed upgrade", matched_categories, roles, reason, card, source_files, warnings, quality_gate=quality_gate, swap_guidance=swap_guidance, strong_fit_needs=_strong_fit_categories(matched_categories, role_set))
+                candidate = _make_candidate(card_name, quantity, "Shakeup only", "Best available / experiment, not a confirmed upgrade", matched_categories, roles, reason, card, source_files, warnings, quality_gate=quality_gate)
                 shakeup.append((score, candidate))
 
     strong.sort(key=lambda item: (-item[0], item[1].card_name.lower()))
     possible.sort(key=lambda item: (-item[0], item[1].card_name.lower()))
     shakeup.sort(key=lambda item: (-item[0], item[1].card_name.lower()))
 
-    summary.strong_candidates = [candidate for _, candidate in strong[:5]]
+    summary.strong_candidates = [candidate for _, candidate in strong[:12]]
     summary.possible_candidates = [candidate for _, candidate in possible[:16]]
     summary.shakeup_candidates = [candidate for _, candidate in shakeup[:12]]
     summary.rejected_candidates = rejected[:50]
-
-    # Recompute visible strong-fit coverage from the reported Strong candidates.
-    # This keeps Collection Gaps honest: hidden/low-ranked or broad multi-role
-    # matches do not make every replacement category look solved.
-    visible_strong_hits: Counter[str] = Counter()
-    for candidate in summary.strong_candidates:
-        for category in getattr(candidate, "strong_fit_needs", []) or getattr(candidate, "matched_needs", []) or []:
-            visible_strong_hits[category] += 1
-    summary.category_strong_fit_counts = list(visible_strong_hits.items())
-    summary.no_strong_fit_categories = [category for category in priority_categories if visible_strong_hits[category] == 0]
+    summary.no_strong_fit_categories = [category for category in priority_categories if strong_category_hits[category] == 0]
 
     if summary.strong_candidates:
         summary.notes.append("Strong owned candidates passed the stricter quality gate for at least one current deck need.")
@@ -950,7 +592,5 @@ def build_collection_candidate_summary(
         summary.quality_gate_notes.append(f"Downgraded broad/uncertain collection matches: {top_reasons}.")
     if priority_categories and not strong_category_hits:
         summary.quality_gate_notes.append("No current replacement category received a strong owned-card fit after quality gating.")
-    elif priority_categories:
-        summary.quality_gate_notes.append("Collection gaps are based on visible Strong candidates only; Possible and Shakeup candidates do not close a category gap.")
 
     return summary

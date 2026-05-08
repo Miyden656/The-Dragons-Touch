@@ -516,7 +516,6 @@ def _build_collection_pull_section(context: dict[str, Any]) -> list[str]:
 def build_normal_report(context: dict[str, Any]) -> str:
     parsed = context["parsed_deck"]
     runtime_config = context["runtime_config"]
-    original_runtime_config = context.get("original_runtime_config", runtime_config)
     command_zone = context["command_zone"]
     legality = context["legality"]
     role_summary = context["role_summary"]

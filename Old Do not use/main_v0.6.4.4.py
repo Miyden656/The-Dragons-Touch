@@ -53,7 +53,7 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.4.5 — auto-batch selection control"
+VERSION_LABEL = "v0.6.4.3 — collection candidate matching"
 
 
 def build_analysis_context(

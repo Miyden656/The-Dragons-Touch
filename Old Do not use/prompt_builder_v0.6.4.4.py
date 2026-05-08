@@ -217,7 +217,6 @@ def _collection_prompt_context_block(context: dict[str, Any]) -> list[str]:
 def _script_context_block(context: dict[str, Any]) -> list[str]:
     parsed = context["parsed_deck"]
     runtime_config = context["runtime_config"]
-    original_runtime_config = context.get("original_runtime_config", runtime_config)
     strategy = context["strategy_summary"]
     cut_pressure = context["cut_pressure"]
     replacement = context["replacement_needs"]
@@ -229,7 +228,6 @@ def _script_context_block(context: dict[str, Any]) -> list[str]:
         f"- Command zone card(s): {parsed.commander_name}",
         f"- Prompt mode: {runtime_config.prompt_interaction_mode}",
         f"- Review direction: {runtime_config.review_direction}",
-        f"- Auto-batch selected this direction from deck size: {'Yes' if getattr(original_runtime_config, 'review_direction', '') == 'batch_auto' else 'No'}",
         f"- Script-reported primary strategy: {strategy.primary_strategy}",
         f"- Script-reported secondary strategy: {strategy.secondary_strategy}",
         f"- Deck size status: {cut_pressure.status}",
@@ -239,18 +237,12 @@ def _script_context_block(context: dict[str, Any]) -> list[str]:
         f"- Collection mode: {getattr(runtime_config, 'collection_mode', 'none')}",
     ]
 
-    if getattr(original_runtime_config, "review_direction", "") == "batch_auto":
-        lines.append(f"- Auto-batch source: deck size ({parsed.deck_card_count} main-deck cards)")
-        lines.append("- Auto-batch note: review direction/build-up level were detected per deck; cut strictness, prompt mode, philosophy, guide style, and collection behavior came from global run settings.")
     if runtime_config.review_direction == "build_up":
         lines.append(f"- Build-up mode: {runtime_config.build_up_config.get('label', 'Not applicable')}")
         if completion:
             lines.append(f"- Cards needed to reach 100: {completion.cards_needed}")
     else:
         lines.append(f"- Cut depth mode: {runtime_config.cut_depth_config.get('mode', 'normal')}")
-        note = runtime_config.cut_depth_config.get("auto_batch_pool_note")
-        if note:
-            lines.append(f"- Auto-batch pool note: {note}")
 
     if replacement.priority_categories:
         lines.extend(["", "Script-reported replacement/addition categories:"])

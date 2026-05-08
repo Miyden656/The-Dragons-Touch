@@ -387,15 +387,9 @@ def _format_collection_candidate(candidate: Any) -> list[str]:
     lines.append(f"- Quantity owned: {getattr(candidate, 'quantity_owned', 0)}")
     lines.append(f"- Confidence: {getattr(candidate, 'confidence', 'Unknown')}")
     lines.append(f"- Fit type: {getattr(candidate, 'fit_type', 'Collection candidate')}")
-    quality_gate = getattr(candidate, 'quality_gate', '')
-    if quality_gate:
-        lines.append(f"- Quality gate: {quality_gate}")
     matched = list(getattr(candidate, 'matched_needs', []) or [])
     if matched:
         lines.append(f"- Matches deck need(s): {', '.join(matched[:6])}")
-    strong_fits = list(getattr(candidate, 'strong_fit_needs', []) or [])
-    if strong_fits and getattr(candidate, 'confidence', '').lower().startswith('strong'):
-        lines.append(f"- Strong-fit role(s): {', '.join(strong_fits[:6])}")
     roles = list(getattr(candidate, 'role_tags', []) or [])
     if roles:
         lines.append(f"- Detected collection roles: {', '.join(roles[:10])}")
@@ -411,11 +405,6 @@ def _format_collection_candidate(candidate: Any) -> list[str]:
     warnings = list(getattr(candidate, 'warnings', []) or [])
     for warning in warnings[:3]:
         lines.append(f"  - Warning: {warning}")
-    swap_guidance = list(getattr(candidate, 'swap_guidance', []) or [])
-    if swap_guidance:
-        lines.append("- Early swap guidance:")
-        for item in swap_guidance[:4]:
-            lines.append(f"  - {item}")
     sources = list(getattr(candidate, 'source_files', []) or [])
     if sources:
         lines.append("- Source file(s): " + ", ".join(Path(src).name for src in sources[:3]))
@@ -438,11 +427,6 @@ def _build_collection_pull_section(context: dict[str, Any]) -> list[str]:
         f"- Selected collection files: {len(getattr(collection_summary, 'selected_files', []) or []) if collection_summary else 0}",
         "",
         "> Collection candidates are only shown when they appear to support the current strategy, replacement needs, color identity, and implemented companion filters.",
-        "> Strong candidates must pass a semantic fit gate. Broad utility or support-only overlap is not enough.",
-        "> Role mapping hardening is active: evasion/trample, board wipe, token, and combat categories require exact semantic matches.",
-        "> Strong promotion gate is active: standalone beaters, generic colorless bodies, and self-protection cards are usually capped at Possible.",
-        "> v0.6.4.4 prompt/report integration is active: owned cards are review candidates, not automatic swaps.",
-        "> Collection gaps are tracked role-by-role. Possible and Shakeup cards do not close a strong-fit gap.",
         "> If no strong owned candidate exists, The Dragon's Touch should say so instead of forcing a bad recommendation.",
     ])
 
@@ -457,17 +441,9 @@ def _build_collection_pull_section(context: dict[str, Any]) -> list[str]:
     possible = list(getattr(summary, 'possible_candidates', []) or [])
     shakeup = list(getattr(summary, 'shakeup_candidates', []) or [])
     no_fit = list(getattr(summary, 'no_strong_fit_categories', []) or [])
-    replacement_needs = context.get("replacement_needs")
-    priority_categories = list(getattr(replacement_needs, "priority_categories", []) or [])
-    actionable_categories = [
-        category for category in priority_categories
-        if category and not str(category).lower().startswith("no urgent") and not str(category).lower().startswith("note:")
-    ]
 
     lines.append("")
     lines.append("### Strong Owned Candidates")
-    lines.append("> These are owned cards that appear to directly satisfy a current need and support the deck's specific plan. They are still review candidates, not automatic swaps.")
-    lines.append("> Use them as the best owned fits to review first, then confirm the pilot actually wants that role changed.")
     if strong:
         for candidate in strong[:10]:
             lines.extend(_format_collection_candidate(candidate))
@@ -478,8 +454,6 @@ def _build_collection_pull_section(context: dict[str, Any]) -> list[str]:
 
     lines.append("")
     lines.append("### Possible Owned Candidates")
-    lines.append("> These are legal or role-relevant owned cards that need pilot review. They may not be clear upgrades over the current list.")
-    lines.append("> They should not be presented as upgrades unless the pilot chooses that direction.")
     if possible:
         for candidate in possible[:10]:
             lines.extend(_format_collection_candidate(candidate))
@@ -488,18 +462,12 @@ def _build_collection_pull_section(context: dict[str, Any]) -> list[str]:
 
     lines.append("")
     lines.append("### Collection Gaps")
-    if not actionable_categories:
-        lines.append("- No active replacement category was available to evaluate for strong collection fits.")
-        lines.append("- The collection may still show shakeup candidates, but those are not presented as upgrades.")
-    elif no_fit:
-        lines.append("The selected collection did not contain a **strong** owned fit for:")
+    if no_fit:
+        lines.append("The selected collection did not contain a strong owned fit for:")
         for category in no_fit[:12]:
             lines.append(f"- {category}")
-        lines.append("")
-        lines.append("> Possible or shakeup cards may still exist for these categories, but they did not pass the semantic strong-fit gate.")
     else:
-        lines.append("- Every current replacement category had at least one visible Strong owned fit after strict role-by-role quality gating.")
-        lines.append("- Still confirm with the pilot before treating these as actual swaps.")
+        lines.append("- No current replacement category was left without at least one matched owned candidate.")
 
     lines.append("")
     lines.append("### Best Available Collection Shakeup Candidates")
@@ -516,7 +484,6 @@ def _build_collection_pull_section(context: dict[str, Any]) -> list[str]:
 def build_normal_report(context: dict[str, Any]) -> str:
     parsed = context["parsed_deck"]
     runtime_config = context["runtime_config"]
-    original_runtime_config = context.get("original_runtime_config", runtime_config)
     command_zone = context["command_zone"]
     legality = context["legality"]
     role_summary = context["role_summary"]
@@ -542,18 +509,6 @@ def build_normal_report(context: dict[str, Any]) -> str:
         f"- Review direction: {runtime_config.review_direction}",
         f"- Prompt interaction mode: {runtime_config.prompt_interaction_mode}",
     ])
-    if getattr(original_runtime_config, "review_direction", "") == "batch_auto":
-        lines.extend([
-            "- Auto-batch source: deck size",
-            f"- Auto-batch detected deck size: {parsed.deck_card_count}",
-            f"- Auto-batch applied review direction: {runtime_config.review_direction}",
-        ])
-        if runtime_config.review_direction == "build_up":
-            lines.append(f"- Auto-batch cards needed to reach 100: {runtime_config.build_up_config.get('cards_needed', max(0, 100 - parsed.deck_card_count))}")
-        else:
-            note = runtime_config.cut_depth_config.get("auto_batch_pool_note")
-            if note:
-                lines.append(f"- Auto-batch pool note: {note}")
     if runtime_config.review_direction == "build_up":
         lines.append(f"- Build-up mode: {runtime_config.build_up_config.get('label', 'Not applicable')}")
     else:

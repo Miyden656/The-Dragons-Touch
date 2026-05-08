@@ -516,7 +516,6 @@ def _build_collection_pull_section(context: dict[str, Any]) -> list[str]:
 def build_normal_report(context: dict[str, Any]) -> str:
     parsed = context["parsed_deck"]
     runtime_config = context["runtime_config"]
-    original_runtime_config = context.get("original_runtime_config", runtime_config)
     command_zone = context["command_zone"]
     legality = context["legality"]
     role_summary = context["role_summary"]
@@ -542,18 +541,6 @@ def build_normal_report(context: dict[str, Any]) -> str:
         f"- Review direction: {runtime_config.review_direction}",
         f"- Prompt interaction mode: {runtime_config.prompt_interaction_mode}",
     ])
-    if getattr(original_runtime_config, "review_direction", "") == "batch_auto":
-        lines.extend([
-            "- Auto-batch source: deck size",
-            f"- Auto-batch detected deck size: {parsed.deck_card_count}",
-            f"- Auto-batch applied review direction: {runtime_config.review_direction}",
-        ])
-        if runtime_config.review_direction == "build_up":
-            lines.append(f"- Auto-batch cards needed to reach 100: {runtime_config.build_up_config.get('cards_needed', max(0, 100 - parsed.deck_card_count))}")
-        else:
-            note = runtime_config.cut_depth_config.get("auto_batch_pool_note")
-            if note:
-                lines.append(f"- Auto-batch pool note: {note}")
     if runtime_config.review_direction == "build_up":
         lines.append(f"- Build-up mode: {runtime_config.build_up_config.get('label', 'Not applicable')}")
     else:

@@ -53,7 +53,7 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.4.5 — auto-batch selection control"
+VERSION_LABEL = "v0.6.4.2 — collection Scryfall resolution improvement"
 
 
 def build_analysis_context(
@@ -76,19 +76,10 @@ def build_analysis_context(
     possible_cuts = build_possible_cut_review(cut_pressure, replaceability)
     replacement_needs = build_replacement_need_summary(role_summary.role_counts, strategy_summary, parsed_deck.deck_card_count)
     deck_completion = build_deck_completion_summary(parsed_deck, resolved_config, strategy_summary, replacement_needs)
+    collection_candidates = build_collection_candidate_summary()
     philosophy_context = build_philosophy_context(
         key=resolved_config.philosophy_key,
         guide_preference=resolved_config.guide_preference,
-    )
-    collection_candidates = build_collection_candidate_summary(
-        collection_summary=collection_summary,
-        replacement_needs=replacement_needs,
-        parsed_deck=parsed_deck,
-        command_zone=command_zone,
-        legality=legality,
-        scryfall_lookup=scryfall_lookup,
-        strategy_summary=strategy_summary,
-        runtime_config=resolved_config,
     )
 
     return {

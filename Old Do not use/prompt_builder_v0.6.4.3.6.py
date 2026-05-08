@@ -169,55 +169,9 @@ def _philosophy_intro_instruction(context: dict[str, Any]) -> str:
     )
 
 
-
-
-def _collection_prompt_context_block(context: dict[str, Any]) -> list[str]:
-    collection_summary = context.get("collection_summary")
-    collection_candidates = context.get("collection_candidates")
-    runtime_config = context.get("runtime_config")
-    mode = getattr(collection_candidates, "mode", None) or getattr(collection_summary, "mode", None) or getattr(runtime_config, "collection_mode", "none")
-    if mode == "none" and not collection_summary and not collection_candidates:
-        return []
-
-    lines = [
-        "",
-        "## Collection Pull Context",
-        "",
-        f"- Collection mode: {mode}",
-    ]
-    if collection_summary:
-        lines.extend([
-            f"- Collection loaded: {'Yes' if getattr(collection_summary, 'loaded', False) else 'No'}",
-            f"- Total owned cards loaded: {getattr(collection_summary, 'total_cards', 0)}",
-            f"- Unique owned card names: {getattr(collection_summary, 'unique_cards', 0)}",
-            f"- Selected collection files: {len(getattr(collection_summary, 'selected_files', []) or [])}",
-        ])
-    if collection_candidates:
-        lines.extend([
-            f"- Strong owned candidates in report: {len(getattr(collection_candidates, 'strong_candidates', []) or [])}",
-            f"- Possible owned candidates in report: {len(getattr(collection_candidates, 'possible_candidates', []) or [])}",
-            f"- Shakeup candidates in report: {len(getattr(collection_candidates, 'shakeup_candidates', []) or [])}",
-        ])
-        no_fit = list(getattr(collection_candidates, 'no_strong_fit_categories', []) or [])
-        if no_fit:
-            lines.append("- Replacement categories with no strong owned fit: " + ", ".join(no_fit[:8]))
-    lines.extend([
-        "",
-        "Collection-review rules for the reviewing AI:",
-        "1. Treat collection candidates as review candidates, not automatic upgrades or automatic swaps.",
-        "2. In collection-only mode, do not recommend non-owned cards as if they are available from the user's collection.",
-        "3. If no owned card is a strong fit for a role, say that clearly instead of forcing a weak recommendation.",
-        "4. Use Strong Owned Candidates first, but still confirm they actually improve the pilot's stated plan.",
-        "5. Use Possible Owned Candidates only after warning that they require pilot review.",
-        "6. Use Shakeup Candidates only if the pilot asks for experiments or a shakeup; do not frame them as upgrades.",
-        "7. Do not create exact one-for-one swaps unless the deck report and pilot intent make the swap clearly justified.",
-    ])
-    return lines
-
 def _script_context_block(context: dict[str, Any]) -> list[str]:
     parsed = context["parsed_deck"]
     runtime_config = context["runtime_config"]
-    original_runtime_config = context.get("original_runtime_config", runtime_config)
     strategy = context["strategy_summary"]
     cut_pressure = context["cut_pressure"]
     replacement = context["replacement_needs"]
@@ -227,34 +181,36 @@ def _script_context_block(context: dict[str, Any]) -> list[str]:
         "## Script Context From The Dragon's Touch",
         "",
         f"- Command zone card(s): {parsed.commander_name}",
+        f"- Companion(s): {', '.join(getattr(context.get('command_zone'), 'companion_names', []) or []) if getattr(context.get('command_zone'), 'companion_names', []) else 'None'}",
+        f"- Possible reference companion(s): {', '.join(getattr(context.get('command_zone'), 'possible_reference_companion_names', []) or []) if getattr(context.get('command_zone'), 'possible_reference_companion_names', []) else 'None'}",
         f"- Prompt mode: {runtime_config.prompt_interaction_mode}",
         f"- Review direction: {runtime_config.review_direction}",
-        f"- Auto-batch selected this direction from deck size: {'Yes' if getattr(original_runtime_config, 'review_direction', '') == 'batch_auto' else 'No'}",
         f"- Script-reported primary strategy: {strategy.primary_strategy}",
         f"- Script-reported secondary strategy: {strategy.secondary_strategy}",
         f"- Deck size status: {cut_pressure.status}",
         f"- Current deck size: {cut_pressure.deck_card_count}",
         f"- Required cuts: {cut_pressure.required_cuts}",
         f"- Optional cut target: {runtime_config.cut_depth_config.get('optional_cut_target', 0)}",
-        f"- Collection mode: {getattr(runtime_config, 'collection_mode', 'none')}",
     ]
 
-    if getattr(original_runtime_config, "review_direction", "") == "batch_auto":
-        lines.append(f"- Auto-batch source: deck size ({parsed.deck_card_count} main-deck cards)")
-        lines.append("- Auto-batch note: review direction/build-up level were detected per deck; cut strictness, prompt mode, philosophy, guide style, and collection behavior came from global run settings.")
     if runtime_config.review_direction == "build_up":
         lines.append(f"- Build-up mode: {runtime_config.build_up_config.get('label', 'Not applicable')}")
         if completion:
             lines.append(f"- Cards needed to reach 100: {completion.cards_needed}")
     else:
         lines.append(f"- Cut depth mode: {runtime_config.cut_depth_config.get('mode', 'normal')}")
-        note = runtime_config.cut_depth_config.get("auto_batch_pool_note")
-        if note:
-            lines.append(f"- Auto-batch pool note: {note}")
 
     if replacement.priority_categories:
         lines.extend(["", "Script-reported replacement/addition categories:"])
         lines.extend(f"- {category}" for category in replacement.priority_categories)
+
+    legality = context.get("legality")
+    companion_filter_notes = list(getattr(legality, "companion_replacement_filter_notes", []) or []) if legality else []
+    companion_legality_notes = list(getattr(legality, "companion_legality_notes", []) or []) if legality else []
+    if companion_legality_notes or companion_filter_notes:
+        lines.extend(["", "Script-reported companion legality / recommendation filters:"])
+        lines.extend(f"- {note}" for note in companion_legality_notes)
+        lines.extend(f"- {note}" for note in companion_filter_notes)
 
     core_packages = []
     for candidate in getattr(strategy, "candidates", [])[:6]:
@@ -272,23 +228,53 @@ def _global_prompt_rules(context: dict[str, Any]) -> list[str]:
     return [
         "## Required Workflow Rules For The Reviewing AI",
         "",
-        "1. First, ask the user to paste or upload the generated deck report. Do not begin Section 1 until the report is provided.",
-        "2. After the deck report is provided, confirm receipt and give a brief initial summary of what the report appears to say.",
-        f"3. {_philosophy_intro_instruction(context)}",
-        "4. Then immediately ask Section 1 only. Do not ask multiple sections at once in interactive mode.",
-        "5. The user may answer using just numbers, short phrases, or N/A. Accept numbered answers without forcing long explanations.",
-        "6. After each section, summarize the user's answers in 3 to 6 bullets, then immediately ask the next section.",
-        "7. Do not make final cut, addition, or replacement recommendations until all required sections are complete.",
-        "8. Do not assume the script's strategy read is correct if the pilot corrects it.",
-        "9. Separate required legality cuts from optional optimization cuts.",
-        "10. Do not recommend cutting cards the pilot refuses to cut.",
-        "11. Treat bracket pressure as table-fit information, not an automatic cut.",
-        "12. Do not recommend cards already in the deck unless the card is a legal duplicate exception.",
-        "13. Before final recommendations, provide a full intent summary titled '<Commander Name> Review Intent Summary' and ask the user to confirm or correct it.",
-        "14. Only after confirmation should you produce the final recommendations in the user's selected output style.",
-        "15. If Collection Pull Candidates are present, treat them as review candidates. Strong means review first, Possible means pilot review required, and Shakeup means experiment only.",
-        "16. If collection-only mode is active, do not present outside-card suggestions as owned or available from the selected collection.",
-        "17. If the collection does not contain a strong fit for a role, say so directly and do not force a weak owned-card recommendation.",
+        "### Phase 0 — Required Deck Report Intake",
+        "",
+        "1. Your first response must only ask the user to paste or upload the generated deck report. Do not ask Section 1 in that first response.",
+        "2. Do not provide cuts, replacements, additions, strategy corrections, or playtest recommendations before the deck report is provided.",
+        "3. Even though the intake sections are printed below, they are for later use only. Do not begin the questionnaire until after the deck report is provided and verified.",
+        "",
+        "### Phase 1 — Report Verification and Brief Summary",
+        "",
+        "4. After the deck report is provided, confirm receipt and check that it includes these handoff sections:",
+        "   - Full Decklist / Main Deck Cards for AI Review",
+        "   - Annotated Decklist / Card Role Notes for AI Review",
+        "   - Reference / Non-Mainboard / Ignored Cards",
+        "   - Companion Intake Check, if the report detected a possible companion in reference/non-mainboard cards",
+        "5. If the Full Decklist section is missing, ask the user to paste the full decklist before making final cut, replacement, or completion recommendations.",
+        "6. If the Annotated Decklist section is missing, explain that card-specific reasoning may be weaker and ask the user to provide the missing report section if available.",
+        "7. If the report lists a confirmed Companion in the Deck / Command Zone or Companion Legality / Replacement Filter section, apply that companion restriction immediately to all cuts, builds, replacements, and card recommendations.",
+        "8. If a Companion Intake Check is present, ask the pilot to confirm whether each listed card is: 1. Companion, 2. Sideboard/maybeboard, or 3. Reference-only. Do this before final recommendations.",
+        "9. If a companion is confirmed during the guided review, apply that companion restriction to every cut, build, replacement, and recommendation decision. Do not recommend cards that would break the confirmed companion restriction. If the report says the companion rule is not fully automated, manually enforce the printed restriction from the Companion Intake Check.",
+        "10. If the Reference / Non-Mainboard / Ignored Cards section contains cards but there is no companion warning, still ask whether any listed card is intended as a companion, sideboard/maybeboard card, or reference-only card before final recommendations.",
+        "11. If a confirmed or user-confirmed companion has a recommendation filter in the report, treat that filter as a hard recommendation constraint unless the pilot explicitly removes the companion requirement. If the Companion Intake Check flags the companion as banned, illegal, or manual/house-rule only, ask the pilot whether they are intentionally using a house rule before proceeding.",
+        "12. Give a brief initial summary of what the report appears to say: commander, deck size, legality/cut pressure, primary strategy, secondary strategy, companion status, and any obvious mismatch to verify.",
+        "13. Companion intake is not optional when a possible companion is detected. The pilot must confirm companion, sideboard/maybeboard, or reference-only before final cuts, builds, replacements, or card recommendations.",
+        "",
+        "### Phase 2 — Guide Introduction",
+        "",
+        f"14. {_philosophy_intro_instruction(context)}",
+        "",
+        "### Phase 3 — Section-by-Section Intake",
+        "",
+        "15. Then immediately ask Section 1 only. Do not ask multiple sections at once in interactive mode.",
+        "16. The user may answer using just numbers, short phrases, or N/A. Accept numbered answers without forcing long explanations.",
+        "17. After each section, summarize the user's answers in 3 to 6 bullets, then immediately ask the next section.",
+        "18. Do not make final cut, addition, or replacement recommendations until all required sections are complete.",
+        "",
+        "### Phase 4 — Final Intent Summary",
+        "",
+        "19. Do not assume the script's strategy read is correct if the pilot corrects it.",
+        "20. Separate required legality cuts from optional optimization cuts.",
+        "21. Do not recommend cutting cards the pilot refuses to cut.",
+        "22. Treat bracket pressure as table-fit information, not an automatic cut.",
+        "23. Do not recommend cards already in the deck unless the card is a legal duplicate exception.",
+        "24. Before final recommendations, provide a full intent summary titled '<Commander Name> Review Intent Summary' and ask the user to confirm or correct it.",
+        "",
+        "### Phase 5 — Final Recommendations",
+        "",
+        "25. Only after confirmation should you produce the final recommendations in the user's selected output style.",
+        "26. Final recommendations are decision support, not final authority. The pilot makes the final keep/cut/build decisions.",
     ]
 
 
@@ -345,6 +331,7 @@ A simple **No**, **N/A**, or **None** can cover this whole section if nothing ap
 3. Cards you want to build around:
 4. Cards you are uncertain about:
 5. Cards you specifically want reviewed:
+6. Companion requirement to preserve, if any:
 
 ### Section 5 — Bracket / Table Intent
 1. What bracket or power level are you aiming for?
@@ -402,14 +389,6 @@ A simple **No**, **N/A**, or **None** can cover this whole section if nothing ap
 
 6. Preferred final output style:
 {_final_output_style_options()}
-
-### Collection Pull Handling During Final Recommendations
-If the deck report includes **Collection Pull Candidates**, use them as follows:
-- Strong Owned Candidates are the best owned fits to review first, not automatic swaps.
-- Possible Owned Candidates require pilot review before being treated as upgrades.
-- Best Available Collection Shakeup Candidates are experiments only.
-- If collection-only mode is active and no owned card is a strong fit for a role, say that clearly.
-- If the pilot wants full-card-pool suggestions instead, ask them to confirm that shift before recommending non-owned cards.
 
 ### Final Confirmation Step
 After Section 7, provide a full intent summary titled **{context['parsed_deck'].commander_name} Review Intent Summary**. Ask the user to confirm or correct the summary before final recommendations. After confirmation, produce the final output based on Section 7, question 6.
@@ -506,6 +485,7 @@ A simple **No**, **N/A**, or **None** can cover this whole section if nothing ap
 3. Cards you want to build around:
 4. Cards you are uncertain about:
 5. Cards you specifically want reviewed:
+6. Companion requirement to preserve, if any:
 
 ### Section 5 — Bracket / Table Intent
 1. What bracket or power level are you aiming for?
@@ -551,14 +531,6 @@ A simple **No**, **N/A**, or **None** can cover this whole section if nothing ap
 7. Preferred final output style:
 {_final_output_style_options()}
 
-### Collection Pull Handling During Final Recommendations
-If the deck report includes **Collection Pull Candidates**, use them as follows:
-- Strong Owned Candidates are the best owned fits to review first, not automatic swaps.
-- Possible Owned Candidates require pilot review before being treated as upgrades.
-- Best Available Collection Shakeup Candidates are experiments only.
-- If collection-only mode is active and the owned pool cannot complete the deck cleanly, say what roles remain unfilled.
-- If the pilot wants full-card-pool suggestions instead, ask them to confirm that shift before recommending non-owned cards.
-
 ### Final Confirmation Step
 After Section 7, provide a full intent summary titled **{parsed.commander_name} Review Intent Summary**. Ask the user to confirm or correct the summary before final recommendations.
 
@@ -590,7 +562,6 @@ def build_user_guided_prompt(context: dict[str, Any]) -> str:
         "",
     ]
     lines.extend(_script_context_block(context))
-    lines.extend(_collection_prompt_context_block(context))
     lines.extend(["", *_global_prompt_rules(context)])
 
     philosophy_context = context.get("philosophy_context")

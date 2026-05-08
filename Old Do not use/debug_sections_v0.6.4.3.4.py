@@ -228,16 +228,12 @@ def build_replacement_prompt_debug_section(context: dict[str, Any]) -> str:
 def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
     parsed = context["parsed_deck"]
     runtime_config = context["runtime_config"]
-    original_runtime_config = context.get("original_runtime_config", runtime_config)
     philosophy_context = context.get("philosophy_context") or {}
     lines = [
         "# Debug — Diagnostics",
         "",
         f"Output mode: {runtime_config.output_mode}",
         f"Review direction: {runtime_config.review_direction}",
-        f"Original review direction: {getattr(original_runtime_config, 'review_direction', runtime_config.review_direction)}",
-        f"Auto-batch source: {'deck_size' if getattr(original_runtime_config, 'review_direction', '') == 'batch_auto' else 'not_applicable'}",
-        f"Auto-batch detected deck size: {parsed.deck_card_count if getattr(original_runtime_config, 'review_direction', '') == 'batch_auto' else 'not_applicable'}",
         f"Prompt interaction mode: {runtime_config.prompt_interaction_mode}",
         f"Philosophy key: {getattr(runtime_config, 'philosophy_key', 'balanced_unknown')}",
         f"Guide preference: {getattr(runtime_config, 'guide_preference', 'either')}",
@@ -245,7 +241,6 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
         f"Resolved guide: {philosophy_context.get('guide_name') or 'No named guide selected'}",
         f"Build-up config: {runtime_config.build_up_config}",
         f"Cut-depth config: {runtime_config.cut_depth_config}",
-        f"Auto-batch pool note: {runtime_config.cut_depth_config.get('auto_batch_pool_note', 'None')}",
         f"Collection mode: {getattr(runtime_config, 'collection_mode', 'none')}",
         f"Collection source mode: {getattr(runtime_config, 'collection_source_mode', 'none')}",
         f"Collection file/folder: {getattr(runtime_config, 'collection_file', '') or 'None'}",
@@ -311,10 +306,6 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             "- Quality gate active: Yes — broad role overlap alone is not enough for Strong candidates.",
             "- Semantic gate active: Yes — support-only matches are not displayed as matched deck needs.",
             "- Role mapping hardening active: Yes — evasion/trample, board wipe, token, and combat categories use exact semantic gates.",
-            "- Strong promotion gate active: Yes — standalone beaters, generic colorless bodies, and self-protection cards are usually capped at Possible.",
-            "- v0.6.4.4 report/prompt integration active: Yes — candidates are review candidates, not automatic swaps.",
-            "- Artifact-context cap active: Yes — artifact-context-dependent cards require artifact deck support before Strong.",
-            "- Role-by-role gap tracking active: Yes — Possible and Shakeup candidates do not close strong-fit gaps.",
             f"- Strong candidates considered: {getattr(collection_candidates, 'strong_candidates_considered', 0)}",
             f"- Strong candidates accepted: {getattr(collection_candidates, 'strong_candidates_accepted', 0)}",
             f"- Downgraded to Possible: {getattr(collection_candidates, 'downgraded_to_possible', 0)}",
@@ -326,9 +317,6 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
         strong = list(getattr(collection_candidates, 'strong_candidates', []) or [])
         possible = list(getattr(collection_candidates, 'possible_candidates', []) or [])
         shakeup = list(getattr(collection_candidates, 'shakeup_candidates', []) or [])
-        category_counts = list(getattr(collection_candidates, 'category_strong_fit_counts', []) or [])
-        if category_counts:
-            lines.append("- Strong-fit coverage by category: " + ", ".join(f"{cat}={count}" for cat, count in category_counts[:12]))
         if no_fit:
             lines.append("- Needs with no strong owned fit: " + ", ".join(no_fit[:12]))
         if notes:
