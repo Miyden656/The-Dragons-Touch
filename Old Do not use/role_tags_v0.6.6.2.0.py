@@ -46,7 +46,7 @@ ROLE_TAG_DISPLAY_ORDER = [
     "ltb_value", "landfall", "landfall_payoff", "extra_land_play", "lands_matter", "land_aura_ramp", "enchant_land_ramp", "mana_infrastructure", "land_token",
     "artifact_token_synergy", "treasure_synergy", "clue_synergy", "food_synergy", "lifegain_payoff",
     "lifedrain_payoff", "toughness_payoff", "defender_payoff", "high_toughness", "activated_ability_synergy",
-    "mana_sink", "trigger_amplifier", "etb_amplifier", "copy_amplifier", "commander_payoff_amplifier", "big_moment_enabler", "cheat_into_play", "copy_clone_value", "dragon_typal", "dragon_copy_value", "mutate", "mutate_payoff",
+    "mana_sink", "copy_clone_value", "dragon_typal", "dragon_copy_value", "mutate", "mutate_payoff",
     "cast_from_outside_hand", "nonhand_casting", "foretell", "plot", "suspend_synergy", "adventure_synergy",
     "draw_punisher", "forced_draw", "wheel", "group_slug", "table_damage", "punisher",
     "fast_mana", "efficient_tutor", "free_interaction", "high_bracket_pressure", "bracket_pressure",
@@ -338,49 +338,7 @@ def infer_card_role_tags(card: dict[str, Any], commander_cards: list[dict[str, A
     if _has_any(text, ["whenever you cast an instant", "whenever you cast a sorcery", "whenever you cast or copy", "magecraft", "instant or sorcery spell", "noncreature spell"]):
         tags.update(["spell_payoff", "noncreature_spell_payoff", "cast_trigger", "synergy_piece"])
     if _has_any(text, ["copy target spell", "copy that spell", "copy it", "copy each spell"]):
-        tags.update(["cast_copy_synergy", "spell_payoff", "combo_piece_possible", "copy_amplifier", "commander_payoff_amplifier"])
-
-    # Trigger / ETB / copy amplifiers. These are especially important for commanders
-    # such as Miirym, Phelia, Yarok-style shells, and other decks where the main
-    # payoff is copying or doubling triggered abilities rather than simply casting
-    # more raw threats. Earlier checkpoints sometimes saw these as generic artifacts.
-    if _has_any(text, [
-        "triggered ability",
-        "triggers an additional time",
-        "triggers one or more additional times",
-        "copy target activated or triggered ability",
-        "copy target triggered ability",
-    ]):
-        tags.update(["trigger_amplifier", "commander_payoff_amplifier", "synergy_piece"])
-    if _has_any(text, [
-        "entering the battlefield causes a triggered ability",
-        "enters the battlefield causes a triggered ability",
-        "creature entering the battlefield",
-        "artifact entering the battlefield",
-    ]):
-        tags.update(["etb_amplifier", "trigger_amplifier", "commander_payoff_amplifier", "synergy_piece"])
-    if _has_any(text, [
-        "copy target activated or triggered ability",
-        "copy target triggered ability",
-        "whenever you cast a spell of the chosen type, copy",
-        "copy that spell",
-    ]):
-        tags.update(["copy_amplifier", "trigger_amplifier", "synergy_piece"])
-
-    # Creature-cheat / big-moment enablers. These cards often look disconnected
-    # unless the deck's intended payoff is putting a major creature into play or
-    # triggering a commander payoff from a creature entering.
-    if _has_any(text, [
-        "put a creature card from your hand onto the battlefield",
-        "put a creature card from your hand onto the battlefield",
-        "put target creature card from your hand onto the battlefield",
-        "you may put a creature card",
-        "put a permanent card from your hand onto the battlefield",
-    ]):
-        tags.update(["cheat_into_play", "big_moment_enabler", "synergy_piece"])
-    if "haste" in text and ("creature" in tl or "creatures you control" in text):
-        tags.update(["combat_synergy", "big_moment_enabler"])
-
+        tags.update(["cast_copy_synergy", "spell_payoff", "combo_piece_possible"])
     if _has_any(text, ["flashback", "jump-start", "cast target instant", "cast target sorcery"]):
         tags.update(["spell_recursion_possible", "graveyard_enabler"])
 
@@ -429,7 +387,7 @@ def infer_card_role_tags(card: dict[str, Any], commander_cards: list[dict[str, A
     if "dragon" in tl or "dragon" in text:
         tags.add("dragon_typal")
     if _has_any(text, ["token that's a copy", "copy of target creature", "copy target creature", "enters as a copy"]):
-        tags.update(["copy_clone_value", "copy_amplifier", "commander_payoff_amplifier", "combo_piece_possible", "synergy_piece", "big_moment_enabler"])
+        tags.update(["copy_clone_value", "combo_piece_possible", "synergy_piece"])
         if "dragon" in text or "dragon" in tl:
             tags.update(["dragon_copy_value", "dragon_typal"])
 
@@ -467,19 +425,6 @@ def infer_card_role_tags(card: dict[str, Any], commander_cards: list[dict[str, A
             tags.add("toolbox_support")
     if _has_any(text, ["you win the game", "each opponent loses the game", "loses the game"]):
         tags.update(["win_condition", "combo_piece_possible", "bracket_pressure"])
-
-
-    # Name-specific amplifier cleanup for cards whose current Oracle text can be
-    # difficult to classify from broad patterns alone. This is intentionally
-    # narrow and uses real card names, not scanner/export aliases.
-    if name in {"panharmonicon", "strionic resonator", "roaming throne"}:
-        tags.update(["trigger_amplifier", "commander_payoff_amplifier", "synergy_piece"])
-    if name == "panharmonicon":
-        tags.add("etb_amplifier")
-    if name in {"reflections of littjara", "helm of the host", "mirror room // fractured realm", "mirror room", "fractured realm"}:
-        tags.update(["copy_amplifier", "copy_clone_value", "big_moment_enabler", "commander_payoff_amplifier", "synergy_piece"])
-    if name in {"sneak attack", "monster manual // zoological study", "monster manual"}:
-        tags.update(["cheat_into_play", "big_moment_enabler", "synergy_piece"])
 
     # Manual review for unusual or custom-ish objects.
     if not card.get("name") or not type_line:

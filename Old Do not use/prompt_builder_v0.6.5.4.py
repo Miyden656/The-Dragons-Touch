@@ -16,11 +16,6 @@ v0.6.5.2.1 hotfix:
 
 v0.6.5.2.2 polish:
 - Render answer choices as plain `number = choice` lines, without bullets.
-
-v0.6.5.4 polish:
-- Make philosophy/persona prompt behavior more showcase-ready across lenses.
-- Add explicit partial-answer clarification rules.
-- Keep prompt QA guidance separate from mechanical scoring.
 """
 
 from __future__ import annotations
@@ -29,10 +24,7 @@ from pathlib import Path
 from typing import Any
 
 from app_io.output_writer import get_unique_output_path, write_text_file
-from analysis.deck_building_philosophies import (
-    render_philosophy_prompt_questions,
-    render_philosophy_prompt_showcase_block,
-)
+from analysis.deck_building_philosophies import render_philosophy_prompt_questions
 
 
 BRACKET_OPTIONS = """1. Exhibition / Bracket 1 — very casual, theme-first, intentionally low pressure.
@@ -199,18 +191,17 @@ def _philosophy_intro_instruction(context: dict[str, Any]) -> str:
     label = philosophy.get("label") or "Balanced / Unknown"
     core_question = philosophy.get("core_question") or "What does this deck want to do?"
     tone = philosophy.get("tone") or "clear, practical, and supportive"
-    lens_summary = philosophy.get("short_lens_summary") or philosophy.get("rules_summary") or "Use this lens as review framing only."
 
     if guide_name:
         return (
             f"After receiving the deck report, confirm receipt and briefly introduce the selected philosophy guide as "
             f"{guide_name}, {guide_role}. Use exactly 2 to 4 sentences. State that the review will use the "
-            f"{label} lens, whose guiding question is: '{core_question}'. In plain language, frame the lens as: {lens_summary} "
-            f"Keep the tone {tone}. Do not write in first person as the persona, do not roleplay a scene, and do not let the persona override the pilot, legality, deck size, color identity, collection mode, or the report evidence."
+            f"{label} lens, whose guiding question is: '{core_question}' Keep the tone {tone}. "
+            f"Do not write in first person as the persona, do not roleplay a scene, and do not let the persona override the pilot, legality, deck size, color identity, or the report evidence."
         )
     return (
         f"After receiving the deck report, confirm receipt and briefly introduce the selected philosophy lens: {label}. "
-        f"Use exactly 2 to 4 sentences. Explain that this lens guides tone and priorities, but does not override pilot intent, legality, deck size, color identity, collection mode, or strategy evidence. Lens summary: {lens_summary}"
+        f"Use exactly 2 to 4 sentences. Explain that this lens guides tone and priorities, but does not override pilot intent, legality, deck size, color identity, or strategy evidence."
     )
 
 
@@ -228,15 +219,8 @@ def _philosophy_prompt_behavior_block(context: dict[str, Any]) -> list[str]:
     tone = philosophy.get("tone") or "clear, practical, and supportive"
     example_language = philosophy.get("example_language")
 
-    short_lens_summary = philosophy.get("short_lens_summary")
-    report_guidance_summary = philosophy.get("report_guidance_summary")
-    protect_summary = philosophy.get("protect_summary")
-    question_summary = philosophy.get("question_summary")
-    prefer_summary = philosophy.get("prefer_summary")
-    pilot_override_note = philosophy.get("pilot_override_note")
-
     lines = [
-        "## v0.6.5.4 Philosophy / Persona Prompt Behavior",
+        "## v0.6.5.2 Philosophy / Persona Prompt Behavior",
         "",
         f"- Selected lens: {label}",
         f"- Guide/persona: {guide_name or 'No named guide'}{f' — {guide_role}' if guide_name else ''}",
@@ -244,33 +228,16 @@ def _philosophy_prompt_behavior_block(context: dict[str, Any]) -> list[str]:
         f"- Core philosophy: {core_philosophy}",
         f"- Review summary: {rules_summary}",
         f"- Tone target: {tone}",
-    ]
-
-    if short_lens_summary:
-        lines.append(f"- Showcase lens summary: {short_lens_summary}")
-    if report_guidance_summary:
-        lines.append(f"- How to use this lens: {report_guidance_summary}")
-    if protect_summary:
-        lines.append(f"- Protect emphasis: {protect_summary}")
-    if question_summary:
-        lines.append(f"- Question/review emphasis: {question_summary}")
-    if prefer_summary:
-        lines.append(f"- Replacement framing: {prefer_summary}")
-    if pilot_override_note:
-        lines.append(f"- Pilot override note: {pilot_override_note}")
-
-    lines.extend([
         "",
         "How the reviewing AI should use this lens:",
         "1. Use the philosophy to shape explanation style, protection language, review priorities, and recommendation framing.",
-        "2. Do not use the philosophy to override legality, deck-size rules, color identity, commander legality, companion restrictions, collection mode, budget, or required cuts.",
+        "2. Do not use the philosophy to override legality, deck-size rules, color identity, commander legality, companion restrictions, or required cuts.",
         "3. Do not use the philosophy to invent a new primary strategy if the pilot has not confirmed it.",
         "4. Do not roleplay as the guide in first person. The guide is a mentor frame, not a character scene.",
         "5. Keep guide/persona references short: introduce the lens once, then use normal deck-review language.",
         "6. If pilot answers conflict with the selected philosophy, pilot intent wins and the final summary should mention the shift.",
         "7. If the selected lens is Balanced / Unknown, stay exploratory and avoid making subtype-specific assumptions.",
-        "8. Keep the final review grounded in the deck report and the pilot's section answers; do not turn the philosophy lens into a separate roleplay voice.",
-    ])
+    ]
 
     protect = philosophy.get("protect_bias") or []
     review = philosophy.get("review_bias") or []
@@ -398,21 +365,19 @@ def _global_prompt_rules(context: dict[str, Any]) -> list[str]:
         f"3. {_philosophy_intro_instruction(context)}",
         "4. After the philosophy/guide introduction, immediately ask Section 1 only. Do not ask multiple sections at once in interactive mode.",
         "5. The user may answer using just numbers, short phrases, or N/A. Accept numbered answers without forcing long explanations.",
-        "6. If the user answers only part of a section, ask only for the missing or unclear items from that same section before summarizing and moving on.",
-        "7. After each completed section, summarize the user's answers in 3 to 6 bullets, then immediately ask the next section.",
-        "8. Preserve deck-report terms and separators when summarizing, such as Token Combat / Go-Wide-Go-Tall, ETB Control / Flicker Control, and collection-only.",
-        "9. Use the selected philosophy as a review lens only: tone, priorities, protection language, and framing. Do not let it override mechanical facts.",
-        "10. Do not make final cut, addition, or replacement recommendations until all required sections are complete.",
-        "11. Do not assume the script's strategy read is correct if the pilot corrects it.",
-        "12. Separate required legality cuts from optional optimization cuts.",
-        "13. Do not recommend cutting cards the pilot refuses to cut.",
-        "14. Treat bracket pressure as table-fit information, not an automatic cut.",
-        "15. Do not recommend cards already in the deck unless the card is a legal duplicate exception.",
-        "16. Before final recommendations, provide a full intent summary titled '<Commander Name> Review Intent Summary' and ask the user to confirm or correct it.",
-        "17. Only after confirmation should you produce the final recommendations in the user's selected output style.",
-        "18. If Collection Pull Candidates are present, treat them as review candidates. Strong means review first, Possible means pilot review required, and Shakeup means experiment only.",
-        "19. If collection-only mode is active, do not present outside-card suggestions as owned or available from the selected collection.",
-        "20. If the collection does not contain a strong fit for a role, say so directly and do not force a weak owned-card recommendation.",
+        "6. After each section, summarize the user's answers in 3 to 6 bullets, then immediately ask the next section.",
+        "7. Use the selected philosophy as a review lens only: tone, priorities, protection language, and framing. Do not let it override mechanical facts.",
+        "8. Do not make final cut, addition, or replacement recommendations until all required sections are complete.",
+        "9. Do not assume the script's strategy read is correct if the pilot corrects it.",
+        "10. Separate required legality cuts from optional optimization cuts.",
+        "11. Do not recommend cutting cards the pilot refuses to cut.",
+        "12. Treat bracket pressure as table-fit information, not an automatic cut.",
+        "13. Do not recommend cards already in the deck unless the card is a legal duplicate exception.",
+        "14. Before final recommendations, provide a full intent summary titled '<Commander Name> Review Intent Summary' and ask the user to confirm or correct it.",
+        "15. Only after confirmation should you produce the final recommendations in the user's selected output style.",
+        "16. If Collection Pull Candidates are present, treat them as review candidates. Strong means review first, Possible means pilot review required, and Shakeup means experiment only.",
+        "17. If collection-only mode is active, do not present outside-card suggestions as owned or available from the selected collection.",
+        "18. If the collection does not contain a strong fit for a role, say so directly and do not force a weak owned-card recommendation.",
     ]
 
 
@@ -431,7 +396,7 @@ def _cut_down_sections(context: dict[str, Any], worksheet: bool = False) -> str:
 
 {prefix}
 
-Formatting rule for the reviewing AI: Keep each question separate. Render answer choices as plain option lines like `1 = choice`, with no bullet dots and no nested numbered lists. Do not flatten questions and answer choices into one continuous numbered list. If the user partially answers a section, ask only for the missing or unclear items from that section.
+Formatting rule for the reviewing AI: Keep each question separate. Render answer choices as plain option lines like `1 = choice`, with no bullet dots and no nested numbered lists. Do not flatten questions and answer choices into one continuous numbered list.
 
 ### Section 1 — Main Review Goal
 1. Is the script's review direction correct? Script says: **cut_down / tuning**.
@@ -599,7 +564,7 @@ This section exists because build-up mode may still need optional optimization s
 
 {prefix}
 
-Formatting rule for the reviewing AI: Keep each question separate. Render answer choices as plain option lines like `1 = choice`, with no bullet dots and no nested numbered lists. Do not flatten questions and answer choices into one continuous numbered list. If the user partially answers a section, ask only for the missing or unclear items from that section.
+Formatting rule for the reviewing AI: Keep each question separate. Render answer choices as plain option lines like `1 = choice`, with no bullet dots and no nested numbered lists. Do not flatten questions and answer choices into one continuous numbered list.
 
 ### Section 1 — Main Review Goal
 1. Is the script's review direction correct? Script says: **build_up / completion**.
@@ -727,9 +692,6 @@ def build_user_guided_prompt(context: dict[str, Any]) -> str:
         if philosophy_text.startswith("### Philosophy Guide Context"):
             philosophy_text = philosophy_text.replace("### Philosophy Guide Context", "## Philosophy Guide Context", 1)
         lines.extend(["", philosophy_text])
-        showcase_block = render_philosophy_prompt_showcase_block(philosophy_context).rstrip()
-        if showcase_block:
-            lines.extend(["", showcase_block])
         lines.extend(["", *_philosophy_prompt_behavior_block(context)])
 
     if is_build_up:

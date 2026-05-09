@@ -22,8 +22,8 @@ v0.6.5.4 adds prompt-facing showcase polish so generated guided prompts explain
 philosophy lenses consistently across subtypes.
 
 v0.6.6.1 adds the foundation for philosophy-aware cut/replacement bias.
-v0.6.6.2 turns on a light optional-cut scoring nudge while leaving replacement
-scoring, strategy detection, legality, and collection matching unchanged.
+This patch exposes bias profiles and diagnostics only; it does not change cut
+scores, replacement scores, strategy detection, legality, or collection matching.
 """
 
 from __future__ import annotations
@@ -76,12 +76,12 @@ class PhilosophyProfile:
     replacement_bias: List[str] = field(default_factory=list)
     cut_pressure_notes: List[str] = field(default_factory=list)
     # v0.6.6.1 bias foundation fields. These are exposed for diagnostics and
-    # future cut/replacement logic. In v0.6.6.2 the cut-side profile is applied as a small optional-cut nudge; replacement scoring remains inactive.
+    # future cut/replacement logic, but are not applied to scoring in v0.6.6.1.
     cut_bias_protect_roles: List[str] = field(default_factory=list)
     cut_bias_review_roles: List[str] = field(default_factory=list)
     replacement_bias_roles: List[str] = field(default_factory=list)
     bias_strength: str = "guidance"
-    bias_warning: str = "v0.6.6.2.1 applies light optional-cut bias only, with improved trigger/copy-amplifier visibility. It must not override legality, required cuts, pilot-protected cards, color identity, companion restrictions, collection mode, or explicit pilot intent."
+    bias_warning: str = "Bias profile is available for future phases, but v0.6.6.1 does not apply it to scoring."
     tone: str = "balanced, clear, and supportive"
     example_language: str = ""
 
@@ -586,18 +586,6 @@ def _build_bias_profile(profile: PhilosophyProfile) -> dict:
             "replacement": ["role_balance", "strategy_support", "mana_consistency", "clear_deck_identity"],
             "strength": "neutral",
         },
-        "big_moment": {
-            "protect": ["declared_big_moment_card", "big_moment_enabler", "splashy_finisher", "x_spell", "doublers", "payoff_ramp", "payoff_protection"],
-            "review": ["unsupported_haymaker", "expensive_no_payoff", "win_more", "clunky_unrelated_card"],
-            "replacement": ["better_ramp", "payoff_support", "protection", "haste_evasion_trample", "copy_or_doubling_effect", "draw_to_find_payoff"],
-            "strength": "light",
-        },
-        "big_creature_stompy": {
-            "protect": ["large_central_creature", "ramp_into_threats", "haste_evasion_trample", "creature_protection", "power_toughness_payoff"],
-            "review": ["large_creature_no_impact", "redundant_top_end", "ramp_light_expensive_hand", "small_value_dilution"],
-            "replacement": ["ramp", "creature_based_draw", "trample_evasion_haste", "protection", "impactful_top_end", "size_to_value_payoff"],
-            "strength": "light",
-        },
         "theme_vibe": {
             "protect": ["declared_theme", "typal_piece", "flavor_with_function", "identity_preserving_card"],
             "review": ["flavor_only_low_function", "identity_clashing_staple", "low_impact_theme_card"],
@@ -674,10 +662,8 @@ def _build_bias_profile(profile: PhilosophyProfile) -> dict:
 
     return {
         "philosophy_bias_foundation_active": True,
-        "philosophy_bias_foundation_version": "v0.6.6.2.1",
-        "bias_scoring_active": True,
-        "cut_bias_scoring_active": True,
-        "replacement_bias_scoring_active": False,
+        "philosophy_bias_foundation_version": "v0.6.6.1",
+        "bias_scoring_active": False,
         "bias_strength": strength,
         "bias_warning": profile.bias_warning,
         "cut_bias_protect_roles": _dedupe_preserve_order(protect_roles),
@@ -1080,12 +1066,11 @@ def render_philosophy_diagnostics_section(context: dict) -> str:
         "- v0.6.5.3 subtype report summary active: Yes",
         f"- Report guidance summary available: {'Yes' if context.get('report_guidance_summary') else 'No'}",
         f"- Protect / Question / Prefer summaries available: {'Yes' if context.get('protect_summary') and context.get('question_summary') and context.get('prefer_summary') else 'No'}",
-        "- Guidance scope: normal report framing and diagnostics only; v0.6.6.2 applies a light optional-cut nudge while keeping replacement scoring inactive.",
-        f"- v0.6.6.2 philosophy optional-cut bias active: {'Yes' if context.get('philosophy_bias_foundation_active') else 'No'}",
+        "- Guidance scope: normal report framing and diagnostics only; v0.6.6.1 exposes bias profiles but does not apply scoring changes yet.",
+        f"- v0.6.6.1 philosophy bias foundation active: {'Yes' if context.get('philosophy_bias_foundation_active') else 'No'}",
         f"- Bias profile available: {'Yes' if context.get('cut_bias_protect_roles') or context.get('cut_bias_review_roles') or context.get('replacement_bias_roles') else 'No'}",
         f"- Bias strength: {context.get('bias_strength', 'guidance')}",
-        f"- Bias currently applied to cut scoring: {'Yes' if context.get('cut_bias_scoring_active') else 'No'}",
-        f"- Bias currently applied to replacement scoring: {'Yes' if context.get('replacement_bias_scoring_active') else 'No'}",
+        f"- Bias currently applied to scoring: {'Yes' if context.get('bias_scoring_active') else 'No'}",
     ]
 
     if context.get("short_lens_summary"):
@@ -1109,12 +1094,10 @@ def render_philosophy_diagnostics_section(context: dict) -> str:
             "",
             "## v0.6.6.1 Philosophy Bias Foundation",
             "- v0.6.6.1 bias foundation active: Yes",
-            "- v0.6.6.2 optional-cut bias active: Yes",
             f"- Bias profile version: {context.get('philosophy_bias_foundation_version', 'v0.6.6.1')}",
             f"- Bias strength: {context.get('bias_strength', 'guidance')}",
-            f"- Bias currently applied to cut scoring: {'Yes' if context.get('cut_bias_scoring_active') else 'No'}",
-        f"- Bias currently applied to replacement scoring: {'Yes' if context.get('replacement_bias_scoring_active') else 'No'}",
-            "- Scope: cut-side bias is now a small optional nudge. Replacement bias remains profile data only.",
+            f"- Bias currently applied to scoring: {'Yes' if context.get('bias_scoring_active') else 'No'}",
+            "- Scope: bias data is available for future cut/replacement phases; this patch only exposes profile data and diagnostics.",
             f"- Protect-biased roles available: {'Yes' if context.get('cut_bias_protect_roles') else 'No'}",
             f"- Review-biased roles available: {'Yes' if context.get('cut_bias_review_roles') else 'No'}",
             f"- Replacement-biased roles available: {'Yes' if context.get('replacement_bias_roles') else 'No'}",
@@ -1186,8 +1169,6 @@ def get_cut_modifier_hints(key: Optional[str]) -> dict:
         "philosophy_bias_foundation_active": bias["philosophy_bias_foundation_active"],
         "bias_scoring_active": bias["bias_scoring_active"],
         "bias_strength": bias["bias_strength"],
-        "cut_bias_scoring_active": bias.get("cut_bias_scoring_active", False),
-        "replacement_bias_scoring_active": bias.get("replacement_bias_scoring_active", False),
         "cut_bias_protect_roles": list(bias["cut_bias_protect_roles"]),
         "cut_bias_review_roles": list(bias["cut_bias_review_roles"]),
     }

@@ -55,7 +55,7 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.6.2 — philosophy-aware optional cut bias"
+VERSION_LABEL = "v0.6.4.6 — batch aggregate report export"
 
 
 def build_analysis_context(
@@ -72,16 +72,16 @@ def build_analysis_context(
     strategy_summary = build_strategy_summary(role_summary.role_counts, role_summary.type_counts, command_zone.commander_cards_scryfall)
     plan_fit_summary = build_plan_fit_summary(role_summary.card_roles, strategy_summary, command_zone.commander_names)
     bracket_summary = build_bracket_analysis(role_summary)
-    philosophy_context = build_philosophy_context(
-        key=resolved_config.philosophy_key,
-        guide_preference=resolved_config.guide_preference,
-    )
     protected_cards = build_protected_cards(role_summary.card_roles, plan_fit_summary, command_zone)
-    replaceability = build_replaceability_review(role_summary.card_roles, plan_fit_summary, protected_cards, philosophy_context)
+    replaceability = build_replaceability_review(role_summary.card_roles, plan_fit_summary, protected_cards)
     cut_pressure = build_cut_pressure_summary(parsed_deck.deck_card_count, resolved_config, replaceability)
     possible_cuts = build_possible_cut_review(cut_pressure, replaceability)
     replacement_needs = build_replacement_need_summary(role_summary.role_counts, strategy_summary, parsed_deck.deck_card_count)
     deck_completion = build_deck_completion_summary(parsed_deck, resolved_config, strategy_summary, replacement_needs)
+    philosophy_context = build_philosophy_context(
+        key=resolved_config.philosophy_key,
+        guide_preference=resolved_config.guide_preference,
+    )
     collection_candidates = build_collection_candidate_summary(
         collection_summary=collection_summary,
         replacement_needs=replacement_needs,

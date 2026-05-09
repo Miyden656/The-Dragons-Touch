@@ -81,7 +81,7 @@ class PhilosophyProfile:
     cut_bias_review_roles: List[str] = field(default_factory=list)
     replacement_bias_roles: List[str] = field(default_factory=list)
     bias_strength: str = "guidance"
-    bias_warning: str = "v0.6.6.2.1 applies light optional-cut bias only, with improved trigger/copy-amplifier visibility. It must not override legality, required cuts, pilot-protected cards, color identity, companion restrictions, collection mode, or explicit pilot intent."
+    bias_warning: str = "v0.6.6.2 applies light optional-cut bias only. It must not override legality, required cuts, pilot-protected cards, color identity, companion restrictions, collection mode, or explicit pilot intent."
     tone: str = "balanced, clear, and supportive"
     example_language: str = ""
 
@@ -586,18 +586,6 @@ def _build_bias_profile(profile: PhilosophyProfile) -> dict:
             "replacement": ["role_balance", "strategy_support", "mana_consistency", "clear_deck_identity"],
             "strength": "neutral",
         },
-        "big_moment": {
-            "protect": ["declared_big_moment_card", "big_moment_enabler", "splashy_finisher", "x_spell", "doublers", "payoff_ramp", "payoff_protection"],
-            "review": ["unsupported_haymaker", "expensive_no_payoff", "win_more", "clunky_unrelated_card"],
-            "replacement": ["better_ramp", "payoff_support", "protection", "haste_evasion_trample", "copy_or_doubling_effect", "draw_to_find_payoff"],
-            "strength": "light",
-        },
-        "big_creature_stompy": {
-            "protect": ["large_central_creature", "ramp_into_threats", "haste_evasion_trample", "creature_protection", "power_toughness_payoff"],
-            "review": ["large_creature_no_impact", "redundant_top_end", "ramp_light_expensive_hand", "small_value_dilution"],
-            "replacement": ["ramp", "creature_based_draw", "trample_evasion_haste", "protection", "impactful_top_end", "size_to_value_payoff"],
-            "strength": "light",
-        },
         "theme_vibe": {
             "protect": ["declared_theme", "typal_piece", "flavor_with_function", "identity_preserving_card"],
             "review": ["flavor_only_low_function", "identity_clashing_staple", "low_impact_theme_card"],
@@ -674,7 +662,7 @@ def _build_bias_profile(profile: PhilosophyProfile) -> dict:
 
     return {
         "philosophy_bias_foundation_active": True,
-        "philosophy_bias_foundation_version": "v0.6.6.2.1",
+        "philosophy_bias_foundation_version": "v0.6.6.2",
         "bias_scoring_active": True,
         "cut_bias_scoring_active": True,
         "replacement_bias_scoring_active": False,

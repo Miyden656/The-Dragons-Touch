@@ -12,18 +12,6 @@ Design rules:
 - The persona name is the user-facing guide.
 - This module should not perform strategy detection.
 - Reports, cut logic, replacement logic, and prompt generation can consume this module.
-
-v0.6.5.3 adds report-facing subtype summaries. These summaries are still
-non-scoring guidance: they help humans and reviewing AIs understand what the
-selected lens means without changing legality, strategy detection, cuts, or
-collection matching.
-
-v0.6.5.4 adds prompt-facing showcase polish so generated guided prompts explain
-philosophy lenses consistently across subtypes.
-
-v0.6.6.1 adds the foundation for philosophy-aware cut/replacement bias.
-v0.6.6.2 turns on a light optional-cut scoring nudge while leaving replacement
-scoring, strategy detection, legality, and collection matching unchanged.
 """
 
 from __future__ import annotations
@@ -75,13 +63,6 @@ class PhilosophyProfile:
     review_bias: List[str] = field(default_factory=list)
     replacement_bias: List[str] = field(default_factory=list)
     cut_pressure_notes: List[str] = field(default_factory=list)
-    # v0.6.6.1 bias foundation fields. These are exposed for diagnostics and
-    # future cut/replacement logic. In v0.6.6.2 the cut-side profile is applied as a small optional-cut nudge; replacement scoring remains inactive.
-    cut_bias_protect_roles: List[str] = field(default_factory=list)
-    cut_bias_review_roles: List[str] = field(default_factory=list)
-    replacement_bias_roles: List[str] = field(default_factory=list)
-    bias_strength: str = "guidance"
-    bias_warning: str = "v0.6.6.2.1 applies light optional-cut bias only, with improved trigger/copy-amplifier visibility. It must not override legality, required cuts, pilot-protected cards, color identity, companion restrictions, collection mode, or explicit pilot intent."
     tone: str = "balanced, clear, and supportive"
     example_language: str = ""
 
@@ -549,142 +530,6 @@ def resolve_persona_name(key: Optional[str], preference: GuidePreference = "eith
     return get_philosophy_profile(key).persona.resolve_name(preference)
 
 
-
-
-def _dedupe_preserve_order(values: list[str]) -> list[str]:
-    """Return unique, non-empty strings while preserving first-seen order."""
-    seen: set[str] = set()
-    output: list[str] = []
-    for value in values:
-        cleaned = str(value).strip()
-        if not cleaned or cleaned in seen:
-            continue
-        seen.add(cleaned)
-        output.append(cleaned)
-    return output
-
-
-def _build_bias_profile(profile: PhilosophyProfile) -> dict:
-    """Build v0.6.6.1 philosophy bias foundation data.
-
-    This exposes the *shape* of future cut/replacement bias without applying it.
-    Later phases can consume these fields in cut_pressure.py and
-    collection_candidates.py. In v0.6.6.1 the fields are diagnostics/report
-    context only.
-    """
-    # Explicit profile fields win if a future profile supplies them. Otherwise,
-    # map existing human-facing philosophy guidance into role-like buckets that
-    # later logic can consume.
-    protect_roles = list(profile.cut_bias_protect_roles)
-    review_roles = list(profile.cut_bias_review_roles)
-    replacement_roles = list(profile.replacement_bias_roles)
-
-    key_specific: dict[str, dict[str, list[str] | str]] = {
-        "balanced_unknown": {
-            "protect": ["primary_plan_support", "commander_synergy", "essential_infrastructure", "declared_user_intent"],
-            "review": ["off_plan", "unsupported_package", "role_imbalance", "user_intent_conflict"],
-            "replacement": ["role_balance", "strategy_support", "mana_consistency", "clear_deck_identity"],
-            "strength": "neutral",
-        },
-        "big_moment": {
-            "protect": ["declared_big_moment_card", "big_moment_enabler", "splashy_finisher", "x_spell", "doublers", "payoff_ramp", "payoff_protection"],
-            "review": ["unsupported_haymaker", "expensive_no_payoff", "win_more", "clunky_unrelated_card"],
-            "replacement": ["better_ramp", "payoff_support", "protection", "haste_evasion_trample", "copy_or_doubling_effect", "draw_to_find_payoff"],
-            "strength": "light",
-        },
-        "big_creature_stompy": {
-            "protect": ["large_central_creature", "ramp_into_threats", "haste_evasion_trample", "creature_protection", "power_toughness_payoff"],
-            "review": ["large_creature_no_impact", "redundant_top_end", "ramp_light_expensive_hand", "small_value_dilution"],
-            "replacement": ["ramp", "creature_based_draw", "trample_evasion_haste", "protection", "impactful_top_end", "size_to_value_payoff"],
-            "strength": "light",
-        },
-        "theme_vibe": {
-            "protect": ["declared_theme", "typal_piece", "flavor_with_function", "identity_preserving_card"],
-            "review": ["flavor_only_low_function", "identity_clashing_staple", "low_impact_theme_card"],
-            "replacement": ["on_theme_role_filler", "flavorful_removal", "flavorful_draw", "vibe_preserving_upgrade"],
-            "strength": "light",
-        },
-        "pet_card": {
-            "protect": ["declared_pet_card", "personal_attachment_card", "build_around_memory_card"],
-            "review": ["surrounding_shell_weakness", "support_piece_not_helping_pet_card"],
-            "replacement": ["pet_card_support", "shell_consistency", "protection_for_pet_card"],
-            "strength": "light",
-        },
-        "commander_exploiter": {
-            "protect": ["commander_text_synergy", "commander_scaling", "commander_protection", "ability_enabler", "resource_converter", "commander_specific_payoff"],
-            "review": ["generic_goodstuff", "commander_ignoring_card", "unused_ability_support", "color_fit_plan_miss"],
-            "replacement": ["commander_synergy", "commander_protection", "ability_multiplier", "redundancy_for_commander_effect", "backup_engine"],
-            "strength": "light",
-        },
-        "engine_builder": {
-            "protect": ["engine_piece", "connector_card", "enabler", "payoff_bridge", "weak_alone_strong_in_context"],
-            "review": ["unsupported_engine_piece", "disconnected_package", "cute_but_unconnected_card"],
-            "replacement": ["engine_redundancy", "connector_piece", "enabler_density", "payoff_support"],
-            "strength": "light",
-        },
-        "combo_builder": {
-            "protect": ["combo_piece", "combo_tutor", "combo_protection", "combo_enabler", "combo_payoff"],
-            "review": ["partial_combo_without_support", "unwanted_combo_pressure", "dead_combo_piece"],
-            "replacement": ["combo_consistency", "combo_protection", "cleaner_enabler", "backup_plan"],
-            "strength": "light",
-        },
-        "curve_mana_discipline": {
-            "protect": ["efficient_ramp", "cheap_interaction", "curve_smoothing", "mana_fixing", "low_curve_enabler"],
-            "review": ["overcosted_effect", "curve_clog", "clunky_top_end", "mana_intensive_card"],
-            "replacement": ["lower_curve", "efficient_role_filler", "better_mana", "cheap_card_selection"],
-            "strength": "medium",
-        },
-        "power_level_calibrator": {
-            "protect": ["table_fit_card", "bracket_appropriate_interaction", "power_limit_respecting_card"],
-            "review": ["bracket_pressure", "table_mismatch", "unwanted_fast_mana", "unwanted_tutor", "unwanted_combo"],
-            "replacement": ["table_fit_upgrade", "bracket_appropriate_answer", "power_matched_role_filler"],
-            "strength": "medium",
-        },
-        "interaction_controller": {
-            "protect": ["flexible_interaction", "synergy_interaction", "board_control_piece", "commander_protection"],
-            "review": ["narrow_answer", "dead_interaction", "threat_mismatch", "uninteractive_payoff"],
-            "replacement": ["better_interaction", "role_compression", "table_specific_answer", "protective_interaction"],
-            "strength": "medium",
-        },
-        "spike": {
-            "protect": ["efficient_ramp", "efficient_draw", "flexible_interaction", "reliable_mana", "clean_finisher"],
-            "review": ["overcosted_effect", "low_impact_card", "win_more", "narrow_card", "clunky_top_end"],
-            "replacement": ["efficiency_upgrade", "consistency_upgrade", "role_compression", "better_interaction"],
-            "strength": "medium",
-        },
-    }
-
-    data = key_specific.get(profile.key)
-    if data:
-        protect_roles.extend(data.get("protect", []))
-        review_roles.extend(data.get("review", []))
-        replacement_roles.extend(data.get("replacement", []))
-        strength = str(data.get("strength", profile.bias_strength or "guidance"))
-    else:
-        # Safe default for profiles that do not yet have explicit bias maps.
-        protect_roles.extend(profile.protect_bias)
-        review_roles.extend(profile.review_bias)
-        replacement_roles.extend(profile.replacement_bias)
-        if profile.parent == "spike":
-            strength = "medium"
-        elif profile.parent in {"timmy_tammy", "johnny_jenny"}:
-            strength = "light"
-        else:
-            strength = profile.bias_strength or "guidance"
-
-    return {
-        "philosophy_bias_foundation_active": True,
-        "philosophy_bias_foundation_version": "v0.6.6.2.1",
-        "bias_scoring_active": True,
-        "cut_bias_scoring_active": True,
-        "replacement_bias_scoring_active": False,
-        "bias_strength": strength,
-        "bias_warning": profile.bias_warning,
-        "cut_bias_protect_roles": _dedupe_preserve_order(protect_roles),
-        "cut_bias_review_roles": _dedupe_preserve_order(review_roles),
-        "replacement_bias_roles": _dedupe_preserve_order(replacement_roles),
-    }
-
 def build_philosophy_context(
     key: Optional[str] = None,
     guide_preference: GuidePreference = "either",
@@ -698,9 +543,6 @@ def build_philosophy_context(
         parent_label = PHILOSOPHY_PROFILES[profile.parent].label
     elif profile.key == "balanced_unknown":
         parent_label = "Balanced / Unknown"
-
-    summary_fields = _summaries_for_profile(profile)
-    bias_fields = _build_bias_profile(profile)
 
     return {
         "key": profile.key,
@@ -719,8 +561,6 @@ def build_philosophy_context(
         "tone": profile.tone,
         "example_language": profile.example_language,
         "named_guide_enabled": guide_preference != "none",
-        **summary_fields,
-        **bias_fields,
     }
 
 
@@ -730,128 +570,6 @@ def _guide_display_name(context: dict) -> str:
         return str(context["guide_name"])
     return str(context.get("label", "Balanced / Unknown"))
 
-
-
-def _comma_list(values: list[str], limit: int = 6) -> str:
-    """Render a short comma-separated list for report guidance."""
-    cleaned = [str(value).strip() for value in values if str(value).strip()]
-    return ", ".join(cleaned[:limit]) if cleaned else "None listed"
-
-
-def _sentence_list(values: list[str], limit: int = 5) -> str:
-    """Render short guidance values as a readable comma list."""
-    return _comma_list(values, limit=limit)
-
-
-def _build_short_lens_summary(profile: PhilosophyProfile) -> str:
-    """Return one concise at-a-glance sentence for the selected lens."""
-    if profile.key == "balanced_unknown":
-        return "Use this lens to discover the deck's natural identity before making strong philosophy assumptions."
-
-    parent = PHILOSOPHY_PROFILES.get(profile.parent).label if profile.parent and profile.parent in PHILOSOPHY_PROFILES else profile.label
-    if parent == "Timmy / Tammy":
-        return f"Use this lens to preserve the deck's intended experience while checking that the support structure actually lets that experience happen."
-    if parent == "Johnny / Jenny":
-        return f"Use this lens to protect the deck's idea, engine, constraint, or clever interaction while challenging pieces that do not actually connect."
-    if parent == "Spike":
-        return f"Use this lens to improve performance at the intended table without assuming cEDH or overriding the pilot's power goal."
-    return profile.rules_summary
-
-
-def _build_report_guidance_summary(profile: PhilosophyProfile) -> str:
-    """Return a report-facing explanation of how to read cards through this lens."""
-    if profile.key == "theme_vibe":
-        return "Judge cards by whether they make the deck feel more like its intended story, creature type, joke, table experience, or aesthetic. Theme cards get extra respect when they also perform a useful role; flavor-only cards can still be challenged if they weaken function."
-    if profile.key == "pet_card":
-        return "Declared pet cards should be protected from normal optimization pressure, while the surrounding shell should be improved so those cards can matter in games."
-    if profile.key == "combo_builder":
-        return "Evaluate whether each card finds, protects, enables, or cleanly supports the intended combo or interaction chain without adding unwanted combo pressure."
-    if profile.key == "commander_exploiter":
-        return "Prioritize cards that specifically exploit the commander's rules text over generic good cards that do not strengthen the commander's unique plan."
-    if profile.key == "curve_mana_discipline":
-        return "Evaluate whether the mana curve, land count, ramp, and color requirements let the deck actually execute its plan on time."
-    if profile.key == "power_level_calibrator":
-        return "Evaluate whether the deck is matched to the target table experience; stronger is not automatically better if it violates the intended bracket."
-    if profile.key == "balanced_unknown":
-        return "Use the report to identify the deck's likely plan, tensions, and possible philosophy lean without applying subtype-specific assumptions yet."
-    return profile.rules_summary
-
-
-def _summaries_for_profile(profile: PhilosophyProfile) -> dict:
-    """Build v0.6.5.3 summary fields from the existing philosophy profile."""
-    protect = _sentence_list(profile.protect_bias, 6)
-    question = _sentence_list(profile.review_bias, 6)
-    prefer = _sentence_list(profile.replacement_bias, 6)
-    return {
-        "short_lens_summary": _build_short_lens_summary(profile),
-        "report_guidance_summary": _build_report_guidance_summary(profile),
-        "protect_summary": protect,
-        "question_summary": question,
-        "prefer_summary": prefer,
-        "pilot_override_note": "Pilot-stated intent overrides this lens whenever the two conflict.",
-        "subtype_summary_active": True,
-        "subtype_summary_version": "v0.6.5.3",
-    }
-
-
-def render_philosophy_report_guidance(context: dict) -> str:
-    """Render v0.6.5.3 report-facing philosophy guidance.
-
-    This is intentionally guidance text only. It does not change scoring,
-    legality, strategy detection, collection matching, or required cuts.
-    """
-    label = context.get("label", "Balanced / Unknown")
-    key = context.get("key", "balanced_unknown")
-    guide = _guide_display_name(context)
-    parent = context.get("parent_label") or label
-    protect = context.get("protect_summary") or _comma_list(context.get("protect_bias", []), 6)
-    review = context.get("question_summary") or _comma_list(context.get("review_bias", []), 6)
-    replacement = context.get("prefer_summary") or _comma_list(context.get("replacement_bias", []), 6)
-
-    lines = [
-        "**v0.6.5.3 Philosophy Subtype Report Summary:** This block explains how to read this report through the selected lens. It is still guidance only and does not change legality, deck size, color identity, strategy detection, required cuts, collection matching, cut scores, or replacement scores.",
-        "",
-        "**At-a-glance lens summary:**",
-        f"- {context.get('short_lens_summary') or context.get('rules_summary', 'Use the selected lens as review framing only.')}",
-        "",
-        "**How to read cards through this lens:**",
-        f"- {context.get('report_guidance_summary') or context.get('rules_summary', 'Use this lens to shape explanation style and review priorities.')}",
-        "",
-        "**Protect / Question / Prefer:**",
-        f"- Protect: {protect}.",
-        f"- Question: {review}.",
-        f"- Prefer replacements that support: {replacement}.",
-        "",
-        "**Review boundaries:**",
-        "- Treat all philosophy language as review framing, not as a hard mechanical override.",
-        "- If the pilot's stated intent conflicts with this lens, the pilot's stated intent wins.",
-        "- Required legality fixes still outrank philosophy preference.",
-    ]
-
-    if key == "balanced_unknown":
-        lines.extend([
-            "- Balanced / Unknown should avoid strong assumptions, identify possible philosophy lean, and recommend choosing a deeper lens only when it would materially improve the review.",
-        ])
-    elif parent in {"Timmy / Tammy", "Johnny / Jenny", "Spike"}:
-        lines.append(f"- Because this is under {parent}, preserve the deck's chosen style while still checking whether the support structure actually works.")
-
-    if context.get("example_language"):
-        lines.extend(["", "**Example review language:**", f"> {context.get('example_language')}"])
-
-    if context.get("named_guide_enabled", True):
-        lines.extend([
-            "",
-            "**Guide presentation note:**",
-            f"- {guide} should be used as a concise mentor frame, not as heavy roleplay or a separate character speaking in first person.",
-        ])
-    else:
-        lines.extend([
-            "",
-            "**Guide presentation note:**",
-            "- Named guide presentation is disabled; use philosophy labels only.",
-        ])
-
-    return "\n".join(lines)
 
 def render_guide_introduction_instruction(context: dict) -> str:
     """Render prompt instructions for the AI that will use the generated user-guided prompt.
@@ -875,59 +593,12 @@ def render_guide_introduction_instruction(context: dict) -> str:
         opening,
         f"Use this guide question to frame the review: {question}",
         "Keep the introduction to 2-4 sentences, then immediately ask Section 1.",
-        "The guide/persona is a mentor framing device only; it must not override legality, deck size, strategy detection, budget, combo tolerance, bracket goals, collection mode, or user answers.",
+        "The guide/persona is a mentor framing device only; it must not override legality, deck size, strategy detection, budget, combo tolerance, bracket goals, or user answers.",
     ])
 
 
-def render_philosophy_prompt_showcase_block(context: dict) -> str:
-    """Render v0.6.5.4 prompt-facing philosophy QA / showcase guidance.
-
-    This block is meant for the AI that receives the generated user-guided prompt.
-    It keeps guide/persona behavior consistent across lenses and remains
-    guidance-only: no scoring, legality, strategy, or collection logic changes.
-    """
-    if not context:
-        return ""
-
-    guide = _guide_display_name(context)
-    lens = context.get("label", "Balanced / Unknown")
-    role = context.get("guide_role", "Guide")
-    question = context.get("core_question", "What does this deck want to do?")
-    short_summary = context.get("short_lens_summary") or context.get("rules_summary", "Use this lens as review framing only.")
-    report_guidance = context.get("report_guidance_summary") or context.get("rules_summary", "Use this lens to shape review language and priorities.")
-    protect = context.get("protect_summary") or _comma_list(context.get("protect_bias", []), 6)
-    review = context.get("question_summary") or _comma_list(context.get("review_bias", []), 6)
-    prefer = context.get("prefer_summary") or _comma_list(context.get("replacement_bias", []), 6)
-    pilot_override = context.get("pilot_override_note") or "Pilot-stated intent beats the philosophy lens when they conflict."
-
-    lines = [
-        "## v0.6.5.4 Philosophy Prompt QA / Showcase Polish",
-        "",
-        f"- Lens: {lens}",
-        f"- Guide frame: {guide} — {role}",
-        f"- Guiding question: {question}",
-        f"- One-sentence lens summary: {short_summary}",
-        "",
-        "Use this lens in the guided review as follows:",
-        f"1. Read cards through this lens: {report_guidance}",
-        f"2. Protect or lower cut pressure for: {protect}.",
-        f"3. Question or review more carefully: {review}.",
-        f"4. Prefer recommendations that support: {prefer}.",
-        f"5. Pilot override rule: {pilot_override}",
-        "6. Introduce the guide/lens once after the deck report, then continue as a practical deck-review assistant.",
-        "7. Do not use the guide as a roleplay character, speaking persona, or substitute for strategy evidence.",
-        "8. If the pilot gives a partial section answer, ask only for the missing or unclear items from that section before moving on.",
-    ]
-
-    return "\n".join(lines)
-
-
 def render_philosophy_guide_section(context: dict) -> str:
-    """Render the Philosophy Guide report section.
-
-    v0.6.5.1 expands this from a simple label block into a report guidance
-    checkpoint while keeping philosophy as non-scoring guidance.
-    """
+    """Render the Philosophy Guide report section."""
     selected_lens = context.get("label", "Balanced / Unknown")
     parent_label = context.get("parent_label")
     guide_name = context.get("guide_name")
@@ -949,20 +620,8 @@ def render_philosophy_guide_section(context: dict) -> str:
     lines.append("")
     lines.append(context.get("rules_summary", "Use a balanced exploratory lens."))
     lines.append("")
-    lines.append("**Boundary:** This philosophy is a review lens. It does not replace strategy detection, legality, deck-size rules, color identity, budget, combo tolerance, bracket goals, collection limits, or user-stated intent.")
+    lines.append("**Boundary:** This philosophy is a review lens. It does not replace strategy detection, legality, deck-size rules, color identity, budget, combo tolerance, bracket goals, or user-stated intent.")
     lines.append("")
-
-    if context.get("short_lens_summary"):
-        lines.append("**Lens Summary:** " + context.get("short_lens_summary", ""))
-        lines.append("")
-
-    if context.get("report_guidance_summary"):
-        lines.append("**How to Use This Lens:** " + context.get("report_guidance_summary", ""))
-        lines.append("")
-
-    if context.get("core_philosophy"):
-        lines.append("**Core Philosophy:** " + context.get("core_philosophy", ""))
-        lines.append("")
 
     if context.get("protect_bias"):
         lines.append("**What this lens tends to protect:** " + ", ".join(context["protect_bias"][:6]))
@@ -982,10 +641,8 @@ def render_philosophy_guide_section(context: dict) -> str:
             lines.append(f"- {note}")
         lines.append("")
 
-    lines.append(render_philosophy_report_guidance(context).rstrip())
-    lines.append("")
-
     return "\n".join(lines)
+
 
 def render_philosophy_prompt_questions(context: dict) -> str:
     """Render philosophy guidance for the user-guided prompt.
@@ -1010,7 +667,7 @@ def render_philosophy_prompt_questions(context: dict) -> str:
         "Philosophy boundary:",
         "Use this philosophy as a review lens only. Strategy detection, legality, deck size, color identity, budget, combo tolerance, bracket goals, and user answers take priority.",
         "",
-        "Optional later philosophy clarification questions if needed; do not ask these before Section 1:",
+        "Optional philosophy clarification questions if needed:",
     ]
 
     question_map = {
@@ -1075,23 +732,8 @@ def render_philosophy_diagnostics_section(context: dict) -> str:
         f"- Guide role: {context.get('guide_role', 'Guide')}",
         f"- Primary question: {context.get('core_question', 'What does this deck want to do?')}",
         f"- Tone: {context.get('tone', 'balanced, clear, and supportive')}",
-        "- Boundary: Philosophy/persona is guidance only; it does not alter legality, deck size, color identity, strategy detection, required cuts, or collection matching in v0.6.5.x.",
-        "- v0.6.5.1 report guidance active: Yes",
-        "- v0.6.5.3 subtype report summary active: Yes",
-        f"- Report guidance summary available: {'Yes' if context.get('report_guidance_summary') else 'No'}",
-        f"- Protect / Question / Prefer summaries available: {'Yes' if context.get('protect_summary') and context.get('question_summary') and context.get('prefer_summary') else 'No'}",
-        "- Guidance scope: normal report framing and diagnostics only; v0.6.6.2 applies a light optional-cut nudge while keeping replacement scoring inactive.",
-        f"- v0.6.6.2 philosophy optional-cut bias active: {'Yes' if context.get('philosophy_bias_foundation_active') else 'No'}",
-        f"- Bias profile available: {'Yes' if context.get('cut_bias_protect_roles') or context.get('cut_bias_review_roles') or context.get('replacement_bias_roles') else 'No'}",
-        f"- Bias strength: {context.get('bias_strength', 'guidance')}",
-        f"- Bias currently applied to cut scoring: {'Yes' if context.get('cut_bias_scoring_active') else 'No'}",
-        f"- Bias currently applied to replacement scoring: {'Yes' if context.get('replacement_bias_scoring_active') else 'No'}",
+        "- Boundary: Philosophy/persona is guidance only; it does not alter legality, deck size, color identity, strategy detection, or required cuts in this MVP.",
     ]
-
-    if context.get("short_lens_summary"):
-        lines.append("- Short lens summary: " + str(context.get("short_lens_summary")))
-    if context.get("report_guidance_summary"):
-        lines.append("- Report guidance summary: " + str(context.get("report_guidance_summary")))
 
     if context.get("protect_bias"):
         lines.append("- Protect bias: " + ", ".join(context["protect_bias"][:8]))
@@ -1103,30 +745,6 @@ def render_philosophy_diagnostics_section(context: dict) -> str:
         lines.append("- Cut-pressure notes:")
         for note in context["cut_pressure_notes"][:5]:
             lines.append(f"  - {note}")
-
-    if context.get("philosophy_bias_foundation_active"):
-        lines.extend([
-            "",
-            "## v0.6.6.1 Philosophy Bias Foundation",
-            "- v0.6.6.1 bias foundation active: Yes",
-            "- v0.6.6.2 optional-cut bias active: Yes",
-            f"- Bias profile version: {context.get('philosophy_bias_foundation_version', 'v0.6.6.1')}",
-            f"- Bias strength: {context.get('bias_strength', 'guidance')}",
-            f"- Bias currently applied to cut scoring: {'Yes' if context.get('cut_bias_scoring_active') else 'No'}",
-        f"- Bias currently applied to replacement scoring: {'Yes' if context.get('replacement_bias_scoring_active') else 'No'}",
-            "- Scope: cut-side bias is now a small optional nudge. Replacement bias remains profile data only.",
-            f"- Protect-biased roles available: {'Yes' if context.get('cut_bias_protect_roles') else 'No'}",
-            f"- Review-biased roles available: {'Yes' if context.get('cut_bias_review_roles') else 'No'}",
-            f"- Replacement-biased roles available: {'Yes' if context.get('replacement_bias_roles') else 'No'}",
-        ])
-        if context.get("cut_bias_protect_roles"):
-            lines.append("- Protect-biased roles: " + ", ".join(context["cut_bias_protect_roles"][:10]))
-        if context.get("cut_bias_review_roles"):
-            lines.append("- Review-biased roles: " + ", ".join(context["cut_bias_review_roles"][:10]))
-        if context.get("replacement_bias_roles"):
-            lines.append("- Replacement-biased roles: " + ", ".join(context["replacement_bias_roles"][:10]))
-        if context.get("bias_warning"):
-            lines.append("- Bias warning: " + str(context.get("bias_warning")))
 
     return "\n".join(lines)
 
@@ -1177,31 +795,17 @@ def get_cut_modifier_hints(key: Optional[str]) -> dict:
     MVP implementation should label cards first before changing numeric scoring.
     """
     profile = get_philosophy_profile(key)
-    bias = _build_bias_profile(profile)
     return {
         "philosophy_key": profile.key,
         "protect_bias": list(profile.protect_bias),
         "review_bias": list(profile.review_bias),
         "cut_pressure_notes": list(profile.cut_pressure_notes),
-        "philosophy_bias_foundation_active": bias["philosophy_bias_foundation_active"],
-        "bias_scoring_active": bias["bias_scoring_active"],
-        "bias_strength": bias["bias_strength"],
-        "cut_bias_scoring_active": bias.get("cut_bias_scoring_active", False),
-        "replacement_bias_scoring_active": bias.get("replacement_bias_scoring_active", False),
-        "cut_bias_protect_roles": list(bias["cut_bias_protect_roles"]),
-        "cut_bias_review_roles": list(bias["cut_bias_review_roles"]),
     }
 
 
 def get_replacement_bias(key: Optional[str]) -> List[str]:
     """Return preferred replacement categories for the selected philosophy."""
     return list(get_philosophy_profile(key).replacement_bias)
-
-
-def get_replacement_bias_roles(key: Optional[str]) -> List[str]:
-    """Return v0.6.6.1 replacement-bias role buckets for future candidate logic."""
-    profile = get_philosophy_profile(key)
-    return list(_build_bias_profile(profile)["replacement_bias_roles"])
 
 
 if __name__ == "__main__":

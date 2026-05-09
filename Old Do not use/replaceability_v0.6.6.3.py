@@ -26,10 +26,6 @@ v0.6.6.2.2:
 v0.6.6.3:
 - Improve protected/watch-card language when philosophy bias changes a verdict.
 - Use clearer Initial flag / Philosophy adjustment / Final verdict / Why this matters / Review instruction wording.
-
-v0.6.6.3.1:
-- Ensure Why this matters and Review instruction fields are surfaced in normal report output.
-- Strip old raw v0.6.6.2.2 final-verdict wording from philosophy adjustment text.
 """
 
 from __future__ import annotations
@@ -190,40 +186,22 @@ def _format_protected_watch_reasons(
     role_entry: CardRoleEntry,
     philosophy_context: dict | None,
 ) -> list[str]:
-    """Build clearer protected/watch-card language for v0.6.6.3.1."""
+    """Build clearer protected/watch-card language for v0.6.6.3."""
     initial_flag = _initial_flag_from_reasons(reasons, tags)
     protected_label = _protected_label(tags, plan_entry)
-
-    # v0.6.6.3.1: keep score-adjustment text separate from verdict text.
-    # Older v0.6.6.2.2 wording sometimes included "final philosophy verdict"
-    # inside the philosophy adjustment line; do not surface that raw versioned
-    # text in the final report.
-    philosophy_reasons = [
-        reason for reason in reasons
-        if "philosophy" in reason.lower() and "final philosophy verdict" not in reason.lower()
-    ]
-    verdict_reasons = [reason for reason in reasons if "final philosophy verdict" in reason.lower()]
-    excluded_reasons = set(philosophy_reasons + verdict_reasons)
-    other_reasons = [
-        reason for reason in reasons
-        if not str(reason).startswith("Initial flag:") and reason not in excluded_reasons
-    ]
+    philosophy_reasons = [reason for reason in reasons if "philosophy" in reason.lower()]
+    other_reasons = [reason for reason in reasons if not reason.startswith("Initial flag:") and reason not in philosophy_reasons]
 
     if philosophy_reasons:
         adjustment_text = "; ".join(_clean_philosophy_reason(reason) for reason in philosophy_reasons[:2])
     else:
         adjustment_text = "No philosophy score change was needed; normal protection/context rules kept this from being treated as a cut."
 
-    if verdict_reasons:
-        final_verdict = "Not currently a cut. Treat as a playtest-only watch card unless playtesting or explicit pilot intent says otherwise."
-    else:
-        final_verdict = "Not currently a cut. Keep unless playtesting or explicit pilot intent says otherwise."
-
     return [
         f"Protected Label: {protected_label}",
         f"Initial flag: {initial_flag}",
         f"Philosophy adjustment: {adjustment_text}",
-        f"Final verdict: {final_verdict}",
+        "Final verdict: Not currently a cut. Keep unless playtesting or explicit pilot intent says otherwise.",
         f"Why this matters: {_watch_card_why_this_matters(tags, protected_label, philosophy_context)}",
         f"Review instruction: {_watch_card_review_instruction(tags, protected_label, initial_flag, philosophy_context)}",
     ] + [f"Supporting note: {reason}" for reason in other_reasons[:2] if reason]
@@ -626,7 +604,7 @@ def build_replaceability_review(
             # Do not turn every philosophy-supported card into Protected From Cut.
             # This only downgrades marginal optional cuts into playtest/watch status.
             protected = True
-            reasons.append("Final philosophy verdict: treat as a playtest-only watch card, not a normal cut, unless pilot intent says otherwise.")
+            reasons.append("v0.6.6.2.2 final philosophy verdict: treat as a playtest-only watch card, not a normal cut, unless pilot intent says otherwise.")
 
         cut_type = _cut_type_from_reasons(reasons, tags, plan_entry, protected)
 

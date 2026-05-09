@@ -5,22 +5,6 @@ Patch Batch 1 goal:
 - Force the reviewing AI to ask for the generated deck report first.
 - Use numbered answer choices where possible.
 - Preserve separate cut-down and build-up intake flows.
-
-v0.6.5.2 goal:
-- Improve philosophy/persona prompt framing.
-- Add concise guide introductions without heavy roleplay.
-- Keep philosophy guidance separate from legality, strategy, cut, and collection logic.
-
-v0.6.5.2.1 hotfix:
-- Render answer choices as bullets so receiving AIs do not flatten nested numbered lists.
-
-v0.6.5.2.2 polish:
-- Render answer choices as plain `number = choice` lines, without bullets.
-
-v0.6.5.4 polish:
-- Make philosophy/persona prompt behavior more showcase-ready across lenses.
-- Add explicit partial-answer clarification rules.
-- Keep prompt QA guidance separate from mechanical scoring.
 """
 
 from __future__ import annotations
@@ -29,10 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from app_io.output_writer import get_unique_output_path, write_text_file
-from analysis.deck_building_philosophies import (
-    render_philosophy_prompt_questions,
-    render_philosophy_prompt_showcase_block,
-)
+from analysis.deck_building_philosophies import render_philosophy_prompt_questions
 
 
 BRACKET_OPTIONS = """1. Exhibition / Bracket 1 — very casual, theme-first, intentionally low pressure.
@@ -68,122 +49,98 @@ PACKAGE_DEFINITION_NOTE = """Use the deck report as evidence, but let the pilot 
 # Small formatting helpers
 # -----------------------------
 
-# v0.6.5.2.2: Keep fast numbered answers while avoiding nested Markdown numbering.
-def _option_block(options: str) -> str:
-    """Render numbered choices as plain `number = choice` lines without bullets.
-
-    This keeps the fast numbered-answer workflow while avoiding nested Markdown
-    numbering and avoiding visible bullet dots in the generated prompt.
-    """
-    lines: list[str] = []
-    for raw in (options or "").splitlines():
-        line = raw.strip()
-        if not line:
-            continue
-        if ". " in line:
-            number, text = line.split(". ", 1)
-            if number.isdigit():
-                lines.append(f"{number} = {text}")
-                continue
-        lines.append(line)
-    return "\n".join(lines)
-
-# Convert shared option blocks once; question numbers remain normal, answer choices become plain option lines.
-BRACKET_OPTIONS = _option_block(BRACKET_OPTIONS)
-TABLE_EXPERIENCE_OPTIONS = _option_block(TABLE_EXPERIENCE_OPTIONS)
-COMMANDER_NEEDS_OPTIONS = _option_block(COMMANDER_NEEDS_OPTIONS)
-
 def _yes_no_direction_options() -> str:
-    return _option_block("""1. Yes, the script's review direction is correct.
-2. No — I want the other review direction instead. Please state build-up/completion or cut-down/tuning.""")
+    return """1. Yes, the script's review direction is correct.
+2. No — I want the other review direction instead. Please state build-up/completion or cut-down/tuning."""
 
 
 def _main_goal_cut_options() -> str:
-    return _option_block("""1. Legal cuts — identify cuts needed to make the deck legal.
+    return """1. Legal cuts — identify cuts needed to make the deck legal.
 2. Optimization — improve a legal deck without treating changes as mandatory.
 3. Strategy correction — fix the script's read if the deck plan is wrong.
 4. Additions / replacements — identify what kinds of cards would help.
-5. Playtest notes — focus on what to watch in future games.""")
+5. Playtest notes — focus on what to watch in future games."""
 
 
 def _help_depth_options() -> str:
-    return _option_block("""1. Light touch — only obvious issues.
+    return """1. Light touch — only obvious issues.
 2. Normal tuning — practical review with a few useful candidates.
 3. Strict optimization — challenge more slots and tighten the deck.
 4. Brutal / deep review — broad diagnostic with many review points.
-5. Rebuild-level review — treat the list as a rough pool and reshape around the stated plan.""")
+5. Rebuild-level review — treat the list as a rough pool and reshape around the stated plan."""
 
 
 def _build_goal_options() -> str:
-    return _option_block("""1. This is correct.
+    return """1. This is correct.
 2. No, Build from Scratch — Commander(s) only; create a complete plan and card recommendation path.
 3. No, Point me in the right direction — the deck needs 30+ cards and mainly needs structure.
 4. No, Help me get there — the deck needs 11 to 30 cards and needs role completion.
-5. No, Finalize — the deck needs 10 or fewer cards and needs finishing touches.""")
+5. No, Finalize — the deck needs 10 or fewer cards and needs finishing touches."""
 
 
 def _commander_role_options() -> str:
-    return _option_block("""1. Engine — the commander repeatedly generates the deck's main advantage.
+    return """1. Engine — the commander repeatedly generates the deck's main advantage.
 2. Payoff — the commander rewards the deck for doing its thing.
 3. Support piece — the commander helps the plan but is not the whole plan.
 4. Finisher — the commander is how the deck closes games.
-5. Color identity only — the commander mainly provides colors or theme.""")
+5. Color identity only — the commander mainly provides colors or theme."""
 
 
 def _cut_candidate_visibility_options() -> str:
-    return _option_block("""1. Only stronger candidates.
-2. Include low-confidence / manual-review candidates too.""")
+    return """1. Only stronger candidates.
+2. Include low-confidence / manual-review candidates too."""
 
 
 def _bracket_pressure_cut_options() -> str:
-    return _option_block("""1. Yes, review bracket-pressure cards as possible cuts if they exceed my table goal.
-2. No, treat bracket-pressure cards as table-fit notes only unless they are also off-plan.""")
+    return """1. Yes, review bracket-pressure cards as possible cuts if they exceed my table goal.
+2. No, treat bracket-pressure cards as table-fit notes only unless they are also off-plan."""
 
 
 def _preferred_output_options() -> str:
-    return _option_block("""1. Recommended Cuts — strongest cut recommendations only.
+    return """1. Recommended Cuts — strongest cut recommendations only.
 2. Possible Cuts — broader review list with caveats.
 3. Playtest Guide — what to watch before cutting.
 4. Protected Cards — focus on what should not be cut.
-5. Full diagnostic — show strategy, cuts, protected cards, replacements, and playtest notes.""")
+5. Full diagnostic — show strategy, cuts, protected cards, replacements, and playtest notes."""
 
 
 def _replacement_preference_options(include_replacements: bool = True) -> str:
     if not include_replacements:
-        return _option_block("""1. Categories only — describe what roles the deck needs.
+        return """1. Categories only — describe what roles the deck needs.
 2. Exact cards when obvious — only recommend exact cards when the fit is very clear.
 3. Exact cards welcome — recommend specific card names freely.
-4. Suggestions for later — finish the plan first, then suggest cards later.""")
-    return _option_block("""1. No replacements.
+4. Suggestions for later — finish the plan first, then suggest cards later."""
+    return """1. No replacements.
 2. Categories only.
 3. Exact cards when obvious — specific card names only when the role fit is clear.
 4. Exact cards welcome.
-5. Suggestions for later.""")
+5. Suggestions for later."""
 
 
 def _replacement_source_options() -> str:
-    return _option_block("""1. My collection / card pool.
-2. Full Magic card pool.""")
+    return """1. My collection / card pool.
+2. Full Magic card pool."""
 
 
 def _priority_options() -> str:
-    return "Choose 1 to 2 priorities:\n" + _option_block("""1. Synergy — strongest fit with the commander and primary plan.
+    return """Choose 1 to 2 priorities:
+1. Synergy — strongest fit with the commander and primary plan.
 2. Consistency — make the deck do its thing more often.
 3. Bracket limits / power fit — keep the deck inside the intended table range.
 4. Budget — respect price limits.
 5. Flavor — preserve theme, story, or vibe.
-6. Table friendliness — avoid cards that create the wrong table experience.""")
+6. Table friendliness — avoid cards that create the wrong table experience."""
 
 
 def _final_output_style_options() -> str:
-    return _option_block("""1. Short list — concise recommendations only.
+    return """1. Short list — concise recommendations only.
 2. Full report — complete reasoning and sections.
 3. Strategy review — focus on plan, packages, and identity.
 4. Cut-only — only cuts and why.
 5. Replacement-focused — focus on what to add or swap.
 6. Playtest notes — focus on what to test in games.
 7. Prompt for another AI — produce a clean follow-up prompt.
-8. Batch QA / bug review — focus on whether the script output looks wrong.""")
+8. Batch QA / bug review — focus on whether the script output looks wrong."""
 
 
 def _safe_list(items: list[str], fallback: str = "None reported") -> str:
@@ -198,98 +155,20 @@ def _philosophy_intro_instruction(context: dict[str, Any]) -> str:
     guide_role = philosophy.get("guide_role") or "Guide"
     label = philosophy.get("label") or "Balanced / Unknown"
     core_question = philosophy.get("core_question") or "What does this deck want to do?"
-    tone = philosophy.get("tone") or "clear, practical, and supportive"
-    lens_summary = philosophy.get("short_lens_summary") or philosophy.get("rules_summary") or "Use this lens as review framing only."
 
     if guide_name:
         return (
-            f"After receiving the deck report, confirm receipt and briefly introduce the selected philosophy guide as "
-            f"{guide_name}, {guide_role}. Use exactly 2 to 4 sentences. State that the review will use the "
-            f"{label} lens, whose guiding question is: '{core_question}'. In plain language, frame the lens as: {lens_summary} "
-            f"Keep the tone {tone}. Do not write in first person as the persona, do not roleplay a scene, and do not let the persona override the pilot, legality, deck size, color identity, collection mode, or the report evidence."
+            f"After receiving the deck report, briefly introduce the selected philosophy guide: "
+            f"{guide_name}, {guide_role}. Explain in 2 to 4 sentences that the review will use the "
+            f"{label} lens, whose guiding question is: '{core_question}' Do not roleplay heavily; "
+            f"use the guide as concise mentor framing."
         )
     return (
-        f"After receiving the deck report, confirm receipt and briefly introduce the selected philosophy lens: {label}. "
-        f"Use exactly 2 to 4 sentences. Explain that this lens guides tone and priorities, but does not override pilot intent, legality, deck size, color identity, collection mode, or strategy evidence. Lens summary: {lens_summary}"
+        f"After receiving the deck report, briefly introduce the selected philosophy lens: {label}. "
+        f"Explain in 2 to 4 sentences that this lens will guide tone and priorities, but not legality or strategy detection."
     )
 
 
-def _philosophy_prompt_behavior_block(context: dict[str, Any]) -> list[str]:
-    philosophy = context.get("philosophy_context") or {}
-    if not philosophy:
-        return []
-
-    guide_name = philosophy.get("guide_name")
-    guide_role = philosophy.get("guide_role") or "Guide"
-    label = philosophy.get("label") or "Balanced / Unknown"
-    core_question = philosophy.get("core_question") or "What does this deck want to do?"
-    core_philosophy = philosophy.get("core_philosophy") or "Use the selected lens to frame the review."
-    rules_summary = philosophy.get("rules_summary") or "Use the selected lens as guidance only."
-    tone = philosophy.get("tone") or "clear, practical, and supportive"
-    example_language = philosophy.get("example_language")
-
-    short_lens_summary = philosophy.get("short_lens_summary")
-    report_guidance_summary = philosophy.get("report_guidance_summary")
-    protect_summary = philosophy.get("protect_summary")
-    question_summary = philosophy.get("question_summary")
-    prefer_summary = philosophy.get("prefer_summary")
-    pilot_override_note = philosophy.get("pilot_override_note")
-
-    lines = [
-        "## v0.6.5.4 Philosophy / Persona Prompt Behavior",
-        "",
-        f"- Selected lens: {label}",
-        f"- Guide/persona: {guide_name or 'No named guide'}{f' — {guide_role}' if guide_name else ''}",
-        f"- Guiding question: {core_question}",
-        f"- Core philosophy: {core_philosophy}",
-        f"- Review summary: {rules_summary}",
-        f"- Tone target: {tone}",
-    ]
-
-    if short_lens_summary:
-        lines.append(f"- Showcase lens summary: {short_lens_summary}")
-    if report_guidance_summary:
-        lines.append(f"- How to use this lens: {report_guidance_summary}")
-    if protect_summary:
-        lines.append(f"- Protect emphasis: {protect_summary}")
-    if question_summary:
-        lines.append(f"- Question/review emphasis: {question_summary}")
-    if prefer_summary:
-        lines.append(f"- Replacement framing: {prefer_summary}")
-    if pilot_override_note:
-        lines.append(f"- Pilot override note: {pilot_override_note}")
-
-    lines.extend([
-        "",
-        "How the reviewing AI should use this lens:",
-        "1. Use the philosophy to shape explanation style, protection language, review priorities, and recommendation framing.",
-        "2. Do not use the philosophy to override legality, deck-size rules, color identity, commander legality, companion restrictions, collection mode, budget, or required cuts.",
-        "3. Do not use the philosophy to invent a new primary strategy if the pilot has not confirmed it.",
-        "4. Do not roleplay as the guide in first person. The guide is a mentor frame, not a character scene.",
-        "5. Keep guide/persona references short: introduce the lens once, then use normal deck-review language.",
-        "6. If pilot answers conflict with the selected philosophy, pilot intent wins and the final summary should mention the shift.",
-        "7. If the selected lens is Balanced / Unknown, stay exploratory and avoid making subtype-specific assumptions.",
-        "8. Keep the final review grounded in the deck report and the pilot's section answers; do not turn the philosophy lens into a separate roleplay voice.",
-    ])
-
-    protect = philosophy.get("protect_bias") or []
-    review = philosophy.get("review_bias") or []
-    replace = philosophy.get("replacement_bias") or []
-    cut_notes = philosophy.get("cut_pressure_notes") or []
-
-    if protect:
-        lines.append("- Philosophy tends to protect: " + ", ".join(protect[:8]))
-    if review:
-        lines.append("- Philosophy tends to question: " + ", ".join(review[:8]))
-    if replace:
-        lines.append("- Philosophy replacement framing prefers: " + ", ".join(replace[:8]))
-    if cut_notes:
-        lines.append("- Philosophy cut-pressure reminders:")
-        lines.extend(f"  - {note}" for note in cut_notes[:5])
-    if example_language:
-        lines.extend(["", "Example tone to emulate:", f"> {example_language}"])
-
-    return lines
 
 
 def _collection_prompt_context_block(context: dict[str, Any]) -> list[str]:
@@ -396,23 +275,20 @@ def _global_prompt_rules(context: dict[str, Any]) -> list[str]:
         "1. First, ask the user to paste or upload the generated deck report. Do not begin Section 1 until the report is provided.",
         "2. After the deck report is provided, confirm receipt and give a brief initial summary of what the report appears to say.",
         f"3. {_philosophy_intro_instruction(context)}",
-        "4. After the philosophy/guide introduction, immediately ask Section 1 only. Do not ask multiple sections at once in interactive mode.",
+        "4. Then immediately ask Section 1 only. Do not ask multiple sections at once in interactive mode.",
         "5. The user may answer using just numbers, short phrases, or N/A. Accept numbered answers without forcing long explanations.",
-        "6. If the user answers only part of a section, ask only for the missing or unclear items from that same section before summarizing and moving on.",
-        "7. After each completed section, summarize the user's answers in 3 to 6 bullets, then immediately ask the next section.",
-        "8. Preserve deck-report terms and separators when summarizing, such as Token Combat / Go-Wide-Go-Tall, ETB Control / Flicker Control, and collection-only.",
-        "9. Use the selected philosophy as a review lens only: tone, priorities, protection language, and framing. Do not let it override mechanical facts.",
-        "10. Do not make final cut, addition, or replacement recommendations until all required sections are complete.",
-        "11. Do not assume the script's strategy read is correct if the pilot corrects it.",
-        "12. Separate required legality cuts from optional optimization cuts.",
-        "13. Do not recommend cutting cards the pilot refuses to cut.",
-        "14. Treat bracket pressure as table-fit information, not an automatic cut.",
-        "15. Do not recommend cards already in the deck unless the card is a legal duplicate exception.",
-        "16. Before final recommendations, provide a full intent summary titled '<Commander Name> Review Intent Summary' and ask the user to confirm or correct it.",
-        "17. Only after confirmation should you produce the final recommendations in the user's selected output style.",
-        "18. If Collection Pull Candidates are present, treat them as review candidates. Strong means review first, Possible means pilot review required, and Shakeup means experiment only.",
-        "19. If collection-only mode is active, do not present outside-card suggestions as owned or available from the selected collection.",
-        "20. If the collection does not contain a strong fit for a role, say so directly and do not force a weak owned-card recommendation.",
+        "6. After each section, summarize the user's answers in 3 to 6 bullets, then immediately ask the next section.",
+        "7. Do not make final cut, addition, or replacement recommendations until all required sections are complete.",
+        "8. Do not assume the script's strategy read is correct if the pilot corrects it.",
+        "9. Separate required legality cuts from optional optimization cuts.",
+        "10. Do not recommend cutting cards the pilot refuses to cut.",
+        "11. Treat bracket pressure as table-fit information, not an automatic cut.",
+        "12. Do not recommend cards already in the deck unless the card is a legal duplicate exception.",
+        "13. Before final recommendations, provide a full intent summary titled '<Commander Name> Review Intent Summary' and ask the user to confirm or correct it.",
+        "14. Only after confirmation should you produce the final recommendations in the user's selected output style.",
+        "15. If Collection Pull Candidates are present, treat them as review candidates. Strong means review first, Possible means pilot review required, and Shakeup means experiment only.",
+        "16. If collection-only mode is active, do not present outside-card suggestions as owned or available from the selected collection.",
+        "17. If the collection does not contain a strong fit for a role, say so directly and do not force a weak owned-card recommendation.",
     ]
 
 
@@ -430,8 +306,6 @@ def _cut_down_sections(context: dict[str, Any], worksheet: bool = False) -> str:
 ## Cut-Down / Tuning Guided Flow
 
 {prefix}
-
-Formatting rule for the reviewing AI: Keep each question separate. Render answer choices as plain option lines like `1 = choice`, with no bullet dots and no nested numbered lists. Do not flatten questions and answer choices into one continuous numbered list. If the user partially answers a section, ask only for the missing or unclear items from that section.
 
 ### Section 1 — Main Review Goal
 1. Is the script's review direction correct? Script says: **cut_down / tuning**.
@@ -479,29 +353,29 @@ A simple **No**, **N/A**, or **None** can cover this whole section if nothing ap
 2. Are Game Changers, fast mana, efficient tutors, or free interaction acceptable? Answer Yes, No, Some, or explain.
 
 3. Are infinite combos or near-combos welcome?
-1 = Welcome.
-2 = Acceptable but not preferred.
-3 = Only if they require 3+ cards.
-4 = Unwanted.
-5 = Other — please describe.
+1. Welcome.
+2. Acceptable but not preferred.
+3. Only if they require 3+ cards.
+4. Unwanted.
+5. Other — please describe.
 
 4. Should replacements avoid adding or completing combos unless you explicitly want that?
-1 = Yes.
-2 = No.
-3 = Case-by-case.
+1. Yes.
+2. No.
+3. Case-by-case.
 
 5. What kind of table experience do you want this deck to create?
 {TABLE_EXPERIENCE_OPTIONS}
 
 ### Section 6 — Cut Philosophy
 1. Is the cut review from the deck report correct? The report says: **{cut_pressure.status}; required cuts: {cut_pressure.required_cuts}; optional target: {getattr(cut_pressure, 'optional_cut_target', 'see report')}**.
-Optional: enter a specific number of cuts you want reviewed. N/A or no answer means the report's range is fine.
+- Optional: enter a specific number of cuts you want reviewed. N/A or no answer means the report's range is fine.
 
 2. Are we making required cuts, optional upgrades, or both?
-1 = Required legal cuts only.
-2 = Optional upgrades only.
-3 = Both required cuts and optional upgrades.
-4 = Not sure — use the deck report's deck-size status.
+1. Required legal cuts only.
+2. Optional upgrades only.
+3. Both required cuts and optional upgrades.
+4. Not sure — use the deck report's deck-size status.
 
 3. Should the review show only stronger candidates or include low-confidence/manual-review candidates?
 {_cut_candidate_visibility_options()}
@@ -563,24 +437,24 @@ def _build_up_sections(context: dict[str, Any], worksheet: bool = False) -> str:
 Skip this section because the selected build-up mode is **Build from Scratch — Commander(s) only**. Do not ask optimization-cut questions for a commander-only build. Immediately continue to Section 7."""
         replacement_note = "This is Build from Scratch, so do not discuss replacements or swaps. Focus only on building a complete legal 100-card Commander deck."
         replacement_pref_block = """1. Build recommendation preference:
-1 = Categories only.
-2 = Exact cards when obvious.
-3 = Exact cards welcome.
-4 = Suggestions for later."""
+1. Categories only.
+2. Exact cards when obvious.
+3. Exact cards welcome.
+4. Suggestions for later."""
     else:
         section_6 = f"""### Section 6 — Cut Philosophy For Optimization
 This section exists because build-up mode may still need optional optimization swaps if the list already contains cards or if a suggested addition replaces a weaker role card. If the user wants additions only, they can say so.
 
 1. Do you want optional upgrade recommendations with every cut suggestion made?
-1 = Yes.
-2 = No, additions only.
-3 = Only if the cut is very obvious.
+1. Yes.
+2. No, additions only.
+3. Only if the cut is very obvious.
 
 2. How many optimization cut recommendations do you want?
-1 = 3–5
-2 = 6–9
-3 = 10–14
-4 = None unless required for legality.
+1. 3–5
+2. 6–9
+3. 10–14
+4. None unless required for legality.
 
 3. Should the review show only stronger candidates or include low-confidence/manual-review candidates?
 {_cut_candidate_visibility_options()}
@@ -598,8 +472,6 @@ This section exists because build-up mode may still need optional optimization s
 ## Build-Up / Completion Guided Flow
 
 {prefix}
-
-Formatting rule for the reviewing AI: Keep each question separate. Render answer choices as plain option lines like `1 = choice`, with no bullet dots and no nested numbered lists. Do not flatten questions and answer choices into one continuous numbered list. If the user partially answers a section, ask only for the missing or unclear items from that section.
 
 ### Section 1 — Main Review Goal
 1. Is the script's review direction correct? Script says: **build_up / completion**.
@@ -642,16 +514,16 @@ A simple **No**, **N/A**, or **None** can cover this whole section if nothing ap
 2. Are Game Changers, fast mana, efficient tutors, or free interaction acceptable? Answer Yes, No, Some, or explain.
 
 3. Are infinite combos or near-combos welcome?
-1 = Welcome.
-2 = Acceptable but not preferred.
-3 = Only if they require 3+ cards.
-4 = Unwanted.
-5 = Other — please describe.
+1. Welcome.
+2. Acceptable but not preferred.
+3. Only if they require 3+ cards.
+4. Unwanted.
+5. Other — please describe.
 
 4. Should replacements avoid adding or completing combos unless you explicitly want that?
-1 = Yes.
-2 = No.
-3 = Case-by-case.
+1. Yes.
+2. No.
+3. Case-by-case.
 
 5. What kind of table experience do you want this deck to create?
 {TABLE_EXPERIENCE_OPTIONS}
@@ -723,14 +595,7 @@ def build_user_guided_prompt(context: dict[str, Any]) -> str:
 
     philosophy_context = context.get("philosophy_context")
     if philosophy_context:
-        philosophy_text = render_philosophy_prompt_questions(philosophy_context).rstrip()
-        if philosophy_text.startswith("### Philosophy Guide Context"):
-            philosophy_text = philosophy_text.replace("### Philosophy Guide Context", "## Philosophy Guide Context", 1)
-        lines.extend(["", philosophy_text])
-        showcase_block = render_philosophy_prompt_showcase_block(philosophy_context).rstrip()
-        if showcase_block:
-            lines.extend(["", showcase_block])
-        lines.extend(["", *_philosophy_prompt_behavior_block(context)])
+        lines.extend(["", "## Philosophy Guide Context", "", render_philosophy_prompt_questions(philosophy_context).rstrip()])
 
     if is_build_up:
         lines.extend(["", _build_up_sections(context, worksheet=worksheet)])

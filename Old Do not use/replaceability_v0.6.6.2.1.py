@@ -18,18 +18,6 @@ v0.6.6.2.1:
 - Improve philosophy-bias visibility and trigger/copy-amplifier support.
 - Track when bias was evaluated, applied, or missed for diagnostics.
 - Preserve philosophy-adjustment reasons when cards move to protected/watch status.
-
-v0.6.6.2.2:
-- Count unique adjusted cards separately from total bias hits.
-- Suppress review-pressure wording on protected mana-base infrastructure.
-
-v0.6.6.3:
-- Improve protected/watch-card language when philosophy bias changes a verdict.
-- Use clearer Initial flag / Philosophy adjustment / Final verdict / Why this matters / Review instruction wording.
-
-v0.6.6.3.1:
-- Ensure Why this matters and Review instruction fields are surfaced in normal report output.
-- Strip old raw v0.6.6.2.2 final-verdict wording from philosophy adjustment text.
 """
 
 from __future__ import annotations
@@ -123,111 +111,6 @@ def _initial_flag_from_reasons(reasons: list[str], tags: set[str]) -> str:
     return "Possible Low-Impact Review"
 
 
-
-def _clean_philosophy_reason(reason: str) -> str:
-    """Convert raw v0.6.6.x adjustment text into report-facing language."""
-    text = str(reason).strip()
-    lowered = text.lower()
-    for prefix in (
-        "v0.6.6.2.2 philosophy adjustment:",
-        "v0.6.6.2.1 philosophy adjustment:",
-        "v0.6.6.2 philosophy adjustment:",
-        "v0.6.6.2.2 philosophy note:",
-        "v0.6.6.2.1 philosophy note:",
-        "v0.6.6.2 philosophy note:",
-    ):
-        if lowered.startswith(prefix):
-            return text[len(prefix):].strip()
-    return text
-
-
-def _watch_card_why_this_matters(tags: set[str], protected_label: str, philosophy_context: dict | None) -> str:
-    """Explain why a protected/watch verdict matters in deck-building terms."""
-    lens = "the selected philosophy"
-    if philosophy_context:
-        lens = str(philosophy_context.get("label") or lens)
-
-    if tags & {"trigger_amplifier", "etb_amplifier", "copy_amplifier", "commander_payoff_amplifier"}:
-        return f"This card may look replaceable in a generic deck review, but under {lens} it can amplify the commander's payoff pattern or the deck's core engine."
-    if tags & {"big_moment_enabler", "cheat_into_play"}:
-        return f"This card may be part of the deck's payoff setup rather than a generic value slot, so it deserves playtest review before cutting."
-    if tags & {"commander_protection", "protection", "board_protection"}:
-        return f"This card helps preserve the commander or the payoff turn, which can matter more than raw rate in this shell."
-    if tags & {"typal_density_piece", "tribal_payoff", "typal_payoff", "dragon_typal", "creature_type_present"}:
-        return f"This card contributes to the deck's creature-type or identity structure, so the cut decision should account for density as well as raw power."
-    if tags & INFRASTRUCTURE_TAGS:
-        return "This card fills a support role. Review it by role pressure and redundancy, not by whether it is flashy."
-    if tags & SYNERGY_TAGS:
-        return f"This card has context-dependent synergy. It should be judged by whether the surrounding shell actually uses it."
-    if "Protected" in protected_label:
-        return "This card is currently treated as part of the deck's support structure, not as a normal cut candidate."
-    return "This card needs playtest context before becoming a confident cut."
-
-
-def _watch_card_review_instruction(tags: set[str], protected_label: str, initial_flag: str, philosophy_context: dict | None) -> str:
-    """Give the pilot a concrete review instruction for protected/watch cards."""
-    lens = "the selected philosophy"
-    if philosophy_context:
-        lens = str(philosophy_context.get("label") or lens)
-
-    if tags & {"trigger_amplifier", "etb_amplifier", "copy_amplifier", "commander_payoff_amplifier"}:
-        return "Do not cut this as generic artifact/enchantment filler; only revisit it if it fails to create meaningful commander or payoff amplification in actual games."
-    if tags & {"big_moment_enabler", "cheat_into_play"}:
-        return "Playtest whether this reliably enables the deck's payoff turn; cut only if it is too slow, stranded, or redundant with better enablers."
-    if tags & {"typal_density_piece", "tribal_payoff", "typal_payoff", "dragon_typal", "creature_type_present"}:
-        return "Before cutting, check whether removing it weakens typal density, commander triggers, or the deck's intended identity."
-    if tags & INFRASTRUCTURE_TAGS:
-        return "Review this only against the same role slot; replace it with a better support piece rather than cutting support density blindly."
-    if tags & SYNERGY_TAGS:
-        return "Keep it on a watch list; cut only if the pilot confirms the synergy package is not important or it repeatedly underperforms."
-    return f"Treat this as a watch card under {lens}; ask the pilot whether it actually supports the intended game experience before cutting."
-
-
-def _format_protected_watch_reasons(
-    reasons: list[str],
-    tags: set[str],
-    plan_entry: CardPlanFitEntry | None,
-    role_entry: CardRoleEntry,
-    philosophy_context: dict | None,
-) -> list[str]:
-    """Build clearer protected/watch-card language for v0.6.6.3.1."""
-    initial_flag = _initial_flag_from_reasons(reasons, tags)
-    protected_label = _protected_label(tags, plan_entry)
-
-    # v0.6.6.3.1: keep score-adjustment text separate from verdict text.
-    # Older v0.6.6.2.2 wording sometimes included "final philosophy verdict"
-    # inside the philosophy adjustment line; do not surface that raw versioned
-    # text in the final report.
-    philosophy_reasons = [
-        reason for reason in reasons
-        if "philosophy" in reason.lower() and "final philosophy verdict" not in reason.lower()
-    ]
-    verdict_reasons = [reason for reason in reasons if "final philosophy verdict" in reason.lower()]
-    excluded_reasons = set(philosophy_reasons + verdict_reasons)
-    other_reasons = [
-        reason for reason in reasons
-        if not str(reason).startswith("Initial flag:") and reason not in excluded_reasons
-    ]
-
-    if philosophy_reasons:
-        adjustment_text = "; ".join(_clean_philosophy_reason(reason) for reason in philosophy_reasons[:2])
-    else:
-        adjustment_text = "No philosophy score change was needed; normal protection/context rules kept this from being treated as a cut."
-
-    if verdict_reasons:
-        final_verdict = "Not currently a cut. Treat as a playtest-only watch card unless playtesting or explicit pilot intent says otherwise."
-    else:
-        final_verdict = "Not currently a cut. Keep unless playtesting or explicit pilot intent says otherwise."
-
-    return [
-        f"Protected Label: {protected_label}",
-        f"Initial flag: {initial_flag}",
-        f"Philosophy adjustment: {adjustment_text}",
-        f"Final verdict: {final_verdict}",
-        f"Why this matters: {_watch_card_why_this_matters(tags, protected_label, philosophy_context)}",
-        f"Review instruction: {_watch_card_review_instruction(tags, protected_label, initial_flag, philosophy_context)}",
-    ] + [f"Supporting note: {reason}" for reason in other_reasons[:2] if reason]
-
 def _cut_type_from_reasons(reasons: list[str], tags: set[str], plan_entry: CardPlanFitEntry | None, protected: bool) -> str:
     if protected:
         return _protected_label(tags, plan_entry)
@@ -261,18 +144,6 @@ def _is_land_aura_ramp(tags: set[str]) -> bool:
 
 def _is_context_synergy(tags: set[str]) -> bool:
     return bool(tags & SYNERGY_TAGS)
-
-
-def _is_mana_base_infrastructure(tags: set[str]) -> bool:
-    """Return True for lands that are primarily mana-base infrastructure.
-
-    v0.6.6.2.2: Philosophy review pressure should not add confusing
-    generic-goodstuff notes to protected duals/fetches/fixing lands. Lands can
-    still be reviewed by normal mana-base logic elsewhere, but the philosophy
-    bias layer should not imply that a normal fixing land is a Commander
-    Exploiter problem.
-    """
-    return "land" in tags and "mana_source" in tags
 
 
 def _has_meaningful_plan_support(plan_entry: CardPlanFitEntry | None) -> bool:
@@ -415,13 +286,7 @@ def _role_matches_bias(role_names: list[str], tags: set[str], mapping: dict[str,
 
 
 def _record_philosophy_bias_event(philosophy_context: dict | None, event: str, card_name: str | None = None) -> None:
-    """Record lightweight diagnostics for v0.6.6.2.2 without changing review behavior.
-
-    The original v0.6.6.2.1 counters counted every role-hit event, so a card
-    with both protect-side and review-side matches could make "applied" exceed
-    the number of evaluated cards. v0.6.6.2.2 keeps unique-card counters for
-    readable diagnostics while also preserving total hit counts.
-    """
+    """Record lightweight diagnostics for v0.6.6.2.1 without changing review behavior."""
     if not philosophy_context:
         return
     stats = philosophy_context.setdefault("cut_bias_runtime_stats", {
@@ -430,45 +295,11 @@ def _record_philosophy_bias_event(philosophy_context: dict | None, event: str, c
         "protected_adjustments": 0,
         "review_adjustments": 0,
         "no_match": 0,
-        "total_bias_hits": 0,
-        "suppressed_infrastructure_review": 0,
-        "_evaluated_cards": set(),
-        "_applied_cards": set(),
-        "_protected_adjusted_cards": set(),
-        "_review_adjusted_cards": set(),
-        "_no_match_cards": set(),
-        "_suppressed_infrastructure_review_cards": set(),
         "example_applied_cards": [],
         "example_no_match_cards": [],
-        "example_suppressed_infrastructure_review_cards": [],
-        "watch_language_entries": 0,
-        "example_watch_language_cards": [],
     })
-
-    if event in {"applied", "protected_adjustments", "review_adjustments"}:
-        stats["total_bias_hits"] = int(stats.get("total_bias_hits", 0)) + 1
-
+    stats[event] = int(stats.get(event, 0)) + 1
     if card_name:
-        set_key_by_event = {
-            "evaluated": "_evaluated_cards",
-            "applied": "_applied_cards",
-            "protected_adjustments": "_protected_adjusted_cards",
-            "review_adjustments": "_review_adjusted_cards",
-            "no_match": "_no_match_cards",
-            "suppressed_infrastructure_review": "_suppressed_infrastructure_review_cards",
-            "watch_language_entries": "_watch_language_cards",
-        }
-        set_key = set_key_by_event.get(event)
-        if set_key:
-            card_set = stats.setdefault(set_key, set())
-            if not isinstance(card_set, set):
-                card_set = set(card_set)
-                stats[set_key] = card_set
-            card_set.add(card_name)
-            stats[event] = len(card_set)
-        else:
-            stats[event] = int(stats.get(event, 0)) + 1
-
         if event in {"applied", "protected_adjustments", "review_adjustments"}:
             examples = stats.setdefault("example_applied_cards", [])
             if card_name not in examples and len(examples) < 12:
@@ -477,16 +308,6 @@ def _record_philosophy_bias_event(philosophy_context: dict | None, event: str, c
             examples = stats.setdefault("example_no_match_cards", [])
             if card_name not in examples and len(examples) < 12:
                 examples.append(card_name)
-        elif event == "suppressed_infrastructure_review":
-            examples = stats.setdefault("example_suppressed_infrastructure_review_cards", [])
-            if card_name not in examples and len(examples) < 12:
-                examples.append(card_name)
-        elif event == "watch_language_entries":
-            examples = stats.setdefault("example_watch_language_cards", [])
-            if card_name not in examples and len(examples) < 12:
-                examples.append(card_name)
-    else:
-        stats[event] = int(stats.get(event, 0)) + 1
 
 
 def _philosophy_bias_delta(tags: set[str], plan_entry: CardPlanFitEntry | None, role_entry: CardRoleEntry, philosophy_context: dict | None) -> tuple[int, list[str], bool]:
@@ -507,14 +328,6 @@ def _philosophy_bias_delta(tags: set[str], plan_entry: CardPlanFitEntry | None, 
     protect_matches = _role_matches_bias(protect_roles, tags, PHILOSOPHY_PROTECT_ROLE_TAGS, plan_entry, role_entry)
     review_matches = _role_matches_bias(review_roles, tags, PHILOSOPHY_REVIEW_ROLE_TAGS, plan_entry, role_entry)
 
-    # v0.6.6.2.2: a normal fixing land should not receive a visible
-    # Commander Exploiter "generic goodstuff" review-pressure note. Keep normal
-    # mana-base/protected-infrastructure logic intact; suppress only the
-    # philosophy review-side nudge.
-    if review_matches and _is_mana_base_infrastructure(tags):
-        review_matches = []
-        _record_philosophy_bias_event(philosophy_context, "suppressed_infrastructure_review", role_entry.card_name)
-
     if not protect_matches and not review_matches:
         _record_philosophy_bias_event(philosophy_context, "no_match", role_entry.card_name)
 
@@ -531,19 +344,19 @@ def _philosophy_bias_delta(tags: set[str], plan_entry: CardPlanFitEntry | None, 
         protected_by_bias = True
         _record_philosophy_bias_event(philosophy_context, "applied", role_entry.card_name)
         _record_philosophy_bias_event(philosophy_context, "protected_adjustments", role_entry.card_name)
-        reasons.append(f"v0.6.6.2.2 philosophy adjustment: lowered optional cut pressure for {lens} because this card matches protect-biased role(s): {', '.join(protect_matches[:4])}.")
+        reasons.append(f"v0.6.6.2.1 philosophy adjustment: lowered optional cut pressure for {lens} because this card matches protect-biased role(s): {', '.join(protect_matches[:4])}.")
 
     if review_matches:
         # If a card is already supported by the primary plan, do not pile on a large philosophy penalty.
         if plan_entry and plan_entry.supports_primary:
             _record_philosophy_bias_event(philosophy_context, "applied", role_entry.card_name)
             _record_philosophy_bias_event(philosophy_context, "review_adjustments", role_entry.card_name)
-            reasons.append(f"v0.6.6.2.2 philosophy note: {lens} would normally review role(s) {', '.join(review_matches[:4])}, but primary-plan support keeps this as a light watch point.")
+            reasons.append(f"v0.6.6.2.1 philosophy note: {lens} would normally review role(s) {', '.join(review_matches[:4])}, but primary-plan support keeps this as a light watch point.")
         else:
             delta += review_nudge
             _record_philosophy_bias_event(philosophy_context, "applied", role_entry.card_name)
             _record_philosophy_bias_event(philosophy_context, "review_adjustments", role_entry.card_name)
-            reasons.append(f"v0.6.6.2.2 philosophy adjustment: raised optional review pressure for {lens} because this card matches review-biased role(s): {', '.join(review_matches[:4])}.")
+            reasons.append(f"v0.6.6.2.1 philosophy adjustment: raised optional review pressure for {lens} because this card matches review-biased role(s): {', '.join(review_matches[:4])}.")
 
     return delta, reasons, protected_by_bias
 
@@ -626,21 +439,22 @@ def build_replaceability_review(
             # Do not turn every philosophy-supported card into Protected From Cut.
             # This only downgrades marginal optional cuts into playtest/watch status.
             protected = True
-            reasons.append("Final philosophy verdict: treat as a playtest-only watch card, not a normal cut, unless pilot intent says otherwise.")
+            reasons.append("v0.6.6.2.1 final philosophy verdict: treat as a playtest-only watch card, not a normal cut, unless pilot intent says otherwise.")
 
         cut_type = _cut_type_from_reasons(reasons, tags, plan_entry, protected)
 
         # Protected entries should read like keep guidance even if the report formatter
         # still uses a generic "Cut type" label.
         if protected:
-            _record_philosophy_bias_event(philosophy_context, "watch_language_entries", role_entry.card_name)
-            reasons = _format_protected_watch_reasons(
-                reasons=reasons,
-                tags=tags,
-                plan_entry=plan_entry,
-                role_entry=role_entry,
-                philosophy_context=philosophy_context,
-            )
+            initial_flag = _initial_flag_from_reasons(reasons, tags)
+            protected_label = _protected_label(tags, plan_entry)
+            philosophy_reasons = [reason for reason in reasons if "philosophy" in reason.lower()]
+            other_reasons = [reason for reason in reasons if not reason.startswith("Initial flag:") and reason not in philosophy_reasons]
+            reasons = [
+                f"Protected Label: {protected_label}",
+                f"Initial flag: {initial_flag}",
+                "Final verdict: Not currently a cut. Keep unless playtesting or user intent says otherwise.",
+            ] + philosophy_reasons[:3] + other_reasons[:2]
 
         entries.append(ReplaceabilityEntry(
             card_name=role_entry.card_name,

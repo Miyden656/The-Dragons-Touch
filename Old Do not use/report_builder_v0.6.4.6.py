@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from app_io.output_writer import get_unique_output_path, write_text_file
-from analysis.deck_building_philosophies import render_philosophy_guide_section  # v0.6.5.3 renders subtype summaries
+from analysis.deck_building_philosophies import render_philosophy_guide_section
 from legality.companion_rules import (
     OFFICIAL_COMPANION_CARD_NAMES as COMPANION_CARD_NAMES,
     companion_is_banned_as_companion,
@@ -151,19 +151,6 @@ def _none_or_items(items: list[str], empty: str = "None found.") -> list[str]:
     return [f"- {item}" for item in items]
 
 
-def _is_structured_watch_reason(reason: str) -> bool:
-    prefixes = (
-        "Protected Label:",
-        "Initial flag:",
-        "Philosophy adjustment:",
-        "Final verdict:",
-        "Why this matters:",
-        "Review instruction:",
-        "Supporting note:",
-    )
-    return str(reason).startswith(prefixes)
-
-
 def _format_cut_entries(entries, empty: str = "None found in this checkpoint.", limit: int = 12) -> list[str]:
     lines: list[str] = []
     if not entries:
@@ -173,25 +160,16 @@ def _format_cut_entries(entries, empty: str = "None found in this checkpoint.", 
         # Protected entries may now use keep-oriented labels in cut_type. Keep the
         # field name generic so the report does not imply the pilot must cut it.
         label = getattr(entry, "cut_type", "Review candidate")
-        is_protected_label = "protected" in str(label).lower() or "keep" in str(label).lower() or getattr(entry, "protected", False)
-        if is_protected_label:
+        if "protected" in str(label).lower() or "keep" in str(label).lower():
             lines.append(f"- Review label: {label}")
         else:
             lines.append(f"- Cut type: {label}")
         lines.append(f"- Confidence: {entry.cut_confidence}")
         lines.append(f"- Replaceability score: {entry.score}")
-        reasons = list(getattr(entry, "reasons", []) or [])
-        if reasons:
-            # v0.6.6.3.1: protected/watch entries use structured reason lines.
-            # Show all key fields instead of truncating before Why this matters / Review instruction.
-            if any(_is_structured_watch_reason(reason) for reason in reasons):
-                lines.append("- Reason:")
-                for reason in reasons[:8]:
-                    lines.append(f"  - {reason}")
-            else:
-                lines.append(f"- Reason: {reasons[0]}")
-                for reason in reasons[1:4]:
-                    lines.append(f"  - {reason}")
+        if entry.reasons:
+            lines.append(f"- Reason: {entry.reasons[0]}")
+            for reason in entry.reasons[1:4]:
+                lines.append(f"  - {reason}")
         lines.append("")
     return lines
 
@@ -270,8 +248,6 @@ def _format_review_status(status: tuple[str, Any] | None) -> tuple[str, list[str
     score = getattr(entry, "score", "Unknown")
     reasons = list(getattr(entry, "reasons", []) or [])
     headline = f"{bucket}: {label}; confidence {confidence}; score {score}"
-    if any(_is_structured_watch_reason(reason) for reason in reasons):
-        return headline, reasons[:8]
     return headline, reasons[:4]
 
 
