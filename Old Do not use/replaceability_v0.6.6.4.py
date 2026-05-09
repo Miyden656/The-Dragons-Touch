@@ -125,32 +125,19 @@ def _initial_flag_from_reasons(reasons: list[str], tags: set[str]) -> str:
 
 
 def _clean_philosophy_reason(reason: str) -> str:
-    """Convert raw v0.6.6.x adjustment text into report-facing language.
-
-    v0.6.6.5 preserves the duplicated-label cleanup and QA visibility for philosophy bias such as
-    "Philosophy adjustment: Philosophy adjustment: ..." when protected/watch
-    entries are rebuilt by the report formatter.
-    """
+    """Convert raw v0.6.6.x adjustment text into report-facing language."""
     text = str(reason).strip()
-    prefixes = (
+    lowered = text.lower()
+    for prefix in (
         "v0.6.6.2.2 philosophy adjustment:",
         "v0.6.6.2.1 philosophy adjustment:",
         "v0.6.6.2 philosophy adjustment:",
         "v0.6.6.2.2 philosophy note:",
         "v0.6.6.2.1 philosophy note:",
         "v0.6.6.2 philosophy note:",
-        "philosophy adjustment:",
-        "philosophy note:",
-    )
-    changed = True
-    while changed:
-        changed = False
-        lowered = text.lower()
-        for prefix in prefixes:
-            if lowered.startswith(prefix):
-                text = text[len(prefix):].strip()
-                changed = True
-                break
+    ):
+        if lowered.startswith(prefix):
+            return text[len(prefix):].strip()
     return text
 
 
@@ -348,9 +335,7 @@ PHILOSOPHY_PROTECT_ROLE_TAGS = {
     "doublers": {"copy_amplifier", "trigger_amplifier", "etb_amplifier", "commander_payoff_amplifier", "copy_clone_value"},
     "payoff_ramp": {"ramp", "mana_rock", "mana_dork", "mana_source", "treasure_synergy", "cheat_into_play"},
     "payoff_protection": {"protection", "commander_protection", "board_protection", "counterspell"},
-    "large_central_creature": set(),  # legacy alias; handled with mana-value precision in _role_matches_bias
-    "impactful_large_creature": set(),  # v0.6.6.4.2 precision alias; handled in _role_matches_bias
-    "typal_commander_support": {"typal_density_piece", "creature_type_present", "typal_enabler", "tribal_payoff", "typal_payoff", "dragon_typal"},
+    "large_central_creature": {"creature", "combat_synergy", "high_toughness", "dragon_typal", "typal_density_piece"},
     "ramp_into_threats": {"ramp", "mana_rock", "mana_dork", "mana_source", "cheat_into_play"},
     "power_toughness_payoff": {"go_tall_support", "counter_synergy", "high_toughness", "combat_synergy"},
 }
@@ -394,7 +379,7 @@ PHILOSOPHY_REVIEW_ROLE_TAGS = {
     "unsupported_haymaker": {"manual_review"},
     "expensive_no_payoff": set(),
     "clunky_unrelated_card": set(),
-    "large_creature_no_impact": set(),  # handled with mana-value precision in _role_matches_bias
+    "large_creature_no_impact": {"creature"},
     "redundant_top_end": set(),
     "ramp_light_expensive_hand": set(),
     "small_value_dilution": set(),
@@ -406,39 +391,6 @@ def _role_matches_bias(role_names: list[str], tags: set[str], mapping: dict[str,
     matches: list[str] = []
     for role_name in role_names or []:
         role_key = str(role_name).strip()
-
-        # v0.6.6.5 preserves v0.6.6.4.2 precision cleanup: Big Creature / Stompy should not
-        # treat every small typal creature as a large central creature. These
-        # aliases require actual top-end size or substantial big-creature payoff
-        # evidence. Small typal pieces can still be protected through
-        # typal_commander_support or normal plan-support rules.
-        if role_key in {"large_central_creature", "impactful_large_creature"}:
-            try:
-                mv = float(role_entry.mana_value) if role_entry and role_entry.mana_value is not None else 0.0
-            except (TypeError, ValueError):
-                mv = 0.0
-            if (
-                mv >= 5
-                and "creature" in tags
-                and (tags & {"combat_synergy", "go_tall_support", "high_toughness", "win_condition", "big_moment_enabler", "dragon_typal"})
-            ):
-                matches.append(role_key)
-            continue
-
-        if role_key == "large_creature_no_impact":
-            try:
-                mv = float(role_entry.mana_value) if role_entry and role_entry.mana_value is not None else 0.0
-            except (TypeError, ValueError):
-                mv = 0.0
-            if (
-                mv >= 6
-                and "creature" in tags
-                and not (plan_entry and (plan_entry.supports_primary or plan_entry.supports_secondary))
-                and not (tags & {"combat_synergy", "go_tall_support", "high_toughness", "win_condition", "big_moment_enabler", "card_advantage", "card_draw", "protection"})
-            ):
-                matches.append(role_key)
-            continue
-
         mapped_tags = mapping.get(role_key, set())
         if mapped_tags and tags & mapped_tags:
             matches.append(role_key)
@@ -579,19 +531,19 @@ def _philosophy_bias_delta(tags: set[str], plan_entry: CardPlanFitEntry | None, 
         protected_by_bias = True
         _record_philosophy_bias_event(philosophy_context, "applied", role_entry.card_name)
         _record_philosophy_bias_event(philosophy_context, "protected_adjustments", role_entry.card_name)
-        reasons.append(f"Philosophy adjustment: lowered optional cut pressure for {lens} because this card matches protect-biased role(s): {', '.join(protect_matches[:4])}.")
+        reasons.append(f"v0.6.6.2.2 philosophy adjustment: lowered optional cut pressure for {lens} because this card matches protect-biased role(s): {', '.join(protect_matches[:4])}.")
 
     if review_matches:
         # If a card is already supported by the primary plan, do not pile on a large philosophy penalty.
         if plan_entry and plan_entry.supports_primary:
             _record_philosophy_bias_event(philosophy_context, "applied", role_entry.card_name)
             _record_philosophy_bias_event(philosophy_context, "review_adjustments", role_entry.card_name)
-            reasons.append(f"Philosophy note: {lens} would normally review role(s) {', '.join(review_matches[:4])}, but primary-plan support keeps this as a light watch point.")
+            reasons.append(f"v0.6.6.2.2 philosophy note: {lens} would normally review role(s) {', '.join(review_matches[:4])}, but primary-plan support keeps this as a light watch point.")
         else:
             delta += review_nudge
             _record_philosophy_bias_event(philosophy_context, "applied", role_entry.card_name)
             _record_philosophy_bias_event(philosophy_context, "review_adjustments", role_entry.card_name)
-            reasons.append(f"Philosophy adjustment: raised optional review pressure for {lens} because this card matches review-biased role(s): {', '.join(review_matches[:4])}.")
+            reasons.append(f"v0.6.6.2.2 philosophy adjustment: raised optional review pressure for {lens} because this card matches review-biased role(s): {', '.join(review_matches[:4])}.")
 
     return delta, reasons, protected_by_bias
 

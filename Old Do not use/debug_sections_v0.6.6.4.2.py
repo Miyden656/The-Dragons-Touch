@@ -50,98 +50,6 @@ def _bullet_list(values: list[str], empty: str = "None") -> list[str]:
     return [f"- {value}" for value in values]
 
 
-def _format_qa_ratio(numerator: int | float, denominator: int | float) -> str:
-    """Format a small QA ratio without adding runtime dependencies."""
-    try:
-        n = float(numerator or 0)
-        d = float(denominator or 0)
-    except (TypeError, ValueError):
-        return "not available"
-    if d <= 0:
-        return "not applicable"
-    return f"{n / d:.2%}"
-
-
-def _qa_counter_sanity(philosophy_context: dict[str, Any]) -> str:
-    stats = philosophy_context.get("cut_bias_runtime_stats") or {}
-    evaluated = int(stats.get("evaluated", 0) or 0)
-    adjusted = int(stats.get("applied", 0) or 0)
-    if evaluated <= 0 and adjusted <= 0:
-        return "Pass — no cut-bias candidates were evaluated in this run."
-    if adjusted <= evaluated:
-        return "Pass — adjusted unique cards do not exceed evaluated unique cards."
-    return "Review — adjusted unique cards exceed evaluated unique cards; inspect bias counters."
-
-
-def _qa_cut_bias_activity_verdict(philosophy_context: dict[str, Any]) -> str:
-    stats = philosophy_context.get("cut_bias_runtime_stats") or {}
-    evaluated = int(stats.get("evaluated", 0) or 0)
-    adjusted = int(stats.get("applied", 0) or 0)
-    if evaluated <= 0:
-        return "No eligible cut-bias candidates were evaluated."
-    ratio = adjusted / evaluated
-    if adjusted == 0:
-        return "No cut-bias matches this run; acceptable for lenses requiring explicit pilot declarations or narrow evidence."
-    if ratio >= 0.90:
-        return "High activity — review for overbroad aliases before lock."
-    if ratio >= 0.75:
-        return "Moderate/high activity — acceptable if examples are real plan support; review manually."
-    return "Normal activity — bias is visible without adjusting nearly every card."
-
-
-def _qa_pet_card_verdict(philosophy_context: dict[str, Any]) -> str:
-    label = str(philosophy_context.get("label", "")).lower()
-    if "pet card" not in label:
-        return "Not applicable."
-    stats = philosophy_context.get("cut_bias_runtime_stats") or {}
-    adjusted = int(stats.get("applied", 0) or 0)
-    if adjusted == 0:
-        return "Pass — no declared pet card evidence, so the lens did not randomly protect cards."
-    return "Review — Pet Card bias adjusted cards; confirm a declared pet card or explicit pilot protection exists."
-
-
-def _qa_commander_exploiter_verdict(philosophy_context: dict[str, Any]) -> str:
-    label = str(philosophy_context.get("label", "")).lower()
-    if "commander exploiter" not in label:
-        return "Not applicable."
-    stats = philosophy_context.get("cut_bias_runtime_stats") or {}
-    evaluated = int(stats.get("evaluated", 0) or 0)
-    adjusted = int(stats.get("applied", 0) or 0)
-    if evaluated <= 0:
-        return "No eligible candidates evaluated."
-    ratio = adjusted / evaluated
-    if ratio >= 0.90:
-        return "Review — very high Commander Exploiter activity; ensure generic support is not over-flagged."
-    if ratio >= 0.75:
-        return "Watch — high Commander Exploiter activity; acceptable only when examples clearly touch commander text."
-    return "Pass — Commander Exploiter activity is not overbroad by count."
-
-
-def _qa_replacement_metric(context: dict[str, Any], primary: str, fallback: str | None = None) -> int:
-    summary = context.get("collection_candidates")
-    if not summary:
-        return 0
-    value = getattr(summary, primary, None)
-    if value is None and fallback:
-        value = getattr(summary, fallback, 0)
-    return int(value or 0)
-
-
-def _qa_replacement_visibility_verdict(context: dict[str, Any]) -> str:
-    summary = context.get("collection_candidates")
-    if not summary or not getattr(summary, "active", False):
-        return "Not applicable — collection candidate matching was not active."
-    evaluated = _qa_replacement_metric(context, "replacement_bias_candidates_evaluated")
-    nudged = _qa_replacement_metric(context, "replacement_bias_candidates_nudged", "replacement_bias_adjusted_cards")
-    no_match = _qa_replacement_metric(context, "replacement_bias_candidates_no_match")
-    no_evidence = _qa_replacement_metric(context, "replacement_bias_candidates_no_deck_evidence")
-    if evaluated <= 0:
-        return "Review — replacement bias active but no candidate evaluation count was recorded."
-    if nudged + no_match + no_evidence <= 0:
-        return "Review — replacement candidates were evaluated but no visibility buckets were recorded."
-    return "Pass — replacement-bias counters are visible and bucketed."
-
-
 def build_legality_debug_section(context: dict[str, Any]) -> str:
     parsed = context["parsed_deck"]
     command_zone = context["command_zone"]
@@ -356,11 +264,11 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             f"- Protect / Question / Prefer fields available: {'Yes' if philosophy_context.get('protect_summary') and philosophy_context.get('question_summary') and philosophy_context.get('prefer_summary') else 'No'}",
             "- Scope: normal report guidance and diagnostics plus v0.6.6.1 bias foundation metadata",
             "- Cut scoring changed by philosophy: Yes — v0.6.6.3.1 light optional-cut bias and completed protected/watch fields are active",
-            "- Replacement scoring changed by philosophy: Yes — v0.6.6.5 philosophy-bias QA / stress-test checkpoint is active",
+            "- Replacement scoring changed by philosophy: Yes — v0.6.6.4.2 replacement-bias language and alias precision cleanup is active",
             "- Strategy detection changed by philosophy: No",
             "- Collection candidate matching changed by philosophy: No",
-            "- Current philosophy scoring phase: v0.6.6.5 Philosophy Bias QA / Stress-Test Checkpoint",
-            "- Next philosophy scoring phase: v0.6.6.6 v0.6.6 Lock / Bias Documentation",
+            "- Current philosophy scoring phase: v0.6.6.4.2 Replacement Bias Language and Alias Precision Cleanup",
+            "- Next philosophy scoring phase: v0.6.6.5 Philosophy Bias QA / Stress Test",
             "",
             "## v0.6.6.1 Philosophy Bias Rules Foundation",
             "- v0.6.6.1 philosophy bias foundation active: Yes",
@@ -373,7 +281,7 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             f"- Protect-biased roles available: {'Yes' if philosophy_context.get('cut_bias_protect_roles') else 'No'}",
             f"- Review-biased roles available: {'Yes' if philosophy_context.get('cut_bias_review_roles') else 'No'}",
             f"- Replacement-biased roles available: {'Yes' if philosophy_context.get('replacement_bias_roles') else 'No'}",
-            "- Foundation boundary: v0.6.6.5 keeps small optional-cut nudges, completed protected/watch-card report fields, light replacement-candidate presentation/order bias, visibility counters, tighter role-alias precision, and adds QA/stress-test verdicts. It does not alter legality, required cuts, strategy detection, collection mode, color identity, companion restrictions, or quality gates.",
+            "- Foundation boundary: v0.6.6.4.2 applies small optional-cut nudges, completed protected/watch-card report fields, light replacement-candidate presentation/order bias, visibility counters, and tighter role-alias precision. It does not alter legality, required cuts, strategy detection, collection mode, color identity, companion restrictions, or quality gates.",
             f"- Protect-biased role examples: {', '.join((philosophy_context.get('cut_bias_protect_roles') or [])[:10]) if philosophy_context.get('cut_bias_protect_roles') else 'None'}",
             f"- Review-biased role examples: {', '.join((philosophy_context.get('cut_bias_review_roles') or [])[:10]) if philosophy_context.get('cut_bias_review_roles') else 'None'}",
             f"- Replacement-biased role examples: {', '.join((philosophy_context.get('replacement_bias_roles') or [])[:10]) if philosophy_context.get('replacement_bias_roles') else 'None'}",
@@ -415,9 +323,8 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             "- Watch-card boundary: philosophy can lower optional cut pressure, but pilot intent and playtest results still decide the final keep/cut",
             "- Required legality boundary: required legality fixes still outrank protected/watch language",
             "",
-            "## v0.6.6.4.2 Replacement Bias Language and Alias Precision Cleanup — carried into v0.6.6.5",
+            "## v0.6.6.4.2 Replacement Bias Language and Alias Precision Cleanup",
             "- v0.6.6.4.2 replacement bias language/alias cleanup active: Yes",
-            "- v0.6.6.5 QA status: replacement-bias counters and aliases are included in the stress-test checkpoint.",
             "- Applies to: collection candidate presentation, light ordering nudges, debug counters, and role-alias matching",
             "- Does not apply to: legality, color identity, companion filters, required cuts, collection mode, or quality-gate overrides",
             f"- Selected replacement lens: {philosophy_context.get('label', 'Balanced / Unknown')}",
@@ -426,39 +333,13 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             "- Safety rule: philosophy replacement fit is never an automatic swap recommendation.",
             "- Collection-only boundary: if the selected collection has no real fit, the report should say so instead of forcing a weak recommendation.",
             "",
-            "## v0.6.6.5 Philosophy Bias QA / Stress-Test Checkpoint",
-            "- v0.6.6.5 QA checkpoint active: Yes",
-            "- Purpose: verify that philosophy bias helps explanation and review priority without becoming a hard override.",
-            f"- Lens under QA: {philosophy_context.get('label', 'Balanced / Unknown')}",
-            f"- Guide under QA: {philosophy_context.get('guide_name') or 'No named guide selected'}",
-            f"- Primary question present: {'Yes' if (philosophy_context.get('primary_question') or philosophy_context.get('core_question')) else 'No'}",
-            f"- Bias strength under QA: {philosophy_context.get('bias_strength', 'guidance')}",
-            f"- Cut-bias scoring active: {'Yes' if philosophy_context.get('cut_bias_scoring_active') or philosophy_context.get('bias_scoring_active') else 'No'}",
-            f"- Replacement-bias scoring active: {'Yes' if philosophy_context.get('replacement_bias_scoring_active') else 'No'}",
-            f"- Cut-bias evaluated cards: {(philosophy_context.get('cut_bias_runtime_stats') or {}).get('evaluated', 0)}",
-            f"- Cut-bias adjusted cards: {(philosophy_context.get('cut_bias_runtime_stats') or {}).get('applied', 0)}",
-            f"- Cut-bias adjustment ratio: {_format_qa_ratio((philosophy_context.get('cut_bias_runtime_stats') or {}).get('applied', 0), (philosophy_context.get('cut_bias_runtime_stats') or {}).get('evaluated', 0))}",
-            f"- Cut-bias counter sanity: {_qa_counter_sanity(philosophy_context)}",
-            f"- Cut-bias activity verdict: {_qa_cut_bias_activity_verdict(philosophy_context)}",
-            f"- Pet Card declaration check: {_qa_pet_card_verdict(philosophy_context)}",
-            f"- Commander Exploiter overactivity check: {_qa_commander_exploiter_verdict(philosophy_context)}",
-            f"- Replacement-bias candidates evaluated: {_qa_replacement_metric(context, 'replacement_bias_candidates_evaluated')}",
-            f"- Replacement-bias candidates nudged: {_qa_replacement_metric(context, 'replacement_bias_candidates_nudged', 'replacement_bias_adjusted_cards')}",
-            f"- Replacement-bias no-match candidates: {_qa_replacement_metric(context, 'replacement_bias_candidates_no_match')}",
-            f"- Replacement-bias evidence-gap candidates: {_qa_replacement_metric(context, 'replacement_bias_candidates_no_deck_evidence')}",
-            f"- Replacement-bias visibility verdict: {_qa_replacement_visibility_verdict(context)}",
-            "- Required legality boundary: philosophy bias must not override required cuts, illegal duplicates, banned cards, color identity, or companion restrictions.",
-            "- Collection honesty boundary: philosophy bias must not force collection-only recommendations when no owned card is a real fit.",
-            "- QA test targets: Balanced / Unknown, Pet Card without declared pet card, Engine Builder, Commander Exploiter, Power-Level Calibrator, Big Moment or Big Creature / Stompy.",
-            "- QA pass condition: readable explanations, visible counters, no forced bad recommendations, no legality override, and no uncontrolled overactive bias.",
-            "",
             "## v0.6.5.5 Philosophy Batch QA / Stress-Test Summary",
             "- v0.6.5.5 batch QA checkpoint active: Yes",
             "- Purpose: confirm philosophy guidance remains stable across multiple decks, lenses, guides, prompt modes, collection modes, and batch runs before locking v0.6.5.",
             f"- Selected lens under test: {philosophy_context.get('label', 'Balanced / Unknown')}",
             f"- Selected guide under test: {philosophy_context.get('guide_name') or 'No named guide selected'}",
             f"- Guide/persona role: {philosophy_context.get('guide_role') or 'No named guide role'}",
-            f"- Primary lens question present: {'Yes' if (philosophy_context.get('primary_question') or philosophy_context.get('core_question')) else 'No'}",
+            f"- Primary lens question present: {'Yes' if philosophy_context.get('primary_question') else 'No'}",
             f"- Short lens summary present: {'Yes' if philosophy_context.get('short_lens_summary') else 'No'}",
             f"- Report guidance summary present: {'Yes' if philosophy_context.get('report_guidance_summary') else 'No'}",
             f"- Protect summary present: {'Yes' if philosophy_context.get('protect_summary') else 'No'}",

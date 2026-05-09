@@ -23,7 +23,7 @@ philosophy lenses consistently across subtypes.
 
 v0.6.6.1 adds the foundation for philosophy-aware cut/replacement bias.
 v0.6.6.2 turns on a light optional-cut scoring nudge while leaving strategy detection, legality, and collection matching unchanged.
-v0.6.6.5 adds a philosophy-bias QA / stress-test checkpoint while preserving the v0.6.6.4.2 replacement-bias behavior and all quality gates.
+v0.6.6.4.2 cleans replacement-bias language and tightens role-alias precision while preserving collection honesty and all quality gates.
 """
 
 from __future__ import annotations
@@ -76,12 +76,12 @@ class PhilosophyProfile:
     replacement_bias: List[str] = field(default_factory=list)
     cut_pressure_notes: List[str] = field(default_factory=list)
     # v0.6.6.1 bias foundation fields. These are exposed for diagnostics and
-    # future cut/replacement logic. In v0.6.6.5 the v0.6.6.4.2 cut/replacement bias behavior remains active and a QA/stress-test checkpoint documents whether the lens is behaving safely.
+    # future cut/replacement logic. In v0.6.6.4.2 the cut-side profile, replacement-side candidate nudge, replacement-bias visibility cleanup, and alias-precision cleanup are active.
     cut_bias_protect_roles: List[str] = field(default_factory=list)
     cut_bias_review_roles: List[str] = field(default_factory=list)
     replacement_bias_roles: List[str] = field(default_factory=list)
     bias_strength: str = "guidance"
-    bias_warning: str = "v0.6.6.5 keeps light optional-cut and replacement-candidate bias active, adds QA/stress-test diagnostics, and preserves cleaner report language plus tighter role-alias precision. It must not override legality, required cuts, pilot-protected cards, color identity, companion restrictions, collection mode, quality gates, or explicit pilot intent."
+    bias_warning: str = "v0.6.6.4.2 applies light optional-cut and replacement-candidate bias with visibility counters, cleaner report language, and tighter role-alias precision. It must not override legality, required cuts, pilot-protected cards, color identity, companion restrictions, collection mode, quality gates, or explicit pilot intent."
     tone: str = "balanced, clear, and supportive"
     example_language: str = ""
 
@@ -672,7 +672,7 @@ def _build_bias_profile(profile: PhilosophyProfile) -> dict:
 
     return {
         "philosophy_bias_foundation_active": True,
-        "philosophy_bias_foundation_version": "v0.6.6.5",
+        "philosophy_bias_foundation_version": "v0.6.6.4.2",
         "bias_scoring_active": True,
         "cut_bias_scoring_active": True,
         "replacement_bias_scoring_active": True,
@@ -1078,8 +1078,8 @@ def render_philosophy_diagnostics_section(context: dict) -> str:
         "- v0.6.5.3 subtype report summary active: Yes",
         f"- Report guidance summary available: {'Yes' if context.get('report_guidance_summary') else 'No'}",
         f"- Protect / Question / Prefer summaries available: {'Yes' if context.get('protect_summary') and context.get('question_summary') and context.get('prefer_summary') else 'No'}",
-        "- Guidance scope: normal report framing and diagnostics; v0.6.6.5 keeps the same light optional-cut and replacement-candidate nudges, adds QA/stress-test visibility, and preserves legality, strategy, collection mode, and quality gates.",
-        f"- v0.6.6.5 philosophy cut/replacement bias QA active: {'Yes' if context.get('philosophy_bias_foundation_active') else 'No'}",
+        "- Guidance scope: normal report framing and diagnostics; v0.6.6.4.2 applies light optional-cut and replacement-candidate nudges with visibility counters and alias precision cleanup while preserving legality, strategy, collection mode, and quality gates.",
+        f"- v0.6.6.4.2 philosophy cut/replacement bias active: {'Yes' if context.get('philosophy_bias_foundation_active') else 'No'}",
         f"- Bias profile available: {'Yes' if context.get('cut_bias_protect_roles') or context.get('cut_bias_review_roles') or context.get('replacement_bias_roles') else 'No'}",
         f"- Bias strength: {context.get('bias_strength', 'guidance')}",
         f"- Bias currently applied to cut scoring: {'Yes' if context.get('cut_bias_scoring_active') else 'No'}",
@@ -1107,8 +1107,8 @@ def render_philosophy_diagnostics_section(context: dict) -> str:
             "",
             "## v0.6.6.1 Philosophy Bias Foundation",
             "- v0.6.6.1 bias foundation active: Yes",
-            "- v0.6.6.5 optional-cut / replacement-candidate bias QA active: Yes",
-            f"- Bias profile version: {context.get('philosophy_bias_foundation_version', 'v0.6.6.5')}",
+            "- v0.6.6.4.2 optional-cut and replacement-candidate bias active: Yes",
+            f"- Bias profile version: {context.get('philosophy_bias_foundation_version', 'v0.6.6.4.2')}",
             f"- Bias strength: {context.get('bias_strength', 'guidance')}",
             f"- Bias currently applied to cut scoring: {'Yes' if context.get('cut_bias_scoring_active') else 'No'}",
         f"- Bias currently applied to replacement scoring: {'Yes' if context.get('replacement_bias_scoring_active') else 'No'}",

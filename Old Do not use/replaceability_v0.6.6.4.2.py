@@ -127,7 +127,7 @@ def _initial_flag_from_reasons(reasons: list[str], tags: set[str]) -> str:
 def _clean_philosophy_reason(reason: str) -> str:
     """Convert raw v0.6.6.x adjustment text into report-facing language.
 
-    v0.6.6.5 preserves the duplicated-label cleanup and QA visibility for philosophy bias such as
+    v0.6.6.4.2 also removes duplicated visible labels such as
     "Philosophy adjustment: Philosophy adjustment: ..." when protected/watch
     entries are rebuilt by the report formatter.
     """
@@ -407,7 +407,7 @@ def _role_matches_bias(role_names: list[str], tags: set[str], mapping: dict[str,
     for role_name in role_names or []:
         role_key = str(role_name).strip()
 
-        # v0.6.6.5 preserves v0.6.6.4.2 precision cleanup: Big Creature / Stompy should not
+        # v0.6.6.4.2 precision cleanup: Big Creature / Stompy should not
         # treat every small typal creature as a large central creature. These
         # aliases require actual top-end size or substantial big-creature payoff
         # evidence. Small typal pieces can still be protected through

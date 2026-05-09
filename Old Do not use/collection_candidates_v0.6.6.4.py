@@ -1,14 +1,12 @@
 """Collection candidate matching for The Dragon's Touch.
 
-v0.6.6.5 scope:
+v0.6.6.4 scope:
 - Integrate Collection Pull quality into report/prompt guidance.
 - Keep owned-card recommendations honest: candidates are review candidates, not automatic swaps.
 - Track collection gaps per replacement category using stricter strong-fit evidence.
 - Cap artifact-context-dependent cards at Possible unless the deck actually supports artifact context.
 - Add early swap-guidance labels for owned candidates without forcing exact one-for-one swaps.
 - Apply a light philosophy-aware replacement bias to candidate presentation and ordering.
-- Add replacement-bias visibility counters and examples for QA.
-- Add role-alias cleanup so non-Commander-Exploiter lenses can match real role tags.
 - Keep collection-only honesty: philosophy can nudge candidates, but cannot force bad recommendations.
 """
 
@@ -45,7 +43,6 @@ class CollectionCandidate:
     strong_fit_needs: list[str] = field(default_factory=list)
     philosophy_bias_matches: list[str] = field(default_factory=list)
     philosophy_bias_note: str = ""
-    philosophy_bias_explanation: str = ""
     philosophy_replacement_nudge: int = 0
 
 
@@ -84,14 +81,8 @@ class CollectionCandidateSummary:
     replacement_bias_strong_adjusted_cards: int = 0
     replacement_bias_possible_adjusted_cards: int = 0
     replacement_bias_shakeup_adjusted_cards: int = 0
-    replacement_bias_candidates_evaluated: int = 0
-    replacement_bias_candidates_nudged: int = 0
-    replacement_bias_candidates_not_nudged: int = 0
-    replacement_bias_candidates_no_match: int = 0
-    replacement_bias_candidates_no_deck_evidence: int = 0
     replacement_bias_examples: list[str] = field(default_factory=list)
     replacement_bias_no_match_examples: list[str] = field(default_factory=list)
-    replacement_bias_no_evidence_examples: list[str] = field(default_factory=list)
 
     @property
     def candidates(self) -> list[str]:
@@ -109,15 +100,6 @@ DRAW_PHRASES = [
 REMOVAL_PHRASES = [
     "destroy target", "exile target", "return target", "damage to target", "counter target",
     "tap target creature", "doesn't untap", "fight target", "target creature gets -", "target opponent sacrifices",
-]
-TUTOR_PHRASES = [
-    "search your library", "tutor", "reveal cards from the top", "put that card into your hand",
-]
-CARD_SELECTION_PHRASES = [
-    "scry", "surveil", "look at the top", "rearrange", "put any number on the bottom",
-]
-COUNTERSPELL_PHRASES = [
-    "counter target spell", "counter target", "can't be countered",
 ]
 WIPE_PHRASES = [
     # Keep this list intentionally narrow. Do not include generic phrases like
@@ -256,12 +238,6 @@ def _infer_collection_roles(card: dict[str, Any]) -> list[str]:
         roles.update({"card_draw", "card_advantage"})
     if _contains_any(text, REMOVAL_PHRASES):
         roles.add("targeted_removal")
-    if _contains_any(text, TUTOR_PHRASES):
-        roles.add("tutor")
-    if _contains_any(text, CARD_SELECTION_PHRASES):
-        roles.add("card_selection")
-    if _contains_any(text, COUNTERSPELL_PHRASES):
-        roles.add("counterspell")
     if _is_true_board_wipe_text(text):
         roles.add("board_wipe")
     if _contains_any(text, PROTECTION_PHRASES):
@@ -585,10 +561,6 @@ REPLACEMENT_BIAS_ROLE_TO_COLLECTION_ROLES: dict[str, set[str]] = {
     "protection_for_pet_card": {"protection", "board_protection_specific"},
     "better_ramp": {"ramp", "mana_source"},
     "protection": {"protection", "board_protection_specific"},
-    "creature_based_draw": {"card_draw", "card_advantage", "creature"},
-    "trample_evasion_haste": {"evasion_support", "team_wide_combat_support", "combat_support", "finisher_or_payoff"},
-    "impactful_top_end": {"finisher_or_payoff", "combat_support", "team_wide_combat_support", "typal_or_theme_support"},
-    "size_to_value_payoff": {"card_draw", "card_advantage", "finisher_or_payoff", "combat_support"},
     "haste_evasion_trample": {"evasion_support", "team_wide_combat_support", "combat_support"},
     "copy_or_doubling_effect": {"token_production", "finisher_or_payoff", "team_wide_combat_support"},
     "draw_to_find_payoff": {"card_draw", "card_advantage", "card_selection"},
@@ -605,27 +577,13 @@ REPLACEMENT_BIAS_ROLE_TO_COLLECTION_ROLES: dict[str, set[str]] = {
     "table_fit_upgrade": {"targeted_removal", "protection", "card_draw", "ramp"},
     "bracket_appropriate_answer": {"targeted_removal", "board_wipe", "protection"},
     "power_matched_role_filler": {"targeted_removal", "ramp", "card_draw", "card_advantage", "protection"},
-
-    # v0.6.6.4.2 human-facing role aliases. These connect philosophy language
-    # like "reliable enablers" to the concrete collection-role tags produced by
-    # _infer_collection_roles().
-    "reliable enablers": {"ramp", "mana_source", "mana_rock", "mana_dork", "tutor", "card_selection", "card_draw", "card_advantage"},
-    "ramp/draw/protection": {"ramp", "mana_source", "card_draw", "card_advantage", "protection", "board_protection_specific"},
-    "commander support": {"typal_or_theme_support", "token_production", "finisher_or_payoff", "protection", "board_protection_specific", "team_wide_combat_support"},
-    "redundancy": {"tutor", "card_selection", "card_draw", "card_advantage", "recursion", "token_production"},
-    "participation-focused interaction": {"protection", "counterspell", "targeted_removal", "board_wipe"},
-    "focused setup": {"tutor", "card_selection", "topdeck_manipulation", "graveyard_setup", "ramp", "mana_source"},
-    "survival interaction": {"protection", "counterspell", "targeted_removal", "board_wipe", "board_protection_specific"},
-    "core enablers": {"ramp", "mana_source", "card_draw", "card_advantage", "tutor", "card_selection"},
-    "card draw": {"card_draw", "card_advantage"},
-    "ramp": {"ramp", "mana_source"},
 }
 
 
 def _replacement_bias_matches(role_set: set[str], philosophy_context: dict[str, Any] | None) -> list[str]:
     """Return selected philosophy replacement-role buckets matched by this card.
 
-    v0.6.6.5 keeps these matches as a light presentation/order nudge only and exposes them to QA diagnostics.
+    v0.6.6.4 uses these matches as a light presentation/order nudge only.
     It does not create Strong candidates without the existing direct need,
     semantic fit, quality gate, color identity, collection, and companion checks.
     """
@@ -645,23 +603,10 @@ def _replacement_bias_note(philosophy_context: dict[str, Any] | None, matched_bi
         return ""
     label = str(philosophy_context.get("label", "selected philosophy"))
     return (
-        f"Philosophy replacement fit: {label} slightly favors this candidate "
+        f"v0.6.6.4 philosophy replacement bias: {label} slightly favors this candidate "
         f"because it matches replacement-bias role(s): {', '.join(matched_bias_roles[:4])}. "
         "This is a nudge only; normal collection fit, strategy fit, legality, and pilot intent still decide."
     )
-
-
-
-def _replacement_bias_plain_explanation(philosophy_context: dict[str, Any] | None, matched_bias_roles: list[str]) -> str:
-    if not matched_bias_roles or not philosophy_context:
-        return ""
-    label = str(philosophy_context.get("label", "selected philosophy"))
-    roles = ", ".join(matched_bias_roles[:4])
-    return f"This candidate matches the {label} replacement lens through: {roles}."
-
-
-def _replacement_bias_still_not_automatic_text() -> str:
-    return "Still not automatic because collection fit, strategy fit, quality gates, legality, companion rules, and pilot intent still decide the final recommendation."
 
 def _source_files_for_card(collection_summary: Any, card_name: str) -> list[str]:
     sources = getattr(collection_summary, "card_sources", {}) or {}
@@ -698,7 +643,6 @@ def _make_candidate(
     strong_fit_needs: list[str] | None = None,
     philosophy_bias_matches: list[str] | None = None,
     philosophy_bias_note: str = "",
-    philosophy_bias_explanation: str = "",
     philosophy_replacement_nudge: int = 0,
 ) -> CollectionCandidate:
     return CollectionCandidate(
@@ -718,7 +662,6 @@ def _make_candidate(
         strong_fit_needs=strong_fit_needs or [],
         philosophy_bias_matches=philosophy_bias_matches or [],
         philosophy_bias_note=philosophy_bias_note,
-        philosophy_bias_explanation=philosophy_bias_explanation,
         philosophy_replacement_nudge=philosophy_replacement_nudge,
     )
 
@@ -847,7 +790,7 @@ def build_collection_candidate_summary(
         "Strong promotion gate is active: standalone beaters, generic colorless bodies, and self-protection cards are usually capped at Possible.",
         "Collection gaps are tracked per replacement category using strict strong-fit evidence, not broad multi-category overlap.",
         "Artifact-context-dependent cards are capped at Possible unless the deck has artifact-token/artifact-creature/artifact-strategy support.",
-        "v0.6.6.5 replacement bias QA visibility is active: philosophy nudges are counted, exampled, and still cannot override quality gates.",
+        "v0.6.6.4 replacement bias is active when a philosophy lens is selected, but it is only a light nudge and cannot override quality gates.",
     ])
 
     if not active:
@@ -951,29 +894,17 @@ def build_collection_candidate_summary(
 
         philosophy_bias_matches = _replacement_bias_matches(role_set, philosophy_context)
         philosophy_bias_note = _replacement_bias_note(philosophy_context, philosophy_bias_matches)
-        philosophy_bias_explanation = _replacement_bias_plain_explanation(philosophy_context, philosophy_bias_matches)
         philosophy_replacement_nudge = 0
-        if summary.replacement_bias_active:
-            summary.replacement_bias_candidates_evaluated += 1
         # Philosophy can nudge a card only if it already has real deck evidence.
         # This prevents the selected lens from forcing weak or unrelated collection cards.
         if philosophy_bias_matches and (matched_categories or strategy_overlap):
             philosophy_replacement_nudge = min(2, len(philosophy_bias_matches))
             score += philosophy_replacement_nudge
             summary.replacement_bias_adjusted_cards += 1
-            summary.replacement_bias_candidates_nudged += 1
             if len(summary.replacement_bias_examples) < 8:
                 summary.replacement_bias_examples.append(str(card_name))
-        elif philosophy_bias_matches:
-            summary.replacement_bias_candidates_not_nudged += 1
-            summary.replacement_bias_candidates_no_deck_evidence += 1
-            if len(summary.replacement_bias_no_evidence_examples) < 8:
-                summary.replacement_bias_no_evidence_examples.append(str(card_name))
-        elif summary.replacement_bias_active:
-            summary.replacement_bias_candidates_not_nudged += 1
-            summary.replacement_bias_candidates_no_match += 1
-            if len(summary.replacement_bias_no_match_examples) < 8:
-                summary.replacement_bias_no_match_examples.append(str(card_name))
+        elif not philosophy_bias_matches and len(summary.replacement_bias_no_match_examples) < 8:
+            summary.replacement_bias_no_match_examples.append(str(card_name))
 
         warnings: list[str] = list(companion_warnings)
         quality_gate_parts: list[str] = []
@@ -1089,14 +1020,14 @@ def build_collection_candidate_summary(
                 strong_category_hits[category] += 1
             summary.strong_candidates_accepted += 1
             swap_guidance = _swap_guidance_for_candidate(strong_matched_categories, role_set, "Strong")
-            candidate = _make_candidate(card_name, quantity, "Strong", "Owned card directly supports a current deck need and the deck's specific plan", strong_matched_categories, roles, reason, card, source_files, quality_gate=quality_gate, swap_guidance=swap_guidance, strong_fit_needs=strong_matched_categories, philosophy_bias_matches=philosophy_bias_matches, philosophy_bias_note=philosophy_bias_note, philosophy_bias_explanation=philosophy_bias_explanation, philosophy_replacement_nudge=philosophy_replacement_nudge)
+            candidate = _make_candidate(card_name, quantity, "Strong", "Owned card directly supports a current deck need and the deck's specific plan", strong_matched_categories, roles, reason, card, source_files, quality_gate=quality_gate, swap_guidance=swap_guidance, strong_fit_needs=strong_matched_categories, philosophy_bias_matches=philosophy_bias_matches, philosophy_bias_note=philosophy_bias_note, philosophy_replacement_nudge=philosophy_replacement_nudge)
             if philosophy_replacement_nudge > 0:
                 summary.replacement_bias_strong_adjusted_cards += 1
             strong.append((score, candidate))
         elif matched_categories and score >= 3 and not cap_to_shakeup:
             summary.downgraded_to_possible += 1
             swap_guidance = _swap_guidance_for_candidate(matched_categories, role_set, "Possible")
-            candidate = _make_candidate(card_name, quantity, "Possible", "Owned card may fit current deck needs; pilot review recommended", matched_categories, roles, reason, card, source_files, warnings, quality_gate=quality_gate, swap_guidance=swap_guidance, strong_fit_needs=_strong_fit_categories(matched_categories, role_set), philosophy_bias_matches=philosophy_bias_matches, philosophy_bias_note=philosophy_bias_note, philosophy_bias_explanation=philosophy_bias_explanation, philosophy_replacement_nudge=philosophy_replacement_nudge)
+            candidate = _make_candidate(card_name, quantity, "Possible", "Owned card may fit current deck needs; pilot review recommended", matched_categories, roles, reason, card, source_files, warnings, quality_gate=quality_gate, swap_guidance=swap_guidance, strong_fit_needs=_strong_fit_categories(matched_categories, role_set), philosophy_bias_matches=philosophy_bias_matches, philosophy_bias_note=philosophy_bias_note, philosophy_replacement_nudge=philosophy_replacement_nudge)
             if philosophy_replacement_nudge > 0:
                 summary.replacement_bias_possible_adjusted_cards += 1
             possible.append((score, candidate))
@@ -1104,7 +1035,7 @@ def build_collection_candidate_summary(
             if score >= 2 or mode == "shakeup":
                 summary.downgraded_to_shakeup += 1
                 swap_guidance = _swap_guidance_for_candidate(matched_categories, role_set, "Shakeup")
-                candidate = _make_candidate(card_name, quantity, "Shakeup only", "Best available / experiment, not a confirmed upgrade", matched_categories, roles, reason, card, source_files, warnings, quality_gate=quality_gate, swap_guidance=swap_guidance, strong_fit_needs=_strong_fit_categories(matched_categories, role_set), philosophy_bias_matches=philosophy_bias_matches, philosophy_bias_note=philosophy_bias_note, philosophy_bias_explanation=philosophy_bias_explanation, philosophy_replacement_nudge=philosophy_replacement_nudge)
+                candidate = _make_candidate(card_name, quantity, "Shakeup only", "Best available / experiment, not a confirmed upgrade", matched_categories, roles, reason, card, source_files, warnings, quality_gate=quality_gate, swap_guidance=swap_guidance, strong_fit_needs=_strong_fit_categories(matched_categories, role_set), philosophy_bias_matches=philosophy_bias_matches, philosophy_bias_note=philosophy_bias_note, philosophy_replacement_nudge=philosophy_replacement_nudge)
                 if philosophy_replacement_nudge > 0:
                     summary.replacement_bias_shakeup_adjusted_cards += 1
                 shakeup.append((score, candidate))
@@ -1142,9 +1073,9 @@ def build_collection_candidate_summary(
         summary.notes.append("Shakeup candidates are not guaranteed upgrades; they are the best available experiments from the selected collection pool.")
     if summary.replacement_bias_active:
         if summary.replacement_bias_adjusted_cards:
-            summary.notes.append(f"v0.6.6.5 philosophy-aware replacement bias nudged {summary.replacement_bias_adjusted_cards} owned candidate(s) for {summary.replacement_bias_lens}; this is not an automatic upgrade verdict.")
+            summary.notes.append(f"v0.6.6.4 philosophy-aware replacement bias nudged {summary.replacement_bias_adjusted_cards} owned candidate(s) for {summary.replacement_bias_lens}; this is not an automatic upgrade verdict.")
         else:
-            summary.notes.append(f"v0.6.6.5 replacement bias was active for {summary.replacement_bias_lens}, but no owned candidates had enough normal deck-fit evidence to receive a philosophy nudge.")
+            summary.notes.append(f"v0.6.6.4 replacement bias was active for {summary.replacement_bias_lens}, but no owned candidates had enough normal deck-fit evidence to receive a philosophy nudge.")
 
     if downgrade_reasons:
         summary.downgrade_reason_counts = list(downgrade_reasons.most_common())

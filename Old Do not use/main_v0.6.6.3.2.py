@@ -55,7 +55,7 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.6.5 — philosophy bias QA / stress-test checkpoint"
+VERSION_LABEL = "v0.6.6.2 — philosophy-aware optional cut bias"
 
 
 def build_analysis_context(
@@ -91,7 +91,6 @@ def build_analysis_context(
         scryfall_lookup=scryfall_lookup,
         strategy_summary=strategy_summary,
         runtime_config=resolved_config,
-        philosophy_context=philosophy_context,
     )
 
     return {

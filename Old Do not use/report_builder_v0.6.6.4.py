@@ -437,12 +437,9 @@ def _format_collection_candidate(candidate: Any) -> list[str]:
     philosophy_nudge = getattr(candidate, 'philosophy_replacement_nudge', 0)
     if philosophy_matches and philosophy_nudge:
         lines.append(f"- Philosophy replacement fit: {', '.join(philosophy_matches[:6])}")
-        philosophy_explanation = getattr(candidate, 'philosophy_bias_explanation', '')
-        if philosophy_explanation:
-            lines.append(f"  - Why this fits the selected lens: {philosophy_explanation}")
         if philosophy_note:
             lines.append(f"  - {philosophy_note}")
-        lines.append("  - Still not automatic because collection fit, strategy fit, quality gates, legality, companion rules, and pilot intent still decide the final recommendation.")
+        lines.append("  - Reminder: philosophy fit is not an automatic swap; verify role, strategy, collection mode, and pilot intent.")
     warnings = list(getattr(candidate, 'warnings', []) or [])
     for warning in warnings[:3]:
         lines.append(f"  - Warning: {warning}")
@@ -473,38 +470,17 @@ def _build_collection_pull_section(context: dict[str, Any]) -> list[str]:
         f"- Selected collection files: {len(getattr(collection_summary, 'selected_files', []) or []) if collection_summary else 0}",
         f"- Philosophy-aware replacement bias active: {'Yes' if getattr(summary, 'replacement_bias_active', False) else 'No'}",
         f"- Replacement bias lens: {getattr(summary, 'replacement_bias_lens', 'Balanced / Unknown')}",
-        f"- Replacement-biased owned candidates evaluated: {getattr(summary, 'replacement_bias_candidates_evaluated', 0)}",
-        f"- Replacement-biased owned candidates nudged: {getattr(summary, 'replacement_bias_candidates_nudged', getattr(summary, 'replacement_bias_adjusted_cards', 0))}",
-        f"- Replacement-biased owned candidates not nudged: {getattr(summary, 'replacement_bias_candidates_not_nudged', 0)}",
+        f"- Replacement-biased owned candidates nudged: {getattr(summary, 'replacement_bias_adjusted_cards', 0)}",
         "",
         "> Collection candidates are only shown when they appear to support the current strategy, replacement needs, color identity, and implemented companion filters.",
         "> Strong candidates must pass a semantic fit gate. Broad utility or support-only overlap is not enough.",
         "> Role mapping hardening is active: evasion/trample, board wipe, token, and combat categories require exact semantic matches.",
         "> Strong promotion gate is active: standalone beaters, generic colorless bodies, and self-protection cards are usually capped at Possible.",
         "> v0.6.4.4 prompt/report integration is active: owned cards are review candidates, not automatic swaps.",
-        "> v0.6.6.5 philosophy-aware replacement bias QA is active: candidate presentation may be lightly nudged, visibility counters/examples are recorded, and the system still cannot force bad recommendations or override collection-only mode.",
+        "> v0.6.6.4 philosophy-aware replacement bias may nudge candidate presentation, but it cannot force bad recommendations or override collection-only mode.",
         "> Collection gaps are tracked role-by-role. Possible and Shakeup cards do not close a strong-fit gap.",
         "> If no strong owned candidate exists, The Dragon's Touch should say so instead of forcing a bad recommendation.",
     ])
-
-    rb_examples = list(getattr(summary, 'replacement_bias_examples', []) or [])
-    rb_no_match = list(getattr(summary, 'replacement_bias_no_match_examples', []) or [])
-    rb_no_evidence = list(getattr(summary, 'replacement_bias_no_evidence_examples', []) or [])
-    if getattr(summary, 'replacement_bias_active', False):
-        lines.append("")
-        lines.append("### Philosophy-Aware Replacement Bias Visibility / QA")
-        lines.append(f"- Candidates evaluated for replacement bias: {getattr(summary, 'replacement_bias_candidates_evaluated', 0)}")
-        lines.append(f"- Candidates nudged by philosophy: {getattr(summary, 'replacement_bias_candidates_nudged', getattr(summary, 'replacement_bias_adjusted_cards', 0))}")
-        lines.append(f"- Candidates not nudged: {getattr(summary, 'replacement_bias_candidates_not_nudged', 0)}")
-        lines.append(f"- No replacement-bias role match: {getattr(summary, 'replacement_bias_candidates_no_match', 0)}")
-        lines.append(f"- Bias role matched but lacked deck evidence: {getattr(summary, 'replacement_bias_candidates_no_deck_evidence', 0)}")
-        if rb_examples:
-            lines.append("- Replacement bias examples: " + ", ".join(rb_examples[:8]))
-        if rb_no_match:
-            lines.append("- No replacement-bias match examples: " + ", ".join(rb_no_match[:8]))
-        if rb_no_evidence:
-            lines.append("- Matched lens but no deck-fit evidence examples: " + ", ".join(rb_no_evidence[:8]))
-        lines.append("- Safety boundary: philosophy replacement fit is a presentation/order nudge only, not an automatic swap or quality-gate override.")
 
     notes = list(getattr(summary, 'notes', []) or [])
     if notes:

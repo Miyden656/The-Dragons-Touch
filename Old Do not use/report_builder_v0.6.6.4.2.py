@@ -482,7 +482,7 @@ def _build_collection_pull_section(context: dict[str, Any]) -> list[str]:
         "> Role mapping hardening is active: evasion/trample, board wipe, token, and combat categories require exact semantic matches.",
         "> Strong promotion gate is active: standalone beaters, generic colorless bodies, and self-protection cards are usually capped at Possible.",
         "> v0.6.4.4 prompt/report integration is active: owned cards are review candidates, not automatic swaps.",
-        "> v0.6.6.5 philosophy-aware replacement bias QA is active: candidate presentation may be lightly nudged, visibility counters/examples are recorded, and the system still cannot force bad recommendations or override collection-only mode.",
+        "> v0.6.6.4.2 philosophy-aware replacement bias may nudge candidate presentation, records visibility counters/examples, and cannot force bad recommendations or override collection-only mode.",
         "> Collection gaps are tracked role-by-role. Possible and Shakeup cards do not close a strong-fit gap.",
         "> If no strong owned candidate exists, The Dragon's Touch should say so instead of forcing a bad recommendation.",
     ])
@@ -492,7 +492,7 @@ def _build_collection_pull_section(context: dict[str, Any]) -> list[str]:
     rb_no_evidence = list(getattr(summary, 'replacement_bias_no_evidence_examples', []) or [])
     if getattr(summary, 'replacement_bias_active', False):
         lines.append("")
-        lines.append("### Philosophy-Aware Replacement Bias Visibility / QA")
+        lines.append("### Philosophy-Aware Replacement Bias Visibility")
         lines.append(f"- Candidates evaluated for replacement bias: {getattr(summary, 'replacement_bias_candidates_evaluated', 0)}")
         lines.append(f"- Candidates nudged by philosophy: {getattr(summary, 'replacement_bias_candidates_nudged', getattr(summary, 'replacement_bias_adjusted_cards', 0))}")
         lines.append(f"- Candidates not nudged: {getattr(summary, 'replacement_bias_candidates_not_nudged', 0)}")

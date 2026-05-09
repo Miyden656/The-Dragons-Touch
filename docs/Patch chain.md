@@ -44,7 +44,7 @@ Patch v0.6.4.3.4 — Collection Strong Candidate Promotion Gate
 
 Patch v0.6.4.4 — Collection Report / Prompt Integration and Swap Guidance
 
-Patch v0.6.4.5 — Auto-Batch Defaults and Selection Control
+Patch v0.6.4.5 — Auto-Batch Defaults and Selection Control/
 
 Patch v0.6.4.5.1 — Auto-Batch Report Builder Hotfix
 
@@ -65,6 +65,12 @@ Patch v0.6.6.1 — Philosophy Bias Rules Foundation
 
 Patch v0.6.6.2 — Philosophy-Aware Optional Cut Bias
 Patch v0.6.6.2.1 — Philosophy Bias Visibility and Trigger-Amplifier Role Support
-v0.6.6.2.2 — Philosophy Bias Counter and Infrastructure Suppression Hotfix:
+Patch v0.6.6.2.2 — Philosophy Bias Counter and Infrastructure Suppression Hotfix:
 Patch v0.6.6.3 — Philosophy-Aware Protected / Watch Card Language
+
+Patch v0.6.6.3.1 — Protected Watch Language Field Completion Hotfix
+Patch v0.6.6.4 — Philosophy-Aware Replacement Bias
+Patch v0.6.6.4.1 — Replacement Bias Visibility and Role-Alias Cleanup
+Patch v0.6.6.4.2 — Replacement Bias Language and Alias Precision Cleanup
+Patch v0.6.6.5 — Philosophy Bias QA / Stress Test
 
