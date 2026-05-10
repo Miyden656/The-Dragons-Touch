@@ -79,3 +79,21 @@ Patch v0.6.6.5.2 — Balanced Neutrality and Companion Review Wording Cleanup
 Patch v0.6.6.6 — Lock / Bias Documentation
 Patch v0.6.7.1 — Desktop UI Shell / Navigation Foundation
 
+Patch v0.6.7.1.1 — Adventurer’s Map Contrast / Readability Cleanup
+Patch v0.6.7.1.2 — Adventurer’s Map Cartographer Palette Cleanup
+Patch v0.6.7.2 — Deck File Selection
+Patch v0.6.7.2.1 — Deck Preview Layout Cleanup
+
+Patch v0.6.7.2.2 — Deck Preview Layout and Count Cleanup
+Patch v0.6.7.2.3 — Deck Preview Button Spacing Cleanup
+
+Patch v0.6.7.3 — Review Settings Form Foundation
+
+Patch v0.6.7.3.1 — Review Setup Dropdown and Defaults Cleanup
+
+Patch v0.6.7.3.2 — Review Setup Polish and Deck Preview Spacing Cleanup
+Patch v0.6.7.3.3 — Adventurer’s Map Dropdown Popup Frame Cleanup
+
+Patch v0.6.7.4 — Collection Source Selection UI
+Patch v0.6.7.4.1 — Collection Source Visibility and Layout Cleanup
+
