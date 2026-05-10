@@ -228,7 +228,7 @@ def check_companion_legality(
             manual_reviews.append({
                 "companion_name": companion_name,
                 "card_name": "ALL",
-                "reason": "Manual review required — this companion restriction is not automated yet. No automated violation was found because the restriction was not fully checked.",
+                "reason": "This companion restriction is not implemented yet; manual companion-legality review required.",
             })
             continue
 
@@ -242,15 +242,7 @@ def check_companion_legality(
                 manual_review["quantity"] = quantity
                 manual_reviews.append(manual_review)
 
-    if violations:
-        legal: bool | None = False
-    elif manual_reviews:
-        # v0.6.6.6: unsupported companion restrictions are not the same as
-        # automated violations. Return None so reports can say manual review is
-        # required instead of implying a violation was found.
-        legal = None
-    else:
-        legal = True
+    legal = not violations and not manual_reviews
     return checked, legal, violations, manual_reviews, notes, replacement_filter_notes
 
 

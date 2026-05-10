@@ -1,15 +1,14 @@
 """Companion rule helpers for The Dragon's Touch.
 
-v0.6.6.6 scope:
+Patch Batch 7.2 scope:
 - Detect official companion cards in companion/reference zones.
 - Provide companion-intake wording for every official companion.
 - Validate implemented companion restrictions when a companion is actually detected.
 - Provide replacement-filter notes for reports/prompts.
 
-Only Keruga's restriction is fully automated at this checkpoint. All other official
+Only Keruga's restriction is fully automated in this patch. All other official
 companions have summaries and manual-review guidance so the report never implies
-that an unsupported companion rule has been fully enforced or that a violation was
-found when only manual review is available.
+that an unsupported companion rule has been fully enforced.
 """
 
 from __future__ import annotations
@@ -224,7 +223,7 @@ def check_card_against_companion(
         return None, {
             "companion_name": display,
             "card_name": card_name,
-            "reason": "Manual review required — this companion restriction is not automated yet. No automated violation was found because the restriction was not fully checked.",
+            "reason": "This companion restriction is not automated yet; manual companion-legality review required.",
         }
 
     if _is_land_card(card):

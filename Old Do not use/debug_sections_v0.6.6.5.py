@@ -77,36 +77,11 @@ def _qa_cut_bias_activity_verdict(philosophy_context: dict[str, Any]) -> str:
     stats = philosophy_context.get("cut_bias_runtime_stats") or {}
     evaluated = int(stats.get("evaluated", 0) or 0)
     adjusted = int(stats.get("applied", 0) or 0)
-    label = str(philosophy_context.get("label", "")).lower()
-    key = str(philosophy_context.get("key", "")).lower()
     if evaluated <= 0:
         return "No eligible cut-bias candidates were evaluated."
     ratio = adjusted / evaluated
     if adjusted == 0:
         return "No cut-bias matches this run; acceptable for lenses requiring explicit pilot declarations or narrow evidence."
-
-    # v0.6.6.5.2: thresholds are lens-aware. Balanced / Unknown should stay
-    # quiet; specialized lenses may be more active when the deck provides real
-    # evidence.
-    if key == "balanced_unknown" or "balanced" in label:
-        if ratio >= 0.50:
-            return "Review — Balanced / Unknown is still too active; it should stay mostly neutral."
-        if ratio >= 0.25:
-            return "Watch — Balanced / Unknown has visible activity; confirm it is limited to clear plan/off-plan evidence."
-        return "Pass — Balanced / Unknown stayed appropriately conservative."
-
-    if "pet card" in label:
-        if ratio >= 0.25:
-            return "Review — Pet Card is active; confirm declared pet-card evidence exists."
-        return "Pass — Pet Card stayed conservative unless explicit pet-card evidence exists."
-
-    if "power-level calibrator" in label:
-        if ratio >= 0.90:
-            return "Review — Power-Level Calibrator is very active; acceptable only if bracket-pressure evidence is high."
-        if ratio >= 0.75:
-            return "Watch — Power-Level Calibrator is active; verify examples are real table-fit or bracket-pressure concerns."
-        return "Normal activity — table-fit bias is visible without adjusting nearly every card."
-
     if ratio >= 0.90:
         return "High activity — review for overbroad aliases before lock."
     if ratio >= 0.75:
@@ -167,22 +142,6 @@ def _qa_replacement_visibility_verdict(context: dict[str, Any]) -> str:
     return "Pass — replacement-bias counters are visible and bucketed."
 
 
-def _companion_legality_result_text(legality: Any) -> str:
-    checked = bool(getattr(legality, "companion_legality_checked", False))
-    if not checked:
-        return "Not checked"
-    legal = getattr(legality, "companion_legality_legal", None)
-    violations = list(getattr(legality, "companion_legality_violations", []) or [])
-    manual_reviews = list(getattr(legality, "manual_review_companion_cards", []) or [])
-    if legal is True:
-        return "Pass"
-    if violations:
-        return "Violation found by automated companion check"
-    if manual_reviews:
-        return "Manual review required — automated restriction check is incomplete for this companion"
-    return "Needs review — automated companion result was inconclusive"
-
-
 def build_legality_debug_section(context: dict[str, Any]) -> str:
     parsed = context["parsed_deck"]
     command_zone = context["command_zone"]
@@ -200,8 +159,7 @@ def build_legality_debug_section(context: dict[str, Any]) -> str:
         f"Possible reference companion(s): {', '.join(getattr(command_zone, 'possible_reference_companion_names', []) or []) if getattr(command_zone, 'possible_reference_companion_names', []) else 'None'}",
         f"Companion legality checked: {getattr(legality, 'companion_legality_checked', False)}",
         f"Companion legality legal: {getattr(legality, 'companion_legality_legal', None)}",
-        f"Companion legality result: {_companion_legality_result_text(legality)}",
-        f"Companion legality violations found by automation: {len(getattr(legality, 'companion_legality_violations', []) or [])}",
+        f"Companion legality violations: {len(getattr(legality, 'companion_legality_violations', []) or [])}",
         f"Manual companion reviews: {len(getattr(legality, 'manual_review_companion_cards', []) or [])}",
         "",
         "## Cards not found",
@@ -401,8 +359,8 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             "- Replacement scoring changed by philosophy: Yes — v0.6.6.5 philosophy-bias QA / stress-test checkpoint is active",
             "- Strategy detection changed by philosophy: No",
             "- Collection candidate matching changed by philosophy: No",
-            "- Current philosophy scoring phase: v0.6.6.6 v0.6.6 Lock / Bias Documentation",
-            "- Next philosophy scoring phase: v0.6.7 Desktop UI Foundation / next roadmap phase",
+            "- Current philosophy scoring phase: v0.6.6.5 Philosophy Bias QA / Stress-Test Checkpoint",
+            "- Next philosophy scoring phase: v0.6.6.6 v0.6.6 Lock / Bias Documentation",
             "",
             "## v0.6.6.1 Philosophy Bias Rules Foundation",
             "- v0.6.6.1 philosophy bias foundation active: Yes",
@@ -415,7 +373,7 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             f"- Protect-biased roles available: {'Yes' if philosophy_context.get('cut_bias_protect_roles') else 'No'}",
             f"- Review-biased roles available: {'Yes' if philosophy_context.get('cut_bias_review_roles') else 'No'}",
             f"- Replacement-biased roles available: {'Yes' if philosophy_context.get('replacement_bias_roles') else 'No'}",
-            "- Foundation boundary: v0.6.6.6 locks small optional-cut nudges, completed protected/watch-card report fields, replacement-bias visibility, balanced-neutrality cleanup, and companion manual-review wording. It does not alter legality, required cuts, strategy detection, collection mode, color identity, companion restrictions, or quality gates.",
+            "- Foundation boundary: v0.6.6.5 keeps small optional-cut nudges, completed protected/watch-card report fields, light replacement-candidate presentation/order bias, visibility counters, tighter role-alias precision, and adds QA/stress-test verdicts. It does not alter legality, required cuts, strategy detection, collection mode, color identity, companion restrictions, or quality gates.",
             f"- Protect-biased role examples: {', '.join((philosophy_context.get('cut_bias_protect_roles') or [])[:10]) if philosophy_context.get('cut_bias_protect_roles') else 'None'}",
             f"- Review-biased role examples: {', '.join((philosophy_context.get('cut_bias_review_roles') or [])[:10]) if philosophy_context.get('cut_bias_review_roles') else 'None'}",
             f"- Replacement-biased role examples: {', '.join((philosophy_context.get('replacement_bias_roles') or [])[:10]) if philosophy_context.get('replacement_bias_roles') else 'None'}",
@@ -438,11 +396,9 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             f"- Review-side adjusted unique cards this run: {(philosophy_context.get('cut_bias_runtime_stats') or {}).get('review_adjustments', 0)}",
             f"- Bias no-match unique cards this run: {(philosophy_context.get('cut_bias_runtime_stats') or {}).get('no_match', 0)}",
             f"- Mana-base infrastructure review notes suppressed: {(philosophy_context.get('cut_bias_runtime_stats') or {}).get('suppressed_infrastructure_review', 0)}",
-            f"- Overbroad philosophy-bias matches suppressed: {(philosophy_context.get('cut_bias_runtime_stats') or {}).get('suppressed_overbroad_bias', 0)}",
             f"- Bias-applied examples: {', '.join((philosophy_context.get('cut_bias_runtime_stats') or {}).get('example_applied_cards', [])[:8]) if (philosophy_context.get('cut_bias_runtime_stats') or {}).get('example_applied_cards') else 'None'}",
             f"- Bias no-match examples: {', '.join((philosophy_context.get('cut_bias_runtime_stats') or {}).get('example_no_match_cards', [])[:8]) if (philosophy_context.get('cut_bias_runtime_stats') or {}).get('example_no_match_cards') else 'None'}",
             f"- Suppressed mana-base examples: {', '.join((philosophy_context.get('cut_bias_runtime_stats') or {}).get('example_suppressed_infrastructure_review_cards', [])[:8]) if (philosophy_context.get('cut_bias_runtime_stats') or {}).get('example_suppressed_infrastructure_review_cards') else 'None'}",
-            f"- Suppressed overbroad-bias examples: {', '.join((philosophy_context.get('cut_bias_runtime_stats') or {}).get('example_suppressed_overbroad_bias_cards', [])[:8]) if (philosophy_context.get('cut_bias_runtime_stats') or {}).get('example_suppressed_overbroad_bias_cards') else 'None'}",
             "- Visibility note: adjusted unique cards should never exceed evaluated unique cards; total bias hits may be higher because one card can match multiple protect/review roles.",
             "- Mana-base suppression active: Yes — normal fixing lands should not receive Commander Exploiter generic-goodstuff review-pressure notes.",
             "- Trigger-amplifier cleanup active: Yes — Panharmonicon/Strionic Resonator-style cards can receive trigger/copy/ETB amplifier role tags when detected.",
@@ -461,7 +417,7 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             "",
             "## v0.6.6.4.2 Replacement Bias Language and Alias Precision Cleanup — carried into v0.6.6.5",
             "- v0.6.6.4.2 replacement bias language/alias cleanup active: Yes",
-            "- v0.6.6.6 lock status: replacement-bias counters remain active, overbroad cut-bias aliases are tightened, and QA documentation is recorded.",
+            "- v0.6.6.5 QA status: replacement-bias counters and aliases are included in the stress-test checkpoint.",
             "- Applies to: collection candidate presentation, light ordering nudges, debug counters, and role-alias matching",
             "- Does not apply to: legality, color identity, companion filters, required cuts, collection mode, or quality-gate overrides",
             f"- Selected replacement lens: {philosophy_context.get('label', 'Balanced / Unknown')}",
@@ -470,9 +426,9 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             "- Safety rule: philosophy replacement fit is never an automatic swap recommendation.",
             "- Collection-only boundary: if the selected collection has no real fit, the report should say so instead of forcing a weak recommendation.",
             "",
-            "## v0.6.6.5.2 Balanced Neutrality and Companion Review Wording Cleanup — locked into v0.6.6.6",
-            "- v0.6.6.5.2 balanced-neutrality and companion-review cleanup active: Yes — locked into v0.6.6.6",
-            "- Purpose: verify that philosophy bias helps explanation without becoming a hard override, while companion reports distinguish manual review from automated violations. v0.6.6.6 records this as the locked philosophy-bias behavior.",
+            "## v0.6.6.5 Philosophy Bias QA / Stress-Test Checkpoint",
+            "- v0.6.6.5 QA checkpoint active: Yes",
+            "- Purpose: verify that philosophy bias helps explanation and review priority without becoming a hard override.",
             f"- Lens under QA: {philosophy_context.get('label', 'Balanced / Unknown')}",
             f"- Guide under QA: {philosophy_context.get('guide_name') or 'No named guide selected'}",
             f"- Primary question present: {'Yes' if (philosophy_context.get('primary_question') or philosophy_context.get('core_question')) else 'No'}",
@@ -484,7 +440,6 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             f"- Cut-bias adjustment ratio: {_format_qa_ratio((philosophy_context.get('cut_bias_runtime_stats') or {}).get('applied', 0), (philosophy_context.get('cut_bias_runtime_stats') or {}).get('evaluated', 0))}",
             f"- Cut-bias counter sanity: {_qa_counter_sanity(philosophy_context)}",
             f"- Cut-bias activity verdict: {_qa_cut_bias_activity_verdict(philosophy_context)}",
-            f"- Overbroad-bias matches suppressed: {(philosophy_context.get('cut_bias_runtime_stats') or {}).get('suppressed_overbroad_bias', 0)}",
             f"- Pet Card declaration check: {_qa_pet_card_verdict(philosophy_context)}",
             f"- Commander Exploiter overactivity check: {_qa_commander_exploiter_verdict(philosophy_context)}",
             f"- Replacement-bias candidates evaluated: {_qa_replacement_metric(context, 'replacement_bias_candidates_evaluated')}",
@@ -496,19 +451,6 @@ def build_diagnostics_debug_section(context: dict[str, Any]) -> str:
             "- Collection honesty boundary: philosophy bias must not force collection-only recommendations when no owned card is a real fit.",
             "- QA test targets: Balanced / Unknown, Pet Card without declared pet card, Engine Builder, Commander Exploiter, Power-Level Calibrator, Big Moment or Big Creature / Stompy.",
             "- QA pass condition: readable explanations, visible counters, no forced bad recommendations, no legality override, and no uncontrolled overactive bias.",
-            "",
-            "## v0.6.6.6 v0.6.6 Lock / Bias Documentation",
-            "- v0.6.6.6 lock checkpoint active: Yes",
-            "- Purpose: document and lock the v0.6.6 philosophy-bias milestone after QA cleanup.",
-            "- Locked behavior: philosophy can lightly nudge optional cut pressure, protected/watch-card explanations, and collection-candidate presentation/order.",
-            "- Locked boundary: philosophy cannot override legality, required cuts, deck size, color identity, banned cards, illegal duplicates, companion restrictions, collection mode, quality gates, or explicit pilot intent.",
-            "- Balanced / Unknown lock rule: stay mostly neutral; apply visible bias only to clear off-plan or explicit user-intent-conflict cases.",
-            "- Pet Card lock rule: do not protect cards merely because Pet Card is selected; declared pet-card evidence or pilot protection is required.",
-            "- Commander Exploiter lock rule: protect commander-specific support only when card roles or plan evidence connect to commander text.",
-            "- Replacement-bias lock rule: owned-card philosophy fit is a presentation/order nudge only, never an automatic swap or strong-candidate override.",
-            "- Companion lock rule: unsupported companion restrictions must report manual review required instead of implying an automated violation.",
-            "- Recommended locked test coverage: Balanced / Unknown, Pet Card, Commander Exploiter, Engine Builder, Power-Level Calibrator, Competitive Closer, Big Moment / Big Creature.",
-            "- v0.6.6 milestone verdict: Ready to treat as the current stable philosophy-bias checkpoint if local tests match expected diagnostics.",
             "",
             "## v0.6.5.5 Philosophy Batch QA / Stress-Test Summary",
             "- v0.6.5.5 batch QA checkpoint active: Yes",

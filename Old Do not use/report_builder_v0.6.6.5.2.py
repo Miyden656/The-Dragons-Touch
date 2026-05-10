@@ -493,7 +493,7 @@ def _build_collection_pull_section(context: dict[str, Any]) -> list[str]:
         "> Role mapping hardening is active: evasion/trample, board wipe, token, and combat categories require exact semantic matches.",
         "> Strong promotion gate is active: standalone beaters, generic colorless bodies, and self-protection cards are usually capped at Possible.",
         "> v0.6.4.4 prompt/report integration is active: owned cards are review candidates, not automatic swaps.",
-        "> v0.6.6.6 philosophy-bias lock is active: candidate presentation may be lightly nudged, overbroad cut-bias aliases are suppressed, visibility counters/examples are recorded, companion manual-review wording is clarified, and the system still cannot force bad recommendations or override collection-only mode.",
+        "> v0.6.6.5.2 balanced-neutrality and companion-review cleanup is active: candidate presentation may be lightly nudged, overbroad cut-bias aliases are suppressed, visibility counters/examples are recorded, and the system still cannot force bad recommendations or override collection-only mode.",
         "> Collection gaps are tracked role-by-role. Possible and Shakeup cards do not close a strong-fit gap.",
         "> If no strong owned candidate exists, The Dragon's Touch should say so instead of forcing a bad recommendation.",
     ])

@@ -30,12 +30,6 @@ v0.6.6.3:
 v0.6.6.3.1:
 - Ensure Why this matters and Review instruction fields are surfaced in normal report output.
 - Strip old raw v0.6.6.2.2 final-verdict wording from philosophy adjustment text.
-
-v0.6.6.6 lock note:
-- Make Balanced / Unknown more neutral before v0.6.6 lock.
-- Suppress Balanced philosophy notes on normal infrastructure, primary-plan support, and context-synergy cards.
-- Suppress philosophy bias on normal mana-base infrastructure.
-- Require stronger evidence for broad Commander Exploiter, Engine Builder, and Power-Level Calibrator aliases.
 """
 
 from __future__ import annotations
@@ -305,98 +299,6 @@ def _has_meaningful_plan_support(plan_entry: CardPlanFitEntry | None) -> bool:
     }
 
 
-def _lens_key(philosophy_context: dict | None) -> str:
-    if not philosophy_context:
-        return ""
-    return str(philosophy_context.get("key") or "").strip().lower()
-
-
-def _filter_overbroad_philosophy_matches(
-    protect_matches: list[str],
-    review_matches: list[str],
-    tags: set[str],
-    plan_entry: CardPlanFitEntry | None,
-    role_entry: CardRoleEntry,
-    philosophy_context: dict | None,
-) -> tuple[list[str], list[str]]:
-    """Trim philosophy-bias matches that proved too broad in v0.6.6.5 QA.
-
-    Normal plan-fit and infrastructure protection still run elsewhere. This only
-    controls whether the *philosophy layer* adds extra score changes and visible
-    philosophy notes.
-    """
-    key = _lens_key(philosophy_context)
-
-    # Mana-base infrastructure should be protected by normal mana-base/support
-    # logic, not by philosophy-specific aliases. This prevents high-power and
-    # engine lenses from adjusting every dual/fetch/basic land.
-    if _is_mana_base_infrastructure(tags):
-        return [], []
-
-    if key == "balanced_unknown":
-        # v0.6.6.6 lock note: Balanced / Unknown is the neutral/default lens. It should
-        # not create extra philosophy-protection notes for normal primary-plan,
-        # commander, role-filler, or infrastructure cards; the normal protection
-        # system already handles those. Balanced only adds review pressure to
-        # *clear* off-plan cards that lack synergy/infrastructure context.
-        protect_matches = [m for m in protect_matches if m == "declared_user_intent"]
-        if "declared_user_intent" not in protect_matches:
-            protect_matches = []
-
-        review_matches = [m for m in review_matches if m in {"off_plan", "user_intent_conflict"}]
-        if not (plan_entry and plan_entry.possible_off_plan):
-            review_matches = []
-        elif tags & (INFRASTRUCTURE_TAGS | SYNERGY_TAGS):
-            # Cards with real infrastructure/synergy tags should be handled by
-            # normal context/manual-review rules instead of receiving an extra
-            # Balanced philosophy penalty.
-            review_matches = []
-        return protect_matches, review_matches
-
-    if key == "commander_exploiter":
-        # Commander Exploiter should care about commander text, not every generic
-        # ramp/draw/removal support card. Broad resource_converter matches need
-        # direct plan support or commander-specific payoff evidence.
-        specific_tags = {
-            "commander_payoff_amplifier", "trigger_amplifier", "copy_amplifier",
-            "etb_amplifier", "copy_clone_value", "dragon_copy_value",
-            "commander_protection", "activated_ability_synergy", "cast_trigger",
-            "noncreature_spell_payoff", "spell_payoff", "go_tall_support",
-            "counter_synergy", "mana_sink", "x_spell",
-        }
-        if "resource_converter" in protect_matches and not ((plan_entry and (plan_entry.supports_primary or plan_entry.supports_secondary)) or (tags & specific_tags)):
-            protect_matches = [m for m in protect_matches if m != "resource_converter"]
-        if "generic_goodstuff" in review_matches and (plan_entry and (plan_entry.supports_primary or plan_entry.supports_secondary)):
-            review_matches = [m for m in review_matches if m != "generic_goodstuff"]
-        return protect_matches, review_matches
-
-    if key == "engine_builder":
-        # Engine Builder can be active, but generic landfall/lands_matter or
-        # normal infrastructure should not make every support card look like an
-        # engine piece. Require a real engine connector/payoff tag or plan support.
-        engine_specific_tags = {
-            "sacrifice_outlet", "free_sacrifice_outlet", "sacrifice_payoff",
-            "artifact_payoff", "artifact_token_synergy", "treasure_synergy",
-            "death_trigger_payoff", "aristocrat_payoff", "recursion",
-            "graveyard_enabler", "discard_outlet", "trigger_amplifier",
-            "etb_amplifier", "copy_amplifier", "commander_payoff_amplifier",
-            "landfall_payoff", "token_maker", "card_selection", "tutor",
-            "mana_sink",
-        }
-        if not ((tags & engine_specific_tags) or (plan_entry and (plan_entry.supports_primary or plan_entry.supports_secondary))):
-            protect_matches = [m for m in protect_matches if m not in {"engine_piece", "connector_card", "enabler", "weak_alone_strong_in_context"}]
-        return protect_matches, review_matches
-
-    if key == "power_level_calibrator":
-        # Power-Level Calibrator should focus on bracket/table-fit evidence, not
-        # treat every normal support role as a table-fit adjustment.
-        if not (tags & HIGH_PRESSURE_TAGS):
-            protect_matches = [m for m in protect_matches if m not in {"table_fit_card"}]
-            review_matches = [m for m in review_matches if m not in {"bracket_pressure", "table_mismatch", "unwanted_fast_mana", "unwanted_tutor", "unwanted_combo"}]
-        return protect_matches, review_matches
-
-    return protect_matches, review_matches
-
 
 PHILOSOPHY_PROTECT_ROLE_TAGS = {
     "primary_plan_support": set(),
@@ -578,18 +480,15 @@ def _record_philosophy_bias_event(philosophy_context: dict | None, event: str, c
         "no_match": 0,
         "total_bias_hits": 0,
         "suppressed_infrastructure_review": 0,
-        "suppressed_overbroad_bias": 0,
         "_evaluated_cards": set(),
         "_applied_cards": set(),
         "_protected_adjusted_cards": set(),
         "_review_adjusted_cards": set(),
         "_no_match_cards": set(),
         "_suppressed_infrastructure_review_cards": set(),
-        "_suppressed_overbroad_bias_cards": set(),
         "example_applied_cards": [],
         "example_no_match_cards": [],
         "example_suppressed_infrastructure_review_cards": [],
-        "example_suppressed_overbroad_bias_cards": [],
         "watch_language_entries": 0,
         "example_watch_language_cards": [],
     })
@@ -605,7 +504,6 @@ def _record_philosophy_bias_event(philosophy_context: dict | None, event: str, c
             "review_adjustments": "_review_adjusted_cards",
             "no_match": "_no_match_cards",
             "suppressed_infrastructure_review": "_suppressed_infrastructure_review_cards",
-            "suppressed_overbroad_bias": "_suppressed_overbroad_bias_cards",
             "watch_language_entries": "_watch_language_cards",
         }
         set_key = set_key_by_event.get(event)
@@ -629,10 +527,6 @@ def _record_philosophy_bias_event(philosophy_context: dict | None, event: str, c
                 examples.append(card_name)
         elif event == "suppressed_infrastructure_review":
             examples = stats.setdefault("example_suppressed_infrastructure_review_cards", [])
-            if card_name not in examples and len(examples) < 12:
-                examples.append(card_name)
-        elif event == "suppressed_overbroad_bias":
-            examples = stats.setdefault("example_suppressed_overbroad_bias_cards", [])
             if card_name not in examples and len(examples) < 12:
                 examples.append(card_name)
         elif event == "watch_language_entries":
@@ -661,24 +555,11 @@ def _philosophy_bias_delta(tags: set[str], plan_entry: CardPlanFitEntry | None, 
     protect_matches = _role_matches_bias(protect_roles, tags, PHILOSOPHY_PROTECT_ROLE_TAGS, plan_entry, role_entry)
     review_matches = _role_matches_bias(review_roles, tags, PHILOSOPHY_REVIEW_ROLE_TAGS, plan_entry, role_entry)
 
-    original_protect_matches = list(protect_matches)
-    original_review_matches = list(review_matches)
-    protect_matches, review_matches = _filter_overbroad_philosophy_matches(
-        protect_matches=protect_matches,
-        review_matches=review_matches,
-        tags=tags,
-        plan_entry=plan_entry,
-        role_entry=role_entry,
-        philosophy_context=philosophy_context,
-    )
-    if (original_protect_matches or original_review_matches) and not (protect_matches or review_matches):
-        _record_philosophy_bias_event(philosophy_context, "suppressed_overbroad_bias", role_entry.card_name)
-
-    # v0.6.6.2.2/v0.6.6.6 lock note: a normal fixing land should not receive a visible
-    # philosophy review/protect pressure note. Keep normal mana-base/protected
-    # infrastructure logic intact; suppress only philosophy-layer nudges.
-    if (review_matches or protect_matches) and _is_mana_base_infrastructure(tags):
-        protect_matches = []
+    # v0.6.6.2.2: a normal fixing land should not receive a visible
+    # Commander Exploiter "generic goodstuff" review-pressure note. Keep normal
+    # mana-base/protected-infrastructure logic intact; suppress only the
+    # philosophy review-side nudge.
+    if review_matches and _is_mana_base_infrastructure(tags):
         review_matches = []
         _record_philosophy_bias_event(philosophy_context, "suppressed_infrastructure_review", role_entry.card_name)
 

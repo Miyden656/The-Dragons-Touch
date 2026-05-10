@@ -1,6 +1,6 @@
 """Companion rule helpers for The Dragon's Touch.
 
-v0.6.6.6 scope:
+v0.6.6.5.2 scope:
 - Detect official companion cards in companion/reference zones.
 - Provide companion-intake wording for every official companion.
 - Validate implemented companion restrictions when a companion is actually detected.

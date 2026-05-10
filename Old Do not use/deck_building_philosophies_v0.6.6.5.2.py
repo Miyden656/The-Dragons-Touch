@@ -24,7 +24,7 @@ philosophy lenses consistently across subtypes.
 v0.6.6.1 adds the foundation for philosophy-aware cut/replacement bias.
 v0.6.6.2 turns on a light optional-cut scoring nudge while leaving strategy detection, legality, and collection matching unchanged.
 v0.6.6.5 adds a philosophy-bias QA / stress-test checkpoint while preserving the v0.6.6.4.2 replacement-bias behavior and all quality gates.
-v0.6.6.6 locks the v0.6.6 philosophy-bias milestone and documents its scope, boundaries, and QA expectations. The v0.6.6.5.2 balanced-neutrality and companion-review cleanup remains active.
+v0.6.6.5.2 makes Balanced / Unknown more neutral and clarifies companion manual-review wording for unsupported companion restrictions.
 """
 
 from __future__ import annotations
@@ -82,7 +82,7 @@ class PhilosophyProfile:
     cut_bias_review_roles: List[str] = field(default_factory=list)
     replacement_bias_roles: List[str] = field(default_factory=list)
     bias_strength: str = "guidance"
-    bias_warning: str = "v0.6.6.6 locks the philosophy-bias milestone: light optional-cut nudges, protected/watch explanation fields, replacement-candidate presentation nudges, balanced-neutrality cleanup, and companion manual-review wording are active. Bias must not override legality, required cuts, pilot-protected cards, color identity, companion restrictions, collection mode, quality gates, or explicit pilot intent."
+    bias_warning: str = "v0.6.6.5.2 keeps light optional-cut and replacement-candidate bias active, adds balanced-neutrality cleanup, and preserves QA/stress-test diagnostics. It must not override legality, required cuts, pilot-protected cards, color identity, companion restrictions, collection mode, quality gates, or explicit pilot intent."
     tone: str = "balanced, clear, and supportive"
     example_language: str = ""
 
@@ -678,7 +678,7 @@ def _build_bias_profile(profile: PhilosophyProfile) -> dict:
 
     return {
         "philosophy_bias_foundation_active": True,
-        "philosophy_bias_foundation_version": "v0.6.6.6",
+        "philosophy_bias_foundation_version": "v0.6.6.5.2",
         "bias_scoring_active": True,
         "cut_bias_scoring_active": True,
         "replacement_bias_scoring_active": True,

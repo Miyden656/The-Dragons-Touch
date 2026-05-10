@@ -24,7 +24,6 @@ philosophy lenses consistently across subtypes.
 v0.6.6.1 adds the foundation for philosophy-aware cut/replacement bias.
 v0.6.6.2 turns on a light optional-cut scoring nudge while leaving strategy detection, legality, and collection matching unchanged.
 v0.6.6.5 adds a philosophy-bias QA / stress-test checkpoint while preserving the v0.6.6.4.2 replacement-bias behavior and all quality gates.
-v0.6.6.6 locks the v0.6.6 philosophy-bias milestone and documents its scope, boundaries, and QA expectations. The v0.6.6.5.2 balanced-neutrality and companion-review cleanup remains active.
 """
 
 from __future__ import annotations
@@ -82,7 +81,7 @@ class PhilosophyProfile:
     cut_bias_review_roles: List[str] = field(default_factory=list)
     replacement_bias_roles: List[str] = field(default_factory=list)
     bias_strength: str = "guidance"
-    bias_warning: str = "v0.6.6.6 locks the philosophy-bias milestone: light optional-cut nudges, protected/watch explanation fields, replacement-candidate presentation nudges, balanced-neutrality cleanup, and companion manual-review wording are active. Bias must not override legality, required cuts, pilot-protected cards, color identity, companion restrictions, collection mode, quality gates, or explicit pilot intent."
+    bias_warning: str = "v0.6.6.5 keeps light optional-cut and replacement-candidate bias active, adds QA/stress-test diagnostics, and preserves cleaner report language plus tighter role-alias precision. It must not override legality, required cuts, pilot-protected cards, color identity, companion restrictions, collection mode, quality gates, or explicit pilot intent."
     tone: str = "balanced, clear, and supportive"
     example_language: str = ""
 
@@ -580,13 +579,8 @@ def _build_bias_profile(profile: PhilosophyProfile) -> dict:
 
     key_specific: dict[str, dict[str, list[str] | str]] = {
         "balanced_unknown": {
-            # v0.6.6.5.2: Balanced / Unknown must stay mostly neutral. Normal
-            # protection/context rules already handle commander support, primary
-            # plan support, infrastructure, role-fillers, and protected cards.
-            # The Balanced philosophy layer should add visible cut-bias text only
-            # to clear off-plan cards or explicit user-intent conflicts.
-            "protect": ["declared_user_intent"],
-            "review": ["off_plan", "user_intent_conflict"],
+            "protect": ["primary_plan_support", "commander_synergy", "essential_infrastructure", "declared_user_intent"],
+            "review": ["off_plan", "unsupported_package", "role_imbalance", "user_intent_conflict"],
             "replacement": ["role_balance", "strategy_support", "mana_consistency", "clear_deck_identity"],
             "strength": "neutral",
         },
@@ -678,7 +672,7 @@ def _build_bias_profile(profile: PhilosophyProfile) -> dict:
 
     return {
         "philosophy_bias_foundation_active": True,
-        "philosophy_bias_foundation_version": "v0.6.6.6",
+        "philosophy_bias_foundation_version": "v0.6.6.5",
         "bias_scoring_active": True,
         "cut_bias_scoring_active": True,
         "replacement_bias_scoring_active": True,

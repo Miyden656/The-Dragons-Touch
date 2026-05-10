@@ -31,9 +31,9 @@ v0.6.6.3.1:
 - Ensure Why this matters and Review instruction fields are surfaced in normal report output.
 - Strip old raw v0.6.6.2.2 final-verdict wording from philosophy adjustment text.
 
-v0.6.6.6 lock note:
-- Make Balanced / Unknown more neutral before v0.6.6 lock.
-- Suppress Balanced philosophy notes on normal infrastructure, primary-plan support, and context-synergy cards.
+v0.6.6.5.1:
+- Reduce overactive philosophy-bias aliases before v0.6.6 lock.
+- Keep Balanced / Unknown mostly neutral.
 - Suppress philosophy bias on normal mana-base infrastructure.
 - Require stronger evidence for broad Commander Exploiter, Engine Builder, and Power-Level Calibrator aliases.
 """
@@ -334,22 +334,14 @@ def _filter_overbroad_philosophy_matches(
         return [], []
 
     if key == "balanced_unknown":
-        # v0.6.6.6 lock note: Balanced / Unknown is the neutral/default lens. It should
-        # not create extra philosophy-protection notes for normal primary-plan,
-        # commander, role-filler, or infrastructure cards; the normal protection
-        # system already handles those. Balanced only adds review pressure to
-        # *clear* off-plan cards that lack synergy/infrastructure context.
-        protect_matches = [m for m in protect_matches if m == "declared_user_intent"]
-        if "declared_user_intent" not in protect_matches:
+        # Balanced / Unknown should remain exploratory. It can protect obvious
+        # primary-plan cards and review clear off-plan cards, but it should not
+        # add broad infrastructure/role-balance philosophy pressure.
+        protect_matches = [m for m in protect_matches if m in {"primary_plan_support", "declared_user_intent"}]
+        review_matches = [m for m in review_matches if m in {"off_plan", "unsupported_package", "user_intent_conflict"}]
+        if not (plan_entry and plan_entry.supports_primary):
             protect_matches = []
-
-        review_matches = [m for m in review_matches if m in {"off_plan", "user_intent_conflict"}]
         if not (plan_entry and plan_entry.possible_off_plan):
-            review_matches = []
-        elif tags & (INFRASTRUCTURE_TAGS | SYNERGY_TAGS):
-            # Cards with real infrastructure/synergy tags should be handled by
-            # normal context/manual-review rules instead of receiving an extra
-            # Balanced philosophy penalty.
             review_matches = []
         return protect_matches, review_matches
 
@@ -674,7 +666,7 @@ def _philosophy_bias_delta(tags: set[str], plan_entry: CardPlanFitEntry | None, 
     if (original_protect_matches or original_review_matches) and not (protect_matches or review_matches):
         _record_philosophy_bias_event(philosophy_context, "suppressed_overbroad_bias", role_entry.card_name)
 
-    # v0.6.6.2.2/v0.6.6.6 lock note: a normal fixing land should not receive a visible
+    # v0.6.6.2.2/v0.6.6.5.1: a normal fixing land should not receive a visible
     # philosophy review/protect pressure note. Keep normal mana-base/protected
     # infrastructure logic intact; suppress only philosophy-layer nudges.
     if (review_matches or protect_matches) and _is_mana_base_infrastructure(tags):

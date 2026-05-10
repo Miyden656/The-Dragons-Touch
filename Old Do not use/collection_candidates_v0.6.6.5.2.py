@@ -1,6 +1,6 @@
 """Collection candidate matching for The Dragon's Touch.
 
-v0.6.6.6 lock scope:
+v0.6.6.5.2 scope:
 - Integrate Collection Pull quality into report/prompt guidance.
 - Keep owned-card recommendations honest: candidates are review candidates, not automatic swaps.
 - Track collection gaps per replacement category using stricter strong-fit evidence.
@@ -625,7 +625,7 @@ REPLACEMENT_BIAS_ROLE_TO_COLLECTION_ROLES: dict[str, set[str]] = {
 def _replacement_bias_matches(role_set: set[str], philosophy_context: dict[str, Any] | None) -> list[str]:
     """Return selected philosophy replacement-role buckets matched by this card.
 
-    v0.6.6.6 locks these matches as a light presentation/order nudge only, exposes them to QA diagnostics, and relies on balanced-neutrality cleanup on the cut-bias side.
+    v0.6.6.5.2 keeps these matches as a light presentation/order nudge only, exposes them to QA diagnostics, and relies on balanced-neutrality cleanup on the cut-bias side.
     It does not create Strong candidates without the existing direct need,
     semantic fit, quality gate, color identity, collection, and companion checks.
     """
@@ -847,7 +847,7 @@ def build_collection_candidate_summary(
         "Strong promotion gate is active: standalone beaters, generic colorless bodies, and self-protection cards are usually capped at Possible.",
         "Collection gaps are tracked per replacement category using strict strong-fit evidence, not broad multi-category overlap.",
         "Artifact-context-dependent cards are capped at Possible unless the deck has artifact-token/artifact-creature/artifact-strategy support.",
-        "v0.6.6.6 replacement-bias lock is active: philosophy nudges are counted, exampled, and still cannot override quality gates.",
+        "v0.6.6.5.2 replacement bias QA visibility is active: philosophy nudges are counted, exampled, and still cannot override quality gates.",
     ])
 
     if not active:
@@ -1142,9 +1142,9 @@ def build_collection_candidate_summary(
         summary.notes.append("Shakeup candidates are not guaranteed upgrades; they are the best available experiments from the selected collection pool.")
     if summary.replacement_bias_active:
         if summary.replacement_bias_adjusted_cards:
-            summary.notes.append(f"v0.6.6.6 philosophy-aware replacement bias nudged {summary.replacement_bias_adjusted_cards} owned candidate(s) for {summary.replacement_bias_lens}; this is not an automatic upgrade verdict.")
+            summary.notes.append(f"v0.6.6.5.2 philosophy-aware replacement bias nudged {summary.replacement_bias_adjusted_cards} owned candidate(s) for {summary.replacement_bias_lens}; this is not an automatic upgrade verdict.")
         else:
-            summary.notes.append(f"v0.6.6.6 replacement bias was active for {summary.replacement_bias_lens}, but no owned candidates had enough normal deck-fit evidence to receive a philosophy nudge.")
+            summary.notes.append(f"v0.6.6.5.2 replacement bias was active for {summary.replacement_bias_lens}, but no owned candidates had enough normal deck-fit evidence to receive a philosophy nudge.")
 
     if downgrade_reasons:
         summary.downgrade_reason_counts = list(downgrade_reasons.most_common())

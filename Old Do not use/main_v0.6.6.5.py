@@ -55,7 +55,7 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.6.6 — v0.6.6 lock / bias documentation"
+VERSION_LABEL = "v0.6.6.5 — philosophy bias QA / stress-test checkpoint"
 
 
 def build_analysis_context(

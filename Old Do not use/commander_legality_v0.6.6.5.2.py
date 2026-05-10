@@ -245,7 +245,7 @@ def check_companion_legality(
     if violations:
         legal: bool | None = False
     elif manual_reviews:
-        # v0.6.6.6: unsupported companion restrictions are not the same as
+        # v0.6.6.5.2: unsupported companion restrictions are not the same as
         # automated violations. Return None so reports can say manual review is
         # required instead of implying a violation was found.
         legal = None

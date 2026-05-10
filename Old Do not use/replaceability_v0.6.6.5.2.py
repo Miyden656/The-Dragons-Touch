@@ -31,7 +31,7 @@ v0.6.6.3.1:
 - Ensure Why this matters and Review instruction fields are surfaced in normal report output.
 - Strip old raw v0.6.6.2.2 final-verdict wording from philosophy adjustment text.
 
-v0.6.6.6 lock note:
+v0.6.6.5.2:
 - Make Balanced / Unknown more neutral before v0.6.6 lock.
 - Suppress Balanced philosophy notes on normal infrastructure, primary-plan support, and context-synergy cards.
 - Suppress philosophy bias on normal mana-base infrastructure.
@@ -334,7 +334,7 @@ def _filter_overbroad_philosophy_matches(
         return [], []
 
     if key == "balanced_unknown":
-        # v0.6.6.6 lock note: Balanced / Unknown is the neutral/default lens. It should
+        # v0.6.6.5.2: Balanced / Unknown is the neutral/default lens. It should
         # not create extra philosophy-protection notes for normal primary-plan,
         # commander, role-filler, or infrastructure cards; the normal protection
         # system already handles those. Balanced only adds review pressure to
@@ -674,7 +674,7 @@ def _philosophy_bias_delta(tags: set[str], plan_entry: CardPlanFitEntry | None, 
     if (original_protect_matches or original_review_matches) and not (protect_matches or review_matches):
         _record_philosophy_bias_event(philosophy_context, "suppressed_overbroad_bias", role_entry.card_name)
 
-    # v0.6.6.2.2/v0.6.6.6 lock note: a normal fixing land should not receive a visible
+    # v0.6.6.2.2/v0.6.6.5.2: a normal fixing land should not receive a visible
     # philosophy review/protect pressure note. Keep normal mana-base/protected
     # infrastructure logic intact; suppress only philosophy-layer nudges.
     if (review_matches or protect_matches) and _is_mana_base_infrastructure(tags):

@@ -74,3 +74,8 @@ Patch v0.6.6.4.1 — Replacement Bias Visibility and Role-Alias Cleanup
 Patch v0.6.6.4.2 — Replacement Bias Language and Alias Precision Cleanup
 Patch v0.6.6.5 — Philosophy Bias QA / Stress Test
 
+Patch v0.6.6.5.1 — Philosophy Bias Overactivity Cleanup
+Patch v0.6.6.5.2 — Balanced Neutrality and Companion Review Wording Cleanup
+Patch v0.6.6.6 — Lock / Bias Documentation
+Patch v0.6.7.1 — Desktop UI Shell / Navigation Foundation
+
