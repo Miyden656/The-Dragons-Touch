@@ -1,6 +1,6 @@
 """
 The Dragon's Touch - PySide6 Desktop UI Foundation
-Version: v0.6.7.7.2 — Run Analysis Scrollbox and Detail Panel Layout Cleanup
+Version: v0.6.7.7.1 — Backend Entrypoint Rename, Run Analysis Layout Cleanup, and Combo Tracker Placeholder
 
 Standalone local desktop UI foundation for a fantasy-themed Commander deck-building
 and deck-review app.
@@ -42,8 +42,8 @@ from PySide6.QtWidgets import (
 )
 
 
-APP_VERSION = "v0.6.7.7.2"
-APP_PHASE = "Run Analysis Scrollbox and Detail Panel Layout Cleanup"
+APP_VERSION = "v0.6.7.7.1"
+APP_PHASE = "Backend Entrypoint Rename, Run Analysis Layout Cleanup, and Combo Tracker Placeholder"
 BACKEND_STATUS = "Backend not connected — CLI remains stable source of truth"
 LOCKED_BACKEND_VERSION = "v0.6.6.6"
 
@@ -1427,7 +1427,7 @@ class MainWindow(QMainWindow):
     def page_run_review(self):
         page, layout = self.page_container(
             "Run Analysis",
-            f"Preview the safe main.py backend bridge handoff and optional combo tracker. {APP_VERSION} keeps dense details scrollable and does not execute backend commands or call external APIs."
+            f"Preview the safe main.py backend bridge handoff and optional combo tracker. {APP_VERSION} does not execute backend commands or call external APIs."
         )
         body = QWidget(); body_layout = QHBoxLayout(body); body_layout.setContentsMargins(0, 0, 0, 0); body_layout.setSpacing(14)
 
@@ -1440,30 +1440,22 @@ class MainWindow(QMainWindow):
         l_layout.addWidget(run_btn)
 
         readiness = ReportCard("Backend Readiness Checklist", self.theme, badges=[("No engine call", "manual")])
-        readiness_box = self.readonly_text_box(self.run_readiness_text(), min_height=110, max_height=155)
-        readiness_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        readiness.body.addWidget(readiness_box)
-        l_layout.addWidget(readiness, stretch=0)
+        readiness.body.addWidget(self.make_text(self.run_readiness_text(), paper=True))
+        l_layout.addWidget(readiness)
 
         bridge_status = ReportCard("Bridge Status", self.theme, badges=[("main.py preview", "manual"), ("Execution disabled", "protected")])
-        bridge_status_box = self.readonly_text_box(
+        bridge_status.body.addWidget(self.make_text(
             "Future backend entrypoint preview: main.py\n"
             "Legacy name note: deck_helper.py was the older reference.\n"
             "Current patch: preview-only. No subprocess, no backend execution, and no external API calls.\n"
             "Combo Tracker: optional future Commander Spellbook workflow, not part of normal deck review.",
-            min_height=105,
-            max_height=150
-        )
-        bridge_status_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        bridge_status.body.addWidget(bridge_status_box)
-        l_layout.addWidget(bridge_status, stretch=0)
+            paper=True
+        ))
+        l_layout.addWidget(bridge_status)
 
         orb_panel = TexturedPanel(self.theme, kind="iron_2", glow=True, corners=False)
         orb_layout = QVBoxLayout(orb_panel); orb_layout.setContentsMargins(12, 12, 12, 12)
-        orb = ForgeOrb(self.theme)
-        orb.setMinimumSize(190, 190)
-        orb.setMaximumHeight(230)
-        orb_layout.addWidget(orb, stretch=1)
+        orb_layout.addWidget(ForgeOrb(self.theme), stretch=1)
         status = QLabel("The forge is staged, not fired. Dense preview details now live behind the detail selector on the right.")
         status.setObjectName("helperText"); status.setAlignment(Qt.AlignCenter); status.setWordWrap(True)
         orb_layout.addWidget(status)
@@ -1472,7 +1464,7 @@ class MainWindow(QMainWindow):
         right = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(right, blur=28, y=8)
         r_layout = QVBoxLayout(right); r_layout.setContentsMargins(24, 24, 24, 24); r_layout.setSpacing(14)
         title = QLabel("Current Run Summary"); title.setObjectName("sectionTitle"); r_layout.addWidget(title)
-        preview = QPlainTextEdit(); preview.setReadOnly(True); preview.setPlainText(self.run_config_preview_text()); preview.setMinimumHeight(180); preview.setMaximumHeight(240); preview.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded); preview.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        preview = QPlainTextEdit(); preview.setReadOnly(True); preview.setPlainText(self.run_config_preview_text()); preview.setMinimumHeight(190); preview.setMaximumHeight(255)
         preview.setObjectName("runConfigPreview")
         self.run_config_preview_box = preview
         r_layout.addWidget(preview, stretch=0)
@@ -1480,8 +1472,6 @@ class MainWindow(QMainWindow):
         selector_title = QLabel("Run Analysis Detail View"); selector_title.setObjectName("sectionTitle"); r_layout.addWidget(selector_title)
         selector_row = QHBoxLayout(); selector_row.setSpacing(8)
         detail_stack = QStackedWidget()
-        detail_stack.setMinimumHeight(360)
-        detail_stack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         detail_buttons = []
 
         def add_detail_button(label, index):
@@ -1503,9 +1493,7 @@ class MainWindow(QMainWindow):
         mapping_box = QPlainTextEdit()
         mapping_box.setReadOnly(True)
         mapping_box.setPlainText(self.backend_runtime_config_mapping_text())
-        mapping_box.setMinimumHeight(260)
-        mapping_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        mapping_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        mapping_box.setMinimumHeight(360)
         mapping_box.setObjectName("runtimeMappingPreview")
         self.runtime_mapping_preview_box = mapping_box
         mapping_card.body.addWidget(mapping_box)
@@ -1515,9 +1503,7 @@ class MainWindow(QMainWindow):
         bridge_box = QPlainTextEdit()
         bridge_box.setReadOnly(True)
         bridge_box.setPlainText(self.backend_bridge_preview_text())
-        bridge_box.setMinimumHeight(260)
-        bridge_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        bridge_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        bridge_box.setMinimumHeight(360)
         bridge_box.setObjectName("backendBridgePreview")
         self.backend_bridge_preview_box = bridge_box
         bridge_card.body.addWidget(bridge_box)
@@ -1527,9 +1513,7 @@ class MainWindow(QMainWindow):
         combo_box = QPlainTextEdit()
         combo_box.setReadOnly(True)
         combo_box.setPlainText(self.combo_tracker_preview_text())
-        combo_box.setMinimumHeight(250)
-        combo_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        combo_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        combo_box.setMinimumHeight(330)
         combo_box.setObjectName("comboTrackerPreview")
         self.combo_tracker_preview_box = combo_box
         combo_card.body.addWidget(combo_box)
@@ -1539,7 +1523,7 @@ class MainWindow(QMainWindow):
         combo_card.body.addWidget(self.default_note("Future behavior: only ping Commander Spellbook after explicit user click, and only when the decklist has changed since the last combo check."))
         detail_stack.addWidget(combo_card)
 
-        boundary_card = ReportCard("Safety Boundary and Future Stages", self.theme, badges=[("v0.6.7.7.2", "manual")])
+        boundary_card = ReportCard("Safety Boundary and Future Stages", self.theme, badges=[("v0.6.7.7.1", "manual")])
         stage_text = (
             "Future Backend Bridge Stages\n"
             "1. Runtime config contract is visible and refreshes live.\n"
@@ -1550,21 +1534,13 @@ class MainWindow(QMainWindow):
             "6. Report generation is still handled only by the locked CLI backend.\n\n"
             f"{self.backend_runtime_config_boundary_text()}"
         )
-        boundary_box = self.readonly_text_box(stage_text, min_height=260, max_height=520)
-        boundary_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        boundary_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        boundary_card.body.addWidget(boundary_box)
+        boundary_card.body.addWidget(self.make_text(stage_text, paper=True))
         detail_stack.addWidget(boundary_card)
 
         detail_stack.setCurrentIndex(0)
         r_layout.addWidget(detail_stack, stretch=1)
 
-        body_layout.addWidget(left, stretch=1); body_layout.addWidget(right, stretch=2)
-        run_scroll = QScrollArea()
-        run_scroll.setWidgetResizable(True)
-        run_scroll.setWidget(body)
-        layout.addWidget(run_scroll, stretch=1)
-        return page
+        body_layout.addWidget(left, stretch=1); body_layout.addWidget(right, stretch=2); layout.addWidget(body, stretch=1); return page
 
     def update_progress_mock(self):
         if not self.progress_bars or self.stack.currentIndex() != self.RUN_REVIEW: return

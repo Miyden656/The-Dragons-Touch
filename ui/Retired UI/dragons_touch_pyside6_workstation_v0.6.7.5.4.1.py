@@ -1,6 +1,6 @@
 """
 The Dragon's Touch - PySide6 Desktop UI Foundation
-Version: v0.6.7.7.2 — Run Analysis Scrollbox and Detail Panel Layout Cleanup
+Version: v0.6.7.5.4.1 — Effective UI Cleanup Hotfix
 
 Standalone local desktop UI foundation for a fantasy-themed Commander deck-building
 and deck-review app.
@@ -42,8 +42,8 @@ from PySide6.QtWidgets import (
 )
 
 
-APP_VERSION = "v0.6.7.7.2"
-APP_PHASE = "Run Analysis Scrollbox and Detail Panel Layout Cleanup"
+APP_VERSION = "v0.6.7.5.4.1"
+APP_PHASE = "Effective UI Cleanup Hotfix"
 BACKEND_STATUS = "Backend not connected — CLI remains stable source of truth"
 LOCKED_BACKEND_VERSION = "v0.6.6.6"
 
@@ -58,13 +58,7 @@ LOCKED_BACKEND_VERSION = "v0.6.6.6"
 # - v0.6.7.5.2 auto-stages Review Setup and Collection Source choices and cleans up Philosophy Lens cards.
 # - v0.6.7.5.3 removes shell rebuilds from collection auto-staging and theme switching to prevent transient flash popups.
 # - v0.6.7.5.4.1 applies visible UI cleanup for Review Intensity, collection summary layout, sidebar heading readability, and philosophy subtype readability.
-# - v0.6.7.5.5 adds an intended bracket selector to Review Setup and staged run previews while keeping backend execution disconnected.
-# - v0.6.7.6 adds a backend runtime config mapping preview without calling the backend.
-# - v0.6.7.6.1 refreshes Run Analysis preview boxes when staged UI values change and lightly cleans up layout spacing.
-# - v0.6.7.6.2 polishes the runtime config mapping into a clearer future backend handoff contract.
-# - v0.6.7.7 adds a first safe backend bridge preview without executing main.py or any backend command.
-# - v0.6.7.7.1 updates the backend entrypoint preview to main.py, cleans up Run Analysis layout, and adds an optional Commander Spellbook combo tracker placeholder.
-# - v0.6.7.8 may become the first guarded execution bridge if the preview checks out.
+# - v0.6.7.6 should be the first safe backend-call bridge, if the config preview checks out.
 # Keep this file standalone until backend execution patches are intentionally made.
 
 DRAGON_FORGE = {
@@ -131,7 +125,6 @@ class AppState:
     cut_depth: str = "Normal"
     prompt_mode: str = "Interactive AI chat"
     budget_note: str = "Optional budget note, e.g. $25/card"
-    intended_bracket: str = "Not sure yet"
     respect_table_bracket: bool = False
     use_collection_settings: bool = False
     collection_mode: str = "No collection"
@@ -375,10 +368,6 @@ class MainWindow(QMainWindow):
         self.collection_folder_button = None
         self.collection_files_button = None
         self.collection_preview_boxes = []
-        self.run_config_preview_box = None
-        self.runtime_mapping_preview_box = None
-        self.backend_bridge_preview_box = None
-        self.combo_tracker_preview_box = None
         self.setWindowTitle(f"The Dragon's Touch — {APP_VERSION}")
         self.resize(1500, 930)
         self.setMinimumSize(1180, 760)
@@ -426,10 +415,6 @@ class MainWindow(QMainWindow):
         self.collection_folder_button = None
         self.collection_files_button = None
         self.collection_preview_boxes = []
-        self.run_config_preview_box = None
-        self.runtime_mapping_preview_box = None
-        self.backend_bridge_preview_box = None
-        self.combo_tracker_preview_box = None
         self.stack = QStackedWidget()
         self.build_shell()
         self.apply_theme()
@@ -694,19 +679,6 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentIndex(index)
         for btn in self.nav_buttons:
             btn.setChecked(btn.index == index)
-        if index == self.RUN_ANALYSIS:
-            self.refresh_run_analysis_previews()
-
-    def refresh_run_analysis_previews(self):
-        """Refresh Run Analysis preview text from current staged UI state without rebuilding pages."""
-        if self.run_config_preview_box is not None:
-            self.run_config_preview_box.setPlainText(self.run_config_preview_text())
-        if self.runtime_mapping_preview_box is not None:
-            self.runtime_mapping_preview_box.setPlainText(self.backend_runtime_config_mapping_text())
-        if self.backend_bridge_preview_box is not None:
-            self.backend_bridge_preview_box.setPlainText(self.backend_bridge_preview_text())
-        if self.combo_tracker_preview_box is not None:
-            self.combo_tracker_preview_box.setPlainText(self.combo_tracker_preview_text())
 
     def refresh_context_panel_values(self):
         """Refresh right-side context values without rebuilding the whole shell."""
@@ -1040,21 +1012,18 @@ class MainWindow(QMainWindow):
             f"Intensity meaning: {self.review_intensity_meaning()}\n"
             f"Prompt mode: {self.state.prompt_mode}\n"
             f"Budget note: {self.state.budget_note}\n"
-            f"Intended bracket: {self.state.intended_bracket}\n"
             f"Table boundary: {bracket_line}\n"
             f"Collection handoff: {collection_line}\n"
             "Backend config mapping: not connected yet"
         )
 
-    def stage_review_settings(self, output_combo, direction_combo, cut_combo, prompt_combo, budget_input, intended_bracket_combo, bracket_check, collection_check, summary_label=None, intensity_meaning_label=None):
+    def stage_review_settings(self, output_combo, direction_combo, cut_combo, prompt_combo, budget_input, bracket_check, collection_check, summary_label=None, intensity_meaning_label=None):
         """Auto-stage Review Setup choices without requiring an Apply button or popup."""
         self.state.output_mode = output_combo.currentText()
         self.state.review_direction = direction_combo.currentText()
         self.state.cut_depth = cut_combo.currentText()
         self.state.prompt_mode = prompt_combo.currentText()
         self.state.budget_note = budget_input.text().strip() or "No budget note provided"
-        self.state.intended_bracket = intended_bracket_combo.currentText()
-        self.state.bracket = self.state.intended_bracket if self.state.intended_bracket != "Not sure yet" else "Not estimated"
         self.state.respect_table_bracket = bracket_check.isChecked()
         self.state.use_collection_settings = collection_check.isChecked()
         self.state.status = "Review settings auto-staged"
@@ -1063,7 +1032,6 @@ class MainWindow(QMainWindow):
         if intensity_meaning_label is not None:
             intensity_meaning_label.setText(self.review_intensity_meaning())
         self.refresh_context_panel_values()
-        self.refresh_run_analysis_previews()
 
     def page_analysis_setup(self):
         page, layout = self.page_container(
@@ -1095,18 +1063,11 @@ class MainWindow(QMainWindow):
 
         budget_card = ReportCard("Table / Budget Boundaries", self.theme)
         budget_input = QLineEdit(self.state.budget_note)
-        intended_bracket_combo = QComboBox()
-        intended_bracket_combo.addItems(["Not sure yet", "Bracket 1", "Bracket 2", "Bracket 3", "Bracket 4", "Bracket 5"])
-        intended_bracket_combo.setCurrentText(self.state.intended_bracket)
-        self.configure_combo_popup(intended_bracket_combo)
         bracket_check = QCheckBox("Respect stated table bracket")
         bracket_check.setChecked(self.state.respect_table_bracket)
         collection_check = QCheckBox("Use Collection Source page settings when connected")
         collection_check.setChecked(self.state.use_collection_settings)
-        budget_card.body.addWidget(QLabel("Budget Note"))
         budget_card.body.addWidget(budget_input)
-        budget_card.body.addWidget(QLabel("Bracket Intended"))
-        budget_card.body.addWidget(intended_bracket_combo)
         budget_card.body.addWidget(bracket_check)
         budget_card.body.addWidget(collection_check)
         budget_card.body.addWidget(self.default_note("Collection mode and file selection live on the Collection Source page."))
@@ -1122,20 +1083,19 @@ class MainWindow(QMainWindow):
         grid.addWidget(summary, 2, 1)
 
         def auto_stage_review():
-            self.stage_review_settings(output_combo, direction_combo, cut_combo, prompt_combo, budget_input, intended_bracket_combo, bracket_check, collection_check, summary_label, intensity_meaning_label)
+            self.stage_review_settings(output_combo, direction_combo, cut_combo, prompt_combo, budget_input, bracket_check, collection_check, summary_label, intensity_meaning_label)
 
         output_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
         direction_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
         cut_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
         prompt_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
         budget_input.textChanged.connect(lambda _text: auto_stage_review())
-        intended_bracket_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
         bracket_check.toggled.connect(lambda _checked: auto_stage_review())
         collection_check.toggled.connect(lambda _checked: auto_stage_review())
 
         note = TexturedPanel(self.theme, kind="iron_2", glow=False)
         n_layout = QVBoxLayout(note); n_layout.setContentsMargins(18, 14, 18, 14)
-        n_title = QLabel("v0.6.7.7.1 Boundary"); n_title.setObjectName("sectionTitle"); n_layout.addWidget(n_title)
+        n_title = QLabel("v0.6.7.5.4.1 Boundary"); n_title.setObjectName("sectionTitle"); n_layout.addWidget(n_title)
         n_layout.addWidget(self.make_text("These choices auto-stage inside the UI as soon as you change them. They are not yet handed to the locked backend. Collection mode belongs on the Collection Source page; backend runtime-config mapping comes later."))
         grid.addWidget(note, 3, 0, 1, 2)
 
@@ -1223,7 +1183,6 @@ class MainWindow(QMainWindow):
             f"- Intensity meaning: {self.review_intensity_meaning()}\n"
             f"- Prompt mode: {self.state.prompt_mode}\n"
             f"- Budget note: {self.state.budget_note}\n"
-            f"- Intended bracket: {self.state.intended_bracket}\n"
             f"- Table boundary: {'Respect stated table bracket' if self.state.respect_table_bracket else 'No table-bracket checkbox selected'}\n"
             f"- Collection handoff: {'Use Collection Source page settings' if self.state.use_collection_settings else 'Collection handoff not selected on Review Setup'}\n\n"
             "Philosophy lens\n"
@@ -1237,171 +1196,7 @@ class MainWindow(QMainWindow):
             "Backend mapping\n"
             "- Backend execution: not connected in UI yet\n"
             "- Locked backend source of truth: v0.6.6.6 CLI workflow\n"
-            "- v0.6.7.7.1 purpose: preview the main.py bridge handoff, keep dense Run Analysis details organized, and reserve combo tracking as optional/manual"
-        )
-
-    def backend_runtime_config_mapping_text(self):
-        """Contract-style preview of the future backend runtime config. UI-only; no backend calls."""
-        collection_files = [str(Path(path)) for path in self.state.selected_collection_files]
-        collection_files_preview = "None selected"
-        if collection_files:
-            collection_files_preview = "\n".join(f"    - {path}" for path in collection_files[:6])
-            if len(collection_files) > 6:
-                collection_files_preview += f"\n    - ...and {len(collection_files) - 6} more"
-
-        deck_path = self.state.selected_deck_path if self.state.selected_deck_path != "No deck file selected" else "None"
-        collection_folder = self.state.collection_folder if self.state.collection_source_mode == "Entire collection folder" else "Not used for selected-file mode"
-        selected_collection_files = len(self.state.selected_collection_files)
-        deck_handoff_ready = deck_path != "None"
-        collection_source_ready = self.state.collection_mode == "No collection" or self.state.collection_source_note != "Collection source not staged yet."
-
-        return (
-            "Runtime Config Contract Preview\n"
-            "- UI-only contract preview. No backend command is executed.\n"
-            "- This is the proposed handoff shape for the future backend bridge.\n"
-            "- The future bridge should consume this staged UI contract instead of inventing a separate workflow.\n"
-            "- Disconnected systems: Scryfall lookup, legality validation, collection loading, strategy detection, cuts, replacements, and report generation.\n\n"
-            "Execution Boundary\n"
-            "- execution_enabled -> False\n"
-            "- backend_status -> Not connected\n"
-            f"- locked_backend_version -> {LOCKED_BACKEND_VERSION}\n"
-            "- report_generation -> CLI-only for now\n\n"
-            "Deck Input Contract\n"
-            f"- deck_path -> {deck_path}\n"
-            f"- deck_handoff_ready -> {deck_handoff_ready}\n"
-            f"- deck_name_preview -> {self.state.deck_name}\n"
-            f"- commander_preview -> {self.state.commander}\n"
-            f"- commander_detected_preview -> {self.state.commander_detected}\n"
-            f"- deck_size_preview -> {self.state.deck_size}\n"
-            "- source_of_truth -> backend parser later; UI preview is an estimate\n\n"
-            "Review Setup Contract\n"
-            f"- output_mode -> {self.state.output_mode}\n"
-            f"- review_direction -> {self.state.review_direction}\n"
-            f"- review_focus -> {self.review_focus_text()}\n"
-            f"- review_intensity -> {self.state.cut_depth}\n"
-            f"- review_intensity_meaning -> {self.review_intensity_meaning()}\n"
-            f"- prompt_mode -> {self.state.prompt_mode}\n"
-            f"- budget_note -> {self.state.budget_note}\n"
-            f"- intended_bracket -> {self.state.intended_bracket}\n"
-            f"- respect_table_bracket -> {self.state.respect_table_bracket}\n"
-            f"- use_collection_settings -> {self.state.use_collection_settings}\n\n"
-            "Philosophy Contract\n"
-            f"- selected_philosophy -> {self.state.selected_philosophy}\n"
-            "- backend_effect -> guidance bias only; does not override legality, strategy, or explicit user constraints\n\n"
-            "Collection Contract\n"
-            f"- collection_mode -> {self.state.collection_mode}\n"
-            f"- collection_source_mode -> {self.state.collection_source_mode}\n"
-            f"- collection_source_ready -> {collection_source_ready}\n"
-            f"- collection_folder -> {collection_folder}\n"
-            f"- selected_collection_file_count -> {selected_collection_files}\n"
-            f"- collection_txt_file_count_preview -> {self.state.collection_txt_file_count}\n"
-            f"- collection_source_note -> {self.state.collection_source_note}\n"
-            f"- selected_collection_files_preview ->\n{collection_files_preview}\n\n"
-            "Contract Status\n"
-            "- ready_for_preview_review -> True\n"
-            "- ready_for_backend_execution -> False\n"
-            "- next_patch_candidate -> v0.6.7.8 first guarded execution bridge only after preview approval\n"
-        )
-
-    def backend_bridge_preview_text(self):
-        """Preview the safest possible future backend bridge handoff. No subprocess calls."""
-        deck_path = self.state.selected_deck_path if self.state.selected_deck_path != "No deck file selected" else "None"
-        deck_ready = deck_path != "None"
-        collection_ready = self.state.collection_mode == "No collection" or self.state.collection_source_note != "Collection source not staged yet."
-        selected_files = len(self.state.selected_collection_files)
-        source_detail = (
-            f"collection_files_count={selected_files}"
-            if self.state.collection_source_mode == "Select collection files"
-            else f"collection_folder={self.state.collection_folder}; txt_count_preview={self.state.collection_txt_file_count}"
-        )
-        manual_command_preview = "python main.py"
-        if deck_ready:
-            manual_command_preview += f"  # future handoff deck_path={deck_path}"
-        else:
-            manual_command_preview += "  # deck path required before execution"
-
-        return (
-            "Safe Backend Bridge Preview\n"
-            "- This is a bridge preview only. It does not execute anything.\n"
-            "- subprocess.run -> disabled\n"
-            "- main.py execution -> disabled\n"
-            "- legacy_entrypoint_name -> deck_helper.py / older documentation reference\n"
-            "- Scryfall / legality / collection loader / strategy engine / report writer -> disconnected\n"
-            "- The CLI backend remains the source of truth until a later guarded execution patch.\n\n"
-            "Bridge Readiness\n"
-            f"- deck_ready_for_handoff -> {deck_ready}\n"
-            f"- collection_source_ready_or_optional -> {collection_ready}\n"
-            "- runtime_contract_visible -> True\n"
-            "- runtime_contract_refreshes_live -> True\n"
-            "- execution_allowed_in_this_patch -> False\n\n"
-            "Future Backend Entry Candidate\n"
-            "- entrypoint_candidate -> main.py\n"
-            "- legacy_entrypoint_name -> deck_helper.py\n"
-            "- launch_method_candidate -> external subprocess later, not enabled now\n"
-            "- config_source_candidate -> staged UI runtime config contract\n"
-            "- report_output_candidate -> existing CLI output workflow, not opened here yet\n\n"
-            "Manual Command Preview Only\n"
-            f"- command_preview -> {manual_command_preview}\n"
-            f"- review_direction -> {self.state.review_direction}\n"
-            f"- review_intensity -> {self.state.cut_depth}\n"
-            f"- intended_bracket -> {self.state.intended_bracket}\n"
-            f"- collection_mode -> {self.state.collection_mode}\n"
-            f"- collection_source_detail -> {source_detail}\n\n"
-            "Bridge Safety Gates For A Later Patch\n"
-            "- require visible command preview before execution -> True\n"
-            "- require explicit user action before execution -> True\n"
-            "- require backend path/entrypoint validation -> True\n"
-            "- require output folder handling plan -> True\n"
-            "- require error capture and user-readable failure message -> True\n"
-            "- ready_for_guarded_execution_patch -> False"
-        )
-
-    def combo_tracker_preview_text(self):
-        """Preview the future optional Commander Spellbook combo tracker. No API calls."""
-        deck_path = self.state.selected_deck_path if self.state.selected_deck_path != "No deck file selected" else "None"
-        deck_loaded = deck_path != "None"
-        deck_signature_preview = "No deck file loaded"
-        if deck_loaded:
-            deck_signature_preview = f"{Path(deck_path).name} | size_preview={self.state.deck_size} | commander={self.state.commander}"
-
-        return (
-            "Optional Combo Tracker Preview\n"
-            "- Future integration target -> Commander Spellbook API\n"
-            "- Current patch behavior -> placeholder only\n"
-            "- External API calls -> disabled\n"
-            "- Automatic combo lookup during normal deck review -> disabled\n"
-            "- User opt-in required -> True\n\n"
-            "Intended Future Behavior\n"
-            "- Combo lookup should run only when the user clicks a dedicated button.\n"
-            "- If the decklist has not changed since the last combo check, the button should be disabled or report deck unchanged.\n"
-            "- Local state should track the last checked decklist signature/hash.\n"
-            "- The UI should avoid repeated API pings for the same unchanged decklist.\n"
-            "- Normal deck analysis should remain separate from combo lookup.\n\n"
-            "Future Result Targets\n"
-            "- total_combos_found\n"
-            "- combo names\n"
-            "- combo pieces\n"
-            "- combo steps, if returned by the API\n"
-            "- whether each combo is fully contained within the current deck\n"
-            "- optional notes for partial/missing pieces later\n\n"
-            "Current Deck Change Preview\n"
-            f"- deck_loaded -> {deck_loaded}\n"
-            f"- deck_signature_preview -> {deck_signature_preview}\n"
-            "- last_combo_check_signature -> Not stored in this patch\n"
-            "- combo_check_button_state -> Disabled / placeholder in this patch\n"
-            "- commander_spellbook_request_allowed -> False"
-        )
-
-    def backend_runtime_config_boundary_text(self):
-        return (
-            "v0.6.7.7.1 boundary\n"
-            "- This page now uses a detail-selector layout to reduce Run Analysis crowding.\n"
-            "- The future backend entrypoint preview now points to main.py.\n"
-            "- deck_helper.py is retained only as a legacy/older-name reference in the bridge preview.\n"
-            "- The runtime-config handoff contract and safe backend bridge preview remain preview-only.\n"
-            "- The Combo Tracker is an optional future Commander Spellbook workflow and does not call any API here.\n"
-            "- Backend execution, subprocess calls, Commander Spellbook API calls, Scryfall lookup, legality validation, collection loading, strategy detection, cuts, replacements, and report writing remain disconnected.\n"
-            "- A later execution patch must require explicit user action, preserve the visible command preview, capture errors safely, and avoid inventing a separate workflow."
+            "- v0.6.7.5.4.1 purpose: visibly clean up Review Intensity, collection layout, sidebar readability, and philosophy subtype text before a future backend bridge"
         )
 
     def run_readiness_text(self):
@@ -1421,13 +1216,13 @@ class MainWindow(QMainWindow):
         QMessageBox.information(
             self,
             "Run Analysis Backend Hook Prepared",
-            f"{APP_VERSION} has gathered the staged UI choices into a backend bridge preview. It still does not call the locked {LOCKED_BACKEND_VERSION} analysis engine, does not run main.py, and does not execute subprocess commands. Review the runtime contract and safe bridge preview before any future guarded execution patch."
+            f"{APP_VERSION} has gathered the staged UI choices into a backend configuration preview. It still does not call the locked {LOCKED_BACKEND_VERSION} analysis engine. Review the Run Configuration Preview before the future backend bridge patch."
         )
 
     def page_run_review(self):
         page, layout = self.page_container(
             "Run Analysis",
-            f"Preview the safe main.py backend bridge handoff and optional combo tracker. {APP_VERSION} keeps dense details scrollable and does not execute backend commands or call external APIs."
+            f"Review the staged run configuration before future backend execution. {APP_VERSION} prepares the hook, but still does not call the analysis engine."
         )
         body = QWidget(); body_layout = QHBoxLayout(body); body_layout.setContentsMargins(0, 0, 0, 0); body_layout.setSpacing(14)
 
@@ -1440,131 +1235,44 @@ class MainWindow(QMainWindow):
         l_layout.addWidget(run_btn)
 
         readiness = ReportCard("Backend Readiness Checklist", self.theme, badges=[("No engine call", "manual")])
-        readiness_box = self.readonly_text_box(self.run_readiness_text(), min_height=110, max_height=155)
-        readiness_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        readiness.body.addWidget(readiness_box)
-        l_layout.addWidget(readiness, stretch=0)
-
-        bridge_status = ReportCard("Bridge Status", self.theme, badges=[("main.py preview", "manual"), ("Execution disabled", "protected")])
-        bridge_status_box = self.readonly_text_box(
-            "Future backend entrypoint preview: main.py\n"
-            "Legacy name note: deck_helper.py was the older reference.\n"
-            "Current patch: preview-only. No subprocess, no backend execution, and no external API calls.\n"
-            "Combo Tracker: optional future Commander Spellbook workflow, not part of normal deck review.",
-            min_height=105,
-            max_height=150
-        )
-        bridge_status_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        bridge_status.body.addWidget(bridge_status_box)
-        l_layout.addWidget(bridge_status, stretch=0)
+        readiness.body.addWidget(self.make_text(self.run_readiness_text(), paper=True))
+        l_layout.addWidget(readiness)
 
         orb_panel = TexturedPanel(self.theme, kind="iron_2", glow=True, corners=False)
         orb_layout = QVBoxLayout(orb_panel); orb_layout.setContentsMargins(12, 12, 12, 12)
-        orb = ForgeOrb(self.theme)
-        orb.setMinimumSize(190, 190)
-        orb.setMaximumHeight(230)
-        orb_layout.addWidget(orb, stretch=1)
-        status = QLabel("The forge is staged, not fired. Dense preview details now live behind the detail selector on the right.")
+        orb_layout.addWidget(ForgeOrb(self.theme), stretch=1)
+        status = QLabel("The forge is staged, not fired. This page now gathers deck, review, philosophy, and collection choices for inspection before a future backend bridge.")
         status.setObjectName("helperText"); status.setAlignment(Qt.AlignCenter); status.setWordWrap(True)
         orb_layout.addWidget(status)
         l_layout.addWidget(orb_panel, stretch=1)
 
         right = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(right, blur=28, y=8)
         r_layout = QVBoxLayout(right); r_layout.setContentsMargins(24, 24, 24, 24); r_layout.setSpacing(14)
-        title = QLabel("Current Run Summary"); title.setObjectName("sectionTitle"); r_layout.addWidget(title)
-        preview = QPlainTextEdit(); preview.setReadOnly(True); preview.setPlainText(self.run_config_preview_text()); preview.setMinimumHeight(180); preview.setMaximumHeight(240); preview.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded); preview.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        title = QLabel("Run Configuration Preview"); title.setObjectName("sectionTitle"); r_layout.addWidget(title)
+        preview = QPlainTextEdit(); preview.setReadOnly(True); preview.setPlainText(self.run_config_preview_text()); preview.setMinimumHeight(280); preview.setMaximumHeight(360)
         preview.setObjectName("runConfigPreview")
-        self.run_config_preview_box = preview
         r_layout.addWidget(preview, stretch=0)
+        r_layout.addSpacing(24)
 
-        selector_title = QLabel("Run Analysis Detail View"); selector_title.setObjectName("sectionTitle"); r_layout.addWidget(selector_title)
-        selector_row = QHBoxLayout(); selector_row.setSpacing(8)
-        detail_stack = QStackedWidget()
-        detail_stack.setMinimumHeight(360)
-        detail_stack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        detail_buttons = []
-
-        def add_detail_button(label, index):
-            btn = PillButton(label, checked=(index == 0))
-            btn.clicked.connect(lambda checked=False, i=index: detail_stack.setCurrentIndex(i))
-            btn.clicked.connect(lambda checked=False, b=btn: [other.setChecked(False) for other in detail_buttons if other is not b])
-            btn.clicked.connect(lambda checked=False, b=btn: b.setChecked(True))
-            detail_buttons.append(btn)
-            selector_row.addWidget(btn)
-
-        add_detail_button("Runtime Contract", 0)
-        add_detail_button("Bridge Preview", 1)
-        add_detail_button("Combo Tracker", 2)
-        add_detail_button("Safety Boundary", 3)
-        selector_row.addStretch(1)
-        r_layout.addLayout(selector_row)
-
-        mapping_card = ReportCard("Backend Runtime Config Contract Preview", self.theme, badges=[("UI-only", "manual"), ("No engine call", "protected")])
-        mapping_box = QPlainTextEdit()
-        mapping_box.setReadOnly(True)
-        mapping_box.setPlainText(self.backend_runtime_config_mapping_text())
-        mapping_box.setMinimumHeight(260)
-        mapping_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        mapping_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        mapping_box.setObjectName("runtimeMappingPreview")
-        self.runtime_mapping_preview_box = mapping_box
-        mapping_card.body.addWidget(mapping_box)
-        detail_stack.addWidget(mapping_card)
-
-        bridge_card = ReportCard("Safe Backend Bridge Preview", self.theme, badges=[("Preview only", "manual"), ("Execution disabled", "protected")])
-        bridge_box = QPlainTextEdit()
-        bridge_box.setReadOnly(True)
-        bridge_box.setPlainText(self.backend_bridge_preview_text())
-        bridge_box.setMinimumHeight(260)
-        bridge_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        bridge_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        bridge_box.setObjectName("backendBridgePreview")
-        self.backend_bridge_preview_box = bridge_box
-        bridge_card.body.addWidget(bridge_box)
-        detail_stack.addWidget(bridge_card)
-
-        combo_card = ReportCard("Optional Combo Tracker", self.theme, badges=[("Commander Spellbook later", "manual"), ("Opt-in", "protected")])
-        combo_box = QPlainTextEdit()
-        combo_box.setReadOnly(True)
-        combo_box.setPlainText(self.combo_tracker_preview_text())
-        combo_box.setMinimumHeight(250)
-        combo_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        combo_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        combo_box.setObjectName("comboTrackerPreview")
-        self.combo_tracker_preview_box = combo_box
-        combo_card.body.addWidget(combo_box)
-        combo_btn = QPushButton("Check Combos Later — Disabled Placeholder")
-        combo_btn.setEnabled(False)
-        combo_card.body.addWidget(combo_btn)
-        combo_card.body.addWidget(self.default_note("Future behavior: only ping Commander Spellbook after explicit user click, and only when the decklist has changed since the last combo check."))
-        detail_stack.addWidget(combo_card)
-
-        boundary_card = ReportCard("Safety Boundary and Future Stages", self.theme, badges=[("v0.6.7.7.2", "manual")])
+        stages_card = ReportCard("Future Backend Mapping Stages", self.theme, badges=[("v0.6.7.5.4.1", "manual")])
         stage_text = (
-            "Future Backend Bridge Stages\n"
-            "1. Runtime config contract is visible and refreshes live.\n"
-            "2. Safe backend bridge preview is visible and refreshes live.\n"
-            "3. Optional Combo Tracker placeholder is visible but API calls are disabled.\n"
-            "4. Backend command execution is still disabled.\n"
-            "5. A later guarded execution patch must preserve explicit user approval, error capture, and CLI source-of-truth boundaries.\n"
-            "6. Report generation is still handled only by the locked CLI backend.\n\n"
-            f"{self.backend_runtime_config_boundary_text()}"
+            "1. Deck path and preview state are staged.\n"
+            "2. Review Setup choices are staged.\n"
+            "3. Philosophy Lens choice is staged.\n"
+            "4. Collection Source choices are staged.\n"
+            "5. Backend runtime-config mapping is still reserved for a later patch.\n"
+            "6. Report generation is still handled only by the locked CLI backend."
         )
-        boundary_box = self.readonly_text_box(stage_text, min_height=260, max_height=520)
-        boundary_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        boundary_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        boundary_card.body.addWidget(boundary_box)
-        detail_stack.addWidget(boundary_card)
+        stages_card.body.addWidget(self.make_text(stage_text, paper=True))
+        r_layout.addWidget(stages_card)
 
-        detail_stack.setCurrentIndex(0)
-        r_layout.addWidget(detail_stack, stretch=1)
+        boundary = TexturedPanel(self.theme, kind="iron_2", glow=False)
+        b_layout = QVBoxLayout(boundary); b_layout.setContentsMargins(18, 14, 18, 14)
+        b_title = QLabel("v0.6.7.5.4.1 Boundary"); b_title.setObjectName("sectionTitle"); b_layout.addWidget(b_title)
+        b_layout.addWidget(self.make_text("This patch keeps the backend hook preview in one place while Review Setup and Collection Source choices auto-stage immediately. It does not run analysis, load Scryfall, validate legality, load a collection, or write reports."))
+        r_layout.addWidget(boundary)
 
-        body_layout.addWidget(left, stretch=1); body_layout.addWidget(right, stretch=2)
-        run_scroll = QScrollArea()
-        run_scroll.setWidgetResizable(True)
-        run_scroll.setWidget(body)
-        layout.addWidget(run_scroll, stretch=1)
-        return page
+        body_layout.addWidget(left, stretch=1); body_layout.addWidget(right, stretch=2); layout.addWidget(body, stretch=1); return page
 
     def update_progress_mock(self):
         if not self.progress_bars or self.stack.currentIndex() != self.RUN_REVIEW: return
@@ -1628,7 +1336,6 @@ class MainWindow(QMainWindow):
             if box is not None:
                 box.setPlainText(summary_text)
         self.refresh_context_panel_values()
-        self.refresh_run_analysis_previews()
 
     def stage_collection_mode(self, mode):
         self.state.collection_mode = mode
@@ -1820,7 +1527,7 @@ class MainWindow(QMainWindow):
         body = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(body, blur=24, y=8); b_layout = QVBoxLayout(body); b_layout.setContentsMargins(22, 22, 22, 22); b_layout.setSpacing(16)
         theme_card = ReportCard("Theme Options", self.theme, badges=[("Current", "primary")]); row = QHBoxLayout(); dark = QPushButton("Dragon Forge"); dark.setObjectName("primaryButton" if self.theme()["name"] == "Dragon Forge" else "utilityButton"); dark.clicked.connect(lambda: self.set_theme(DRAGON_FORGE)); light = QPushButton("Adventurer's Map"); light.setObjectName("primaryButton" if self.theme()["name"] == "Adventurer's Map" else "utilityButton"); light.clicked.connect(lambda: self.set_theme(ADVENTURERS_MAP)); self.settings_theme_buttons = [(dark, "Dragon Forge"), (light, "Adventurer's Map")]; row.addWidget(dark); row.addWidget(light); row.addStretch(1); theme_card.body.addLayout(row); theme_card.body.addWidget(self.make_text("Dragon Forge remains ember-forge dark. Adventurer’s Map now uses the Cartographer Palette: parchment, dark ink, antique brass, and deep map blue.", paper=True)); b_layout.addWidget(theme_card)
         prefs = ReportCard("UI Preferences", self.theme); pref_grid = QGridLayout(); pref_grid.addWidget(QLabel("Report Detail Level"), 0, 0); detail = QComboBox(); detail.addItems(["Short", "Normal", "Detailed", "Exhaustive"]); detail.setCurrentText("Detailed"); self.configure_combo_popup(detail); pref_grid.addWidget(detail, 0, 1); pref_grid.addWidget(QLabel("Export Format"), 1, 0); export = QComboBox(); export.addItems(["Markdown", "Text", "HTML later", "PDF later"]); self.configure_combo_popup(export); pref_grid.addWidget(export, 1, 1); pref_grid.addWidget(QLabel("Save Folder"), 2, 0); pref_grid.addWidget(QLineEdit("Outputs/"), 2, 1); prefs.body.addLayout(pref_grid); b_layout.addWidget(prefs)
-        version = ReportCard("App Version", self.theme); version.body.addWidget(self.make_text(f"The Dragon’s Touch PySide6 Workstation\nVersion: {APP_VERSION}\nPhase: {APP_PHASE}\nLocked backend: {LOCKED_BACKEND_VERSION}\nBackend: Not connected in UI yet\nPurpose: local deck preview, review settings, collection-source staging, runtime-config contract preview, safe backend bridge preview, and optional combo-tracker placeholder while keeping backend execution and external API calls disabled", paper=True)); b_layout.addWidget(version); b_layout.addStretch(1); layout.addWidget(body, stretch=1); return page
+        version = ReportCard("App Version", self.theme); version.body.addWidget(self.make_text(f"The Dragon’s Touch PySide6 Workstation\nVersion: {APP_VERSION}\nPhase: {APP_PHASE}\nLocked backend: {LOCKED_BACKEND_VERSION}\nBackend: Not connected in UI yet\nPurpose: local deck preview, review settings, collection-source staging, and Run Analysis backend-hook preparation while keeping backend execution disconnected", paper=True)); b_layout.addWidget(version); b_layout.addStretch(1); layout.addWidget(body, stretch=1); return page
 
 
 def main():

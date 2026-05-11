@@ -97,3 +97,21 @@ Patch v0.6.7.3.3 — Adventurer’s Map Dropdown Popup Frame Cleanup
 Patch v0.6.7.4 — Collection Source Selection UI
 Patch v0.6.7.4.1 — Collection Source Visibility and Layout Cleanup
 
+Patch v0.6.7.5 — Run Analysis Backend Hook Preparation
+Patch v0.6.7.5.1 — Staged Update Refresh / Popup Behavior Cleanup
+
+Patch v0.6.7.5.2 — Auto-Staged Settings and Philosophy Layout Cleanup
+Patch v0.6.7.5.3 — Flash Popup Cleanup / Auto-Stage Quiet Mode: complete
+Patch v0.6.7.5.4 — UI Readability and Review Setup Cleanup
+Patch v0.6.7.5.4.1 — Effective UI Cleanup Hotfix
+Patch v0.6.7.5.5 — Intended Bracket Selector / Review Setup Field Cleanup: installed successfully
+
+Patch v0.6.7.6 — Backend Runtime Config Mapping Preview: ready for testing
+Patch v0.6.7.6.1 — Runtime Mapping Refresh and Layout Cleanup
+
+Patch v0.6.7.6.2 — Runtime Config Contract Polish
+Patch v0.6.7.7 — First Safe Backend Bridge Preview
+Patch v0.6.7.7.1 — Backend Entrypoint Rename, Run Analysis Layout Cleanup, and Combo Tracker Placeholder
+
+Patch v0.6.7.7.2 — Run Analysis Scrollbox and Detail Panel Layout Cleanup
+
