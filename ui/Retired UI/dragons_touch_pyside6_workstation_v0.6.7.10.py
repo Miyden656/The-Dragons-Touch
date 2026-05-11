@@ -863,7 +863,7 @@ class MainWindow(QMainWindow):
         QMessageBox.information(
             self,
             "UI Foundation Placeholder",
-            f"This control is part of {APP_VERSION}. The desktop shell is locked as a guarded CLI frontend; this specific utility control remains a placeholder for later polishing."
+            f"This control is part of {APP_VERSION}. The desktop shell is active, but backend integration is intentionally reserved for later v0.6.7 patches."
         )
 
     def backend_hook_message(self, hook_name):
@@ -923,7 +923,7 @@ class MainWindow(QMainWindow):
     def page_deck_input(self):
         page, layout = self.page_container(
             "Deck Selection",
-            f"Choose a local deck file and preview it safely. {APP_VERSION} uses this staged deck for guarded CLI runs while the backend remains the source of truth."
+            f"Choose a local deck file and preview it safely. {APP_VERSION} does not run analysis yet; backend hooks come later."
         )
         body = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(body, blur=26, y=8)
         body_layout = QHBoxLayout(body); body_layout.setContentsMargins(22, 22, 22, 22); body_layout.setSpacing(16)
@@ -984,7 +984,7 @@ class MainWindow(QMainWindow):
         p = QProgressBar(); p.setValue(100 if self.state.selected_deck_path != "No deck file selected" else 0); status_layout.addWidget(p)
         quick = ReportCard("Forge Note", self.theme)
         quick.body.addWidget(self.make_text(
-            f"{APP_VERSION} keeps real local deck-file selection, preserves preview spacing, and stages the selected file for guarded CLI handoff. Backend validation, legality, collection loading, and report generation remain owned by main.py.",
+            f"{APP_VERSION} keeps real local deck-file selection, keeps a clear gap between the deck preview and action buttons, and stages Review Setup choices for later backend mapping. It does not call the analysis engine, Scryfall lookup, legality system, collection loader, or report generator yet.",
             paper=True
         ))
         right.addWidget(status); right.addWidget(quick); right.addStretch(1)
@@ -1241,7 +1241,7 @@ class MainWindow(QMainWindow):
     def page_analysis_setup(self):
         page, layout = self.page_container(
             "Review Setup",
-            f"Stage the same review choices the CLI already supports. {APP_VERSION} auto-stages choices as you change them and hands them to main.py through the guarded CLI bridge."
+            f"Stage the same review choices the CLI already supports. {APP_VERSION} auto-stages choices as you change them; backend mapping still comes later."
         )
         scroll, content = self.scroll_content()
         grid_panel = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(grid_panel, blur=24, y=8)
@@ -3376,7 +3376,7 @@ class MainWindow(QMainWindow):
     def page_collection_tools(self):
         page, layout = self.page_container(
             "Collection Source",
-            f"Stage collection behavior for future recommendations. {APP_VERSION} auto-stages collection choices immediately and hands them to main.py through the guarded CLI bridge."
+            f"Stage collection behavior for future recommendations. {APP_VERSION} auto-stages collection choices immediately but does not load owned cards yet."
         )
         scroll, content = self.scroll_content()
         body = TexturedPanel(self.theme, kind="iron", glow=False)
@@ -3483,9 +3483,8 @@ class MainWindow(QMainWindow):
     def page_settings(self):
         page, layout = self.page_container(
             "Settings",
-            "Theme options, saved defaults, v0.6.7 lock QA checklist, release notes, and checkpoint status."
+            "Theme options, report detail, save location, export format, readability, and v0.6.7 lock status."
         )
-        scroll, content = self.scroll_content()
         body = TexturedPanel(self.theme, kind="iron", glow=False)
         add_shadow(body, blur=24, y=8)
         b_layout = QVBoxLayout(body)
@@ -3506,127 +3505,60 @@ class MainWindow(QMainWindow):
         row.addStretch(1)
         theme_card.body.addLayout(row)
         theme_card.body.addWidget(self.make_text(
-            "Dragon Forge remains the locked default. Adventurer’s Map remains available as the lighter cartographer palette.",
+            "Dragon Forge remains ember-forge dark. Adventurer’s Map uses the Cartographer Palette: parchment, dark ink, antique brass, and deep map blue.",
             paper=True
         ))
         b_layout.addWidget(theme_card)
 
-        prefs = ReportCard("UI Preferences Checkpoint", self.theme, badges=[("Future controls", "manual")])
-        prefs_box = self.readonly_text_box(
-            "UI Preferences Checkpoint\n"
-            "- Report detail level -> Detailed\n"
-            "- Export format -> Markdown\n"
-            "- Save folder -> Outputs/\n"
-            "- Report Viewer text -> approved default for the v0.6.7 lock\n"
-            "- Future settings home -> font family, font size, readability presets, export behavior, and saved user defaults\n"
-            "- Current boundary -> these values are documented here but not yet persistent editable settings",
-            min_height=115,
-            max_height=150,
-        )
-        prefs_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        prefs.body.addWidget(prefs_box)
-        prefs.body.addWidget(self.default_note("Displayed as a checkpoint summary for now. Full editable preferences come after the v0.6.7 foundation lock."))
+        prefs = ReportCard("UI Preferences", self.theme)
+        pref_grid = QGridLayout()
+        pref_grid.addWidget(QLabel("Report Detail Level"), 0, 0)
+        detail = QComboBox()
+        detail.addItems(["Short", "Normal", "Detailed", "Exhaustive"])
+        detail.setCurrentText("Detailed")
+        self.configure_combo_popup(detail)
+        pref_grid.addWidget(detail, 0, 1)
+        pref_grid.addWidget(QLabel("Export Format"), 1, 0)
+        export = QComboBox()
+        export.addItems(["Markdown", "Text", "HTML later", "PDF later"])
+        self.configure_combo_popup(export)
+        pref_grid.addWidget(export, 1, 1)
+        pref_grid.addWidget(QLabel("Save Folder"), 2, 0)
+        pref_grid.addWidget(QLineEdit("Outputs/"), 2, 1)
+        prefs.body.addLayout(pref_grid)
+        prefs.body.addWidget(self.default_note("Future font/readability customization belongs here; Report Viewer keeps the approved default for the v0.6.7 lock."))
         b_layout.addWidget(prefs)
 
         checkpoint = ReportCard("v0.6.7 Desktop UI Foundation Lock", self.theme, badges=[("Locked checkpoint", "protected"), ("CLI source", "manual")])
-        checkpoint_text = (
-            "Desktop UI Foundation Lock\n"
-            "- Deck Selection, Review Setup, Philosophy Lens, Collection Source, Run Analysis, and Report Viewer are connected into one guarded local workflow.\n"
-            "- The UI is a guarded frontend for the existing CLI/backend workflow; it is not a second backend.\n"
-            "- CLI/main.py remains the source of truth for legality, strategy, collection loading, cuts, replacements, and report generation.\n"
-            "- Backend output folders are unique per run and preserve commander/deck-filename distinction.\n"
-            "- Report Viewer loads generated markdown/text as plain readable text.\n"
-            "- Deferred intentionally: deep markdown rendering, structured report parsing, batch/aggregate viewing, user-configurable report font settings, and Commander Spellbook/API combo tracking.\n"
-            "- Commander Spellbook remains disabled and future opt-in only."
-        )
-        checkpoint_box = self.readonly_text_box(checkpoint_text, min_height=155, max_height=210)
-        checkpoint_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        checkpoint.body.addWidget(checkpoint_box)
+        checkpoint.body.addWidget(self.make_text(
+            "This checkpoint locks the desktop foundation: deck selection, staged review setup, philosophy and collection staging, guarded main.py execution, unique backend output folders, report detection, and plain-text report viewing. "
+            "The UI is a guarded frontend for the existing CLI/backend workflow; it is not a second backend. CLI/main.py remains the source of truth for legality, strategy, collection loading, cuts, replacements, and report generation.",
+            paper=True
+        ))
+        checkpoint.body.addWidget(self.make_text(
+            "Deferred intentionally: deep markdown rendering, structured report parsing, batch/aggregate report viewing, user-configurable report font settings, and Commander Spellbook/API combo tracking. Commander Spellbook remains disabled and future opt-in only.",
+            paper=True
+        ))
         b_layout.addWidget(checkpoint)
 
-        qa_card = ReportCard("Final v0.6.7 Lock QA Checklist", self.theme, badges=[("QA checkpoint", "manual"), ("No new scope", "protected")])
-        qa_text = (
-            "Final v0.6.7 Lock QA Checklist\n"
-            "Deck Selection\n"
-            "- Choose a deck file and confirm preview loads without overlap.\n"
-            "- Confirm single commander, partner/paired commanders, and companion preview status display correctly.\n"
-            "- Confirm deck counts separate main deck, commander cards, total Commander deck estimate, and companion cards.\n\n"
-            "Review Setup\n"
-            "- Confirm Output Mode, Review Direction, Review Intensity / Build-Up Mode, Prompt Mode, Budget Note, and Bracket Intended auto-stage immediately.\n"
-            "- Confirm Cut down shows Review Intensity and Build up shows Build-Up Mode.\n\n"
-            "Philosophy Lens\n"
-            "- Confirm top-level philosophy, optional subtype, and Guide Presentation auto-stage cleanly.\n"
-            "- Confirm dropdowns remain readable in both themes.\n\n"
-            "Collection Source\n"
-            "- Confirm No collection, Prefer collection first, Collection only, and Collection shakeup stage correctly.\n"
-            "- Confirm Entire collection folder and Select collection files handoff states are correct.\n\n"
-            "Run Analysis\n"
-            "- Confirm guarded run requires confirmation and uses selected deck handoff.\n"
-            "- Confirm diagnostics remain available behind the detail selector.\n"
-            "- Confirm Commander Spellbook/API calls remain disabled.\n\n"
-            "Report Viewer\n"
-            "- Confirm generated reports are detected, grouped, loaded as plain text, searchable, copyable, and openable.\n"
-            "- Confirm latest backend-created unique output folder opens correctly.\n\n"
-            "Settings / Themes\n"
-            "- Confirm Dragon Forge and Adventurer’s Map remain readable and no flash popup returns.\n"
-            "- Confirm Settings clearly documents the v0.6.7 lock and future boundaries."
-        )
-        qa_box = self.readonly_text_box(qa_text, min_height=235, max_height=310)
-        qa_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        qa_card.body.addWidget(qa_box)
-        qa_card.body.addWidget(self.default_note("Checklist only: this patch documents the lock criteria without adding new features."))
-        b_layout.addWidget(qa_card)
-
-        release_card = ReportCard("v0.6.7 Release Notes and Deferred Scope", self.theme, badges=[("Release notes", "primary"), ("v0.7 clarified", "manual")])
-        release_text = (
-            "v0.6.7 Desktop UI Foundation Release Notes\n"
-            "Locked in this checkpoint\n"
-            "- Single-deck desktop UI foundation.\n"
-            "- Guarded main.py execution with explicit confirmation.\n"
-            "- Backend-created unique timestamped output folders with deck filename distinction.\n"
-            "- Report detection and Report Viewer plain-text loading.\n"
-            "- Deck preview support for commanders, commander pairs, and companion status.\n"
-            "- Collection source staging and CLI handoff.\n"
-            "- Settings/status page describing the current lock boundary.\n\n"
-            "Deferred intentionally\n"
-            "- Batch / Aggregate real workflow.\n"
-            "- Commander Spellbook/API combo tracking.\n"
-            "- Deep markdown rendering and structured report section parsing.\n"
-            "- Settings persistence, saved UI sessions, and full readability preferences.\n"
-            "- Replacement Candidate Engine and future automation layers.\n\n"
-            "Roadmap clarification\n"
-            "- v0.6.7 = Desktop UI Foundation Lock.\n"
-            "- v0.6.8 = Prompt / Report Polish + Stable v0.6 Lock.\n"
-            "- v0.7 = Desktop UI Alpha Foundation / Alpha Hardening.\n"
-            "- v0.7 builds on this locked UI foundation; it is not a rebuild from scratch."
-        )
-        release_box = self.readonly_text_box(release_text, min_height=210, max_height=285)
-        release_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        release_card.body.addWidget(release_box)
-        release_card.body.addWidget(self.default_note("Conservative roadmap wording only: no completed checkpoints were renamed or moved."))
-        b_layout.addWidget(release_card)
-
-        version = ReportCard("App Version", self.theme, badges=[("v0.6.7 lock", "protected")])
-        version_text = (
-            "The Dragon’s Touch PySide6 Workstation\n"
-            f"Version -> {APP_VERSION}\n"
-            f"Phase -> {APP_PHASE}\n"
-            f"Locked backend -> {LOCKED_BACKEND_VERSION}\n"
-            "Backend -> guarded bridge available through explicit confirmation\n"
-            "Foundation status -> v0.6.7 Desktop UI Foundation locked\n"
-            "Stable workflow -> Deck Selection -> Review Setup -> Philosophy Lens -> Collection Source -> Run Analysis -> backend-created unique output folder -> Report Viewer plain-text reading\n"
-            "Output pattern -> Outputs/<CommanderName>_<DeckFileStem>_run_<YYYYMMDD_HHMMSS>/\n"
-            "Boundary -> no hidden API calls; Commander Spellbook/API remains disabled; Report Viewer does not deep-parse markdown yet; v0.7 means alpha hardening of this existing UI, not a rebuild."
-        )
-        version_box = self.readonly_text_box(version_text, min_height=135, max_height=185)
-        version_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        version.body.addWidget(version_box)
+        version = ReportCard("App Version", self.theme)
+        version.body.addWidget(self.make_text(
+            f"The Dragon’s Touch PySide6 Workstation\n"
+            f"Version: {APP_VERSION}\n"
+            f"Phase: {APP_PHASE}\n"
+            f"Locked backend: {LOCKED_BACKEND_VERSION}\n"
+            "Backend: guarded bridge available through explicit confirmation\n"
+            "Foundation status: v0.6.7 Desktop UI Foundation locked\n"
+            "Stable workflow: Deck Selection -> Review Setup -> Philosophy Lens -> Collection Source -> Run Analysis -> backend-created unique output folder -> Report Viewer plain-text reading\n"
+            "Output pattern: Outputs/<CommanderName>_<DeckFileStem>_run_<YYYYMMDD_HHMMSS>/\n"
+            "Boundary: no hidden API calls; Commander Spellbook/API remains disabled; Report Viewer does not deep-parse markdown yet.",
+            paper=True
+        ))
         b_layout.addWidget(version)
-
-        content.addWidget(body)
-        content.addStretch(1)
-        layout.addWidget(scroll, stretch=1)
+        b_layout.addStretch(1)
+        layout.addWidget(body, stretch=1)
         return page
+
 
 def main():
     app = QApplication(sys.argv)

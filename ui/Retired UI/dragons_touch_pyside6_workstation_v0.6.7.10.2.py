@@ -44,8 +44,8 @@ from PySide6.QtWidgets import (
 )
 
 
-APP_VERSION = "v0.6.7.12"
-APP_PHASE = "Desktop UI Foundation Lock"
+APP_VERSION = "v0.6.7.10.2"
+APP_PHASE = "Final v0.6.7 Lock QA Checklist and Release Notes"
 BACKEND_STATUS = "v0.6.7 locked — guarded UI bridge uses CLI/main.py as source of truth"
 LOCKED_BACKEND_VERSION = "v0.6.6.6"
 
@@ -863,7 +863,7 @@ class MainWindow(QMainWindow):
         QMessageBox.information(
             self,
             "UI Foundation Placeholder",
-            f"This control is part of {APP_VERSION}. The desktop shell is locked as a guarded CLI frontend; this specific utility control remains a placeholder for later polishing."
+            f"This control is part of {APP_VERSION}. The desktop shell is active, but backend integration is intentionally reserved for later v0.6.7 patches."
         )
 
     def backend_hook_message(self, hook_name):
@@ -923,7 +923,7 @@ class MainWindow(QMainWindow):
     def page_deck_input(self):
         page, layout = self.page_container(
             "Deck Selection",
-            f"Choose a local deck file and preview it safely. {APP_VERSION} uses this staged deck for guarded CLI runs while the backend remains the source of truth."
+            f"Choose a local deck file and preview it safely. {APP_VERSION} does not run analysis yet; backend hooks come later."
         )
         body = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(body, blur=26, y=8)
         body_layout = QHBoxLayout(body); body_layout.setContentsMargins(22, 22, 22, 22); body_layout.setSpacing(16)
@@ -984,7 +984,7 @@ class MainWindow(QMainWindow):
         p = QProgressBar(); p.setValue(100 if self.state.selected_deck_path != "No deck file selected" else 0); status_layout.addWidget(p)
         quick = ReportCard("Forge Note", self.theme)
         quick.body.addWidget(self.make_text(
-            f"{APP_VERSION} keeps real local deck-file selection, preserves preview spacing, and stages the selected file for guarded CLI handoff. Backend validation, legality, collection loading, and report generation remain owned by main.py.",
+            f"{APP_VERSION} keeps real local deck-file selection, keeps a clear gap between the deck preview and action buttons, and stages Review Setup choices for later backend mapping. It does not call the analysis engine, Scryfall lookup, legality system, collection loader, or report generator yet.",
             paper=True
         ))
         right.addWidget(status); right.addWidget(quick); right.addStretch(1)
@@ -1241,7 +1241,7 @@ class MainWindow(QMainWindow):
     def page_analysis_setup(self):
         page, layout = self.page_container(
             "Review Setup",
-            f"Stage the same review choices the CLI already supports. {APP_VERSION} auto-stages choices as you change them and hands them to main.py through the guarded CLI bridge."
+            f"Stage the same review choices the CLI already supports. {APP_VERSION} auto-stages choices as you change them; backend mapping still comes later."
         )
         scroll, content = self.scroll_content()
         grid_panel = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(grid_panel, blur=24, y=8)
@@ -3376,7 +3376,7 @@ class MainWindow(QMainWindow):
     def page_collection_tools(self):
         page, layout = self.page_container(
             "Collection Source",
-            f"Stage collection behavior for future recommendations. {APP_VERSION} auto-stages collection choices immediately and hands them to main.py through the guarded CLI bridge."
+            f"Stage collection behavior for future recommendations. {APP_VERSION} auto-stages collection choices immediately but does not load owned cards yet."
         )
         scroll, content = self.scroll_content()
         body = TexturedPanel(self.theme, kind="iron", glow=False)

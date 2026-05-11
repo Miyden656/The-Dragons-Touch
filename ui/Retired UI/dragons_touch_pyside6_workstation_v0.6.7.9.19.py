@@ -1,6 +1,6 @@
 """
 The Dragon's Touch - PySide6 Desktop UI Foundation
-Version: v0.6.7.12 — Desktop UI Foundation Lock
+Version: v0.6.7.9.18 — Backend Unique Run Output Folder Handoff Fix with Deck Filename Distinction
 
 Standalone local desktop UI foundation for a fantasy-themed Commander deck-building
 and deck-review app.
@@ -9,17 +9,17 @@ This version focuses on:
 - preserving the Dragon Forge / parchment manuscript visual direction
 - formalizing the mockup into the first official desktop UI foundation
 - aligning pages with the locked v0.6.6.6 workflow
-- using the guarded CLI bridge as the safe backend handoff
-- loading generated reports as plain text while preserving CLI/main.py as the source of truth
+- keeping the backend safely disconnected until later v0.6.7 patches
+- adding clear backend-hook placeholders for future integration
 
 Current scope:
 - UI shell and navigation are active
 - deck file selection and preview are active
 - review settings and collection source staging are active
-- Run Analysis can launch the guarded CLI bridge after explicit confirmation
-- report outputs are written into unique timestamped folders by the backend
-- generated reports can be detected, opened, and read in the Report Viewer as plain text
-- Commander Spellbook/API calls remain disabled until a future opt-in phase
+- Run Analysis shows a staged backend configuration preview
+- no analysis engine is called yet
+- no card database is loaded yet
+- no real report files are opened yet
 - command-line backend remains the stable source of truth
 
 Run:
@@ -35,7 +35,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer, QRectF, QPointF, QSignalBlocker, QProcess, QProcessEnvironment, QUrl
-from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QFont, QLinearGradient, QRadialGradient, QDesktopServices, QTextCursor
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QFont, QLinearGradient, QRadialGradient, QDesktopServices
 from PySide6.QtWidgets import (
     QApplication, QButtonGroup, QCheckBox, QComboBox, QFileDialog, QFrame, QGraphicsDropShadowEffect,
     QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListView, QMainWindow, QMessageBox,
@@ -44,9 +44,9 @@ from PySide6.QtWidgets import (
 )
 
 
-APP_VERSION = "v0.6.7.12"
-APP_PHASE = "Desktop UI Foundation Lock"
-BACKEND_STATUS = "v0.6.7 locked — guarded UI bridge uses CLI/main.py as source of truth"
+APP_VERSION = "v0.6.7.9.19"
+APP_PHASE = "Report Viewer Layout Cleanup"
+BACKEND_STATUS = "Guarded backend bridge available — review setup cleanup and commander pair preview fixed"
 LOCKED_BACKEND_VERSION = "v0.6.6.6"
 
 # Future backend integration notes:
@@ -69,7 +69,6 @@ LOCKED_BACKEND_VERSION = "v0.6.6.6"
 # - v0.6.7.7.2 fixes Run Analysis scrollbox/detail-panel sizing and prevents dense text clipping.
 # - v0.6.7.8 adds the first guarded execution bridge preview with entrypoint validation, command preview, and error/output capture planning while keeping actual subprocess execution disabled.
 # - v0.6.7.9.18 loads detected generated report files into the Report Viewer as plain text without deep parsing.
-# - v0.6.7.9.20 changes text boxes and dropdowns to the parchment/plain-text visual style while keeping scrollability.
 # - v0.6.7.8.1 replaces the Run Analysis detail button row with a compact dropdown selector.
 # - v0.6.7.9 adds the first actual guarded QProcess run path for py main.py with explicit confirmation, output capture, and safe failure handling.
 # - v0.6.7.9.10 hands the selected Deck Selection file to main.py through MTG_DECK_FILE and cleans Philosophy Lens layout/readability.
@@ -82,7 +81,7 @@ LOCKED_BACKEND_VERSION = "v0.6.6.6"
 # - v0.6.7.9.6 adds a durable Guide Presentation UI field and bridges the guide presentation CLI prompt.
 # - v0.6.7.9.7 bridges the Collection Mode CLI prompt using the existing Collection Source page setting.
 # - v0.6.7.9.13 adds companion-section preview detection and handoff status without validating companion legality.
-# v0.6.7.12 checkpoint: desktop UI foundation is locked; future work should build on this guarded bridge rather than replacing it.
+# Keep this file standalone until backend execution patches are intentionally made.
 
 DRAGON_FORGE = {
     "name": "Dragon Forge", "mode": "dark", "bg": "#0b0908", "outer": "#100d0b",
@@ -100,9 +99,9 @@ DRAGON_FORGE = {
     "primary_button_start": "#e86a24", "primary_button_end": "#d9a441",
     "input_text": "#f4e8d4", "progress_text": "#f4e8d4",
     "progress_track": "#120f0c", "progress_chunk_start": "#e86a24", "progress_chunk_end": "#d9a441",
-    "combo_popup_bg": "#f4e4bd", "combo_popup_text": "#3a2818",
-    "combo_popup_border": "#b08b4d", "combo_popup_item_bg": "#f4e4bd",
-    "combo_popup_selected_bg": "#d9a441", "combo_popup_selected_text": "#3a2818",
+    "combo_popup_bg": "#201712", "combo_popup_text": "#f4e8d4",
+    "combo_popup_border": "#d9a441", "combo_popup_item_bg": "#201712",
+    "combo_popup_selected_bg": "#e86a24", "combo_popup_selected_text": "#0b0908",
     "default_note_text": "#d9a441",
 }
 
@@ -191,9 +190,6 @@ class AppState:
     report_viewer_current_file: str = "No report file selected"
     report_viewer_current_status: str = "No generated report loaded into the viewer yet."
     report_viewer_current_text: str = "Run the backend with guarded confirmation, then open Report Viewer to load detected report files here."
-    report_viewer_font_size: int = 14
-    report_viewer_word_wrap: bool = True
-    report_viewer_search_text: str = ""
 
 
 def add_shadow(widget, blur=30, x=0, y=10, color=None):
@@ -441,14 +437,6 @@ class MainWindow(QMainWindow):
         self.report_viewer_status_label = None
         self.open_current_report_file_button = None
         self.report_viewer_reload_button = None
-        self.report_viewer_current_file_label = None
-        self.report_viewer_copy_button = None
-        self.report_viewer_refresh_file_button = None
-        self.report_viewer_open_current_folder_button = None
-        self.report_viewer_search_input = None
-        self.report_viewer_wrap_button = None
-        self.report_viewer_search_input = None
-        self.report_viewer_wrap_button = None
         self.open_output_folder_button = None
         self.open_normal_report_folder_button = None
         self.open_debug_report_folder_button = None
@@ -518,10 +506,6 @@ class MainWindow(QMainWindow):
         self.report_viewer_status_label = None
         self.open_current_report_file_button = None
         self.report_viewer_reload_button = None
-        self.report_viewer_current_file_label = None
-        self.report_viewer_copy_button = None
-        self.report_viewer_refresh_file_button = None
-        self.report_viewer_open_current_folder_button = None
         self.open_output_folder_button = None
         self.open_normal_report_folder_button = None
         self.open_debug_report_folder_button = None
@@ -753,11 +737,6 @@ class MainWindow(QMainWindow):
         combo_popup_selected_bg = t.get("combo_popup_selected_bg", t["accent"])
         combo_popup_selected_text = t.get("combo_popup_selected_text", button_pressed_text)
         default_note_text = t.get("default_note_text", t["muted"])
-        input_paper_bg = t.get("parchment_2", t["input"])
-        input_paper_bg_2 = t.get("parchment", input_paper_bg)
-        input_paper_border = t.get("parchment_3", t["input_border"])
-        input_paper_text = t.get("paper_text", input_text)
-        input_paper_selection = t.get("accent_2", t["accent"])
         return f'''
         QWidget {{ color: {panel_text}; font-family: "Segoe UI", "Arial", sans-serif; font-size: 14px; background: transparent; }}
         QMainWindow {{ background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 {t["bg"]}, stop:0.55 {t["outer"]}, stop:1 {t["leather"]}); }}
@@ -782,16 +761,8 @@ class MainWindow(QMainWindow):
         QPushButton#utilityButton {{ padding: 8px 12px; font-size: 13px; color: {button_text}; }} QPushButton#sidebarButton {{ text-align: left; border-radius: 13px; padding: 12px 13px; color: {sidebar_text}; background: transparent; border: 1px solid transparent; font-weight: 800; }}
         QPushButton#sidebarButton:hover {{ color: {sidebar_hover_text}; background: {t["sidebar_2"]}; border: 1px solid {t["accent_2"]}; }} QPushButton#sidebarButton:checked {{ color: {sidebar_checked_text}; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 {sidebar_checked_start}, stop:1 {sidebar_checked_end}); border: 1px solid {t["accent_2"]}; font-weight: 900; }}
         QPushButton#pillButton {{ border-radius: 15px; padding: 7px 12px; color: {sidebar_muted}; background: {t["iron_2"]}; border: 1px solid {t["border_soft"]}; }} QPushButton#pillButton:checked {{ color: {sidebar_checked_text}; background: {sidebar_checked_start}; border: 1px solid {t["accent_2"]}; }}
-        QLineEdit, QPlainTextEdit, QComboBox {{ color: {input_paper_text}; background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 {input_paper_bg_2}, stop:1 {input_paper_bg}); border: 1px solid {input_paper_border}; border-radius: 12px; padding: 10px; selection-background-color: {input_paper_selection}; selection-color: {input_paper_text}; combobox-popup: 0; }}
-        QLineEdit:focus, QPlainTextEdit:focus, QComboBox:focus {{ border: 1px solid {t["accent_2"]}; }}
-        QPlainTextEdit QScrollBar:vertical {{ background: transparent; width: 10px; border-radius: 5px; }}
-        QPlainTextEdit QScrollBar::handle:vertical {{ background: {t["border"]}; border-radius: 5px; min-height: 24px; }}
-        QPlainTextEdit QScrollBar::handle:vertical:hover {{ background: {t["accent"]}; }}
-        QPlainTextEdit#reportStatusPreview {{ color: {t["paper_text"]}; background: transparent; border: 0px; border-radius: 0px; padding: 4px; selection-background-color: {t["accent_2"]}; selection-color: {t["paper_text"]}; }}
-        QPlainTextEdit#reportStatusPreview QScrollBar:vertical {{ background: transparent; width: 10px; border-radius: 5px; }}
-        QPlainTextEdit#reportStatusPreview QScrollBar::handle:vertical {{ background: {t["border_soft"]}; border-radius: 5px; min-height: 24px; }}
+        QLineEdit, QPlainTextEdit, QComboBox {{ color: {input_text}; background: {t["input"]}; border: 1px solid {t["input_border"]}; border-radius: 12px; padding: 10px; selection-background-color: {t["accent"]}; selection-color: {button_pressed_text}; combobox-popup: 0; }}
         QComboBox::drop-down {{ border: none; width: 28px; }}
-        QComboBox::down-arrow {{ color: {input_paper_text}; }}
         QComboBox QAbstractItemView {{ color: {combo_popup_text}; background-color: {combo_popup_bg}; border: 1px solid {combo_popup_border}; selection-background-color: {combo_popup_selected_bg}; selection-color: {combo_popup_selected_text}; outline: 0; padding: 0px; margin: 0px; }}
         QComboBox QAbstractItemView::item {{ min-height: 28px; padding: 6px 10px; color: {combo_popup_text}; background-color: {combo_popup_item_bg}; }}
         QComboBox QAbstractItemView::item:selected {{ color: {combo_popup_selected_text}; background-color: {combo_popup_selected_bg}; }}
@@ -863,7 +834,7 @@ class MainWindow(QMainWindow):
         QMessageBox.information(
             self,
             "UI Foundation Placeholder",
-            f"This control is part of {APP_VERSION}. The desktop shell is locked as a guarded CLI frontend; this specific utility control remains a placeholder for later polishing."
+            f"This control is part of {APP_VERSION}. The desktop shell is active, but backend integration is intentionally reserved for later v0.6.7 patches."
         )
 
     def backend_hook_message(self, hook_name):
@@ -923,7 +894,7 @@ class MainWindow(QMainWindow):
     def page_deck_input(self):
         page, layout = self.page_container(
             "Deck Selection",
-            f"Choose a local deck file and preview it safely. {APP_VERSION} uses this staged deck for guarded CLI runs while the backend remains the source of truth."
+            f"Choose a local deck file and preview it safely. {APP_VERSION} does not run analysis yet; backend hooks come later."
         )
         body = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(body, blur=26, y=8)
         body_layout = QHBoxLayout(body); body_layout.setContentsMargins(22, 22, 22, 22); body_layout.setSpacing(16)
@@ -984,7 +955,7 @@ class MainWindow(QMainWindow):
         p = QProgressBar(); p.setValue(100 if self.state.selected_deck_path != "No deck file selected" else 0); status_layout.addWidget(p)
         quick = ReportCard("Forge Note", self.theme)
         quick.body.addWidget(self.make_text(
-            f"{APP_VERSION} keeps real local deck-file selection, preserves preview spacing, and stages the selected file for guarded CLI handoff. Backend validation, legality, collection loading, and report generation remain owned by main.py.",
+            f"{APP_VERSION} keeps real local deck-file selection, keeps a clear gap between the deck preview and action buttons, and stages Review Setup choices for later backend mapping. It does not call the analysis engine, Scryfall lookup, legality system, collection loader, or report generator yet.",
             paper=True
         ))
         right.addWidget(status); right.addWidget(quick); right.addStretch(1)
@@ -1241,7 +1212,7 @@ class MainWindow(QMainWindow):
     def page_analysis_setup(self):
         page, layout = self.page_container(
             "Review Setup",
-            f"Stage the same review choices the CLI already supports. {APP_VERSION} auto-stages choices as you change them and hands them to main.py through the guarded CLI bridge."
+            f"Stage the same review choices the CLI already supports. {APP_VERSION} auto-stages choices as you change them; backend mapping still comes later."
         )
         scroll, content = self.scroll_content()
         grid_panel = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(grid_panel, blur=24, y=8)
@@ -2216,10 +2187,10 @@ class MainWindow(QMainWindow):
             "Debug reports\n"
             f"{debug_preview}\n\n"
             "Boundary\n"
-            "- The backend writes directly into a unique deck-file-distinguished timestamped output folder.\n"
-            "- The UI detects file paths from stdout and opens generated folders/files without moving report contents.\n"
+            "- The UI detects file paths from stdout, then moves this run’s detected files into one unique guarded-run output folder.\n"
+            "- The backend still writes first; the UI isolates the detected files after a successful guarded run.\n"
             "- Folder buttons are enabled only when a detected local folder exists.\n"
-            "- The Report Viewer loads markdown/text as plain text only; deep parsing is intentionally deferred.\n"
+            "- The UI does not parse report contents yet.\n"
             "- Backend report generation remains CLI/main.py source of truth.\n"
         )
 
@@ -2607,7 +2578,7 @@ class MainWindow(QMainWindow):
     def page_run_review(self):
         page, layout = self.page_container(
             "Run Analysis",
-            f"Run py main.py through guarded confirmation. {APP_VERSION} keeps diagnostics available here while report reading belongs in Report Viewer."
+            f"Run py main.py only through a guarded confirmation path. {APP_VERSION} captures stdout/stderr and keeps Commander Spellbook/API calls disabled."
         )
         body = QWidget(); body_layout = QHBoxLayout(body); body_layout.setContentsMargins(0, 0, 0, 0); body_layout.setSpacing(14)
 
@@ -2655,7 +2626,7 @@ class MainWindow(QMainWindow):
         orb.setMinimumSize(190, 190)
         orb.setMaximumHeight(230)
         orb_layout.addWidget(orb, stretch=1)
-        status = QLabel("Run the forge here. The latest successful manuscript loads from Report Viewer after output detection.")
+        status = QLabel("The forge is staged, not fired. Dense preview details now live behind the detail selector on the right.")
         status.setObjectName("helperText"); status.setAlignment(Qt.AlignCenter); status.setWordWrap(True)
         orb_layout.addWidget(status)
         l_layout.addWidget(orb_panel, stretch=1)
@@ -2663,7 +2634,7 @@ class MainWindow(QMainWindow):
         right = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(right, blur=28, y=8)
         r_layout = QVBoxLayout(right); r_layout.setContentsMargins(24, 24, 24, 24); r_layout.setSpacing(14)
         title = QLabel("Current Run Summary"); title.setObjectName("sectionTitle"); r_layout.addWidget(title)
-        preview = QPlainTextEdit(); preview.setReadOnly(True); preview.setPlainText(self.run_config_preview_text()); preview.setMinimumHeight(130); preview.setMaximumHeight(180); preview.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded); preview.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        preview = QPlainTextEdit(); preview.setReadOnly(True); preview.setPlainText(self.run_config_preview_text()); preview.setMinimumHeight(180); preview.setMaximumHeight(240); preview.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded); preview.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         preview.setObjectName("runConfigPreview")
         self.run_config_preview_box = preview
         r_layout.addWidget(preview, stretch=0)
@@ -2692,7 +2663,7 @@ class MainWindow(QMainWindow):
         self.configure_combo_popup(detail_selector)
         detail_selector.currentIndexChanged.connect(detail_stack.setCurrentIndex)
         selector_row.addWidget(detail_selector, stretch=1)
-        selector_note = self.default_note("Guarded-run diagnostics stay here; generated report reading and file controls live in Report Viewer.")
+        selector_note = self.default_note("Use this selector instead of horizontal tabs so the detail view stays usable at narrower widths.")
         selector_row.addWidget(selector_note)
         r_layout.addLayout(selector_row)
 
@@ -2799,7 +2770,7 @@ class MainWindow(QMainWindow):
         report_output_card.body.addWidget(self.default_note("Folder buttons use detected paths from the backend Files written block. Report contents are not parsed in this patch."))
         detail_stack.addWidget(report_output_card)
 
-        boundary_card = ReportCard("Safety Boundary and Future Stages", self.theme, badges=[("v0.6.7.9.21", "manual")])
+        boundary_card = ReportCard("Safety Boundary and Future Stages", self.theme, badges=[("v0.6.7.9.18", "manual")])
         stage_text = (
             "Future Backend Bridge Stages\n"
             "1. Runtime config contract is visible and refreshes live.\n"
@@ -2831,41 +2802,19 @@ class MainWindow(QMainWindow):
         self.progress_tick += 1
         for i, bar in enumerate(self.progress_bars): bar.setValue(min(100, (self.progress_tick * (i + 2) + i * 17) % 120))
 
-    def report_file_role_rank(self, path_text):
-        """Sort reports into the order a user is most likely to read them."""
-        lower = Path(path_text).name.lower()
-        ordered_markers = [
-            ("_deck_report", 10),
-            ("_user_guided_prompt", 20),
-            ("_legality_debug", 110),
-            ("_strategy_debug", 120),
-            ("_bracket_debug", 130),
-            ("_cut_pressure_debug", 140),
-            ("_replacement_prompt_debug", 150),
-            ("_diagnostics_debug", 160),
-            ("_full_debug_report", 190),
-        ]
-        for marker, rank in ordered_markers:
-            if marker in lower:
-                return rank
-        return 999
-
     def detected_report_file_entries(self):
         """Return detected report files as display entries without parsing report sections."""
         entries = []
-        for path_text in sorted(self.state.last_normal_report_files, key=self.report_file_role_rank):
+        for path_text in self.state.last_normal_report_files:
             entries.append(("Normal", path_text))
-        for path_text in sorted(self.state.last_debug_report_files, key=self.report_file_role_rank):
+        for path_text in self.state.last_debug_report_files:
             entries.append(("Debug", path_text))
         # Include any detected report files that did not classify cleanly.
         known = {str(Path(path)) for _category, path in entries}
-        other_paths = []
         for path_text in self.state.last_output_files:
             normalized = str(Path(path_text))
             if normalized not in known:
-                other_paths.append(path_text)
-        for path_text in sorted(other_paths, key=lambda p: Path(p).name.lower()):
-            entries.append(("Other", path_text))
+                entries.append(("Other", path_text))
         return entries
 
     def report_file_button_label(self, category, path_text):
@@ -2894,19 +2843,7 @@ class MainWindow(QMainWindow):
             # Fallback keeps the label readable without forcing horizontal scrolling.
             stem = Path(path_text).stem
             role = stem[-34:] if len(stem) > 34 else stem
-        return role if category in {"Normal", "Debug"} else f"{category}: {role}"
-
-    def report_group_entries(self):
-        """Group detected files for the Report Viewer navigation."""
-        grouped = {"Normal Reports": [], "Debug Reports": [], "Other Files": []}
-        for category, path_text in self.detected_report_file_entries():
-            if category == "Normal":
-                grouped["Normal Reports"].append((category, path_text))
-            elif category == "Debug":
-                grouped["Debug Reports"].append((category, path_text))
-            else:
-                grouped["Other Files"].append((category, path_text))
-        return grouped
+        return f"{category}: {role}"
 
     def clear_layout_widgets(self, layout):
         if layout is None:
@@ -2944,106 +2881,32 @@ class MainWindow(QMainWindow):
             self.state.report_viewer_current_status = "Report file load failed."
         if self.report_viewer_text_box is not None:
             self.report_viewer_text_box.setPlainText(self.state.report_viewer_current_text)
-            self.apply_report_viewer_readability_settings()
-        self.refresh_report_viewer_current_file_controls()
-
-    def apply_report_viewer_readability_settings(self):
-        """Apply report-reader wrapping. Font sizing is deferred to Settings later."""
-        if self.report_viewer_text_box is None:
-            return
-        font = QFont("Segoe UI", self.state.report_viewer_font_size)
-        self.report_viewer_text_box.setFont(font)
-        self.report_viewer_text_box.setLineWrapMode(
-            QPlainTextEdit.WidgetWidth if self.state.report_viewer_word_wrap else QPlainTextEdit.NoWrap
-        )
-        if self.report_viewer_wrap_button is not None:
-            self.report_viewer_wrap_button.setText("Wrap: On" if self.state.report_viewer_word_wrap else "Wrap: Off")
-
-    def toggle_report_viewer_word_wrap(self):
-        self.state.report_viewer_word_wrap = not self.state.report_viewer_word_wrap
-        self.apply_report_viewer_readability_settings()
-
-    def jump_report_viewer_top(self):
-        if self.report_viewer_text_box is not None:
-            self.report_viewer_text_box.moveCursor(QTextCursor.Start)
-            self.report_viewer_text_box.ensureCursorVisible()
-
-    def jump_report_viewer_bottom(self):
-        if self.report_viewer_text_box is not None:
-            self.report_viewer_text_box.moveCursor(QTextCursor.End)
-            self.report_viewer_text_box.ensureCursorVisible()
-
-    def find_in_current_report(self):
-        if self.report_viewer_text_box is None:
-            return
-        query = self.report_viewer_search_input.text().strip() if self.report_viewer_search_input is not None else ""
-        self.state.report_viewer_search_text = query
-        if not query:
-            QMessageBox.information(self, "Search Report", "Enter text to search inside the currently loaded report.")
-            return
-        found = self.report_viewer_text_box.find(query)
-        if not found:
-            self.report_viewer_text_box.moveCursor(QTextCursor.Start)
-            found = self.report_viewer_text_box.find(query)
-        if not found:
-            QMessageBox.information(self, "Search Report", f"No match found for: {query}")
-
-    def latest_successful_run_checkpoint_text(self):
-        success = str(self.state.last_guarded_run_return_code) == "0"
-        folder_ready = self.folder_path_is_openable(self.state.last_output_folder)
-        folder_name = Path(self.state.last_output_folder).name if folder_ready else "No successful output folder detected yet"
-        if success and folder_ready:
-            return f"Latest successful run: Yes — {folder_name}"
-        if success:
-            return "Latest successful run: Yes — report folder not detected"
-        return "Latest successful run: Not yet detected in this UI session"
+        if self.report_viewer_status_label is not None:
+            self.report_viewer_status_label.setText(self.report_viewer_status_text())
+            self.report_viewer_status_label.setToolTip(
+                f"Current file: {self.state.report_viewer_current_file}\nOutput folder: {self.state.last_output_folder}"
+            )
+            self.report_viewer_status_label.setToolTip(
+                f"Current file: {self.state.report_viewer_current_file}\nOutput folder: {self.state.last_output_folder}"
+            )
+        if self.open_current_report_file_button is not None:
+            self.open_current_report_file_button.setEnabled(Path(self.state.report_viewer_current_file).is_file())
 
     def report_viewer_status_text(self):
         entries = self.detected_report_file_entries()
         current = Path(self.state.report_viewer_current_file)
         output_folder = Path(self.state.last_output_folder)
         current_name = current.name if current.is_file() or self.state.report_viewer_current_file != "No report file selected" else "No report selected"
-        output_name = output_folder.name if self.state.last_output_folder not in {"No output folder detected yet", "Not detected"} else "No output folder detected"
-        normal_count = len(self.state.last_normal_report_files)
-        debug_count = len(self.state.last_debug_report_files)
+        output_name = output_folder.name if self.state.last_output_folder != "No output folder detected yet" else "No output folder detected"
         return (
             f"Status: {self.state.report_viewer_current_status}\n"
             f"Loaded file: {current_name}\n"
-            f"Detected files: {len(entries)} total | Normal: {normal_count} | Debug: {debug_count}\n"
-            f"{self.latest_successful_run_checkpoint_text()}\n"
-            f"Latest run folder: {output_name}\n"
+            f"Detected files: {len(entries)}   Output folder: {output_name}\n"
             "Boundary: plain text preview only; structured navigation and markdown rendering come later."
         )
 
-    def report_viewer_current_file_label_text(self):
-        path = Path(self.state.report_viewer_current_file)
-        if path.is_file():
-            return f"Current file: {path.name}"
-        return "Current file: No report selected"
-
-    def refresh_report_viewer_current_file_controls(self):
-        """Refresh Report Viewer status/control widgets without rebuilding the page."""
-        path = Path(self.state.report_viewer_current_file)
-        file_ready = path.is_file()
-        if self.report_viewer_status_label is not None:
-            self.report_viewer_status_label.setPlainText(self.report_viewer_status_text())
-            self.report_viewer_status_label.setToolTip(
-                f"Current file: {self.state.report_viewer_current_file}\nOutput folder: {self.state.last_output_folder}"
-            )
-        if self.report_viewer_current_file_label is not None:
-            self.report_viewer_current_file_label.setText(self.report_viewer_current_file_label_text())
-            self.report_viewer_current_file_label.setToolTip(str(path) if file_ready else "No report selected")
-        if self.open_current_report_file_button is not None:
-            self.open_current_report_file_button.setEnabled(file_ready)
-        if self.report_viewer_open_current_folder_button is not None:
-            self.report_viewer_open_current_folder_button.setEnabled(file_ready and path.parent.exists())
-        if self.report_viewer_refresh_file_button is not None:
-            self.report_viewer_refresh_file_button.setEnabled(file_ready)
-        if self.report_viewer_copy_button is not None:
-            self.report_viewer_copy_button.setEnabled(bool(self.state.report_viewer_current_text.strip()))
-
     def refresh_report_viewer_file_list(self):
-        """Populate Report Viewer with grouped files detected from the latest guarded run."""
+        """Populate Report Viewer with files detected from the latest guarded run."""
         if self.report_viewer_file_buttons_layout is None:
             return
         self.clear_layout_widgets(self.report_viewer_file_buttons_layout)
@@ -3054,33 +2917,28 @@ class MainWindow(QMainWindow):
             empty.setWordWrap(True)
             self.report_viewer_file_buttons_layout.addWidget(empty)
         else:
-            groups = self.report_group_entries()
-            for group_name in ("Normal Reports", "Debug Reports", "Other Files"):
-                group_entries = groups.get(group_name, [])
-                if not group_entries:
-                    continue
-                header = QLabel(group_name.upper())
-                header.setObjectName("smallCaps")
-                self.report_viewer_file_buttons_layout.addWidget(header)
-                for category, path_text in group_entries:
-                    btn = QPushButton(self.report_file_button_label(category, path_text))
-                    btn.setObjectName("utilityButton")
-                    btn.setMinimumHeight(38)
-                    btn.setToolTip(f"{Path(path_text).name}\n{path_text}")
-                    btn.clicked.connect(lambda checked=False, p=path_text: self.load_report_file_into_viewer(p))
-                    self.report_viewer_file_buttons_layout.addWidget(btn)
-                self.report_viewer_file_buttons_layout.addSpacing(8)
+            for category, path_text in entries:
+                btn = QPushButton(self.report_file_button_label(category, path_text))
+                btn.setObjectName("utilityButton")
+                btn.setMinimumHeight(40)
+                btn.setToolTip(f"{Path(path_text).name}\n{path_text}")
+                btn.clicked.connect(lambda checked=False, p=path_text: self.load_report_file_into_viewer(p))
+                self.report_viewer_file_buttons_layout.addWidget(btn)
         self.report_viewer_file_buttons_layout.addStretch(1)
+        if self.report_viewer_status_label is not None:
+            self.report_viewer_status_label.setText(self.report_viewer_status_text())
+            self.report_viewer_status_label.setToolTip(
+                f"Current file: {self.state.report_viewer_current_file}\nOutput folder: {self.state.last_output_folder}"
+            )
         if self.report_viewer_text_box is not None:
-            # Auto-load the deck report first when possible, then user prompt, then debug files.
+            # Auto-load the first available report when no report has been selected yet.
             current = Path(self.state.report_viewer_current_file)
             if entries and (self.state.report_viewer_current_file == "No report file selected" or not current.exists()):
-                preferred = sorted(entries, key=lambda item: self.report_file_role_rank(item[1]))[0]
-                self.load_report_file_into_viewer(preferred[1])
+                self.load_report_file_into_viewer(entries[0][1])
             else:
                 self.report_viewer_text_box.setPlainText(self.state.report_viewer_current_text)
-                self.apply_report_viewer_readability_settings()
-        self.refresh_report_viewer_current_file_controls()
+        if self.open_current_report_file_button is not None:
+            self.open_current_report_file_button.setEnabled(Path(self.state.report_viewer_current_file).is_file())
 
     def reload_latest_reports_into_viewer(self):
         self.refresh_report_viewer_file_list()
@@ -3090,22 +2948,6 @@ class MainWindow(QMainWindow):
             "Detected report files from the latest guarded run have been refreshed. Report contents are still shown as plain text only."
         )
 
-    def refresh_current_report_file(self):
-        path = Path(self.state.report_viewer_current_file)
-        if not path.exists() or not path.is_file():
-            QMessageBox.information(self, "No Report File Selected", "No loaded report file is available to refresh yet.")
-            return
-        self.load_report_file_into_viewer(str(path))
-        QMessageBox.information(self, "Report File Refreshed", f"Reloaded {path.name} from disk.")
-
-    def copy_current_report_text(self):
-        text = self.state.report_viewer_current_text or ""
-        if not text.strip():
-            QMessageBox.information(self, "No Report Text", "No loaded report text is available to copy yet.")
-            return
-        QApplication.clipboard().setText(text)
-        QMessageBox.information(self, "Report Text Copied", "The currently loaded report text has been copied to the clipboard.")
-
     def open_current_report_file(self):
         path = Path(self.state.report_viewer_current_file)
         if not path.exists() or not path.is_file():
@@ -3113,17 +2955,10 @@ class MainWindow(QMainWindow):
             return
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
 
-    def open_current_report_folder(self):
-        path = Path(self.state.report_viewer_current_file)
-        if not path.exists() or not path.is_file():
-            QMessageBox.information(self, "No Report File Selected", "No loaded report file is available yet.")
-            return
-        QDesktopServices.openUrl(QUrl.fromLocalFile(str(path.parent)))
-
     def page_report_viewer(self):
         page, layout = self.page_container(
             "Report Viewer",
-            f"Read latest guarded-run reports from backend-created output folders. {APP_VERSION} locks plain-text report viewing as the stable foundation."
+            f"Load generated Dragon's Touch report files as plain readable text. {APP_VERSION} does not deeply parse report sections yet."
         )
         body = QWidget()
         body_layout = QHBoxLayout(body)
@@ -3139,6 +2974,11 @@ class MainWindow(QMainWindow):
         cap = QLabel("DETECTED REPORT FILES")
         cap.setObjectName("smallCaps")
         rn_layout.addWidget(cap)
+        hint = QLabel("Files come from the latest successful guarded run. Click a file to load it as plain text.")
+        hint.setObjectName("mutedText")
+        hint.setWordWrap(True)
+        rn_layout.addWidget(hint)
+
         file_scroll = QScrollArea()
         file_scroll.setWidgetResizable(True)
         file_inner = QWidget()
@@ -3161,92 +3001,40 @@ class MainWindow(QMainWindow):
         add_shadow(viewer_panel, blur=26, y=8)
         viewer_layout = QVBoxLayout(viewer_panel)
         viewer_layout.setContentsMargins(22, 22, 22, 22)
-        viewer_layout.setSpacing(18)
+        viewer_layout.setSpacing(12)
 
-        report_text_card = ReportCard("Report File Preview", self.theme, badges=[("Plain text", "manual"), ("Grouped files", "protected")])
-        report_text_card.setMinimumHeight(430)
-        report_text_card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        current_file_label = QLabel(self.report_viewer_current_file_label_text())
-        current_file_label.setObjectName("defaultNote")
-        current_file_label.setWordWrap(True)
-        current_file_label.setToolTip(self.state.report_viewer_current_file)
-        self.report_viewer_current_file_label = current_file_label
-        report_text_card.body.addWidget(current_file_label)
-
-        reader_tools = QHBoxLayout()
-        reader_tools.setSpacing(8)
-        search_input = QLineEdit(self.state.report_viewer_search_text)
-        search_input.setPlaceholderText("Search current report")
-        self.report_viewer_search_input = search_input
-        search_btn = QPushButton("Find")
-        search_btn.clicked.connect(self.find_in_current_report)
-        search_input.returnPressed.connect(self.find_in_current_report)
-        top_btn = QPushButton("Top")
-        top_btn.clicked.connect(self.jump_report_viewer_top)
-        bottom_btn = QPushButton("Bottom")
-        bottom_btn.clicked.connect(self.jump_report_viewer_bottom)
-        wrap_btn = QPushButton("Wrap: On" if self.state.report_viewer_word_wrap else "Wrap: Off")
-        wrap_btn.clicked.connect(self.toggle_report_viewer_word_wrap)
-        self.report_viewer_wrap_button = wrap_btn
-        reader_tools.addWidget(search_input, stretch=2)
-        reader_tools.addWidget(search_btn)
-        reader_tools.addWidget(top_btn)
-        reader_tools.addWidget(bottom_btn)
-        reader_tools.addWidget(wrap_btn)
-        report_text_card.body.addLayout(reader_tools)
-
+        report_text_card = ReportCard("Report File Preview", self.theme, badges=[("Markdown/text", "normal")])
         text_box = QPlainTextEdit()
         text_box.setReadOnly(True)
         text_box.setPlainText(self.state.report_viewer_current_text)
-        text_box.setMinimumHeight(300)
-        text_box.setMaximumHeight(16777215)
+        text_box.setMinimumHeight(470)
         text_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         text_box.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         text_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         text_box.setObjectName("reportFilePreview")
         self.report_viewer_text_box = text_box
-        self.apply_report_viewer_readability_settings()
         report_text_card.body.addWidget(text_box, stretch=1)
-        viewer_layout.addWidget(report_text_card, stretch=4)
+        report_text_card.body.addWidget(self.default_note("Plain readable text now; structured navigation and markdown rendering come later."))
+        viewer_layout.addWidget(report_text_card, stretch=1)
 
-        status_card = ReportCard("Loaded Report Status", self.theme, badges=[("No deep parsing", "protected")])
-        status_card.setMinimumHeight(210)
-        status_card.setMaximumHeight(285)
-        status_card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        status_label = QPlainTextEdit()
-        status_label.setReadOnly(True)
-        status_label.setPlainText(self.report_viewer_status_text())
-        status_label.setObjectName("reportStatusPreview")
-        status_label.setMinimumHeight(84)
-        status_label.setMaximumHeight(125)
-        status_label.setFrameShape(QFrame.NoFrame)
-        status_label.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        status_label.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        status_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        status_card = ReportCard("Loaded Report Status", self.theme, badges=[("Plain text", "manual"), ("No deep parsing", "protected")])
+        status_card.setMaximumHeight(190)
+        status_label = QLabel(self.report_viewer_status_text())
+        status_label.setObjectName("reportBody")
+        status_label.setWordWrap(True)
+        status_label.setMaximumHeight(90)
         status_label.setToolTip(
             f"Current file: {self.state.report_viewer_current_file}\nOutput folder: {self.state.last_output_folder}"
         )
         self.report_viewer_status_label = status_label
         status_card.body.addWidget(status_label)
         action_row = QHBoxLayout()
-        action_row.setContentsMargins(0, 8, 0, 0)
-        refresh_btn = QPushButton("Refresh Current File")
-        refresh_btn.clicked.connect(self.refresh_current_report_file)
-        self.report_viewer_refresh_file_button = refresh_btn
-        copy_btn = QPushButton("Copy Report Text")
-        copy_btn.clicked.connect(self.copy_current_report_text)
-        self.report_viewer_copy_button = copy_btn
-        open_folder_current_btn = QPushButton("Open Current Folder")
-        open_folder_current_btn.clicked.connect(self.open_current_report_folder)
-        self.report_viewer_open_current_folder_button = open_folder_current_btn
         open_file_btn = QPushButton("Open Current Report File")
         open_file_btn.clicked.connect(self.open_current_report_file)
         self.open_current_report_file_button = open_file_btn
-        action_row.addWidget(refresh_btn)
-        action_row.addWidget(copy_btn)
-        action_row.addStretch(1)
-        action_row.addWidget(open_folder_current_btn)
+        open_file_btn.setEnabled(Path(self.state.report_viewer_current_file).is_file())
         action_row.addWidget(open_file_btn)
+        action_row.addStretch(1)
         status_card.body.addLayout(action_row)
         viewer_layout.addWidget(status_card, stretch=0)
 
@@ -3376,7 +3164,7 @@ class MainWindow(QMainWindow):
     def page_collection_tools(self):
         page, layout = self.page_container(
             "Collection Source",
-            f"Stage collection behavior for future recommendations. {APP_VERSION} auto-stages collection choices immediately and hands them to main.py through the guarded CLI bridge."
+            f"Stage collection behavior for future recommendations. {APP_VERSION} auto-stages collection choices immediately but does not load owned cards yet."
         )
         scroll, content = self.scroll_content()
         body = TexturedPanel(self.theme, kind="iron", glow=False)
@@ -3481,152 +3269,12 @@ class MainWindow(QMainWindow):
         b_layout.addWidget(workflow); b_layout.addStretch(1); layout.addWidget(body, stretch=1); return page
 
     def page_settings(self):
-        page, layout = self.page_container(
-            "Settings",
-            "Theme options, saved defaults, v0.6.7 lock QA checklist, release notes, and checkpoint status."
-        )
-        scroll, content = self.scroll_content()
-        body = TexturedPanel(self.theme, kind="iron", glow=False)
-        add_shadow(body, blur=24, y=8)
-        b_layout = QVBoxLayout(body)
-        b_layout.setContentsMargins(22, 22, 22, 22)
-        b_layout.setSpacing(16)
+        page, layout = self.page_container("Settings", "Theme options, report detail, save location, export format, readability, and app version placeholders.")
+        body = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(body, blur=24, y=8); b_layout = QVBoxLayout(body); b_layout.setContentsMargins(22, 22, 22, 22); b_layout.setSpacing(16)
+        theme_card = ReportCard("Theme Options", self.theme, badges=[("Current", "primary")]); row = QHBoxLayout(); dark = QPushButton("Dragon Forge"); dark.setObjectName("primaryButton" if self.theme()["name"] == "Dragon Forge" else "utilityButton"); dark.clicked.connect(lambda: self.set_theme(DRAGON_FORGE)); light = QPushButton("Adventurer's Map"); light.setObjectName("primaryButton" if self.theme()["name"] == "Adventurer's Map" else "utilityButton"); light.clicked.connect(lambda: self.set_theme(ADVENTURERS_MAP)); self.settings_theme_buttons = [(dark, "Dragon Forge"), (light, "Adventurer's Map")]; row.addWidget(dark); row.addWidget(light); row.addStretch(1); theme_card.body.addLayout(row); theme_card.body.addWidget(self.make_text("Dragon Forge remains ember-forge dark. Adventurer’s Map now uses the Cartographer Palette: parchment, dark ink, antique brass, and deep map blue.", paper=True)); b_layout.addWidget(theme_card)
+        prefs = ReportCard("UI Preferences", self.theme); pref_grid = QGridLayout(); pref_grid.addWidget(QLabel("Report Detail Level"), 0, 0); detail = QComboBox(); detail.addItems(["Short", "Normal", "Detailed", "Exhaustive"]); detail.setCurrentText("Detailed"); self.configure_combo_popup(detail); pref_grid.addWidget(detail, 0, 1); pref_grid.addWidget(QLabel("Export Format"), 1, 0); export = QComboBox(); export.addItems(["Markdown", "Text", "HTML later", "PDF later"]); self.configure_combo_popup(export); pref_grid.addWidget(export, 1, 1); pref_grid.addWidget(QLabel("Save Folder"), 2, 0); pref_grid.addWidget(QLineEdit("Outputs/"), 2, 1); prefs.body.addLayout(pref_grid); b_layout.addWidget(prefs)
+        version = ReportCard("App Version", self.theme); version.body.addWidget(self.make_text(f"The Dragon’s Touch PySide6 Workstation\nVersion: {APP_VERSION}\nPhase: {APP_PHASE}\nLocked backend: {LOCKED_BACKEND_VERSION}\nBackend: guarded bridge available through explicit confirmation\nPurpose: local deck preview, selected deck handoff through MTG_DECK_FILE, review settings, normalized collection folder/file handoff, cleaned Review Setup boundaries, commander-pair preview counting, companion preview detection/handoff status, guarded-run report output detection for backend-created unique deck-file-distinguished run folders, Report Viewer plain-text file loading, runtime-config contract preview, safe backend bridge preview, guarded execution bridge, conditional Review Setup fields, CLI input bridge through Build-up, Cut-down, Auto-batch defaults, top-level/subtype Philosophy Lens, Guide Presentation, Collection Mode, and Collection Source, and optional combo-tracker placeholder while keeping external API calls disabled", paper=True)); b_layout.addWidget(version); b_layout.addStretch(1); layout.addWidget(body, stretch=1); return page
 
-        theme_card = ReportCard("Theme Options", self.theme, badges=[("Current", "primary")])
-        row = QHBoxLayout()
-        dark = QPushButton("Dragon Forge")
-        dark.setObjectName("primaryButton" if self.theme()["name"] == "Dragon Forge" else "utilityButton")
-        dark.clicked.connect(lambda: self.set_theme(DRAGON_FORGE))
-        light = QPushButton("Adventurer's Map")
-        light.setObjectName("primaryButton" if self.theme()["name"] == "Adventurer's Map" else "utilityButton")
-        light.clicked.connect(lambda: self.set_theme(ADVENTURERS_MAP))
-        self.settings_theme_buttons = [(dark, "Dragon Forge"), (light, "Adventurer's Map")]
-        row.addWidget(dark)
-        row.addWidget(light)
-        row.addStretch(1)
-        theme_card.body.addLayout(row)
-        theme_card.body.addWidget(self.make_text(
-            "Dragon Forge remains the locked default. Adventurer’s Map remains available as the lighter cartographer palette.",
-            paper=True
-        ))
-        b_layout.addWidget(theme_card)
-
-        prefs = ReportCard("UI Preferences Checkpoint", self.theme, badges=[("Future controls", "manual")])
-        prefs_box = self.readonly_text_box(
-            "UI Preferences Checkpoint\n"
-            "- Report detail level -> Detailed\n"
-            "- Export format -> Markdown\n"
-            "- Save folder -> Outputs/\n"
-            "- Report Viewer text -> approved default for the v0.6.7 lock\n"
-            "- Future settings home -> font family, font size, readability presets, export behavior, and saved user defaults\n"
-            "- Current boundary -> these values are documented here but not yet persistent editable settings",
-            min_height=115,
-            max_height=150,
-        )
-        prefs_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        prefs.body.addWidget(prefs_box)
-        prefs.body.addWidget(self.default_note("Displayed as a checkpoint summary for now. Full editable preferences come after the v0.6.7 foundation lock."))
-        b_layout.addWidget(prefs)
-
-        checkpoint = ReportCard("v0.6.7 Desktop UI Foundation Lock", self.theme, badges=[("Locked checkpoint", "protected"), ("CLI source", "manual")])
-        checkpoint_text = (
-            "Desktop UI Foundation Lock\n"
-            "- Deck Selection, Review Setup, Philosophy Lens, Collection Source, Run Analysis, and Report Viewer are connected into one guarded local workflow.\n"
-            "- The UI is a guarded frontend for the existing CLI/backend workflow; it is not a second backend.\n"
-            "- CLI/main.py remains the source of truth for legality, strategy, collection loading, cuts, replacements, and report generation.\n"
-            "- Backend output folders are unique per run and preserve commander/deck-filename distinction.\n"
-            "- Report Viewer loads generated markdown/text as plain readable text.\n"
-            "- Deferred intentionally: deep markdown rendering, structured report parsing, batch/aggregate viewing, user-configurable report font settings, and Commander Spellbook/API combo tracking.\n"
-            "- Commander Spellbook remains disabled and future opt-in only."
-        )
-        checkpoint_box = self.readonly_text_box(checkpoint_text, min_height=155, max_height=210)
-        checkpoint_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        checkpoint.body.addWidget(checkpoint_box)
-        b_layout.addWidget(checkpoint)
-
-        qa_card = ReportCard("Final v0.6.7 Lock QA Checklist", self.theme, badges=[("QA checkpoint", "manual"), ("No new scope", "protected")])
-        qa_text = (
-            "Final v0.6.7 Lock QA Checklist\n"
-            "Deck Selection\n"
-            "- Choose a deck file and confirm preview loads without overlap.\n"
-            "- Confirm single commander, partner/paired commanders, and companion preview status display correctly.\n"
-            "- Confirm deck counts separate main deck, commander cards, total Commander deck estimate, and companion cards.\n\n"
-            "Review Setup\n"
-            "- Confirm Output Mode, Review Direction, Review Intensity / Build-Up Mode, Prompt Mode, Budget Note, and Bracket Intended auto-stage immediately.\n"
-            "- Confirm Cut down shows Review Intensity and Build up shows Build-Up Mode.\n\n"
-            "Philosophy Lens\n"
-            "- Confirm top-level philosophy, optional subtype, and Guide Presentation auto-stage cleanly.\n"
-            "- Confirm dropdowns remain readable in both themes.\n\n"
-            "Collection Source\n"
-            "- Confirm No collection, Prefer collection first, Collection only, and Collection shakeup stage correctly.\n"
-            "- Confirm Entire collection folder and Select collection files handoff states are correct.\n\n"
-            "Run Analysis\n"
-            "- Confirm guarded run requires confirmation and uses selected deck handoff.\n"
-            "- Confirm diagnostics remain available behind the detail selector.\n"
-            "- Confirm Commander Spellbook/API calls remain disabled.\n\n"
-            "Report Viewer\n"
-            "- Confirm generated reports are detected, grouped, loaded as plain text, searchable, copyable, and openable.\n"
-            "- Confirm latest backend-created unique output folder opens correctly.\n\n"
-            "Settings / Themes\n"
-            "- Confirm Dragon Forge and Adventurer’s Map remain readable and no flash popup returns.\n"
-            "- Confirm Settings clearly documents the v0.6.7 lock and future boundaries."
-        )
-        qa_box = self.readonly_text_box(qa_text, min_height=235, max_height=310)
-        qa_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        qa_card.body.addWidget(qa_box)
-        qa_card.body.addWidget(self.default_note("Checklist only: this patch documents the lock criteria without adding new features."))
-        b_layout.addWidget(qa_card)
-
-        release_card = ReportCard("v0.6.7 Release Notes and Deferred Scope", self.theme, badges=[("Release notes", "primary"), ("v0.7 clarified", "manual")])
-        release_text = (
-            "v0.6.7 Desktop UI Foundation Release Notes\n"
-            "Locked in this checkpoint\n"
-            "- Single-deck desktop UI foundation.\n"
-            "- Guarded main.py execution with explicit confirmation.\n"
-            "- Backend-created unique timestamped output folders with deck filename distinction.\n"
-            "- Report detection and Report Viewer plain-text loading.\n"
-            "- Deck preview support for commanders, commander pairs, and companion status.\n"
-            "- Collection source staging and CLI handoff.\n"
-            "- Settings/status page describing the current lock boundary.\n\n"
-            "Deferred intentionally\n"
-            "- Batch / Aggregate real workflow.\n"
-            "- Commander Spellbook/API combo tracking.\n"
-            "- Deep markdown rendering and structured report section parsing.\n"
-            "- Settings persistence, saved UI sessions, and full readability preferences.\n"
-            "- Replacement Candidate Engine and future automation layers.\n\n"
-            "Roadmap clarification\n"
-            "- v0.6.7 = Desktop UI Foundation Lock.\n"
-            "- v0.6.8 = Prompt / Report Polish + Stable v0.6 Lock.\n"
-            "- v0.7 = Desktop UI Alpha Foundation / Alpha Hardening.\n"
-            "- v0.7 builds on this locked UI foundation; it is not a rebuild from scratch."
-        )
-        release_box = self.readonly_text_box(release_text, min_height=210, max_height=285)
-        release_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        release_card.body.addWidget(release_box)
-        release_card.body.addWidget(self.default_note("Conservative roadmap wording only: no completed checkpoints were renamed or moved."))
-        b_layout.addWidget(release_card)
-
-        version = ReportCard("App Version", self.theme, badges=[("v0.6.7 lock", "protected")])
-        version_text = (
-            "The Dragon’s Touch PySide6 Workstation\n"
-            f"Version -> {APP_VERSION}\n"
-            f"Phase -> {APP_PHASE}\n"
-            f"Locked backend -> {LOCKED_BACKEND_VERSION}\n"
-            "Backend -> guarded bridge available through explicit confirmation\n"
-            "Foundation status -> v0.6.7 Desktop UI Foundation locked\n"
-            "Stable workflow -> Deck Selection -> Review Setup -> Philosophy Lens -> Collection Source -> Run Analysis -> backend-created unique output folder -> Report Viewer plain-text reading\n"
-            "Output pattern -> Outputs/<CommanderName>_<DeckFileStem>_run_<YYYYMMDD_HHMMSS>/\n"
-            "Boundary -> no hidden API calls; Commander Spellbook/API remains disabled; Report Viewer does not deep-parse markdown yet; v0.7 means alpha hardening of this existing UI, not a rebuild."
-        )
-        version_box = self.readonly_text_box(version_text, min_height=135, max_height=185)
-        version_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        version.body.addWidget(version_box)
-        b_layout.addWidget(version)
-
-        content.addWidget(body)
-        content.addStretch(1)
-        layout.addWidget(scroll, stretch=1)
-        return page
 
 def main():
     app = QApplication(sys.argv)

@@ -115,3 +115,50 @@ Patch v0.6.7.7.1 — Backend Entrypoint Rename, Run Analysis Layout Cleanup, and
 
 Patch v0.6.7.7.2 — Run Analysis Scrollbox and Detail Panel Layout Cleanup
 
+Patch v0.6.7.8 — First Guarded Execution Bridge
+Patch v0.6.7.8.1 — Run Analysis Detail Selector Layout Cleanup
+Patch v0.6.7.9 — First Actual Guarded Run Path: ready for testing
+Patch v0.6.7.9.1 — Interactive CLI Input Bridge Preview
+
+Patch vXXXX - Run through OLAMA to verify things aren't going crazy (OLAMA SETUP) (Future version)
+Patch v0.6.7.9.2 — Review Direction CLI Input Bridge
+Patch v0.6.7.9.3 — Build-Up Mode UI Field and CLI Input Bridge:
+
+Patch v0.6.7.9.4 — Prompt Mode CLI Bridge and Direction-Aware Review Setup UI
+
+Patch v0.6.7.9.5 — Philosophy Lens CLI Bridge and Review Setup Conditional Layout Cleanup
+
+Patch v0.6.7.9.6 — Guide Presentation UI Field and CLI Bridge
+Patch v0.6.7.9.7 — Collection Mode CLI Bridge
+Patch v0.6.7.9.8 — Collection Source CLI Bridge
+Patch v0.6.7.9.9 — Full CLI Bridge Gap Pass
+Patch v0.6.7.9.10 — Deck Selection CLI Handoff and Philosophy Lens Cleanup
+
+Patch v0.6.7.9.11 — Collection Folder Handoff State Cleanup
+
+Patch v0.6.7.9.12 — Review Setup Boundary Cleanup and Commander Pair Preview Fix
+
+Patch v0.6.7.9.13 — Companion Preview Detection and Handoff Status
+
+Patch v0.6.7.9.14 — Guarded Run Report Output Detection
+
+Patch v0.6.7.9.15 — Report File Detection Hardening
+
+Patch v0.6.7.9.16 — Unique Guarded Run Output Folder Isolation
+
+Patch v0.6.7.9.17 — Backend Unique Run Output Folder Handoff Fix with Deck Filename Distinction
+
+Patch v0.6.7.9.18 — Report Viewer File Load Preview
+
+Patch v0.6.7.9.19 — Report Viewer Layout Cleanup
+Patch v0.6.7.9.19.1 — Report Viewer Containment and Scroll Status Hotfix
+Patch v0.6.7.9.19.2 — Report Viewer Parchment Status Layout Hotfix
+Patch v0.6.7.9.20 — Global Parchment Input Styling Pass
+
+Patch v0.6.7.9.21 — Report Workspace Grouping Controls and Run Analysis Cleanup
+
+Patch v0.6.7.9.21.1 — Report Viewer Sidebar Label Cleanup
+Patch v0.6.7.10 — Report Output Hook Checkpoint, UI QA, and Desktop Foundation Lock
+Patch v0.6.7.10.1 — Settings Page Lock Cleanup
+Patch v0.6.7.10.2 — Final v0.6.7 Lock QA Checklist and Release Notes
+

@@ -2,17 +2,16 @@
 
 Patch Batch 8 note:
 - There is exactly one output routing path.
-- Normal reports always go to outputs/<Deck_File_Distinguished_Run>/normal/.
-- Debug/stress-test reports always go to outputs/<Deck_File_Distinguished_Run>/debug/.
-- Every backend run gets a unique timestamped output folder.
-- Output folder names preserve commander identity, source deck-file distinction, and run timestamp.
+- Normal reports always go to outputs/<Deck>/normal/.
+- Debug/stress-test reports always go to outputs/<Deck>/debug/.
+- Existing root-level files from older runs never cause a new numbered deck folder.
+- Batch mode can use deck-file-aware folder names to prevent collisions when multiple deck files share the same commander.
 """
 
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 from typing import Iterable
 
@@ -50,14 +49,6 @@ def shorten_output_stem(name: object, max_length: int = MAX_OUTPUT_STEM_LENGTH) 
     return sanitize_filename(name or "Unknown_Deck", max_length=max_length) or "Unknown_Deck"
 
 
-def run_folder_name_part(name: object, max_length: int = MAX_OUTPUT_STEM_LENGTH) -> str:
-    """Return a readable folder-name segment for timestamped run folders."""
-    part = shorten_output_stem(name or "Unknown_Deck", max_length=max_length)
-    part = re.sub(r"[,.']+", "_", part)
-    part = re.sub(r"_+", "_", part).strip("._ ")
-    return part[:max_length].rstrip("._ ") or "Unknown_Deck"
-
-
 def make_batch_output_deck_name(commander_name: object, deck_file: Path | str | None = None) -> str:
     """Return a batch-safe deck folder name.
 
@@ -75,48 +66,10 @@ def make_batch_output_deck_name(commander_name: object, deck_file: Path | str | 
         return commander_part
 
     remaining = max(20, MAX_OUTPUT_STEM_LENGTH - len(commander_part) - 2)
-    file_part = run_folder_name_part(Path(deck_file).stem, max_length=remaining)
+    file_part = shorten_output_stem(Path(deck_file).stem, max_length=remaining)
     if not file_part or file_part == commander_part:
         return commander_part
     return f"{commander_part}__{file_part}"
-
-
-def safe_run_timestamp() -> str:
-    """Return a filesystem-safe timestamp for one backend output run."""
-    return datetime.now().strftime("%Y%m%d_%H%M%S")
-
-
-def make_run_output_deck_name(
-    commander_name: object,
-    deck_file: Path | str | None = None,
-    *,
-    timestamp: str | None = None,
-) -> str:
-    """Return the final per-run output folder name.
-
-    v0.6.7.9.17 backend handoff fix:
-    - preserve commander identity,
-    - preserve source deck-file distinction when available,
-    - add a timestamp so repeated runs of the same deck do not pile into the
-      same folder or leave empty commander-shell folders for the UI to clean up.
-    
-    Example:
-        Miirym_Sentinel_Wyrm_19_Miirym_Test_run_20260511_052140
-    """
-    stamp = sanitize_filename(timestamp or safe_run_timestamp(), max_length=24)
-    commander_part = run_folder_name_part(commander_name or "Unknown_Deck", max_length=42)
-
-    file_part = ""
-    if deck_file:
-        reserved = len(commander_part) + len(stamp) + len("__run__")
-        remaining = max(18, MAX_OUTPUT_STEM_LENGTH - reserved)
-        file_part = run_folder_name_part(Path(deck_file).stem, max_length=remaining)
-
-    if file_part and file_part != commander_part:
-        base = f"{commander_part}_{file_part}_run_{stamp}"
-    else:
-        base = f"{commander_part}_run_{stamp}"
-    return run_folder_name_part(base, max_length=MAX_OUTPUT_STEM_LENGTH)
 
 
 def safe_output_filename(base_name: object, extension: str = ".txt", max_length: int = MAX_OUTPUT_FILENAME_LENGTH) -> str:
@@ -141,10 +94,11 @@ def get_unique_output_path(folder: Path | str, base_name: object, extension: str
 
 
 def create_deck_output_folder(deck_name: object, output_root: Path | str, subfolder: str | None = None) -> Path:
-    """Create/reuse a specific output folder.
+    """Create/reuse a deck output folder.
 
-    Kept for compatibility with older helpers. New guarded/backend runs should
-    prefer ``create_unique_run_output_folders`` with a timestamped run folder.
+    Important: this intentionally reuses outputs/<Deck_Name> even if old files are
+    already sitting in that root from previous broken runs. It does not create
+    <Deck_Name>_02 just because the folder is non-empty.
     """
     base = Path(output_root) / shorten_output_stem(deck_name)
     if subfolder:
@@ -159,30 +113,6 @@ def create_deck_output_folders(deck_name: object, output_root: Path | str) -> De
     debug = deck_root / "debug"
     normal.mkdir(parents=True, exist_ok=True)
     debug.mkdir(parents=True, exist_ok=True)
-    return DeckOutputFolders(deck_root=deck_root, normal=normal, debug=debug)
-
-
-def create_unique_run_output_folders(deck_name: object, output_root: Path | str) -> DeckOutputFolders:
-    """Create one unique output folder for a single backend run.
-
-    The caller should pass a name that already includes commander/deck-file
-    distinction and timestamp. A numeric suffix is added only if the timestamped
-    folder already exists.
-    """
-    output_root = Path(output_root)
-    base_name = shorten_output_stem(deck_name)
-    deck_root = output_root / base_name
-    counter = 2
-    while deck_root.exists():
-        suffix = f"_{counter}"
-        max_base = max(18, MAX_OUTPUT_STEM_LENGTH - len(suffix))
-        deck_root = output_root / f"{shorten_output_stem(base_name, max_length=max_base)}{suffix}"
-        counter += 1
-
-    normal = deck_root / "normal"
-    debug = deck_root / "debug"
-    normal.mkdir(parents=True, exist_ok=False)
-    debug.mkdir(parents=True, exist_ok=False)
     return DeckOutputFolders(deck_root=deck_root, normal=normal, debug=debug)
 
 
