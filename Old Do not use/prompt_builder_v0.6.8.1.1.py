@@ -31,14 +31,6 @@ v0.6.8.1.1 hotfix:
 - Indent answer choices consistently under their questions.
 - Carry UI/runtime bracket, budget, collection mode, and collection source context into the guided prompt.
 - Keep prompt behavior and backend analysis logic unchanged.
-
-v0.6.8.2 polish:
-- Remove repeated Section 1 review-outcome confirmation.
-- Reference staged Review Intensity / Build-Up Mode in Section 1.
-- Restore clean Game Changer / fast mana / tutor / free interaction option formatting.
-
-v0.6.8.3 boundary cleanup (carried into v0.6.8.4 regression pass):
-- Keep prompt wording aligned with final user-facing boundaries without changing prompt workflow behavior.
 """
 
 from __future__ import annotations
@@ -229,13 +221,6 @@ def _combo_avoidance_options() -> str:
     return _option_block("""1. Yes.
 2. No.
 3. Case-by-case.""")
-
-
-def _game_changer_acceptance_options() -> str:
-    return _option_block("""1. Yes.
-2. No.
-3. Some / case-by-case.
-4. Explain.""")
 
 
 def _build_recommendation_preference_options() -> str:
@@ -538,10 +523,13 @@ def _cut_down_sections(context: dict[str, Any], worksheet: bool = False) -> str:
 1. Is the Dragon's Touch review direction correct? Current Dragon's Touch direction: **cut_down / tuning**.
 {_yes_no_direction_options()}
 
-2. What do you want from this review?
+2. What should this review accomplish? Use the current Dragon's Touch review direction unless you want to change it.
+{_review_outcome_confirmation_options("cut_down")}
+
+3. What do you want from this review?
 {_main_goal_cut_options()}
 
-3. Confirm or correct the Review Setup intensity. Current Dragon's Touch Review Intensity: **{context["runtime_config"].cut_depth_config.get("mode", "normal")}**. Use the current intensity unless you want a different review depth.
+4. How much help do you want?
 {_help_depth_options()}
 
 ### Section 2 — Commander Role
@@ -579,8 +567,7 @@ If nothing applies, **No**, **N/A**, or **None** can cover this whole section.
 
 2. Budget/table boundary note from UI/runtime: **{_runtime_value(context, "budget_note", "No budget note provided")}**. Confirm, correct, or add any table/budget boundary the review should respect.
 
-3. Are Game Changers, fast mana, efficient tutors, or free interaction acceptable?
-{_game_changer_acceptance_options()}
+3. Are Game Changers, fast mana, efficient tutors, or free interaction acceptable? Answer Yes, No, Some, or explain.
 
 4. Are infinite combos or near-combos welcome?
 {_combo_welcome_options()}
@@ -692,7 +679,10 @@ This section is for optional upgrade swaps during build-up. If the pilot wants a
 1. Is the Dragon's Touch review direction correct? Current Dragon's Touch direction: **build_up / completion**.
 {_yes_no_direction_options()}
 
-2. Confirm or correct the Build-Up Mode from Review Setup. Current Dragon's Touch build-up mode: **{build_label}**. Cards needed to reach 100: **{cards_needed}**.
+2. What should this review accomplish? Use the current Dragon's Touch review direction unless you want to change it.
+{_review_outcome_confirmation_options("build_up")}
+
+3. What kind of build-up help do you want? Current Dragon's Touch build-up mode: **{build_label}**. Cards needed to reach 100: **{cards_needed}**.
 {_build_goal_options()}
 
 ### Section 2 — Commander Role
@@ -728,8 +718,7 @@ If nothing applies, **No**, **N/A**, or **None** can cover this whole section.
 
 2. Budget/table boundary note from UI/runtime: **{_runtime_value(context, "budget_note", "No budget note provided")}**. Confirm, correct, or add any table/budget boundary the review should respect.
 
-3. Are Game Changers, fast mana, efficient tutors, or free interaction acceptable?
-{_game_changer_acceptance_options()}
+3. Are Game Changers, fast mana, efficient tutors, or free interaction acceptable? Answer Yes, No, Some, or explain.
 
 4. Are infinite combos or near-combos welcome?
 {_combo_welcome_options()}

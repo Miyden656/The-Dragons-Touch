@@ -169,8 +169,8 @@ PROMPT_INTERACTION_MODE_LABELS = {
 }
 
 PROMPT_INTERACTION_MODE_DISPLAY = {
-    "interactive": "Interactive AI chat — guided review, one section at a time",
-    "worksheet": "One-shot worksheet — asks all questions at once for limited-message use",
+    "interactive": "Interactive AI chat — asks one section at a time",
+    "worksheet": "One-shot worksheet — asks all questions at once for limited/free AI use",
 }
 
 PHILOSOPHY_MODE_LABELS = {
@@ -287,8 +287,6 @@ class RuntimeConfig:
     prompt_interaction_mode: str
     philosophy_key: str = "balanced_unknown"
     guide_preference: str = "either"
-    budget_note: str = "No budget note provided"
-    intended_bracket: str = "Not sure yet"
     collection_mode: str = "none"
     collection_file: str = ""
     collection_source_mode: str = "none"
@@ -370,9 +368,9 @@ def get_prompt_interaction_mode_from_user() -> str:
 
     print()
     print("Choose prompt interaction mode:")
-    print("1. Interactive AI chat — guided review, one section at a time")
-    print("2. One-shot worksheet — asks all questions at once for limited-message use")
-    choice = input("Prompt interaction mode [1=Interactive guided chat]: ").strip().lower()
+    print("1. Interactive AI chat — best quality; asks one section at a time")
+    print("2. One-shot worksheet — best for limited-message/free AI use; asks all questions at once")
+    choice = input("Prompt interaction mode [1=Interactive]: ").strip().lower()
     return PROMPT_INTERACTION_MODE_LABELS.get(choice, "interactive")
 
 
@@ -396,10 +394,10 @@ def get_cut_strictness_from_user() -> dict:
     if not mode:
         print()
         print("Choose cut depth mode:")
-        print("1. Light — only obvious concerns and severe off-plan cards")
+        print("1. Light — only obvious problems and severe off-plan cards")
         print("2. Normal — practical tuning, about 5 optional candidates")
         print("3. Strict — serious optimization, about 10 optional candidates")
-        print("4. Brutal / Deep Review — large pools or heavily overfilled decks, about 15 candidates")
+        print("4. Brutal / Deep Review — large pools or very overfilled decks, about 15 candidates")
         print("5. Rebuild — treat the list as a rough card pool and rebuild toward the stated plan")
         print("6. Custom")
         choice = input("Cut depth [2=Normal]: ").strip().lower()
@@ -549,8 +547,6 @@ def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_car
             prompt_interaction_mode=runtime_config.prompt_interaction_mode,
             philosophy_key=runtime_config.philosophy_key,
             guide_preference=runtime_config.guide_preference,
-            budget_note=runtime_config.budget_note,
-            intended_bracket=runtime_config.intended_bracket,
             collection_mode=runtime_config.collection_mode,
             collection_file=runtime_config.collection_file,
             collection_source_mode=runtime_config.collection_source_mode,
@@ -583,8 +579,6 @@ def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_car
         prompt_interaction_mode=runtime_config.prompt_interaction_mode,
         philosophy_key=runtime_config.philosophy_key,
         guide_preference=runtime_config.guide_preference,
-        budget_note=runtime_config.budget_note,
-        intended_bracket=runtime_config.intended_bracket,
         collection_mode=runtime_config.collection_mode,
         collection_file=runtime_config.collection_file,
         collection_source_mode=runtime_config.collection_source_mode,
@@ -656,9 +650,9 @@ def get_philosophy_selection_from_user(review_direction: str) -> tuple[str, str]
         print("Choose guide presentation:")
         print("1. Masculine guide")
         print("2. Feminine guide")
-        print("3. Either / random guide")
+        print("3. Either / random")
         print("4. No named guide, just philosophy labels")
-        pref_choice = input("Guide presentation [3=Either/random guide]: ").strip().lower()
+        pref_choice = input("Guide presentation [3=Either/random]: ").strip().lower()
         guide_preference = GUIDE_PREFERENCE_LABELS.get(pref_choice, "either")
 
     return philosophy_key, guide_preference
@@ -814,8 +808,6 @@ def get_runtime_config() -> RuntimeConfig:
 
     philosophy_key, guide_preference = get_philosophy_selection_from_user(review_direction)
     collection_mode, collection_file, collection_source_mode, collection_files = get_collection_settings_from_user(review_direction)
-    budget_note = os.environ.get("MTG_BUDGET_NOTE", "").strip() or "No budget note provided"
-    intended_bracket = os.environ.get("MTG_INTENDED_BRACKET", "").strip() or "Not sure yet"
 
     return RuntimeConfig(
         output_mode=output_mode,
@@ -825,8 +817,6 @@ def get_runtime_config() -> RuntimeConfig:
         prompt_interaction_mode=prompt_interaction_mode,
         philosophy_key=philosophy_key,
         guide_preference=guide_preference,
-        budget_note=budget_note,
-        intended_bracket=intended_bracket,
         collection_mode=collection_mode,
         collection_file=collection_file,
         collection_source_mode=collection_source_mode,
@@ -844,8 +834,6 @@ def print_runtime_config_summary(runtime_config: RuntimeConfig) -> None:
     )
     print(f"Philosophy lens: {runtime_config.philosophy_key}")
     print(f"Guide preference: {runtime_config.guide_preference}")
-    print(f"Intended bracket: {runtime_config.intended_bracket}")
-    print(f"Budget note: {runtime_config.budget_note}")
     print(f"Collection mode: {COLLECTION_MODE_DISPLAY.get(runtime_config.collection_mode, runtime_config.collection_mode)}")
     if runtime_config.collection_mode != "none":
         print(f"Collection source: {COLLECTION_SOURCE_MODE_DISPLAY.get(runtime_config.collection_source_mode, runtime_config.collection_source_mode)}")

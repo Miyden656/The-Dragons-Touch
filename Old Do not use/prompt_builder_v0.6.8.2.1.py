@@ -36,9 +36,6 @@ v0.6.8.2 polish:
 - Remove repeated Section 1 review-outcome confirmation.
 - Reference staged Review Intensity / Build-Up Mode in Section 1.
 - Restore clean Game Changer / fast mana / tutor / free interaction option formatting.
-
-v0.6.8.3 boundary cleanup (carried into v0.6.8.4 regression pass):
-- Keep prompt wording aligned with final user-facing boundaries without changing prompt workflow behavior.
 """
 
 from __future__ import annotations

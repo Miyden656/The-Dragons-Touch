@@ -21,9 +21,10 @@ from analysis.strategy_scoring import build_strategy_summary
 from app_io.deck_file_picker import resolve_deck_files
 from app_io.output_writer import (
     assert_output_routing,
-    create_unique_run_output_folders,
+    create_deck_output_folder,
+    create_deck_output_folders,
     get_unique_output_path,
-    make_run_output_deck_name,
+    make_batch_output_deck_name,
     merge_debug_reports,
     write_text_file,
 )
@@ -54,7 +55,7 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.8.5 — Stable v0.6 Lock"
+VERSION_LABEL = "v0.6.8.1.1 — Prompt Formatting and UI Context Carryover Hotfix"
 
 
 def build_analysis_context(
@@ -146,13 +147,12 @@ def process_single_deck(
 ) -> list[Path]:
     scryfall_lookup = scryfall_lookup or {}
     parsed_deck = parse_deck_file(deck_file, scryfall_lookup=scryfall_lookup)
-    # v0.6.8.2.1 regression hotfix:
-    # Always create a unique per-run output folder. This restores the locked
-    # v0.6.7.9.17 behavior that preserves commander identity, source deck-file
-    # distinction, and a run timestamp instead of merging repeated runs into a
-    # plain commander-name folder.
-    output_deck_name = make_run_output_deck_name(parsed_deck.safe_commander_name, deck_file)
-    folders = create_unique_run_output_folders(output_deck_name, OUTPUT_FOLDER)
+    output_deck_name = (
+        make_batch_output_deck_name(parsed_deck.safe_commander_name, deck_file)
+        if batch_output_folder
+        else parsed_deck.safe_commander_name
+    )
+    folders = create_deck_output_folders(output_deck_name, OUTPUT_FOLDER)
     written_paths: list[Path] = []
 
     if not scryfall_lookup:
@@ -300,8 +300,7 @@ def main() -> None:
 
     if scryfall_error:
         parsed_deck = parse_deck_file(deck_files[0], scryfall_lookup={})
-        output_deck_name = make_run_output_deck_name(parsed_deck.safe_commander_name, deck_files[0])
-        folders = create_unique_run_output_folders(output_deck_name, OUTPUT_FOLDER)
+        folders = create_deck_output_folders(parsed_deck.safe_commander_name, OUTPUT_FOLDER)
         written_paths = [write_parser_only_checkpoint(folders.normal, parsed_deck, scryfall_error)]
     else:
         written_paths = process_single_deck(deck_files[0], runtime_config, scryfall_lookup, collection_summary)

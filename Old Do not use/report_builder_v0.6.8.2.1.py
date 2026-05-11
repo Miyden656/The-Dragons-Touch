@@ -162,50 +162,6 @@ def _none_or_items(items: list[str], empty: str = "None found.") -> list[str]:
     return [f"- {item}" for item in items]
 
 
-
-def _duplicate_legality_first_pass_lines(context: dict[str, Any]) -> list[str]:
-    """Render duplicate-copy fixes before ordinary required cut candidates.
-
-    This is presentation/wording only. It does not change legality, cut scoring,
-    replacement scoring, or deck-analysis behavior. The goal is to make the
-    player-facing report clearer when a duplicate copy can solve both an illegal
-    duplicate and deck-size pressure.
-    """
-    legality = context.get("legality")
-    cut_pressure = context.get("cut_pressure")
-    duplicates = list(getattr(legality, "illegal_duplicate_cards", []) or []) if legality else []
-    if not duplicates:
-        return []
-
-    required_cuts = int(getattr(cut_pressure, "required_cuts", 0) or 0) if cut_pressure else 0
-    lines = _section("Duplicate Legality First-Pass Fixes")
-    lines.extend([
-        "> Review these duplicate-copy fixes before treating non-duplicate cards as mandatory required cuts.",
-        "> This section is a player-facing priority note only; the legality engine and cut scoring have not changed.",
-    ])
-    if required_cuts > 0:
-        lines.append("> Because the deck also has deck-size pressure, removing an extra illegal duplicate may solve both the duplicate issue and part or all of the required cut count.")
-    else:
-        lines.append("> The deck does not appear to need deck-size cuts from this checkpoint, but illegal duplicates still need legality review.")
-    lines.append("")
-    for item in duplicates[:12]:
-        card_name = item.get("card_name", "Unknown card")
-        try:
-            quantity = int(item.get("quantity", 0) or 0)
-        except (TypeError, ValueError):
-            quantity = 0
-        extra_copies = max(1, quantity - 1) if quantity else "review"
-        lines.append(f"### {card_name}")
-        lines.append(f"- Reported quantity: {quantity if quantity else 'Unknown'}")
-        lines.append(f"- Extra copy/copies to review first: {extra_copies}")
-        if required_cuts > 0:
-            lines.append("- Priority note: removing an extra illegal duplicate copy should be checked before making a non-duplicate required cut recommendation.")
-        else:
-            lines.append("- Priority note: resolve the duplicate legality issue even if no deck-size cut is required.")
-        lines.append("")
-    return lines
-
-
 def _is_structured_watch_reason(reason: str) -> bool:
     prefixes = (
         "Protected Label:",
@@ -677,17 +633,6 @@ def build_normal_report(context: dict[str, Any]) -> str:
     lines.append(f"- Intended bracket: {getattr(runtime_config, 'intended_bracket', 'Not sure yet')}")
     lines.append(f"- Budget note: {getattr(runtime_config, 'budget_note', 'No budget note provided')}")
 
-    lines += _section("User-Facing Boundaries")
-    lines.extend([
-        "- This report is guidance for review, not an automatic deck edit list.",
-        "- Required cuts mean legality or deck-size pressure; optional optimization candidates are not mandatory.",
-        "- If illegal duplicates, color-identity issues, banned cards, or companion issues exist, resolve those legality concerns before treating ordinary cut candidates as required.",
-        "- Collection-mode recommendations are bounded by the selected collection setting; collection-only mode must not present outside cards as available swaps.",
-        "- Philosophy/persona language changes explanation style and priorities only; it does not override legality, pilot intent, budget, collection mode, color identity, or deck evidence.",
-        "- Commander Spellbook/API combo lookup is not part of this run path and remains disabled/future opt-in.",
-        "- The desktop Report Viewer shows generated markdown/text as plain readable text; deep markdown rendering and structured report parsing are deferred.",
-    ])
-
     philosophy_context = context.get("philosophy_context")
     if philosophy_context:
         lines.append("")
@@ -732,7 +677,7 @@ def build_normal_report(context: dict[str, Any]) -> str:
         for item in legality.illegal_duplicate_cards[:8]:
             lines.append(f"  - {item.get('card_name')}: {item.get('quantity')} copies")
         lines.append("")
-        lines.append("> Duplicate legality note: illegal duplicate copies are first-pass legality fixes. If the deck is also over 100 cards, removing an extra illegal duplicate may be the cleanest way to resolve both duplicate legality and deck-size pressure.")
+        lines.append("> Duplicate legality note: if the deck is over 100 cards and also has an illegal duplicate, removing an extra duplicate copy may be the cleanest required legality fix. Review duplicate issues before treating any non-duplicate review candidate as mandatory.")
 
     # AI handoff packet: full list + per-card notes must appear before strategy/cut summaries.
     lines.extend(_build_full_decklist_section(context))
@@ -803,10 +748,8 @@ def build_normal_report(context: dict[str, Any]) -> str:
     if getattr(legality, "illegal_duplicate_cards", None):
         lines.append("> If duplicate legality issues are present, resolve those duplicate copies first when they also help the deck reach legal size.")
 
-    lines.extend(_duplicate_legality_first_pass_lines(context))
-
     lines += _section("Required Cut / Legality Review Candidates")
-    lines.append("> These are non-duplicate review candidates for resolving required legality/deck-size pressure. If the Duplicate Legality First-Pass Fixes section appears above, review that section first before treating any ordinary card here as a mandatory cut.")
+    lines.append("> These are candidates for resolving required legality/deck-size pressure. Confirm duplicate, color-identity, banned-card, and companion issues before finalizing any required cut.")
     lines.extend(_format_cut_entries(possible.required_cut_candidates, "No required cut candidates in this checkpoint."))
 
     lines += _section("Optional Optimization Review Candidates")

@@ -54,7 +54,7 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.8.5 — Stable v0.6 Lock"
+VERSION_LABEL = "v0.6.6.6 — v0.6.6 lock / bias documentation"
 
 
 def build_analysis_context(
@@ -146,11 +146,10 @@ def process_single_deck(
 ) -> list[Path]:
     scryfall_lookup = scryfall_lookup or {}
     parsed_deck = parse_deck_file(deck_file, scryfall_lookup=scryfall_lookup)
-    # v0.6.8.2.1 regression hotfix:
-    # Always create a unique per-run output folder. This restores the locked
-    # v0.6.7.9.17 behavior that preserves commander identity, source deck-file
-    # distinction, and a run timestamp instead of merging repeated runs into a
-    # plain commander-name folder.
+    # v0.6.7.9.17: every backend run writes directly into a unique,
+    # deck-file-distinguished run folder. This prevents repeated runs of the
+    # same commander from piling reports into one folder and removes the need
+    # for UI-side file relocation.
     output_deck_name = make_run_output_deck_name(parsed_deck.safe_commander_name, deck_file)
     folders = create_unique_run_output_folders(output_deck_name, OUTPUT_FOLDER)
     written_paths: list[Path] = []

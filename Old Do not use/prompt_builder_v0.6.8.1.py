@@ -26,19 +26,6 @@ v0.6.8.1 polish:
 - Clean final user-guided prompt wording before the stable v0.6 lock.
 - Replace internal "script" phrasing with Dragon's Touch wording.
 - Keep workflow behavior unchanged.
-
-v0.6.8.1.1 hotfix:
-- Indent answer choices consistently under their questions.
-- Carry UI/runtime bracket, budget, collection mode, and collection source context into the guided prompt.
-- Keep prompt behavior and backend analysis logic unchanged.
-
-v0.6.8.2 polish:
-- Remove repeated Section 1 review-outcome confirmation.
-- Reference staged Review Intensity / Build-Up Mode in Section 1.
-- Restore clean Game Changer / fast mana / tutor / free interaction option formatting.
-
-v0.6.8.3 boundary cleanup (carried into v0.6.8.4 regression pass):
-- Keep prompt wording aligned with final user-facing boundaries without changing prompt workflow behavior.
 """
 
 from __future__ import annotations
@@ -81,7 +68,7 @@ COMMANDER_NEEDS_OPTIONS = """1. Ramp / mana acceleration
 
 PACKAGE_DEFINITION_NOTE = """Use the deck report as evidence, but let the pilot override it. Packages are groups of cards that work together, such as ramp, typal support, sacrifice outlets, token makers, landfall enablers, wheels, draw-punishers, protection, copy effects, or combo pieces. Play pattern means how the pilot wants games to feel and unfold; that stays player-defined."""
 
-PROMPT_FORMATTING_RULE = """Formatting rule for the reviewing assistant: Keep each question separate. Render answer choices as indented plain option lines like `   1 = choice`, with no bullet dots and no nested numbered lists. If the pilot partially answers a section, ask only for the missing or unclear items from that section."""
+PROMPT_FORMATTING_RULE = """Formatting rule for the reviewing assistant: Keep each question separate. Render answer choices as plain option lines like `1 = choice`, with no bullet dots and no nested numbered lists. If the pilot partially answers a section, ask only for the missing or unclear items from that section."""
 
 
 
@@ -90,12 +77,11 @@ PROMPT_FORMATTING_RULE = """Formatting rule for the reviewing assistant: Keep ea
 # -----------------------------
 
 # v0.6.5.2.2: Keep fast numbered answers while avoiding nested Markdown numbering.
-def _option_block(options: str, indent: str = "   ") -> str:
-    """Render numbered choices as indented plain `number = choice` lines.
+def _option_block(options: str) -> str:
+    """Render numbered choices as plain `number = choice` lines without bullets.
 
     This keeps the fast numbered-answer workflow while avoiding nested Markdown
-    numbering, avoiding visible bullet dots, and making each answer choice sit
-    visually under the question that owns it.
+    numbering and avoiding visible bullet dots in the generated prompt.
     """
     lines: list[str] = []
     for raw in (options or "").splitlines():
@@ -105,9 +91,9 @@ def _option_block(options: str, indent: str = "   ") -> str:
         if ". " in line:
             number, text = line.split(". ", 1)
             if number.isdigit():
-                lines.append(f"{indent}{number} = {text}")
+                lines.append(f"{number} = {text}")
                 continue
-        lines.append(f"{indent}{line}" if indent and not line.startswith(indent) else line)
+        lines.append(line)
     return "\n".join(lines)
 
 # Convert shared option blocks once; question numbers remain normal, answer choices become plain option lines.
@@ -118,35 +104,6 @@ COMMANDER_NEEDS_OPTIONS = _option_block(COMMANDER_NEEDS_OPTIONS)
 def _yes_no_direction_options() -> str:
     return _option_block("""1. Yes, the Dragon's Touch review direction is correct.
 2. No — I want the other review direction instead. Please state build-up/completion or cut-down/tuning.""")
-
-
-def _review_outcome_confirmation_options(current_direction: str) -> str:
-    if current_direction == "build_up":
-        return _option_block("""1. Yes — use the current build-up / completion plan.
-2. Change this into a cut-down / tuning review.
-3. I am not sure — help me choose the right review direction.""")
-    return _option_block("""1. Yes — use the current cut-down / tuning plan.
-2. Change this into a build-up / completion review.
-3. I am not sure — help me choose the right review direction.""")
-
-
-def _runtime_value(context: dict[str, Any], name: str, fallback: str = "Not provided") -> str:
-    runtime_config = context.get("runtime_config")
-    value = getattr(runtime_config, name, None) if runtime_config is not None else None
-    text = str(value or "").strip()
-    return text or fallback
-
-
-def _collection_context_summary(context: dict[str, Any]) -> str:
-    runtime_config = context.get("runtime_config")
-    collection_summary = context.get("collection_summary")
-    mode = getattr(runtime_config, "collection_mode", "none") if runtime_config is not None else "none"
-    source_mode = getattr(runtime_config, "collection_source_mode", "none") if runtime_config is not None else "none"
-    source_path = getattr(runtime_config, "collection_file", "") if runtime_config is not None else ""
-    loaded = getattr(collection_summary, "loaded", False) if collection_summary is not None else False
-    unique = getattr(collection_summary, "unique_cards", 0) if collection_summary is not None else 0
-    files = getattr(runtime_config, "collection_files", ()) if runtime_config is not None else ()
-    return f"mode={mode}; source={source_mode}; path={source_path or 'not provided'}; files={len(files or ())}; loaded={'yes' if loaded else 'no'}; unique_owned_names={unique}"
 
 
 def _main_goal_cut_options() -> str:
@@ -215,54 +172,6 @@ def _replacement_preference_options(include_replacements: bool = True) -> str:
 def _replacement_source_options() -> str:
     return _option_block("""1. My collection / card pool.
 2. Full Magic card pool.""")
-
-
-def _combo_welcome_options() -> str:
-    return _option_block("""1. Welcome.
-2. Acceptable but not preferred.
-3. Only if they require 3+ cards.
-4. Unwanted.
-5. Other — please describe.""")
-
-
-def _combo_avoidance_options() -> str:
-    return _option_block("""1. Yes.
-2. No.
-3. Case-by-case.""")
-
-
-def _game_changer_acceptance_options() -> str:
-    return _option_block("""1. Yes.
-2. No.
-3. Some / case-by-case.
-4. Explain.""")
-
-
-def _build_recommendation_preference_options() -> str:
-    return _option_block("""1. Categories only.
-2. Exact cards when obvious.
-3. Exact cards welcome.
-4. Suggestions for later.""")
-
-
-def _optional_upgrade_recommendation_options() -> str:
-    return _option_block("""1. Yes.
-2. No, additions only.
-3. Only if the cut is very obvious.""")
-
-
-def _optimization_cut_count_options() -> str:
-    return _option_block("""1. 3–5
-2. 6–9
-3. 10–14
-4. None unless required for legality.""")
-
-
-def _required_vs_optional_cut_options() -> str:
-    return _option_block("""1. Required legal cuts only.
-2. Optional upgrades only.
-3. Both required cuts and optional upgrades.
-4. Not sure — use the deck report's deck-size status.""")
 
 
 def _priority_options() -> str:
@@ -457,8 +366,6 @@ def _script_context_block(context: dict[str, Any]) -> list[str]:
         f"- Required cuts: {cut_pressure.required_cuts}",
         f"- Optional cut target: {runtime_config.cut_depth_config.get('optional_cut_target', 0)}",
         f"- Collection mode: {getattr(runtime_config, 'collection_mode', 'none')}",
-        f"- Intended bracket from UI/runtime: {getattr(runtime_config, 'intended_bracket', 'Not provided')}",
-        f"- Budget note from UI/runtime: {getattr(runtime_config, 'budget_note', 'Not provided')}",
     ]
 
     if getattr(original_runtime_config, "review_direction", "") == "batch_auto":
@@ -541,7 +448,7 @@ def _cut_down_sections(context: dict[str, Any], worksheet: bool = False) -> str:
 2. What do you want from this review?
 {_main_goal_cut_options()}
 
-3. Confirm or correct the Review Setup intensity. Current Dragon's Touch Review Intensity: **{context["runtime_config"].cut_depth_config.get("mode", "normal")}**. Use the current intensity unless you want a different review depth.
+3. How much help do you want?
 {_help_depth_options()}
 
 ### Section 2 — Commander Role
@@ -574,21 +481,24 @@ If nothing applies, **No**, **N/A**, or **None** can cover this whole section.
 5. Cards you specifically want reviewed:
 
 ### Section 5 — Bracket / Table Intent
-1. Confirm or correct the intended bracket. Current UI/runtime intended bracket: **{_runtime_value(context, "intended_bracket", "Not sure yet")}**.
+1. What bracket or power level are you aiming for?
 {BRACKET_OPTIONS}
 
-2. Budget/table boundary note from UI/runtime: **{_runtime_value(context, "budget_note", "No budget note provided")}**. Confirm, correct, or add any table/budget boundary the review should respect.
+2. Are Game Changers, fast mana, efficient tutors, or free interaction acceptable? Answer Yes, No, Some, or explain.
 
-3. Are Game Changers, fast mana, efficient tutors, or free interaction acceptable?
-{_game_changer_acceptance_options()}
+3. Are infinite combos or near-combos welcome?
+1 = Welcome.
+2 = Acceptable but not preferred.
+3 = Only if they require 3+ cards.
+4 = Unwanted.
+5 = Other — please describe.
 
-4. Are infinite combos or near-combos welcome?
-{_combo_welcome_options()}
+4. Should replacements avoid adding or completing combos unless you explicitly want that?
+1 = Yes.
+2 = No.
+3 = Case-by-case.
 
-5. Should replacements avoid adding or completing combos unless you explicitly want that?
-{_combo_avoidance_options()}
-
-6. What kind of table experience should this deck create?
+5. What kind of table experience should this deck create?
 {TABLE_EXPERIENCE_OPTIONS}
 
 ### Section 6 — Cut Philosophy
@@ -596,7 +506,10 @@ If nothing applies, **No**, **N/A**, or **None** can cover this whole section.
 Optional: enter a specific number of cuts you want reviewed. N/A or no answer means the report's range is fine.
 
 2. Are we making required cuts, optional upgrades, or both?
-{_required_vs_optional_cut_options()}
+1 = Required legal cuts only.
+2 = Optional upgrades only.
+3 = Both required cuts and optional upgrades.
+4 = Not sure — use the deck report's deck-size status.
 
 3. Should the review show only stronger candidates or include low-confidence/manual-review candidates?
 {_cut_candidate_visibility_options()}
@@ -611,10 +524,10 @@ Optional: enter a specific number of cuts you want reviewed. N/A or no answer me
 1. Replacement preference:
 {_replacement_preference_options(True)}
 
-2. Replacement source. Current Dragon's Touch collection setting: **{_collection_context_summary(context)}**.
+2. Replacement source:
 {_replacement_source_options()}
 
-3. Budget limit. Current UI/runtime budget note: **{_runtime_value(context, "budget_note", "No budget note provided")}**. Confirm or correct this budget limit:
+3. Budget limit if any:
 
 4. Priority:
 {_priority_options()}
@@ -657,17 +570,25 @@ def _build_up_sections(context: dict[str, Any], worksheet: bool = False) -> str:
         section_6 = """### Section 6 — Cut Philosophy
 Skip this section because the selected build-up mode is **Build from Scratch — Commander(s) only**. Do not ask optimization-cut questions for a commander-only build. Immediately continue to Section 7."""
         replacement_note = "This is Build from Scratch, so do not frame recommendations as swaps. Focus on building a complete legal 100-card Commander deck."
-        replacement_pref_block = f"""1. Build recommendation preference:
-{_build_recommendation_preference_options()}"""
+        replacement_pref_block = """1. Build recommendation preference:
+1 = Categories only.
+2 = Exact cards when obvious.
+3 = Exact cards welcome.
+4 = Suggestions for later."""
     else:
         section_6 = f"""### Section 6 — Cut Philosophy For Optimization
 This section is for optional upgrade swaps during build-up. If the pilot wants additions only, they can say so.
 
 1. Do you want optional upgrade recommendations alongside cut suggestions?
-{_optional_upgrade_recommendation_options()}
+1 = Yes.
+2 = No, additions only.
+3 = Only if the cut is very obvious.
 
 2. How many optimization cut recommendations do you want?
-{_optimization_cut_count_options()}
+1 = 3–5
+2 = 6–9
+3 = 10–14
+4 = None unless required for legality.
 
 3. Should the review show only stronger candidates or include low-confidence/manual-review candidates?
 {_cut_candidate_visibility_options()}
@@ -692,7 +613,7 @@ This section is for optional upgrade swaps during build-up. If the pilot wants a
 1. Is the Dragon's Touch review direction correct? Current Dragon's Touch direction: **build_up / completion**.
 {_yes_no_direction_options()}
 
-2. Confirm or correct the Build-Up Mode from Review Setup. Current Dragon's Touch build-up mode: **{build_label}**. Cards needed to reach 100: **{cards_needed}**.
+2. What kind of build-up help do you want? Current Dragon's Touch build-up mode: **{build_label}**. Cards needed to reach 100: **{cards_needed}**.
 {_build_goal_options()}
 
 ### Section 2 — Commander Role
@@ -723,21 +644,24 @@ If nothing applies, **No**, **N/A**, or **None** can cover this whole section.
 5. Cards you specifically want reviewed:
 
 ### Section 5 — Bracket / Table Intent
-1. Confirm or correct the intended bracket. Current UI/runtime intended bracket: **{_runtime_value(context, "intended_bracket", "Not sure yet")}**.
+1. What bracket or power level are you aiming for?
 {BRACKET_OPTIONS}
 
-2. Budget/table boundary note from UI/runtime: **{_runtime_value(context, "budget_note", "No budget note provided")}**. Confirm, correct, or add any table/budget boundary the review should respect.
+2. Are Game Changers, fast mana, efficient tutors, or free interaction acceptable? Answer Yes, No, Some, or explain.
 
-3. Are Game Changers, fast mana, efficient tutors, or free interaction acceptable?
-{_game_changer_acceptance_options()}
+3. Are infinite combos or near-combos welcome?
+1 = Welcome.
+2 = Acceptable but not preferred.
+3 = Only if they require 3+ cards.
+4 = Unwanted.
+5 = Other — please describe.
 
-4. Are infinite combos or near-combos welcome?
-{_combo_welcome_options()}
+4. Should replacements avoid adding or completing combos unless you explicitly want that?
+1 = Yes.
+2 = No.
+3 = Case-by-case.
 
-5. Should replacements avoid adding or completing combos unless you explicitly want that?
-{_combo_avoidance_options()}
-
-6. What kind of table experience should this deck create?
+5. What kind of table experience should this deck create?
 {TABLE_EXPERIENCE_OPTIONS}
 
 {section_6}
@@ -747,13 +671,13 @@ If nothing applies, **No**, **N/A**, or **None** can cover this whole section.
 
 {replacement_pref_block}
 
-2. Replacement source, if replacements are relevant. Current Dragon's Touch collection setting: **{_collection_context_summary(context)}**.
+2. Replacement source, if replacements are relevant:
 {_replacement_source_options()}
 
-3. Build source. Current Dragon's Touch collection setting: **{_collection_context_summary(context)}**.
+3. Build source:
 {_replacement_source_options()}
 
-4. Budget limit. Current UI/runtime budget note: **{_runtime_value(context, "budget_note", "No budget note provided")}**. Confirm or correct this budget limit:
+4. Budget limit if any:
 
 5. Priority:
 {_priority_options()}

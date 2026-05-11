@@ -161,4 +161,16 @@ Patch v0.6.7.9.21.1 — Report Viewer Sidebar Label Cleanup
 Patch v0.6.7.10 — Report Output Hook Checkpoint, UI QA, and Desktop Foundation Lock
 Patch v0.6.7.10.1 — Settings Page Lock Cleanup
 Patch v0.6.7.10.2 — Final v0.6.7 Lock QA Checklist and Release Notes
+Patch v0.6.7.12 — v0.6.7 Desktop UI Foundation Lock
+Patch v0.6.8.1 — Final Prompt Wording Cleanup
+Patch v0.6.8.1.1 — Prompt Formatting and UI Context Carryover Hotfix
+
+Patch v0.6.8.2 — Final Report Wording Cleanup + Prompt Carry-Forward Cleanup
+Patch v0.6.8.2.1 — Restore Unique Timestamped Output Folder Routing
+Patch v0.6.8.3 — Final User-Facing Boundary Cleanup
+
+Patch v0.6.8.4 — Stable v0.6 Regression Pass
+
+Patch v0.6.8.5 — Stable v0.6 Lock
+Stable v0.6: LOCKED
 

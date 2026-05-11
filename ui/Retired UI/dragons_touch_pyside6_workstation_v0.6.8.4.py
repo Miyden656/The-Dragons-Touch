@@ -1,6 +1,6 @@
 """
 The Dragon's Touch - PySide6 Desktop UI Foundation
-Version: v0.6.8.5 — Stable v0.6 Lock
+Version: v0.6.8.4 — Stable v0.6 Regression Pass
 
 Standalone local desktop UI foundation for a fantasy-themed Commander deck-building
 and deck-review app.
@@ -44,9 +44,9 @@ from PySide6.QtWidgets import (
 )
 
 
-APP_VERSION = "v0.6.8.5"
-APP_PHASE = "Stable v0.6 Lock"
-BACKEND_STATUS = "Stable v0.6 locked — guarded UI bridge uses CLI/main.py as source of truth"
+APP_VERSION = "v0.6.8.4"
+APP_PHASE = "Stable v0.6 Regression Pass"
+BACKEND_STATUS = "v0.6.8.4 regression pass — guarded UI bridge uses CLI/main.py as source of truth"
 LOCKED_BACKEND_VERSION = "v0.6.6.6"
 
 # Future backend integration notes:
@@ -3608,7 +3608,7 @@ class MainWindow(QMainWindow):
         release_card.body.addWidget(self.default_note("Conservative roadmap wording only: no completed checkpoints were renamed or moved."))
         b_layout.addWidget(release_card)
 
-        regression_card = ReportCard("Stable v0.6 Regression Pass", self.theme, badges=[("v0.6.8.4 passed", "primary"), ("QA complete", "protected")])
+        regression_card = ReportCard("Stable v0.6 Regression Pass", self.theme, badges=[("v0.6.8.4", "primary"), ("QA only", "protected")])
         regression_text = (
             "Stable v0.6 Regression Pass\n"
             "Purpose\n"
@@ -3627,45 +3627,22 @@ class MainWindow(QMainWindow):
             "- Commander Spellbook/API: confirm external combo calls remain disabled/future opt-in.\n\n"
             "Pass condition\n"
             "- No regressions in guarded run, report generation, output folder routing, UI staging, or plain-text report viewing.\n"
-            "- This pass is complete. v0.6.8.5 formally locks stable v0.6."
+            "- If this passes, the next checkpoint is v0.6.8.5 — Stable v0.6 Lock."
         )
         regression_box = self.readonly_text_box(regression_text, min_height=230, max_height=315)
         regression_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         regression_card.body.addWidget(regression_box)
-        regression_card.body.addWidget(self.default_note("QA checkpoint passed: no new features, backend logic changes, API work, or markdown parser work added."))
+        regression_card.body.addWidget(self.default_note("QA checkpoint only: no new features, backend logic changes, API work, or markdown parser work added."))
         b_layout.addWidget(regression_card)
 
-        stable_lock_card = ReportCard("Stable v0.6 Lock", self.theme, badges=[("v0.6.8.5", "primary"), ("Locked", "protected")])
-        stable_lock_text = (
-            "Stable v0.6 Lock\n"
-            "Final lock status\n"
-            "- v0.6 is now locked as a stable local Commander deck-review workflow.\n"
-            "- v0.6.7 locked the Desktop UI Foundation.\n"
-            "- v0.6.8 polished prompt wording, report wording, user-facing boundaries, and final regression coverage.\n"
-            "- Guarded main.py execution remains the source-of-truth bridge between the UI and backend.\n"
-            "- Backend-created unique timestamped output folders remain locked.\n"
-            "- Report Viewer remains plain-text reading of generated reports.\n"
-            "- Commander Spellbook/API calls remain disabled and future opt-in only.\n"
-            "- Batch / Aggregate remains a placeholder/future workspace.\n\n"
-            "Next roadmap step\n"
-            "- v0.7 = Desktop UI Alpha Foundation / Alpha Hardening.\n"
-            "- v0.7 builds on this locked v0.6 foundation; it is not a rebuild from scratch.\n"
-            "- Future work should focus on alpha usability, not new major systems unless intentionally scoped."
-        )
-        stable_lock_box = self.readonly_text_box(stable_lock_text, min_height=210, max_height=285)
-        stable_lock_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        stable_lock_card.body.addWidget(stable_lock_box)
-        stable_lock_card.body.addWidget(self.default_note("Stable v0.6 lock checkpoint: preserve this behavior unless a future roadmap patch intentionally changes it."))
-        b_layout.addWidget(stable_lock_card)
-
-        version = ReportCard("App Version", self.theme, badges=[("Stable v0.6", "protected")])
+        version = ReportCard("App Version", self.theme, badges=[("v0.6.7 lock", "protected")])
         version_text = (
             "The Dragon’s Touch PySide6 Workstation\n"
             f"Version -> {APP_VERSION}\n"
             f"Phase -> {APP_PHASE}\n"
             f"Locked backend -> {LOCKED_BACKEND_VERSION}\n"
             "Backend -> guarded bridge available through explicit confirmation\n"
-            "Foundation status -> Stable v0.6 locked; v0.6.7 Desktop UI Foundation locked; v0.6.8 polish/regression complete\n"
+            "Foundation status -> v0.6.7 Desktop UI Foundation locked; v0.6.8.4 stable-v0.6 regression pass active\n"
             "Stable workflow -> Deck Selection -> Review Setup -> Philosophy Lens -> Collection Source -> Run Analysis -> backend-created unique output folder -> Report Viewer plain-text reading\n"
             "Output pattern -> Outputs/<CommanderName>_<DeckFileStem>_run_<YYYYMMDD_HHMMSS>/\n"
             "Boundary -> no hidden API calls; Commander Spellbook/API remains disabled; Report Viewer does not deep-parse markdown yet; required cuts, legality fixes, collection mode, and philosophy guidance remain clearly separated; v0.7 means alpha hardening of this existing UI, not a rebuild."

@@ -54,7 +54,7 @@ from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 
 
-VERSION_LABEL = "v0.6.8.5 — Stable v0.6 Lock"
+VERSION_LABEL = "v0.6.8.2.1 — Restore Unique Timestamped Output Folder Routing"
 
 
 def build_analysis_context(
