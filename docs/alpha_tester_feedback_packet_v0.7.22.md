@@ -122,6 +122,32 @@ If the app does not open, record what happened and stop.
 - Pass/Fail: Report Viewer loads the report as plain text.
 - Pass/Fail: Search/copy/refresh/open-folder controls work.
 
+## Required First Test: Use One Included Sample Deck
+
+Start with one of the included sample decklists in the `Decklists/` folder.
+
+These are known test cases. They help confirm that the app can complete the basic workflow before testing unusual or personal files.
+
+Included sample deck purposes:
+
+1. **Miirym Duplicate Legality Test**
+   - Tests duplicate legality reporting.
+   - Includes two copies of `Life Finds a Way`.
+
+2. **Phelia Bracket 2 Test**
+   - Tests lower-power / bracket-sensitive review.
+
+3. **Voja Build-Up Test**
+   - Tests an incomplete deck that needs three more cards to become legal.
+
+4. **Inga & Esika Companion Test**
+   - Tests companion or restriction handling.
+
+5. **Toggo / Keskit Partner Test**
+   - Tests partner commander handling and landfall/artifact/sacrifice package recognition.
+
+After testing one sample deck, please test one of your own Commander decks if you are willing.
+
 ## AI Follow-Up Review Requirement
 
 After generating a Dragon's Touch report, the tester must also run the report through an AI follow-up review.
@@ -221,3 +247,28 @@ This alpha attempt passes if:
 - The tester can open the generated report.
 - The tester can use that report in an AI follow-up review.
 - The tester can provide clear feedback without needing the developer to explain each step live.
+
+## Optional Stress Tests
+
+After the basic smoke test passes, please try to break the system in useful ways.
+
+Useful stress tests:
+
+- Add your own Commander decklist to the `Decklists/` folder.
+- Try a `.txt` export from a deckbuilding site other than Archidekt.
+- Try a copied/pasted decklist saved as a `.txt` file.
+- Try your own collection file.
+- Try a partner commander deck.
+- Try a companion deck.
+- Try an incomplete deck.
+- Try a deck with a known illegal duplicate.
+- Try a deck with unusual formatting.
+
+If something fails, please report:
+
+- what file you tested,
+- where the file came from,
+- what steps you followed,
+- what you expected to happen,
+- what actually happened,
+- and include screenshots if possible.

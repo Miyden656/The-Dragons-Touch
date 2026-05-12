@@ -13,6 +13,18 @@ I am alpha testing The Dragon's Touch, a local Magic: The Gathering Commander de
 
 I have completed the clean ZIP extract, Scryfall data setup, desktop UI launch, deck selection, guarded Run Analysis, output folder generation, report detection, and Report Viewer smoke test.
 
+Before beginning the AI follow-up review, ask the tester whether the report came from:
+
+1. one of the included sample decklists,
+2. their own decklist,
+3. a decklist exported from Archidekt,
+4. a decklist exported from another deckbuilding site,
+5. or an unusual/custom text file.
+
+If the report came from a sample deck, ask which sample was used.
+
+If the report came from the tester's own deck, ask what the deck is supposed to do and whether the Dragon's Touch strategy read matches the tester's intent.
+
 Now I want to run the generated Dragon's Touch report through an AI-assisted review.
 
 Please do the following:

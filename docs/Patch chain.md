@@ -217,4 +217,7 @@ Patch v0.7.17 — Alpha Tester README / Clean Setup Polish
 Patch v0.7.18 — Alpha Tester Packaging Readiness Audit
 
 Patch v0.7.19 — Small UI User-Facing Polish Pass
+Patch v0.7.20 — Alpha Tester Readiness Lock Candidate
+Patch v0.7.21 — Alpha Launcher / Scryfall Setup Repair
+Patch v0.7.22 — Alpha Tester Feedback Packet Handoff (PASS)
 
