@@ -173,4 +173,42 @@ Patch v0.6.8.4 — Stable v0.6 Regression Pass
 
 Patch v0.6.8.5 — Stable v0.6 Lock
 Stable v0.6: LOCKED
+Patch v0.7.0 — Desktop UI Alpha Foundation Baseline
+Patch v0.7.1 — UI Structure Audit / Refactor Map Refinement
+Patch v0.7.2 Test Checklist
+Patch v0.7.3 — Theme / QSS Extraction
+Patch v0.7.4 — Shared Widgets Extraction
+Patch v0.7.5 — Staged State Object Extraction
+
+Patch v0.7.6 — Report Detection Service Extraction
+Patch v0.7.7L — Local Launcher / Alpha Access (FAIL)
+
+Patch v0.7.7L.1 — Python Launcher / Shortcut Fallback
+
+Patch v0.7.7L.2 — Launcher Cleanup / Shortcut Retarget
+
+Patch v0.7.7L.3 — Launcher Scope Correction
+
+Patch v0.7.7 — Backend Runner / CLI Bridge Service Extraction (Failure to open Regression causes .pyw launcher to not work) 
+
+UPDATE: v0.7.7 Passed after v0.7.7.3 hotfix
+
+Patch v0.7.7.1 — Guarded Execution Preview Hotfix
+
+Patch v0.7.7.2 — Guarded Execution Preview Restore Hotfix
+
+Patch v0.7.7.3 — Run Analysis Wrapper Restore Hotfix
+Patch v0.7.8 — Page Extraction: Report Viewer First
+Patch v0.7.9 — Page Extraction: Deck Selection
+
+Patch v0.7.10 — Page Extraction: Review Setup
+Patch v0.7.11 — Page Extraction: Philosophy Lens
+Patch v0.7.12 — Page Extraction: Collection Source
+
+Patch v0.7.13 — Page Extraction: Run Analysis
+
+Patch v0.7.14 — Future / Placeholder Pages Extraction
+
+Patch v0.7.15 — Main Window Cleanup / Alpha Hardening Pass
+
 

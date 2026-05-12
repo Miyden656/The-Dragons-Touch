@@ -28,15 +28,16 @@ Run:
 """
 
 import sys
+import shutil
 from datetime import datetime
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer, QSignalBlocker, QProcess, QProcessEnvironment, QUrl
-from PySide6.QtGui import QFont, QDesktopServices, QTextCursor
+from PySide6.QtCore import Qt, QTimer, QRectF, QPointF, QSignalBlocker, QProcess, QProcessEnvironment, QUrl
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QFont, QLinearGradient, QRadialGradient, QDesktopServices, QTextCursor
 from PySide6.QtWidgets import (
-    QApplication, QButtonGroup, QComboBox, QFileDialog, QFrame,
-    QHBoxLayout, QLabel, QListView, QMainWindow, QMessageBox,
-    QPlainTextEdit, QPushButton, QScrollArea, QSizePolicy,
+    QApplication, QButtonGroup, QCheckBox, QComboBox, QFileDialog, QFrame, QGraphicsDropShadowEffect,
+    QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListView, QMainWindow, QMessageBox,
+    QPlainTextEdit, QProgressBar, QPushButton, QScrollArea, QSlider, QSizePolicy,
     QStackedWidget, QVBoxLayout, QWidget
 )
 
@@ -60,8 +61,6 @@ try:
     from ui.pages.review_setup_page import build_review_setup_page
     from ui.pages.philosophy_lens_page import build_philosophy_lens_page
     from ui.pages.collection_source_page import build_collection_source_page
-    from ui.pages.run_analysis_page import build_run_analysis_page
-    from ui.pages.report_viewer_page import build_report_viewer_page
     from ui.pages.future_workspace_page import build_batch_reports_page, build_settings_page
 except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
     from constants import (
@@ -83,8 +82,6 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
     from pages.review_setup_page import build_review_setup_page
     from pages.philosophy_lens_page import build_philosophy_lens_page
     from pages.collection_source_page import build_collection_source_page
-    from pages.run_analysis_page import build_run_analysis_page
-    from pages.report_viewer_page import build_report_viewer_page
     from pages.future_workspace_page import build_batch_reports_page, build_settings_page
 
 # Future backend integration notes:
@@ -122,7 +119,7 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
 # - v0.6.7.9.13 adds companion-section preview detection and handoff status without validating companion legality.
 # v0.6.7.12 checkpoint: desktop UI foundation is locked; future work should build on this guarded bridge rather than replacing it.
 # v0.7.0 alpha hardening boundary: preserve UI staged state -> guarded confirmation -> subprocess/main.py -> CLI input bridge -> backend output folder -> report detection -> plain-text Report Viewer.
-# Do not bypass main.py, silently execute backend commands, or create a second backend workflow.
+# Do not bypass main.py, silently execute backend commands, or create a second backend workflow duearch_text: str = ""
 
 
 
@@ -165,6 +162,8 @@ class MainWindow(QMainWindow):
         self.report_viewer_copy_button = None
         self.report_viewer_refresh_file_button = None
         self.report_viewer_open_current_folder_button = None
+        self.report_viewer_search_input = None
+        self.report_viewer_wrap_button = None
         self.report_viewer_search_input = None
         self.report_viewer_wrap_button = None
         self.open_output_folder_button = None
@@ -1622,6 +1621,10 @@ class MainWindow(QMainWindow):
         )
 
     def page_run_review(self):
+        try:
+            from ui.pages.run_analysis_page import build_run_analysis_page
+        except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
+            from pages.run_analysis_page import build_run_analysis_page
         return build_run_analysis_page(self)
 
     def update_progress_mock(self):
@@ -1919,7 +1922,12 @@ class MainWindow(QMainWindow):
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(path.parent)))
 
     def page_report_viewer(self):
+        try:
+            from ui.pages.report_viewer_page import build_report_viewer_page
+        except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
+            from pages.report_viewer_page import build_report_viewer_page
         return build_report_viewer_page(self)
+
 
     def collection_settings_summary_text(self):
         if self.state.collection_source_mode == "Select collection files":

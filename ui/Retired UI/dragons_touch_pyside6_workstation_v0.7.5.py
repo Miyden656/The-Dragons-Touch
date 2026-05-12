@@ -28,15 +28,16 @@ Run:
 """
 
 import sys
+import shutil
 from datetime import datetime
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer, QSignalBlocker, QProcess, QProcessEnvironment, QUrl
-from PySide6.QtGui import QFont, QDesktopServices, QTextCursor
+from PySide6.QtCore import Qt, QTimer, QRectF, QPointF, QSignalBlocker, QProcess, QProcessEnvironment, QUrl
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QFont, QLinearGradient, QRadialGradient, QDesktopServices, QTextCursor
 from PySide6.QtWidgets import (
-    QApplication, QButtonGroup, QComboBox, QFileDialog, QFrame,
-    QHBoxLayout, QLabel, QListView, QMainWindow, QMessageBox,
-    QPlainTextEdit, QPushButton, QScrollArea, QSizePolicy,
+    QApplication, QButtonGroup, QCheckBox, QComboBox, QFileDialog, QFrame, QGraphicsDropShadowEffect,
+    QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListView, QMainWindow, QMessageBox,
+    QPlainTextEdit, QProgressBar, QPushButton, QScrollArea, QSlider, QSizePolicy,
     QStackedWidget, QVBoxLayout, QWidget
 )
 
@@ -55,14 +56,6 @@ try:
         add_shadow, TexturedPanel, ForgeOrb, SidebarButton, Badge, ReportCard, SmallStat, PillButton
     )
     from ui.state import AppState
-    from ui.services import report_detector, cli_bridge, backend_runner
-    from ui.pages.deck_selection_page import build_deck_selection_page
-    from ui.pages.review_setup_page import build_review_setup_page
-    from ui.pages.philosophy_lens_page import build_philosophy_lens_page
-    from ui.pages.collection_source_page import build_collection_source_page
-    from ui.pages.run_analysis_page import build_run_analysis_page
-    from ui.pages.report_viewer_page import build_report_viewer_page
-    from ui.pages.future_workspace_page import build_batch_reports_page, build_settings_page
 except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
     from constants import (
         APP_VERSION, APP_PHASE, BACKEND_STATUS, LOCKED_BACKEND_VERSION,
@@ -78,14 +71,6 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
         add_shadow, TexturedPanel, ForgeOrb, SidebarButton, Badge, ReportCard, SmallStat, PillButton
     )
     from state import AppState
-    from services import report_detector, cli_bridge, backend_runner
-    from pages.deck_selection_page import build_deck_selection_page
-    from pages.review_setup_page import build_review_setup_page
-    from pages.philosophy_lens_page import build_philosophy_lens_page
-    from pages.collection_source_page import build_collection_source_page
-    from pages.run_analysis_page import build_run_analysis_page
-    from pages.report_viewer_page import build_report_viewer_page
-    from pages.future_workspace_page import build_batch_reports_page, build_settings_page
 
 # Future backend integration notes:
 # - v0.6.7.2 adds real deck-file selection and local preview.
@@ -122,7 +107,7 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
 # - v0.6.7.9.13 adds companion-section preview detection and handoff status without validating companion legality.
 # v0.6.7.12 checkpoint: desktop UI foundation is locked; future work should build on this guarded bridge rather than replacing it.
 # v0.7.0 alpha hardening boundary: preserve UI staged state -> guarded confirmation -> subprocess/main.py -> CLI input bridge -> backend output folder -> report detection -> plain-text Report Viewer.
-# Do not bypass main.py, silently execute backend commands, or create a second backend workflow.
+# Do not bypass main.py, silently execute backend commands, or create a second backend workflow duearch_text: str = ""
 
 
 
@@ -165,6 +150,8 @@ class MainWindow(QMainWindow):
         self.report_viewer_copy_button = None
         self.report_viewer_refresh_file_button = None
         self.report_viewer_open_current_folder_button = None
+        self.report_viewer_search_input = None
+        self.report_viewer_wrap_button = None
         self.report_viewer_search_input = None
         self.report_viewer_wrap_button = None
         self.open_output_folder_button = None
@@ -563,7 +550,75 @@ class MainWindow(QMainWindow):
         return box
 
     def page_deck_input(self):
-        return build_deck_selection_page(self)
+        page, layout = self.page_container(
+            "Deck Selection",
+            f"Choose a local deck file and preview it safely. {APP_VERSION} uses this staged deck for guarded CLI runs while the backend remains the source of truth."
+        )
+        body = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(body, blur=26, y=8)
+        body_layout = QHBoxLayout(body); body_layout.setContentsMargins(22, 22, 22, 22); body_layout.setSpacing(16)
+
+        left = TexturedPanel(self.theme, parchment=True)
+        left_layout = QVBoxLayout(left); left_layout.setContentsMargins(20, 18, 20, 18); left_layout.setSpacing(12)
+        title = QLabel("Deck File & Commander Preview"); title.setObjectName("reportTitle"); left_layout.addWidget(title)
+
+        file_path = QLineEdit(self.state.selected_deck_path)
+        file_path.setReadOnly(True)
+        deck_name = QLineEdit(self.state.deck_name)
+        deck_name.setReadOnly(True)
+        commander = QLineEdit(self.state.commander)
+        commander.setReadOnly(True)
+        decklist = QPlainTextEdit()
+        decklist.setPlainText(self.state.deck_preview_text)
+        # Keep the preview scrollable but deliberately short enough that the
+        # action-button row always lives below it instead of visually sitting on top.
+        # The backend parser remains the source of truth later; this is only a UI preview.
+        decklist.setMinimumHeight(175)
+        decklist.setMaximumHeight(195)
+        decklist.setFixedHeight(185)
+        decklist.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        decklist.setReadOnly(True)
+
+        for label, widget in [
+            ("Selected Deck File", file_path),
+            ("Deck Name", deck_name),
+            ("Commander Name", commander),
+            ("Decklist Preview", decklist),
+        ]:
+            left_layout.addWidget(QLabel(label))
+            left_layout.addWidget(widget, stretch=0)
+
+        # Keep the preview box from consuming the button row area at normal window sizes.
+        # The preview remains scrollable, but the action buttons always get their own
+        # separate row with a visible parchment gap above it.
+        left_layout.addSpacing(18)
+        button_row = QHBoxLayout()
+        button_row.setContentsMargins(0, 8, 0, 0)
+        button_row.setSpacing(12)
+        choose_btn = QPushButton("Choose Deck File")
+        choose_btn.clicked.connect(self.choose_deck_file)
+        preview_btn = QPushButton("Reload Preview")
+        preview_btn.clicked.connect(self.reload_selected_deck_preview)
+        paste_btn = QPushButton("Paste Decklist Later")
+        paste_btn.clicked.connect(lambda: self.backend_hook_message("Paste/import decklist"))
+        for b in [choose_btn, preview_btn, paste_btn]:
+            b.setMinimumHeight(44)
+            button_row.addWidget(b)
+        left_layout.addLayout(button_row, stretch=0)
+        left_layout.addStretch(1)
+
+        right = QVBoxLayout(); right.setSpacing(14)
+        status = TexturedPanel(self.theme, kind="iron_2", glow=True); status_layout = QVBoxLayout(status); status_layout.setContentsMargins(18, 16, 18, 16)
+        cap = QLabel("FILE PREVIEW STATUS"); cap.setObjectName("smallCaps"); status_layout.addWidget(cap)
+        status_layout.addWidget(self.make_text(self.deck_preview_status_text()))
+        p = QProgressBar(); p.setValue(100 if self.state.selected_deck_path != "No deck file selected" else 0); status_layout.addWidget(p)
+        quick = ReportCard("Forge Note", self.theme)
+        quick.body.addWidget(self.make_text(
+            f"{APP_VERSION} keeps real local deck-file selection, preserves preview spacing, and stages the selected file for guarded CLI handoff. Backend validation, legality, collection loading, and report generation remain owned by main.py.",
+            paper=True
+        ))
+        right.addWidget(status); right.addWidget(quick); right.addStretch(1)
+        body_layout.addWidget(left, stretch=2); body_layout.addLayout(right, stretch=1)
+        layout.addWidget(body, stretch=1); return page
 
     def default_deck_folder(self):
         """Return a sensible starting folder for deck-file selection without requiring project config."""
@@ -813,10 +868,217 @@ class MainWindow(QMainWindow):
         self.refresh_run_analysis_previews()
 
     def page_analysis_setup(self):
-        return build_review_setup_page(self)
+        page, layout = self.page_container(
+            "Review Setup",
+            f"Stage the same review choices the CLI already supports. {APP_VERSION} auto-stages choices as you change them and hands them to main.py through the guarded CLI bridge."
+        )
+        scroll, content = self.scroll_content()
+        grid_panel = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(grid_panel, blur=24, y=8)
+        grid = QGridLayout(grid_panel); grid.setContentsMargins(22, 22, 22, 22); grid.setSpacing(16)
+        grid.setColumnStretch(0, 1)
+        grid.setColumnStretch(1, 1)
+
+        output_card = ReportCard("Output Mode", self.theme)
+        output_combo = QComboBox(); output_combo.addItems(OUTPUT_MODE_OPTIONS); output_combo.setCurrentText(self.state.output_mode); self.configure_combo_popup(output_combo)
+        output_card.body.addWidget(output_combo); output_card.body.addWidget(self.default_note("Default: Both")); grid.addWidget(output_card, 0, 0)
+
+        direction_card = ReportCard("Review Direction", self.theme)
+        direction_combo = QComboBox(); direction_combo.addItems(REVIEW_DIRECTION_OPTIONS); direction_combo.setCurrentText(self.state.review_direction); self.configure_combo_popup(direction_combo)
+        direction_card.body.addWidget(direction_combo)
+        direction_card.body.addWidget(self.default_note("Default: Cut down. Auto batch is development-oriented and will move behind development mode later."))
+        grid.addWidget(direction_card, 0, 1)
+
+        cut_card = ReportCard("Review Intensity", self.theme)
+        cut_combo = QComboBox(); cut_combo.addItems(REVIEW_INTENSITY_OPTIONS); cut_combo.setCurrentText(self.state.cut_depth); self.configure_combo_popup(cut_combo)
+        cut_card.body.addWidget(cut_combo)
+        intensity_meaning_label = self.make_text(self.review_intensity_meaning(), paper=True)
+        cut_card.body.addWidget(intensity_meaning_label)
+        cut_card.body.addWidget(self.default_note("Used when Review Direction is Cut down. Also used as an Auto batch default."))
+
+        build_up_card = ReportCard("Build-Up Mode", self.theme)
+        build_up_combo = QComboBox()
+        build_up_combo.addItems(BUILD_UP_MODE_OPTIONS)
+        build_up_combo.setCurrentText(self.state.build_up_mode)
+        self.configure_combo_popup(build_up_combo)
+        build_up_card.body.addWidget(build_up_combo)
+        build_up_card.body.addWidget(self.default_note("Used when Review Direction is Build up. Auto batch may show both fields as global defaults."))
+
+        direction_mode_stack = QStackedWidget()
+        direction_mode_stack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        direction_mode_stack.addWidget(cut_card)
+        direction_mode_stack.addWidget(build_up_card)
+        auto_batch_panel = QWidget()
+        auto_panel_layout = QVBoxLayout(auto_batch_panel)
+        auto_panel_layout.setContentsMargins(0, 0, 0, 0)
+        auto_panel_layout.setSpacing(12)
+        # Clone-like dedicated cards keep the Auto batch view from moving the single-mode cards out of the stack.
+        auto_cut_card = ReportCard("Review Intensity", self.theme)
+        auto_cut_combo = QComboBox(); auto_cut_combo.addItems(REVIEW_INTENSITY_OPTIONS); auto_cut_combo.setCurrentText(self.state.cut_depth); self.configure_combo_popup(auto_cut_combo)
+        auto_cut_card.body.addWidget(auto_cut_combo)
+        auto_intensity_label = self.make_text(self.review_intensity_meaning(), paper=True)
+        auto_cut_card.body.addWidget(auto_intensity_label)
+        auto_cut_card.body.addWidget(self.default_note("Auto batch default for 100+ card / cut-down style reviews."))
+        auto_build_card = ReportCard("Build-Up Mode", self.theme)
+        auto_build_combo = QComboBox(); auto_build_combo.addItems(BUILD_UP_MODE_OPTIONS); auto_build_combo.setCurrentText(self.state.build_up_mode); self.configure_combo_popup(auto_build_combo)
+        auto_build_card.body.addWidget(auto_build_combo)
+        auto_build_card.body.addWidget(self.default_note("Auto batch default for under-100-card / build-up style reviews."))
+        auto_panel_layout.addWidget(auto_cut_card)
+        auto_panel_layout.addWidget(auto_build_card)
+        auto_panel_layout.addWidget(self.default_note("Auto batch remains development-oriented and will move behind development mode later."))
+        direction_mode_stack.addWidget(auto_batch_panel)
+        grid.addWidget(direction_mode_stack, 1, 0)
+
+        prompt_card = ReportCard("Prompt Mode", self.theme)
+        prompt_combo = QComboBox(); prompt_combo.addItems(PROMPT_MODE_OPTIONS); prompt_combo.setCurrentText(self.state.prompt_mode); self.configure_combo_popup(prompt_combo)
+        prompt_card.body.addWidget(prompt_combo); prompt_card.body.addWidget(self.default_note("Default: Interactive AI chat")); grid.addWidget(prompt_card, 1, 1)
+
+        budget_card = ReportCard("Table / Budget Boundaries", self.theme)
+        budget_input = QLineEdit(self.state.budget_note)
+        intended_bracket_combo = QComboBox()
+        intended_bracket_combo.addItems(INTENDED_BRACKET_OPTIONS)
+        intended_bracket_combo.setCurrentText(self.state.intended_bracket)
+        self.configure_combo_popup(intended_bracket_combo)
+        budget_card.body.addWidget(QLabel("Budget Note"))
+        budget_card.body.addWidget(budget_input)
+        budget_card.body.addWidget(QLabel("Bracket Intended"))
+        budget_card.body.addWidget(intended_bracket_combo)
+        budget_card.body.addWidget(self.default_note("Collection mode and file selection live on the Collection Source page. Bracket and collection values are staged through dropdowns, not checkboxes."))
+        grid.addWidget(budget_card, 2, 0)
+
+        summary = TexturedPanel(self.theme, kind="iron_2", glow=True)
+        s_layout = QVBoxLayout(summary); s_layout.setContentsMargins(18, 16, 18, 16)
+        s_title = QLabel("Run Settings Summary"); s_title.setObjectName("sectionTitle"); s_layout.addWidget(s_title)
+        summary_label = self.make_text(self.review_settings_summary_text())
+        s_layout.addWidget(summary_label)
+        auto_note = self.default_note("Auto-staged: changes update this summary immediately. No Apply button required.")
+        s_layout.addWidget(auto_note)
+        grid.addWidget(summary, 2, 1)
+
+        def refresh_direction_specific_review_fields():
+            direction = direction_combo.currentText()
+            if direction == "Build up":
+                direction_mode_stack.setCurrentIndex(1)
+            elif direction == "Auto batch":
+                direction_mode_stack.setCurrentIndex(2)
+            else:
+                direction_mode_stack.setCurrentIndex(0)
+
+        def sync_auto_batch_mirrors():
+            blocker_a = QSignalBlocker(auto_cut_combo)
+            auto_cut_combo.setCurrentText(cut_combo.currentText())
+            del blocker_a
+            blocker_b = QSignalBlocker(auto_build_combo)
+            auto_build_combo.setCurrentText(build_up_combo.currentText())
+            del blocker_b
+            auto_intensity_label.setText(self.review_intensity_meaning())
+
+        def auto_stage_review():
+            if direction_combo.currentText() == "Auto batch":
+                # Keep the single-mode controls in sync with the Auto batch mirror controls.
+                blocker_cut = QSignalBlocker(cut_combo)
+                cut_combo.setCurrentText(auto_cut_combo.currentText())
+                del blocker_cut
+                blocker_build = QSignalBlocker(build_up_combo)
+                build_up_combo.setCurrentText(auto_build_combo.currentText())
+                del blocker_build
+            self.stage_review_settings(output_combo, direction_combo, cut_combo, build_up_combo, prompt_combo, budget_input, intended_bracket_combo, summary_label, intensity_meaning_label)
+            sync_auto_batch_mirrors()
+            refresh_direction_specific_review_fields()
+
+        refresh_direction_specific_review_fields()
+        sync_auto_batch_mirrors()
+
+        output_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
+        direction_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
+        cut_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
+        build_up_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
+        auto_cut_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
+        auto_build_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
+        prompt_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
+        budget_input.textChanged.connect(lambda _text: auto_stage_review())
+        intended_bracket_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
+
+        note = TexturedPanel(self.theme, kind="iron_2", glow=False)
+        n_layout = QVBoxLayout(note); n_layout.setContentsMargins(18, 14, 18, 14)
+        n_title = QLabel("v0.6.7.9.12 Boundary"); n_title.setObjectName("sectionTitle"); n_layout.addWidget(n_title)
+        n_layout.addWidget(self.make_text("These choices auto-stage inside the UI as soon as you change them. Table bracket and collection handoff checkboxes were removed; Bracket Intended and the Collection Source page now carry those staged values directly."))
+        grid.addWidget(note, 3, 0, 1, 2)
+
+        content.addWidget(grid_panel); content.addStretch(1); layout.addWidget(scroll, stretch=1); return page
 
     def page_philosophy(self):
-        return build_philosophy_lens_page(self)
+        page, layout = self.page_container(
+            "Philosophy Lens",
+            "Choose the review lens and guide voice. This shapes explanations without overriding legality, strategy, or collection honesty."
+        )
+        body = TexturedPanel(self.theme, kind="iron", glow=False)
+        add_shadow(body, blur=24, y=8)
+        body_layout = QVBoxLayout(body)
+        body_layout.setContentsMargins(22, 22, 22, 22)
+        body_layout.setSpacing(16)
+
+        cards = QHBoxLayout()
+        cards.setSpacing(16)
+        philosophies = [
+            ("Timmy / Tammy", "Big moments, splashy plays, memorable stories.", "🐲", "Big Creature • Theme • Battlecruiser"),
+            ("Johnny / Jenny", "Engines, clever interactions, weird card rescues.", "🛠", "Engine Builder • Combo • Constraint"),
+            ("Spike", "Consistency, efficiency, discipline, clean closing power.", "⚔", "Optimizer • Calibrator • Controller"),
+        ]
+        for name, desc, icon, tags in philosophies:
+            card = ReportCard(name, self.theme)
+            card.setMinimumWidth(250)
+            card.setMinimumHeight(235)
+            subtype = QLabel(tags)
+            subtype.setWordWrap(True)
+            subtype.setObjectName("philosophySubtype")
+            card.body.addWidget(subtype)
+            portrait = QLabel(icon)
+            portrait.setAlignment(Qt.AlignCenter)
+            portrait.setStyleSheet("font-size: 48px; color: #3a2818;")
+            card.body.addWidget(portrait)
+            card.body.addWidget(self.make_text(desc, paper=True))
+            btn = QPushButton("Select Profile")
+            btn.setMinimumHeight(38)
+            btn.clicked.connect(lambda checked=False, n=name: self.select_philosophy(n))
+            card.body.addWidget(btn)
+            cards.addWidget(card)
+        body_layout.addLayout(cards)
+
+        guide_card = ReportCard("Guide Presentation", self.theme, badges=[("CLI bridge", "manual")])
+        guide_card.setMinimumHeight(150)
+        guide_card.body.addWidget(self.make_text(
+            "Choose how the philosophy guide should be presented. This belongs with the Philosophy Lens, not cut/build mechanics.",
+            paper=True
+        ))
+        guide_combo = QComboBox()
+        guide_combo.setMinimumHeight(44)
+        guide_combo.addItems(GUIDE_PRESENTATION_OPTIONS)
+        guide_combo.setCurrentText(self.state.guide_presentation)
+        self.configure_combo_popup(guide_combo)
+        guide_combo.currentTextChanged.connect(self.stage_guide_presentation)
+        guide_card.body.addWidget(guide_combo)
+        guide_card.body.addWidget(self.default_note("Default: Either / random. Used after the top-level philosophy lens in the guarded CLI bridge."))
+        body_layout.addWidget(guide_card)
+
+        subtype_card = ReportCard("Specific Philosophy Subtype", self.theme, badges=[("optional bridge", "manual")])
+        subtype_card.setMinimumHeight(150)
+        subtype_card.body.addWidget(self.make_text(
+            "Optional. Use this only when you want the backend's Specific philosophy subtype route instead of the top-level profile route.",
+            paper=True
+        ))
+        subtype_combo = QComboBox()
+        subtype_combo.setMinimumHeight(44)
+        subtype_combo.addItems(PHILOSOPHY_SUBTYPE_OPTIONS)
+        subtype_combo.setCurrentText(self.state.philosophy_subtype)
+        self.configure_combo_popup(subtype_combo)
+        subtype_combo.currentTextChanged.connect(self.stage_philosophy_subtype)
+        subtype_card.body.addWidget(subtype_combo)
+        subtype_card.body.addWidget(self.default_note("Default: None / top-level only. Subtype bridge is optional and only used when this dropdown is changed."))
+        body_layout.addWidget(subtype_card)
+
+        body_layout.addStretch(1)
+        layout.addWidget(body, stretch=1)
+        return page
 
     def stage_guide_presentation(self, text):
         """Auto-stage guide presentation from Philosophy Lens without requiring Apply."""
@@ -1015,16 +1277,263 @@ class MainWindow(QMainWindow):
 
     def backend_entrypoint_path(self):
         """Resolve the currently previewed backend entrypoint relative to the working directory."""
-        return backend_runner.backend_entrypoint_path(self.state)
+        return Path(self.state.backend_working_directory) / self.state.backend_entrypoint
 
     def guarded_command_preview(self):
         """Build the visible command preview for the guarded bridge. This matches the manual backend command."""
-        return backend_runner.guarded_command_preview(self.state)
+        deck_path = self.state.selected_deck_path if self.state.selected_deck_path != "No deck file selected" else "No UI deck selected; main.py may prompt interactively"
+        return f'py {self.state.backend_entrypoint}  # guarded run; MTG_DECK_FILE="{deck_path}"'
 
     def guarded_command_parts(self):
         """Return the actual guarded command as a list. Never use shell=True."""
-        return backend_runner.guarded_command_parts(self.state)
+        return ["py", self.state.backend_entrypoint]
 
+    def cli_output_mode_input_value(self):
+        """Map the UI Output Mode to the first known main.py CLI prompt."""
+        mapping = {
+            "Normal User Mode": "1",
+            "Debug / Stress-Test Mode": "2",
+            "Both": "3",
+        }
+        return mapping.get(self.state.output_mode, "1")
+
+    def cli_review_direction_input_value(self):
+        """Map the UI Review Direction to the second known main.py CLI prompt."""
+        mapping = {
+            "Build up": "1",
+            "Cut down": "2",
+            "Auto batch": "3",
+        }
+        return mapping.get(self.state.review_direction, "2")
+
+    def cli_build_up_mode_input_value(self):
+        """Map the durable UI Build-Up Mode field to the build-up mode CLI prompt."""
+        mapping = {
+            "Build from Scratch — Commander(s) only": "1",
+            "Point me in the right direction — 30+ cards needed": "2",
+            "Help me get there — 11 to 30 cards needed": "3",
+            "Finalize — 10 or fewer cards needed": "4",
+        }
+        if self.state.build_up_mode in mapping:
+            return mapping[self.state.build_up_mode]
+        intensity_fallback = {
+            "Light": "4",
+            "Normal": "3",
+            "Strict": "2",
+            "Brutal / Deep Review": "2",
+            "Rebuild": "1",
+        }
+        return intensity_fallback.get(self.state.cut_depth, "4")
+
+    def cli_review_intensity_input_value(self):
+        """Map Review Intensity to the cut-down / strictness CLI prompt."""
+        mapping = {
+            "Light": "1",
+            "Normal": "2",
+            "Strict": "3",
+            "Brutal / Deep Review": "4",
+            "Rebuild": "5",
+        }
+        return mapping.get(self.state.cut_depth, "2")
+
+    def cli_prompt_mode_input_value(self):
+        """Map the UI Prompt Mode to the prompt interaction CLI prompt."""
+        mapping = {
+            "Interactive AI chat": "1",
+            "One-shot worksheet": "2",
+        }
+        return mapping.get(self.state.prompt_mode, "1")
+
+    def should_send_prompt_mode_input(self):
+        """Send prompt mode after the known mode-specific prompt for build-up, cut-down, or auto-batch."""
+        return self.state.review_direction in {"Build up", "Cut down", "Auto batch"}
+
+    def cli_philosophy_lens_input_value(self):
+        """Map the UI Philosophy Lens to the CLI philosophy prompt."""
+        if self.state.philosophy_subtype != "None / top-level only":
+            return "5"
+        mapping = {
+            "Balanced / Unknown": "1",
+            "Timmy / Tammy": "2",
+            "Johnny / Jenny": "3",
+            "Spike": "4",
+        }
+        return mapping.get(self.state.selected_philosophy, "1")
+
+    def cli_philosophy_subtype_input_value(self):
+        """Best-effort mapping for Specific philosophy subtype prompt using the planned subtype order."""
+        mapping = {
+            "Michael / Michelle — Big Moment": "1",
+            "Alexander / Alexandria — Big Creature / Stompy": "2",
+            "Benjamin / Bethany — Theme / Vibe": "3",
+            "Milo / Mia — Pet Card": "4",
+            "William / Willow — Let Me Do My Thing": "5",
+            "Aaron / Ariana — Battlecruiser": "6",
+            "Brad / Bria — Engine Builder": "7",
+            "Kyle / Katie — Commander Exploiter": "8",
+            "Elund / Emily — Weird Card Rescuer": "9",
+            "Brandon / Brenda — Theme Mechanic Inventor": "10",
+            "Clark / Clarissa — Self-Imposed Constraint Builder": "11",
+            "Jasper / Jennifer — Combo Builder": "12",
+            "Avery — Consistency Maximizer": "13",
+            "Jordan — Efficiency Optimizer": "14",
+            "River — Curve and Mana Discipline": "15",
+            "Charlie — Competitive Closer": "16",
+            "Kai — Power-Level Calibrator": "17",
+            "Riley — Interaction Controller": "18",
+        }
+        return mapping.get(self.state.philosophy_subtype, "")
+
+    def should_send_philosophy_subtype_input(self):
+        """Only send subtype when user chose an explicit subtype."""
+        return self.state.philosophy_subtype != "None / top-level only"
+
+    def should_send_philosophy_lens_input(self):
+        """Send philosophy after prompt mode for all bridged directions."""
+        return self.should_send_prompt_mode_input()
+
+    def cli_guide_presentation_input_value(self):
+        """Map the UI Guide Presentation field to the CLI guide presentation prompt."""
+        mapping = {
+            "Masculine guide": "1",
+            "Feminine guide": "2",
+            "Either / random": "3",
+            "No named guide, just philosophy labels": "4",
+        }
+        return mapping.get(self.state.guide_presentation, "3")
+
+    def should_send_guide_presentation_input(self):
+        """Only send guide presentation after the known top-level philosophy lens prompt is bridged."""
+        return self.should_send_philosophy_lens_input()
+
+    def cli_collection_mode_input_value(self):
+        """Map the existing Collection Source page mode to the CLI collection mode prompt."""
+        mapping = {
+            "No collection": "1",
+            "Prefer collection first": "2",
+            "Collection only": "3",
+            "Collection shakeup": "4",
+        }
+        return mapping.get(self.state.collection_mode, "1")
+
+    def should_send_collection_mode_input(self):
+        """Only send collection mode after guide presentation is safely bridged in the known Build-up path."""
+        return self.should_send_guide_presentation_input()
+
+    def cli_collection_source_input_value(self):
+        """Map the existing Collection Source page source mode to the CLI collection source prompt."""
+        mapping = {
+            "Entire collection folder": "1",
+            "Select collection files": "2",
+        }
+        return mapping.get(self.state.collection_source_mode, "1")
+
+    def should_send_collection_source_input(self):
+        """Only send collection source after collection mode is bridged and collection is enabled."""
+        return self.should_send_collection_mode_input() and self.state.collection_mode != "No collection"
+
+    def collection_source_detail_answered(self):
+        """Return whether the active collection source detail is sufficiently staged for the guarded bridge preview."""
+        if self.state.collection_mode == "No collection":
+            return True
+        if self.state.collection_source_mode == "Entire collection folder":
+            return bool(str(self.state.collection_folder).strip())
+        if self.state.collection_source_mode == "Select collection files":
+            return bool(self.state.selected_collection_files)
+        return False
+
+    def collection_source_detail_preview_text(self):
+        """Describe the active collection source detail without mixing stale folder/file state."""
+        if self.state.collection_mode == "No collection":
+            return "not required because Collection Mode is No collection"
+        if self.state.collection_source_mode == "Entire collection folder":
+            folder = str(self.state.collection_folder).strip() or "not staged"
+            return f"folder={folder}; txt_count_preview={self.state.collection_txt_file_count}"
+        if self.state.collection_source_mode == "Select collection files":
+            if not self.state.selected_collection_files:
+                return "selected_files=0; no file payload staged"
+            examples = "; ".join(Path(path).name for path in self.state.selected_collection_files[:3])
+            if len(self.state.selected_collection_files) > 3:
+                examples += f"; ...and {len(self.state.selected_collection_files) - 3} more"
+            return f"selected_files={len(self.state.selected_collection_files)}; examples={examples}"
+        return "unknown collection source mode"
+
+    def normalize_collection_source_for_guarded_run(self):
+        """Normalize active source mode before a guarded run without mutating unrelated saved selections."""
+        if self.state.collection_source_mode == "Entire collection folder":
+            try:
+                self.state.collection_txt_file_count = len(list(Path(self.state.collection_folder).glob("*.txt")))
+            except Exception:
+                self.state.collection_txt_file_count = 0
+            if self.state.collection_mode != "No collection":
+                self.state.collection_source_note = "Entire collection folder staged for guarded run. Selected file payload will not be sent."
+        elif self.state.collection_source_mode == "Select collection files":
+            self.state.collection_txt_file_count = len(self.state.selected_collection_files)
+            if self.state.collection_mode != "No collection":
+                self.state.collection_source_note = "Selected collection files staged for guarded run. Folder payload will not be sent."
+
+    def cli_input_bridge_preview_text(self):
+        """Preview the full known stdin bridge used in this patch."""
+        build_up_answer = self.cli_build_up_mode_input_value() if self.state.review_direction == "Build up" else "not sent unless Review Direction is Build up"
+        cut_depth_answer = self.cli_review_intensity_input_value() if self.state.review_direction in {"Cut down", "Auto batch"} else "not sent unless Review Direction is Cut down or Auto batch"
+        prompt_mode_answer = self.cli_prompt_mode_input_value() if self.should_send_prompt_mode_input() else "not sent until prior prompts are mapped for this review direction"
+        philosophy_answer = self.cli_philosophy_lens_input_value() if self.should_send_philosophy_lens_input() else "not sent until prompt mode is safely bridged"
+        subtype_answer = self.cli_philosophy_subtype_input_value() if self.should_send_philosophy_subtype_input() else "not sent unless Specific philosophy subtype is selected"
+        guide_answer = self.cli_guide_presentation_input_value() if self.should_send_guide_presentation_input() else "not sent until philosophy lens is safely bridged"
+        collection_answer = self.cli_collection_mode_input_value() if self.should_send_collection_mode_input() else "not sent until guide presentation is safely bridged"
+        collection_source_answer = self.cli_collection_source_input_value() if self.should_send_collection_source_input() else "not sent unless collection mode is enabled and safely bridged"
+        selected_file_preview = "None selected"
+        if self.state.selected_collection_files:
+            selected_file_preview = "; ".join(str(Path(path)) for path in self.state.selected_collection_files[:3])
+            if len(self.state.selected_collection_files) > 3:
+                selected_file_preview += f"; ...and {len(self.state.selected_collection_files) - 3} more"
+        return (
+            "Full CLI Bridge Gap Pass\n"
+            "- bridge_scope -> Build-up, Cut-down, Auto-batch defaults, top-level/subtype philosophy, guide presentation, collection mode, and collection source\n"
+            "- strategy -> send staged UI answers in the same order main.py asks for them, then capture any unexpected prompt/error\n"
+            f"- selected_deck_handoff -> MTG_DECK_FILE={self.state.selected_deck_path if self.state.selected_deck_path != 'No deck file selected' else 'not staged'}\n"
+            "- known_prompt_1 -> Output mode [1=Normal]:\n"
+            f"- ui_output_mode -> {self.state.output_mode}\n"
+            f"- output_mode_stdin_value_to_send -> {self.cli_output_mode_input_value()}\n"
+            "- known_prompt_2 -> Review direction [2=Cut down]:\n"
+            f"- ui_review_direction -> {self.state.review_direction}\n"
+            f"- review_direction_stdin_value_to_send -> {self.cli_review_direction_input_value()}\n"
+            "- mode_specific_prompt_when_build_up -> Build-up mode [4=Finalize]:\n"
+            f"- ui_build_up_mode -> {self.state.build_up_mode}\n"
+            f"- build_up_mode_stdin_value_to_send -> {build_up_answer}\n"
+            "- mode_specific_prompt_when_cut_down_or_auto_batch -> Review Intensity / Cut Strictness:\n"
+            f"- ui_review_intensity -> {self.state.cut_depth}\n"
+            f"- review_intensity_stdin_value_to_send -> {cut_depth_answer}\n"
+            "- known_prompt_prompt_mode -> Prompt interaction mode [1=Interactive]:\n"
+            f"- ui_prompt_mode -> {self.state.prompt_mode}\n"
+            f"- prompt_mode_stdin_value_to_send -> {prompt_mode_answer}\n"
+            f"- prompt_mode_bridge_active_for_this_direction -> {self.should_send_prompt_mode_input()}\n"
+            "- known_prompt_philosophy -> Philosophy lens [1=Balanced / Unknown]:\n"
+            f"- ui_philosophy_lens -> {self.state.selected_philosophy}\n"
+            f"- ui_philosophy_subtype -> {self.state.philosophy_subtype}\n"
+            f"- philosophy_lens_stdin_value_to_send -> {philosophy_answer}\n"
+            f"- philosophy_subtype_stdin_value_to_send -> {subtype_answer}\n"
+            f"- philosophy_subtype_bridge_active -> {self.should_send_philosophy_subtype_input()}\n"
+            "- known_prompt_guide -> Guide presentation [3=Either/random]:\n"
+            f"- ui_guide_presentation -> {self.state.guide_presentation}\n"
+            f"- guide_presentation_stdin_value_to_send -> {guide_answer}\n"
+            "- known_prompt_collection_mode -> Collection mode [1=No]:\n"
+            f"- ui_collection_mode -> {self.state.collection_mode}\n"
+            f"- collection_mode_stdin_value_to_send -> {collection_answer}\n"
+            "- known_prompt_collection_source -> Collection source [1=Entire collection folder]:\n"
+            f"- ui_collection_source_mode -> {self.state.collection_source_mode}\n"
+            f"- collection_source_stdin_value_to_send -> {collection_source_answer}\n"
+            f"- collection_source_bridge_active_for_this_run -> {self.should_send_collection_source_input()}\n"
+            f"- collection_folder_or_file_path_answered -> {self.collection_source_detail_answered()}\n"
+            f"- active_collection_source_detail -> {self.collection_source_detail_preview_text()}\n"
+            f"- collection_folder_preview -> {self.state.collection_folder}\n"
+            f"- selected_collection_files_preview -> {selected_file_preview}\n"
+            "- active_source_payload_rule -> Entire folder uses folder/default backend behavior; selected files sends file payload only when files are staged\n"
+            "- selected_file_path_handoff -> best-effort only if backend asks for typed paths; unexpected prompts are captured safely\n"
+            "- stdin_closed_after_known_answers -> True\n"
+            "- unknown_future_prompts_answered -> False\n"
+            "- safety_note -> this patch attempts all known gaps, but still captures surprises instead of hiding them\n"
+        )
 
     def guarded_execution_preview_text(self):
         """Preview the guarded execution bridge and current readiness."""
@@ -1038,10 +1547,11 @@ class MainWindow(QMainWindow):
 
         return (
             "Guarded Execution Bridge Preview\n"
-            "- This is the actual guarded execution path.\n"
+            "- This is the first actual guarded execution path.\n"
             "- main.py can run only after explicit user confirmation.\n"
             "- The UI uses QProcess with a command list and never uses shell=True.\n"
             "- The UI must keep CLI/main.py as the source of truth and must not invent a second backend workflow.\n"
+            "- v0.6.7.9.14 keeps the Deck Selection handoff, companion preview status, and adds guarded-run report path detection without parsing report contents.\n"
             "- If a backend prompt does not match the expected order, stdout/stderr capture will reveal it without freezing the UI.\n"
             "- After sending known answers, stdin is closed so unexpected later prompts are captured safely instead of guessed.\n\n"
             "Entrypoint Validation\n"
@@ -1073,7 +1583,7 @@ class MainWindow(QMainWindow):
             f"- companion_detected_preview -> {self.state.companion_detected}\n"
             f"- companion_name_preview -> {self.state.companion_name}\n"
             f"- companion_count_preview -> {self.state.companion_count}\n"
-            "- companion_legality_source -> backend validation only; UI preview does not enforce companion restrictions\n"
+            f"- companion_legality_source -> backend validation only; UI preview does not enforce companion restrictions\n"
             f"- collection_folder_or_file_path_answered -> {self.collection_source_detail_answered()}\n"
             f"- active_collection_source_detail -> {self.collection_source_detail_preview_text()}\n"
             f"- specific_philosophy_subtype_answered -> {self.should_send_philosophy_subtype_input()}\n"
@@ -1099,7 +1609,7 @@ class MainWindow(QMainWindow):
             "- timeout_handling -> active; process will be killed if it exceeds the timeout\n"
             "- cli_input_bridge -> active for output mode, review direction, build-up/cut-down/auto-batch defaults, prompt mode, top-level/subtype philosophy, guide presentation, collection mode, collection source, and conservative selected-file path payloads\n"
             "- user_readable_failure_message -> active\n"
-            "- output_folder_opening -> active after report detection succeeds\n\n"
+            "- output_folder_opening -> planned after successful run, not active yet\n\n"
             "Current Patch Safety Boundary\n"
             "- subprocess.run -> disabled; QProcess is used for guarded execution\n"
             "- main.py execution -> confirmation-gated\n"
@@ -1107,97 +1617,6 @@ class MainWindow(QMainWindow):
             "- Commander Spellbook/API calls -> disabled\n"
             "- ready_for_actual_execution -> guarded only, not automatic\n"
         )
-
-    def cli_output_mode_input_value(self):
-        """Map the UI Output Mode to the first known main.py CLI prompt."""
-        return cli_bridge.output_mode_input_value(self.state)
-
-    def cli_review_direction_input_value(self):
-        """Map the UI Review Direction to the second known main.py CLI prompt."""
-        return cli_bridge.review_direction_input_value(self.state)
-
-    def cli_build_up_mode_input_value(self):
-        """Map the durable UI Build-Up Mode field to the build-up mode CLI prompt."""
-        return cli_bridge.build_up_mode_input_value(self.state)
-
-    def cli_review_intensity_input_value(self):
-        """Map Review Intensity to the cut-down / strictness CLI prompt."""
-        return cli_bridge.review_intensity_input_value(self.state)
-
-    def cli_prompt_mode_input_value(self):
-        """Map the UI Prompt Mode to the prompt interaction CLI prompt."""
-        return cli_bridge.prompt_mode_input_value(self.state)
-
-    def should_send_prompt_mode_input(self):
-        """Send prompt mode after the known mode-specific prompt for build-up, cut-down, or auto-batch."""
-        return cli_bridge.should_send_prompt_mode_input(self.state)
-
-    def cli_philosophy_lens_input_value(self):
-        """Map the UI Philosophy Lens to the CLI philosophy prompt."""
-        return cli_bridge.philosophy_lens_input_value(self.state)
-
-    def cli_philosophy_subtype_input_value(self):
-        """Best-effort mapping for Specific philosophy subtype prompt using the planned subtype order."""
-        return cli_bridge.philosophy_subtype_input_value(self.state)
-
-    def should_send_philosophy_subtype_input(self):
-        """Only send subtype when user chose an explicit subtype."""
-        return cli_bridge.should_send_philosophy_subtype_input(self.state)
-
-    def should_send_philosophy_lens_input(self):
-        """Send philosophy after prompt mode for all bridged directions."""
-        return cli_bridge.should_send_philosophy_lens_input(self.state)
-
-    def cli_guide_presentation_input_value(self):
-        """Map the UI Guide Presentation field to the CLI guide presentation prompt."""
-        return cli_bridge.guide_presentation_input_value(self.state)
-
-    def should_send_guide_presentation_input(self):
-        """Only send guide presentation after the known top-level philosophy lens prompt is bridged."""
-        return cli_bridge.should_send_guide_presentation_input(self.state)
-
-    def cli_collection_mode_input_value(self):
-        """Map the existing Collection Source page mode to the CLI collection mode prompt."""
-        return cli_bridge.collection_mode_input_value(self.state)
-
-    def should_send_collection_mode_input(self):
-        """Only send collection mode after guide presentation is safely bridged in the known Build-up path."""
-        return cli_bridge.should_send_collection_mode_input(self.state)
-
-    def cli_collection_source_input_value(self):
-        """Map the existing Collection Source page source mode to the CLI collection source prompt."""
-        return cli_bridge.collection_source_input_value(self.state)
-
-    def should_send_collection_source_input(self):
-        """Only send collection source after collection mode is bridged and collection is enabled."""
-        return cli_bridge.should_send_collection_source_input(self.state)
-
-    def collection_source_detail_answered(self):
-        """Return whether the active collection source detail is sufficiently staged for the guarded bridge preview."""
-        return cli_bridge.collection_source_detail_answered(self.state)
-
-    def collection_source_detail_preview_text(self):
-        """Describe the active collection source detail without mixing stale folder/file state."""
-        return cli_bridge.collection_source_detail_preview_text(self.state)
-
-    def normalize_collection_source_for_guarded_run(self):
-        """Normalize active source mode before a guarded run without mutating unrelated saved selections."""
-        if self.state.collection_source_mode == "Entire collection folder":
-            try:
-                self.state.collection_txt_file_count = len(list(Path(self.state.collection_folder).glob("*.txt")))
-            except Exception:
-                self.state.collection_txt_file_count = 0
-            if self.state.collection_mode != "No collection":
-                self.state.collection_source_note = "Entire collection folder staged for guarded run. Selected file payload will not be sent."
-        elif self.state.collection_source_mode == "Select collection files":
-            self.state.collection_txt_file_count = len(self.state.selected_collection_files)
-            if self.state.collection_mode != "No collection":
-                self.state.collection_source_note = "Selected collection files staged for guarded run. Folder payload will not be sent."
-
-    def cli_input_bridge_preview_text(self):
-        """Preview the full known stdin bridge used in this patch."""
-        return cli_bridge.cli_input_bridge_preview_text(self.state)
-
 
     def clear_detected_report_outputs(self):
         """Reset report-output detection state before a guarded run."""
@@ -1215,18 +1634,44 @@ class MainWindow(QMainWindow):
 
     def resolve_backend_output_path(self, raw_path):
         """Resolve a backend printed path relative to the guarded run working directory."""
-        return report_detector.resolve_backend_output_path(raw_path, self.state.backend_working_directory)
+        cleaned = (raw_path or "").strip().strip('"').strip("'")
+        if not cleaned:
+            return None
+        normalized = cleaned.replace("\\", "/")
+        path = Path(normalized)
+        if not path.is_absolute():
+            path = Path(self.state.backend_working_directory) / path
+        return path
 
     def expected_report_category_notes(self):
         """Describe which report categories are expected based on the staged Output Mode."""
-        return report_detector.expected_report_categories(self.state.output_mode)
+        mode = (self.state.output_mode or "").lower()
+        expect_normal = "normal" in mode or "both" in mode
+        expect_debug = "debug" in mode or "stress" in mode or "both" in mode
+        if not expect_normal and not expect_debug:
+            # Be conservative for any future custom wording.
+            expect_normal = True
+        return expect_normal, expect_debug
 
     def path_contains_folder(self, path_text, folder_name):
-        return report_detector.path_contains_folder(path_text, folder_name)
+        try:
+            return folder_name.lower() in [part.lower() for part in Path(path_text).parts]
+        except Exception:
+            return False
 
     def derive_output_folder_from_detected_files(self, detected_files):
         """Infer the deck output root from detected backend files without reading report contents."""
-        return report_detector.derive_output_folder_from_detected_files(detected_files)
+        for path_text in detected_files:
+            path = Path(path_text)
+            parts_lower = [part.lower() for part in path.parts]
+            if "outputs" in parts_lower:
+                idx = parts_lower.index("outputs")
+                if len(path.parts) > idx + 1:
+                    return str(Path(*path.parts[:idx + 2]))
+            parent = path.parent
+            if parent.name.lower() in {"normal", "debug"}:
+                return str(parent.parent)
+        return "Not detected"
 
     def make_unique_guarded_run_output_folder(self, original_output_folder):
         """Create a sibling output folder for this guarded run so repeated deck runs do not pile into one folder."""
@@ -1250,33 +1695,89 @@ class MainWindow(QMainWindow):
         remains stable, but do not move files or leave empty commander-shell
         folders behind.
         """
-        detected, status = report_detector.normalize_detected_output_files(detected_files)
-        self.state.last_backend_unique_output_status = status
-        return detected
+        detected_files = list(detected_files or [])
+        if not detected_files:
+            self.state.last_backend_unique_output_status = "No files detected; backend unique output status was not evaluated."
+            return []
+        self.state.last_backend_unique_output_status = (
+            "Skipped: backend now writes directly to a unique deck-file-distinguished run folder; "
+            "UI relocation is no longer needed."
+        )
+        return [str(Path(path)) for path in detected_files]
 
     def extract_files_written_paths(self, stdout_text):
         """Return backend file paths printed under the Files written block. Does not read files."""
-        return report_detector.extract_files_written_paths(stdout_text, self.state.backend_working_directory)
+        lines = (stdout_text or "").splitlines()
+        in_files_block = False
+        detected = []
+        for line in lines:
+            stripped = line.strip()
+            lower = stripped.lower().rstrip(":")
+            if lower == "files written" or lower.endswith("files written") or stripped.lower().startswith("files written"):
+                in_files_block = True
+                continue
+            if not in_files_block:
+                continue
+            if not stripped:
+                continue
+            bullet = None
+            for prefix in ("- ", "• ", "* "):
+                if stripped.startswith(prefix):
+                    bullet = stripped[len(prefix):].strip()
+                    break
+            if bullet is None:
+                if detected:
+                    break
+                continue
+            resolved = self.resolve_backend_output_path(bullet)
+            if resolved is not None:
+                suffix = resolved.suffix.lower()
+                if suffix in {".md", ".txt", ".markdown", ".log"}:
+                    resolved_text = str(resolved)
+                    if resolved_text not in detected:
+                        detected.append(resolved_text)
+        return detected
 
     def detect_report_outputs_from_stdout(self, stdout_text):
         """Parse report paths from stdout and harden status messaging across output modes."""
         self.clear_detected_report_outputs()
-        result = report_detector.detect_report_outputs(
-            stdout_text,
-            self.state.output_mode,
-            self.state.backend_working_directory,
-        )
-        self.state.last_output_files = result.output_files
-        self.state.last_normal_report_files = result.normal_report_files
-        self.state.last_debug_report_files = result.debug_report_files
-        self.state.last_output_folder = result.output_folder
-        self.state.last_normal_report_folder = result.normal_report_folder
-        self.state.last_debug_report_folder = result.debug_report_folder
-        self.state.last_original_output_folder = result.original_output_folder
-        self.state.last_backend_unique_output_status = result.backend_unique_output_status
-        self.state.last_report_detection_status = result.status
-        self.state.last_report_detection_mode = result.mode
-        self.state.last_report_detection_warning = result.warning
+        detected = self.extract_files_written_paths(stdout_text)
+        detected = self.relocate_detected_output_files_to_unique_run_folder(detected)
+        self.state.last_output_files = detected
+        self.state.last_normal_report_files = [p for p in detected if self.path_contains_folder(p, "normal")]
+        self.state.last_debug_report_files = [p for p in detected if self.path_contains_folder(p, "debug")]
+        if detected:
+            self.state.last_output_folder = self.derive_output_folder_from_detected_files(detected)
+        if self.state.last_normal_report_files:
+            self.state.last_normal_report_folder = str(Path(self.state.last_normal_report_files[0]).parent)
+        if self.state.last_debug_report_files:
+            self.state.last_debug_report_folder = str(Path(self.state.last_debug_report_files[0]).parent)
+
+        expect_normal, expect_debug = self.expected_report_category_notes()
+        warnings = []
+        if expect_normal and not self.state.last_normal_report_files:
+            warnings.append("expected normal report output for current Output Mode, but none was detected")
+        if expect_debug and not self.state.last_debug_report_files:
+            warnings.append("expected debug report output for current Output Mode, but none was detected")
+        if detected and self.state.last_output_folder == "Not detected":
+            warnings.append("files were detected, but output folder root could not be inferred")
+
+        if detected:
+            self.state.last_report_detection_mode = "stdout_files_written_block"
+            self.state.last_report_detection_status = (
+                f"Detected {len(detected)} output file(s): "
+                f"{len(self.state.last_normal_report_files)} normal, "
+                f"{len(self.state.last_debug_report_files)} debug."
+            )
+        else:
+            self.state.last_report_detection_mode = "no_files_written_block_detected"
+            self.state.last_report_detection_status = (
+                "No report paths detected from guarded-run stdout. "
+                "If the backend completed successfully, check the CLI output folder manually."
+            )
+            warnings.append("no Files written block or report path bullets were detected")
+
+        self.state.last_report_detection_warning = "; ".join(warnings) if warnings else "No report detection warnings."
 
     def report_output_summary_text(self):
         normal_preview = "None detected"
@@ -1322,7 +1823,11 @@ class MainWindow(QMainWindow):
         )
 
     def folder_path_is_openable(self, folder_path):
-        return report_detector.folder_path_is_openable(folder_path)
+        path_text = folder_path or "Not detected"
+        if path_text == "Not detected":
+            return False
+        path = Path(path_text)
+        return path.exists() and path.is_dir()
 
     def refresh_report_output_buttons(self):
         button_pairs = [
@@ -1376,7 +1881,6 @@ class MainWindow(QMainWindow):
             "- The UI detects report file paths and folders but does not parse report contents yet.\n"
             "- CLI/main.py remains the source of truth.\n"
         )
-
 
     def guarded_execution_placeholder_message(self):
         QMessageBox.information(
@@ -1474,8 +1978,9 @@ class MainWindow(QMainWindow):
         self.backend_process = process
         process.setWorkingDirectory(self.state.backend_working_directory)
         process_env = QProcessEnvironment.systemEnvironment()
-        for env_key, env_value in backend_runner.environment_values(self.state).items():
-            process_env.insert(env_key, env_value)
+        process_env.insert("MTG_DECK_FILE", self.state.selected_deck_path)
+        process_env.insert("MTG_BUDGET_NOTE", self.state.budget_note)
+        process_env.insert("MTG_INTENDED_BRACKET", self.state.intended_bracket)
         process.setProcessEnvironment(process_env)
         process.setProgram("py")
         process.setArguments([self.state.backend_entrypoint])
@@ -1493,11 +1998,87 @@ class MainWindow(QMainWindow):
         if self.backend_process is None or not self.state.guarded_run_in_progress or self.guarded_cli_input_sent:
             return
         self.normalize_collection_source_for_guarded_run()
-        payload = cli_bridge.build_cli_input_payload(self.state)
-        self.backend_process.write(payload.input_text.encode("utf-8"))
+        input_lines = []
+        sent_parts = []
+
+        if self.state.selected_deck_path != "No deck file selected":
+            sent_parts.append(f"handed selected deck to main.py via MTG_DECK_FILE: {self.state.selected_deck_path}")
+
+        output_value = self.cli_output_mode_input_value()
+        input_lines.append(output_value)
+        sent_parts.append(f"sent output-mode answer {output_value} for UI Output Mode: {self.state.output_mode}")
+
+        direction_value = self.cli_review_direction_input_value()
+        input_lines.append(direction_value)
+        sent_parts.append(f"sent review-direction answer {direction_value} for UI Review Direction: {self.state.review_direction}")
+
+        if self.state.review_direction == "Build up":
+            build_up_value = self.cli_build_up_mode_input_value()
+            input_lines.append(build_up_value)
+            sent_parts.append(f"sent build-up-mode answer {build_up_value} for UI Build-Up Mode: {self.state.build_up_mode}")
+        elif self.state.review_direction in {"Cut down", "Auto batch"}:
+            intensity_value = self.cli_review_intensity_input_value()
+            input_lines.append(intensity_value)
+            sent_parts.append(f"sent review-intensity/cut-strictness answer {intensity_value} for UI Review Intensity: {self.state.cut_depth}")
+        else:
+            sent_parts.append("no mode-specific answer sent because Review Direction was not recognized")
+
+        if self.should_send_prompt_mode_input():
+            prompt_value = self.cli_prompt_mode_input_value()
+            input_lines.append(prompt_value)
+            sent_parts.append(f"sent prompt-mode answer {prompt_value} for UI Prompt Mode: {self.state.prompt_mode}")
+        else:
+            sent_parts.append("prompt-mode answer not sent until prior prompts are mapped for this review direction")
+
+        if self.should_send_philosophy_lens_input():
+            philosophy_value = self.cli_philosophy_lens_input_value()
+            input_lines.append(philosophy_value)
+            sent_parts.append(f"sent philosophy-lens answer {philosophy_value} for UI Philosophy Lens: {self.state.selected_philosophy}")
+            if self.should_send_philosophy_subtype_input():
+                subtype_value = self.cli_philosophy_subtype_input_value()
+                if subtype_value:
+                    input_lines.append(subtype_value)
+                    sent_parts.append(f"sent philosophy-subtype answer {subtype_value} for UI Philosophy Subtype: {self.state.philosophy_subtype}")
+                else:
+                    sent_parts.append(f"philosophy-subtype answer not sent because subtype mapping was unavailable for: {self.state.philosophy_subtype}")
+        else:
+            sent_parts.append("philosophy-lens answer not sent until prompt mode is safely bridged for this direction")
+
+        if self.should_send_guide_presentation_input():
+            guide_value = self.cli_guide_presentation_input_value()
+            input_lines.append(guide_value)
+            sent_parts.append(f"sent guide-presentation answer {guide_value} for UI Guide Presentation: {self.state.guide_presentation}")
+        else:
+            sent_parts.append("guide-presentation answer not sent until philosophy lens is safely bridged")
+
+        if self.should_send_collection_mode_input():
+            collection_value = self.cli_collection_mode_input_value()
+            input_lines.append(collection_value)
+            sent_parts.append(f"sent collection-mode answer {collection_value} for UI Collection Mode: {self.state.collection_mode}")
+        else:
+            sent_parts.append("collection-mode answer not sent until guide presentation is safely bridged")
+
+        if self.should_send_collection_source_input():
+            collection_source_value = self.cli_collection_source_input_value()
+            input_lines.append(collection_source_value)
+            sent_parts.append(f"sent collection-source answer {collection_source_value} for UI Collection Source: {self.state.collection_source_mode}")
+            # Normalize active source behavior: entire-folder mode does not send stale selected files,
+            # while selected-file mode sends only the files explicitly staged in the UI.
+            if self.state.collection_source_mode == "Entire collection folder":
+                sent_parts.append(f"using entire collection folder detail: {self.state.collection_folder}; selected-file payload not sent")
+            elif self.state.collection_source_mode == "Select collection files" and self.state.selected_collection_files:
+                file_payload = ";".join(str(Path(path)) for path in self.state.selected_collection_files)
+                input_lines.append(file_payload)
+                sent_parts.append(f"sent selected-collection-file path payload for {len(self.state.selected_collection_files)} file(s)")
+            elif self.state.collection_source_mode == "Select collection files":
+                sent_parts.append("selected collection files source was active but no files were staged; no file payload sent")
+        else:
+            sent_parts.append("collection-source answer not sent because collection mode is No collection or not safely bridged yet")
+
+        self.backend_process.write(("\n".join(input_lines) + "\n").encode("utf-8"))
         self.backend_process.closeWriteChannel()
         self.guarded_cli_input_sent = True
-        self.state.cli_input_bridge_last_sent = payload.sent_summary
+        self.state.cli_input_bridge_last_sent = "; ".join(sent_parts)
         self.refresh_run_analysis_previews()
 
     def capture_guarded_stdout(self):
@@ -1551,7 +2132,10 @@ class MainWindow(QMainWindow):
         QMessageBox.warning(self, "Guarded Run Failed", self.state.last_guarded_run_status)
 
     def trim_process_output(self, text, limit=6000):
-        return backend_runner.trim_process_output(text, limit=limit)
+        text = text or ""
+        if len(text) <= limit:
+            return text
+        return text[-limit:] + "\n\n... output truncated to the most recent captured text ..."
 
     def combo_tracker_preview_text(self):
         """Preview the future optional Commander Spellbook combo tracker. No API calls."""
@@ -1622,7 +2206,218 @@ class MainWindow(QMainWindow):
         )
 
     def page_run_review(self):
-        return build_run_analysis_page(self)
+        page, layout = self.page_container(
+            "Run Analysis",
+            f"Run py main.py through guarded confirmation. {APP_VERSION} keeps diagnostics available here while report reading belongs in Report Viewer."
+        )
+        body = QWidget(); body_layout = QHBoxLayout(body); body_layout.setContentsMargins(0, 0, 0, 0); body_layout.setSpacing(14)
+
+        left = TexturedPanel(self.theme, kind="iron", glow=True); add_shadow(left, blur=28, y=8)
+        l_layout = QVBoxLayout(left); l_layout.setContentsMargins(24, 24, 24, 24); l_layout.setSpacing(16)
+        run_btn = QPushButton("🔥 Prepare Backend Run Preview")
+        run_btn.setObjectName("primaryButton")
+        run_btn.setMinimumHeight(64)
+        run_btn.clicked.connect(self.run_placeholder_message)
+        l_layout.addWidget(run_btn)
+        guarded_btn = QPushButton("🛡 Guarded Execution Preview")
+        guarded_btn.setMinimumHeight(48)
+        guarded_btn.clicked.connect(self.guarded_execution_placeholder_message)
+        l_layout.addWidget(guarded_btn)
+        run_guarded_btn = QPushButton("Run main.py with Guarded Confirmation")
+        run_guarded_btn.setObjectName("primaryButton")
+        run_guarded_btn.setMinimumHeight(52)
+        run_guarded_btn.clicked.connect(self.start_guarded_backend_run)
+        self.guarded_run_button = run_guarded_btn
+        self.guarded_run_buttons.append(run_guarded_btn)
+        l_layout.addWidget(run_guarded_btn)
+
+        readiness = ReportCard("Backend Readiness Checklist", self.theme, badges=[("No engine call", "manual")])
+        readiness_box = self.readonly_text_box(self.run_readiness_text(), min_height=110, max_height=155)
+        readiness_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        readiness.body.addWidget(readiness_box)
+        l_layout.addWidget(readiness, stretch=0)
+
+        bridge_status = ReportCard("Bridge Status", self.theme, badges=[("main.py preview", "manual"), ("Execution disabled", "protected")])
+        bridge_status_box = self.readonly_text_box(
+            "Future backend entrypoint preview: main.py\n"
+            "Legacy name note: deck_helper.py was the older reference.\n"
+            "Current patch: confirmed QProcess run path is available. No shell=True, no direct external API calls.\n"
+            "Combo Tracker: optional future Commander Spellbook workflow, not part of normal deck review.",
+            min_height=105,
+            max_height=150
+        )
+        bridge_status_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        bridge_status.body.addWidget(bridge_status_box)
+        l_layout.addWidget(bridge_status, stretch=0)
+
+        orb_panel = TexturedPanel(self.theme, kind="iron_2", glow=True, corners=False)
+        orb_layout = QVBoxLayout(orb_panel); orb_layout.setContentsMargins(12, 12, 12, 12)
+        orb = ForgeOrb(self.theme)
+        orb.setMinimumSize(190, 190)
+        orb.setMaximumHeight(230)
+        orb_layout.addWidget(orb, stretch=1)
+        status = QLabel("Run the forge here. The latest successful manuscript loads from Report Viewer after output detection.")
+        status.setObjectName("helperText"); status.setAlignment(Qt.AlignCenter); status.setWordWrap(True)
+        orb_layout.addWidget(status)
+        l_layout.addWidget(orb_panel, stretch=1)
+
+        right = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(right, blur=28, y=8)
+        r_layout = QVBoxLayout(right); r_layout.setContentsMargins(24, 24, 24, 24); r_layout.setSpacing(14)
+        title = QLabel("Current Run Summary"); title.setObjectName("sectionTitle"); r_layout.addWidget(title)
+        preview = QPlainTextEdit(); preview.setReadOnly(True); preview.setPlainText(self.run_config_preview_text()); preview.setMinimumHeight(130); preview.setMaximumHeight(180); preview.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded); preview.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        preview.setObjectName("runConfigPreview")
+        self.run_config_preview_box = preview
+        r_layout.addWidget(preview, stretch=0)
+
+        selector_title = QLabel("Run Analysis Detail View"); selector_title.setObjectName("sectionTitle"); r_layout.addWidget(selector_title)
+        selector_row = QHBoxLayout(); selector_row.setSpacing(10)
+        selector_hint = QLabel("Detail section")
+        selector_hint.setObjectName("helperText")
+        selector_row.addWidget(selector_hint)
+        detail_stack = QStackedWidget()
+        detail_stack.setMinimumHeight(360)
+        detail_stack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        detail_selector = QComboBox()
+        detail_selector.setObjectName("detailSelectorCombo")
+        detail_selector.addItems(RUN_DETAIL_OPTIONS)
+        detail_selector.setMinimumWidth(260)
+        detail_selector.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.configure_combo_popup(detail_selector)
+        detail_selector.currentIndexChanged.connect(detail_stack.setCurrentIndex)
+        selector_row.addWidget(detail_selector, stretch=1)
+        selector_note = self.default_note("Guarded-run diagnostics stay here; generated report reading and file controls live in Report Viewer.")
+        selector_row.addWidget(selector_note)
+        r_layout.addLayout(selector_row)
+
+        mapping_card = ReportCard("Backend Runtime Config Contract Preview", self.theme, badges=[("UI-only", "manual"), ("No engine call", "protected")])
+        mapping_box = QPlainTextEdit()
+        mapping_box.setReadOnly(True)
+        mapping_box.setPlainText(self.backend_runtime_config_mapping_text())
+        mapping_box.setMinimumHeight(260)
+        mapping_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        mapping_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        mapping_box.setObjectName("runtimeMappingPreview")
+        self.runtime_mapping_preview_box = mapping_box
+        mapping_card.body.addWidget(mapping_box)
+        detail_stack.addWidget(mapping_card)
+
+        bridge_card = ReportCard("Safe Backend Bridge Preview", self.theme, badges=[("Preview only", "manual"), ("Execution disabled", "protected")])
+        bridge_box = QPlainTextEdit()
+        bridge_box.setReadOnly(True)
+        bridge_box.setPlainText(self.backend_bridge_preview_text())
+        bridge_box.setMinimumHeight(260)
+        bridge_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        bridge_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        bridge_box.setObjectName("backendBridgePreview")
+        self.backend_bridge_preview_box = bridge_box
+        bridge_card.body.addWidget(bridge_box)
+        detail_stack.addWidget(bridge_card)
+
+        combo_card = ReportCard("Optional Combo Tracker", self.theme, badges=[("Commander Spellbook later", "manual"), ("Opt-in", "protected")])
+        combo_box = QPlainTextEdit()
+        combo_box.setReadOnly(True)
+        combo_box.setPlainText(self.combo_tracker_preview_text())
+        combo_box.setMinimumHeight(250)
+        combo_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        combo_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        combo_box.setObjectName("comboTrackerPreview")
+        self.combo_tracker_preview_box = combo_box
+        combo_card.body.addWidget(combo_box)
+        combo_btn = QPushButton("Check Combos Later — Disabled Placeholder")
+        combo_btn.setEnabled(False)
+        combo_card.body.addWidget(combo_btn)
+        combo_card.body.addWidget(self.default_note("Future behavior: only ping Commander Spellbook after explicit user click, and only when the decklist has changed since the last combo check."))
+        detail_stack.addWidget(combo_card)
+
+        guarded_card = ReportCard("Guarded Execution Bridge", self.theme, badges=[("Preview only", "manual"), ("subprocess disabled", "protected")])
+        guarded_box = QPlainTextEdit()
+        guarded_box.setReadOnly(True)
+        guarded_box.setPlainText(self.guarded_execution_preview_text())
+        guarded_box.setMinimumHeight(260)
+        guarded_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        guarded_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        guarded_box.setObjectName("guardedExecutionPreview")
+        self.guarded_execution_preview_box = guarded_box
+        guarded_card.body.addWidget(guarded_box)
+        guarded_preview_btn = QPushButton("Validate Guarded Run Preview — No Execution")
+        guarded_preview_btn.clicked.connect(self.guarded_execution_placeholder_message)
+        guarded_card.body.addWidget(guarded_preview_btn)
+        guarded_run_btn = QPushButton("Run main.py with Guarded Confirmation")
+        guarded_run_btn.setObjectName("primaryButton")
+        guarded_run_btn.clicked.connect(self.start_guarded_backend_run)
+        guarded_card.body.addWidget(guarded_run_btn)
+        self.guarded_run_button = guarded_run_btn
+        self.guarded_run_buttons.append(guarded_run_btn)
+        guarded_card.body.addWidget(self.default_note("Run requires explicit confirmation. It uses QProcess, captures stdout/stderr, and does not call Commander Spellbook/API."))
+        detail_stack.addWidget(guarded_card)
+
+        result_card = ReportCard("Guarded Run Output / Result", self.theme, badges=[("Captured", "manual"), ("Review after run", "protected")])
+        result_box = QPlainTextEdit()
+        result_box.setReadOnly(True)
+        result_box.setPlainText(self.guarded_run_result_text())
+        result_box.setMinimumHeight(260)
+        result_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        result_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        result_box.setObjectName("guardedRunResultPreview")
+        self.guarded_run_result_box = result_box
+        result_card.body.addWidget(result_box)
+        result_card.body.addWidget(self.default_note("This output is captured from the guarded py main.py process. Report file paths are detected from stdout after successful runs."))
+        detail_stack.addWidget(result_card)
+
+        report_output_card = ReportCard("Report Output Detection", self.theme, badges=[("Path detection", "manual"), ("No parsing yet", "protected")])
+        report_output_box = QPlainTextEdit()
+        report_output_box.setReadOnly(True)
+        report_output_box.setPlainText(self.report_output_summary_text())
+        report_output_box.setMinimumHeight(220)
+        report_output_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        report_output_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        report_output_box.setObjectName("reportOutputPreview")
+        self.report_output_preview_box = report_output_box
+        report_output_card.body.addWidget(report_output_box)
+        open_row = QHBoxLayout()
+        open_output_btn = QPushButton("Open Output Folder")
+        open_output_btn.clicked.connect(self.open_last_output_folder)
+        open_normal_btn = QPushButton("Open Normal Report Folder")
+        open_normal_btn.clicked.connect(self.open_last_normal_report_folder)
+        open_debug_btn = QPushButton("Open Debug Report Folder")
+        open_debug_btn.clicked.connect(self.open_last_debug_report_folder)
+        self.open_output_folder_button = open_output_btn
+        self.open_normal_report_folder_button = open_normal_btn
+        self.open_debug_report_folder_button = open_debug_btn
+        self.refresh_report_output_buttons()
+        open_row.addWidget(open_output_btn)
+        open_row.addWidget(open_normal_btn)
+        open_row.addWidget(open_debug_btn)
+        report_output_card.body.addLayout(open_row)
+        report_output_card.body.addWidget(self.default_note("Folder buttons use detected paths from the backend Files written block. Report contents are not parsed in this patch."))
+        detail_stack.addWidget(report_output_card)
+
+        boundary_card = ReportCard("Safety Boundary and Future Stages", self.theme, badges=[("v0.6.7.9.21", "manual")])
+        stage_text = (
+            "Future Backend Bridge Stages\n"
+            "1. Runtime config contract is visible and refreshes live.\n"
+            "2. Safe backend bridge preview is visible and refreshes live.\n"
+            "3. Optional Combo Tracker placeholder is visible but API calls are disabled.\n"
+            "4. Backend command execution is still disabled.\n"
+            "5. A later guarded execution patch must preserve explicit user approval, error capture, and CLI source-of-truth boundaries.\n"
+            "6. Report generation is still handled only by the locked CLI backend.\n\n"
+            f"{self.backend_runtime_config_boundary_text()}"
+        )
+        boundary_box = self.readonly_text_box(stage_text, min_height=260, max_height=520)
+        boundary_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        boundary_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        boundary_card.body.addWidget(boundary_box)
+        detail_stack.addWidget(boundary_card)
+
+        detail_stack.setCurrentIndex(0)
+        r_layout.addWidget(detail_stack, stretch=1)
+
+        body_layout.addWidget(left, stretch=1); body_layout.addWidget(right, stretch=2)
+        run_scroll = QScrollArea()
+        run_scroll.setWidgetResizable(True)
+        run_scroll.setWidget(body)
+        layout.addWidget(run_scroll, stretch=1)
+        return page
 
     def update_progress_mock(self):
         if not self.progress_bars or self.stack.currentIndex() != self.RUN_REVIEW: return
@@ -1919,7 +2714,140 @@ class MainWindow(QMainWindow):
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(path.parent)))
 
     def page_report_viewer(self):
-        return build_report_viewer_page(self)
+        page, layout = self.page_container(
+            "Report Viewer",
+            f"Read latest guarded-run reports from backend-created output folders. {APP_VERSION} keeps plain-text report viewing and final user-facing boundaries explicit."
+        )
+        body = QWidget()
+        body_layout = QHBoxLayout(body)
+        body_layout.setContentsMargins(0, 0, 0, 0)
+        body_layout.setSpacing(14)
+
+        report_nav = TexturedPanel(self.theme, kind="iron", glow=False)
+        report_nav.setFixedWidth(330)
+        add_shadow(report_nav, blur=22, y=7)
+        rn_layout = QVBoxLayout(report_nav)
+        rn_layout.setContentsMargins(16, 16, 16, 16)
+        rn_layout.setSpacing(10)
+        cap = QLabel("DETECTED REPORT FILES")
+        cap.setObjectName("smallCaps")
+        rn_layout.addWidget(cap)
+        file_scroll = QScrollArea()
+        file_scroll.setWidgetResizable(True)
+        file_inner = QWidget()
+        self.report_viewer_file_buttons_layout = QVBoxLayout(file_inner)
+        self.report_viewer_file_buttons_layout.setContentsMargins(0, 0, 6, 0)
+        self.report_viewer_file_buttons_layout.setSpacing(8)
+        file_scroll.setWidget(file_inner)
+        rn_layout.addWidget(file_scroll, stretch=1)
+
+        reload_btn = QPushButton("Reload Latest Reports")
+        reload_btn.clicked.connect(self.reload_latest_reports_into_viewer)
+        self.report_viewer_reload_button = reload_btn
+        rn_layout.addWidget(reload_btn)
+
+        open_folder_btn = QPushButton("Open Output Folder")
+        open_folder_btn.clicked.connect(self.open_last_output_folder)
+        rn_layout.addWidget(open_folder_btn)
+
+        viewer_panel = TexturedPanel(self.theme, kind="iron", glow=True)
+        add_shadow(viewer_panel, blur=26, y=8)
+        viewer_layout = QVBoxLayout(viewer_panel)
+        viewer_layout.setContentsMargins(22, 22, 22, 22)
+        viewer_layout.setSpacing(18)
+
+        report_text_card = ReportCard("Report File Preview", self.theme, badges=[("Plain text", "manual"), ("Grouped files", "protected")])
+        report_text_card.setMinimumHeight(430)
+        report_text_card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        current_file_label = QLabel(self.report_viewer_current_file_label_text())
+        current_file_label.setObjectName("defaultNote")
+        current_file_label.setWordWrap(True)
+        current_file_label.setToolTip(self.state.report_viewer_current_file)
+        self.report_viewer_current_file_label = current_file_label
+        report_text_card.body.addWidget(current_file_label)
+
+        reader_tools = QHBoxLayout()
+        reader_tools.setSpacing(8)
+        search_input = QLineEdit(self.state.report_viewer_search_text)
+        search_input.setPlaceholderText("Search current report")
+        self.report_viewer_search_input = search_input
+        search_btn = QPushButton("Find")
+        search_btn.clicked.connect(self.find_in_current_report)
+        search_input.returnPressed.connect(self.find_in_current_report)
+        top_btn = QPushButton("Top")
+        top_btn.clicked.connect(self.jump_report_viewer_top)
+        bottom_btn = QPushButton("Bottom")
+        bottom_btn.clicked.connect(self.jump_report_viewer_bottom)
+        wrap_btn = QPushButton("Wrap: On" if self.state.report_viewer_word_wrap else "Wrap: Off")
+        wrap_btn.clicked.connect(self.toggle_report_viewer_word_wrap)
+        self.report_viewer_wrap_button = wrap_btn
+        reader_tools.addWidget(search_input, stretch=2)
+        reader_tools.addWidget(search_btn)
+        reader_tools.addWidget(top_btn)
+        reader_tools.addWidget(bottom_btn)
+        reader_tools.addWidget(wrap_btn)
+        report_text_card.body.addLayout(reader_tools)
+
+        text_box = QPlainTextEdit()
+        text_box.setReadOnly(True)
+        text_box.setPlainText(self.state.report_viewer_current_text)
+        text_box.setMinimumHeight(300)
+        text_box.setMaximumHeight(16777215)
+        text_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        text_box.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        text_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        text_box.setObjectName("reportFilePreview")
+        self.report_viewer_text_box = text_box
+        self.apply_report_viewer_readability_settings()
+        report_text_card.body.addWidget(text_box, stretch=1)
+        viewer_layout.addWidget(report_text_card, stretch=4)
+
+        status_card = ReportCard("Loaded Report Status", self.theme, badges=[("No deep parsing", "protected")])
+        status_card.setMinimumHeight(210)
+        status_card.setMaximumHeight(285)
+        status_card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        status_label = QPlainTextEdit()
+        status_label.setReadOnly(True)
+        status_label.setPlainText(self.report_viewer_status_text())
+        status_label.setObjectName("reportStatusPreview")
+        status_label.setMinimumHeight(84)
+        status_label.setMaximumHeight(125)
+        status_label.setFrameShape(QFrame.NoFrame)
+        status_label.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        status_label.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        status_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        status_label.setToolTip(
+            f"Current file: {self.state.report_viewer_current_file}\nOutput folder: {self.state.last_output_folder}"
+        )
+        self.report_viewer_status_label = status_label
+        status_card.body.addWidget(status_label)
+        action_row = QHBoxLayout()
+        action_row.setContentsMargins(0, 8, 0, 0)
+        refresh_btn = QPushButton("Refresh Current File")
+        refresh_btn.clicked.connect(self.refresh_current_report_file)
+        self.report_viewer_refresh_file_button = refresh_btn
+        copy_btn = QPushButton("Copy Report Text")
+        copy_btn.clicked.connect(self.copy_current_report_text)
+        self.report_viewer_copy_button = copy_btn
+        open_folder_current_btn = QPushButton("Open Current Folder")
+        open_folder_current_btn.clicked.connect(self.open_current_report_folder)
+        self.report_viewer_open_current_folder_button = open_folder_current_btn
+        open_file_btn = QPushButton("Open Current Report File")
+        open_file_btn.clicked.connect(self.open_current_report_file)
+        self.open_current_report_file_button = open_file_btn
+        action_row.addWidget(refresh_btn)
+        action_row.addWidget(copy_btn)
+        action_row.addStretch(1)
+        action_row.addWidget(open_folder_current_btn)
+        action_row.addWidget(open_file_btn)
+        status_card.body.addLayout(action_row)
+        viewer_layout.addWidget(status_card, stretch=0)
+
+        body_layout.addWidget(report_nav, stretch=0)
+        body_layout.addWidget(viewer_panel, stretch=1)
+        layout.addWidget(body, stretch=1)
+        self.refresh_report_viewer_file_list()
+        return page
 
     def collection_settings_summary_text(self):
         if self.state.collection_source_mode == "Select collection files":
@@ -2039,14 +2967,309 @@ class MainWindow(QMainWindow):
         self.refresh_collection_page_widgets()
 
     def page_collection_tools(self):
-        return build_collection_source_page(self)
+        page, layout = self.page_container(
+            "Collection Source",
+            f"Stage collection behavior for future recommendations. {APP_VERSION} auto-stages collection choices immediately and hands them to main.py through the guarded CLI bridge."
+        )
+        scroll, content = self.scroll_content()
+        body = TexturedPanel(self.theme, kind="iron", glow=False)
+        add_shadow(body, blur=24, y=8)
+        b_layout = QGridLayout(body)
+        b_layout.setContentsMargins(22, 22, 22, 22)
+        b_layout.setSpacing(16)
+        b_layout.setColumnStretch(0, 1)
+        b_layout.setColumnStretch(1, 1)
+
+        mode_card = ReportCard("Collection Mode", self.theme, badges=[("Staged UI", "primary")])
+        mode_card.setMinimumHeight(230)
+        mode_card.body.addWidget(self.make_text(
+            "Choose how owned cards should affect future recommendations once backend hooks are connected.",
+            paper=True
+        ))
+        mode_combo = QComboBox()
+        self.collection_mode_combo = mode_combo
+        mode_combo.addItems(COLLECTION_MODE_OPTIONS)
+        mode_combo.setCurrentText(self.state.collection_mode)
+        self.configure_combo_popup(mode_combo)
+        mode_combo.currentTextChanged.connect(lambda text: self.stage_collection_mode(text))
+        mode_card.body.addWidget(mode_combo)
+        mode_card.body.addWidget(self.default_note("Default: No collection"))
+        mode_card.body.addWidget(self.make_text(
+            "Collection-only still stays honest: if no owned card is a real fit, the report should say so instead of forcing a weak recommendation.",
+            paper=True
+        ))
+
+        source_card = ReportCard("Collection Source", self.theme, badges=[("Local files", "normal")])
+        source_card.setMinimumHeight(230)
+        source_combo = QComboBox()
+        self.collection_source_combo = source_combo
+        source_combo.addItems(COLLECTION_SOURCE_OPTIONS)
+        source_combo.setCurrentText(self.state.collection_source_mode)
+        self.configure_combo_popup(source_combo)
+        source_combo.currentTextChanged.connect(lambda text: self.stage_collection_source_mode(text))
+        source_card.body.addWidget(source_combo)
+        source_card.body.addWidget(self.default_note("Default: Entire collection folder"))
+        source_card.body.addWidget(self.make_text(
+            "Only the relevant chooser is shown for the selected source mode.",
+            paper=True
+        ))
+        folder_btn = QPushButton("Choose Collection Folder")
+        self.collection_folder_button = folder_btn
+        folder_btn.clicked.connect(self.choose_collection_folder)
+        files_btn = QPushButton("Select Collection Files")
+        self.collection_files_button = files_btn
+        files_btn.clicked.connect(self.choose_collection_files)
+        folder_btn.setVisible(self.state.collection_source_mode == "Entire collection folder")
+        files_btn.setVisible(self.state.collection_source_mode == "Select collection files")
+        source_card.body.addWidget(folder_btn)
+        source_card.body.addWidget(files_btn)
+
+        summary_card = TexturedPanel(self.theme, kind="iron_2", glow=True)
+        summary_card.setMinimumHeight(245)
+        s_layout = QVBoxLayout(summary_card)
+        s_layout.setContentsMargins(18, 16, 18, 16)
+        s_layout.setSpacing(10)
+        s_title = QLabel("Collection Settings Summary")
+        s_title.setObjectName("sectionTitle")
+        s_layout.addWidget(s_title)
+        collection_summary_box = self.readonly_text_box(self.collection_settings_summary_text(), min_height=120, max_height=155)
+        self.collection_preview_boxes.append(collection_summary_box)
+        s_layout.addWidget(collection_summary_box)
+        s_layout.addWidget(self.default_note("Auto-staged: collection choices update immediately. No Apply button required."))
+
+        honesty_card = ReportCard("Collection Honesty Boundary", self.theme, badges=[("v0.6.6.6 locked", "protected")])
+        honesty_card.setMinimumHeight(245)
+        honesty_card.body.addWidget(self.make_text(
+            "Owned cards remain candidates, not automatic swaps. Future backend integration should preserve the locked behavior: collection-first, collection-only, and shakeup modes cannot override strategy fit, legality, color identity, companion restrictions, or quality gates.",
+            paper=True
+        ))
+
+        b_layout.addWidget(mode_card, 0, 0)
+        b_layout.addWidget(source_card, 0, 1)
+        b_layout.addWidget(honesty_card, 1, 0)
+        b_layout.addWidget(summary_card, 1, 1)
+        content.addWidget(body)
+        content.addStretch(1)
+        layout.addWidget(scroll, stretch=1)
+        return page
 
     def page_batch_reports(self):
-        return build_batch_reports_page(self)
+        page, layout = self.page_container("Batch / Aggregate Reports", "Future workspace for batch runs, combined deck reports, combined debug reports, and output review.")
+        body = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(body, blur=24, y=8)
+        b_layout = QVBoxLayout(body); b_layout.setContentsMargins(22, 22, 22, 22); b_layout.setSpacing(16)
+        top = QHBoxLayout()
+        for label, value in [("Batch Files", "Not selected"), ("Deck Reports", "Aggregate later"), ("Debug Reports", "Aggregate later"), ("Prompt Reports", "Not required")]:
+            top.addWidget(SmallStat(label, value, self.theme))
+        b_layout.addLayout(top)
+        aggregate_panel = ReportCard("Aggregate Output Plan", self.theme, badges=[("v0.6.7 later", "manual")])
+        aggregate_panel.body.addWidget(self.make_text(
+            "The locked backend already supports useful report outputs. This page will eventually open the combined deck-report and debug-report files so you do not have to enter each deck output folder manually.",
+            paper=True
+        ))
+        b_layout.addWidget(aggregate_panel)
+        workflow = TexturedPanel(self.theme, kind="iron_2", glow=True)
+        w_layout = QVBoxLayout(workflow); w_layout.setContentsMargins(18, 16, 18, 16)
+        w_title = QLabel("v0.6.7 Batch UI Boundary"); w_title.setObjectName("sectionTitle"); w_layout.addWidget(w_title)
+        w_layout.addWidget(self.make_text("This page is a visual foundation only. The future backend hook should call the existing batch workflow and then surface aggregate markdown/text outputs here."))
+        b_layout.addWidget(workflow); b_layout.addStretch(1); layout.addWidget(body, stretch=1); return page
 
     def page_settings(self):
-        return build_settings_page(self)
+        page, layout = self.page_container(
+            "Settings",
+            "Theme options, saved defaults, v0.6.7 lock QA checklist, release notes, and checkpoint status."
+        )
+        scroll, content = self.scroll_content()
+        body = TexturedPanel(self.theme, kind="iron", glow=False)
+        add_shadow(body, blur=24, y=8)
+        b_layout = QVBoxLayout(body)
+        b_layout.setContentsMargins(22, 22, 22, 22)
+        b_layout.setSpacing(16)
 
+        theme_card = ReportCard("Theme Options", self.theme, badges=[("Current", "primary")])
+        row = QHBoxLayout()
+        dark = QPushButton("Dragon Forge")
+        dark.setObjectName("primaryButton" if self.theme()["name"] == "Dragon Forge" else "utilityButton")
+        dark.clicked.connect(lambda: self.set_theme(DRAGON_FORGE))
+        light = QPushButton("Adventurer's Map")
+        light.setObjectName("primaryButton" if self.theme()["name"] == "Adventurer's Map" else "utilityButton")
+        light.clicked.connect(lambda: self.set_theme(ADVENTURERS_MAP))
+        self.settings_theme_buttons = [(dark, "Dragon Forge"), (light, "Adventurer's Map")]
+        row.addWidget(dark)
+        row.addWidget(light)
+        row.addStretch(1)
+        theme_card.body.addLayout(row)
+        theme_card.body.addWidget(self.make_text(
+            "Dragon Forge remains the locked default. Adventurer’s Map remains available as the lighter cartographer palette.",
+            paper=True
+        ))
+        b_layout.addWidget(theme_card)
+
+        prefs = ReportCard("UI Preferences Checkpoint", self.theme, badges=[("Future controls", "manual")])
+        prefs_box = self.readonly_text_box(
+            "UI Preferences Checkpoint\n"
+            "- Report detail level -> Detailed\n"
+            "- Export format -> Markdown\n"
+            "- Save folder -> Outputs/\n"
+            "- Report Viewer text -> approved default for the v0.6.7 lock\n"
+            "- Future settings home -> font family, font size, readability presets, export behavior, and saved user defaults\n"
+            "- Current boundary -> these values are documented here but not yet persistent editable settings",
+            min_height=115,
+            max_height=150,
+        )
+        prefs_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        prefs.body.addWidget(prefs_box)
+        prefs.body.addWidget(self.default_note("Displayed as a checkpoint summary for now. Full editable preferences come after the v0.6.7 foundation lock."))
+        b_layout.addWidget(prefs)
+
+        checkpoint = ReportCard("v0.6.7 Desktop UI Foundation Lock", self.theme, badges=[("Locked checkpoint", "protected"), ("CLI source", "manual")])
+        checkpoint_text = (
+            "Desktop UI Foundation Lock\n"
+            "- Deck Selection, Review Setup, Philosophy Lens, Collection Source, Run Analysis, and Report Viewer are connected into one guarded local workflow.\n"
+            "- The UI is a guarded frontend for the existing CLI/backend workflow; it is not a second backend.\n"
+            "- CLI/main.py remains the source of truth for legality, strategy, collection loading, cuts, replacements, and report generation.\n"
+            "- Backend output folders are unique per run and preserve commander/deck-filename distinction.\n"
+            "- Report Viewer loads generated markdown/text as plain readable text.\n"
+            "- Deferred intentionally: deep markdown rendering, structured report parsing, batch/aggregate viewing, user-configurable report font settings, and Commander Spellbook/API combo tracking.\n"
+            "- Commander Spellbook remains disabled and future opt-in only."
+        )
+        checkpoint_box = self.readonly_text_box(checkpoint_text, min_height=155, max_height=210)
+        checkpoint_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        checkpoint.body.addWidget(checkpoint_box)
+        b_layout.addWidget(checkpoint)
+
+        qa_card = ReportCard("Final v0.6.7 Lock QA Checklist", self.theme, badges=[("QA checkpoint", "manual"), ("No new scope", "protected")])
+        qa_text = (
+            "Final v0.6.7 Lock QA Checklist\n"
+            "Deck Selection\n"
+            "- Choose a deck file and confirm preview loads without overlap.\n"
+            "- Confirm single commander, partner/paired commanders, and companion preview status display correctly.\n"
+            "- Confirm deck counts separate main deck, commander cards, total Commander deck estimate, and companion cards.\n\n"
+            "Review Setup\n"
+            "- Confirm Output Mode, Review Direction, Review Intensity / Build-Up Mode, Prompt Mode, Budget Note, and Bracket Intended auto-stage immediately.\n"
+            "- Confirm Cut down shows Review Intensity and Build up shows Build-Up Mode.\n\n"
+            "Philosophy Lens\n"
+            "- Confirm top-level philosophy, optional subtype, and Guide Presentation auto-stage cleanly.\n"
+            "- Confirm dropdowns remain readable in both themes.\n\n"
+            "Collection Source\n"
+            "- Confirm No collection, Prefer collection first, Collection only, and Collection shakeup stage correctly.\n"
+            "- Confirm Entire collection folder and Select collection files handoff states are correct.\n\n"
+            "Run Analysis\n"
+            "- Confirm guarded run requires confirmation and uses selected deck handoff.\n"
+            "- Confirm diagnostics remain available behind the detail selector.\n"
+            "- Confirm Commander Spellbook/API calls remain disabled.\n\n"
+            "Report Viewer\n"
+            "- Confirm generated reports are detected, grouped, loaded as plain text, searchable, copyable, and openable.\n"
+            "- Confirm latest backend-created unique output folder opens correctly.\n\n"
+            "Settings / Themes\n"
+            "- Confirm Dragon Forge and Adventurer’s Map remain readable and no flash popup returns.\n"
+            "- Confirm Settings clearly documents the v0.6.7 lock and future boundaries."
+        )
+        qa_box = self.readonly_text_box(qa_text, min_height=235, max_height=310)
+        qa_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        qa_card.body.addWidget(qa_box)
+        qa_card.body.addWidget(self.default_note("Checklist only: this patch documents the lock criteria without adding new features."))
+        b_layout.addWidget(qa_card)
+
+        release_card = ReportCard("v0.6.7 Release Notes and Deferred Scope", self.theme, badges=[("Release notes", "primary"), ("v0.7 clarified", "manual")])
+        release_text = (
+            "v0.6.7 Desktop UI Foundation Release Notes\n"
+            "Locked in this checkpoint\n"
+            "- Single-deck desktop UI foundation.\n"
+            "- Guarded main.py execution with explicit confirmation.\n"
+            "- Backend-created unique timestamped output folders with deck filename distinction.\n"
+            "- Report detection and Report Viewer plain-text loading.\n"
+            "- Deck preview support for commanders, commander pairs, and companion status.\n"
+            "- Collection source staging and CLI handoff.\n"
+            "- Settings/status page describing the current lock boundary.\n\n"
+            "Deferred intentionally\n"
+            "- Batch / Aggregate real workflow.\n"
+            "- Commander Spellbook/API combo tracking.\n"
+            "- Deep markdown rendering and structured report section parsing.\n"
+            "- Settings persistence, saved UI sessions, and full readability preferences.\n"
+            "- Replacement Candidate Engine and future automation layers.\n\n"
+            "Roadmap clarification\n"
+            "- v0.6.7 = Desktop UI Foundation Lock.\n"
+            "- v0.6.8 = Prompt / Report Polish + Stable v0.6 Lock.\n"
+            "- v0.7 = Desktop UI Alpha Foundation / Alpha Hardening.\n"
+            "- v0.7 builds on this locked UI foundation; it is not a rebuild from scratch."
+        )
+        release_box = self.readonly_text_box(release_text, min_height=210, max_height=285)
+        release_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        release_card.body.addWidget(release_box)
+        release_card.body.addWidget(self.default_note("Conservative roadmap wording only: no completed checkpoints were renamed or moved."))
+        b_layout.addWidget(release_card)
+
+        regression_card = ReportCard("Stable v0.6 Regression Pass", self.theme, badges=[("v0.6.8.4 passed", "primary"), ("QA complete", "protected")])
+        regression_text = (
+            "Stable v0.6 Regression Pass\n"
+            "Purpose\n"
+            "- Confirm the locked v0.6.7 desktop foundation and v0.6.8 prompt/report polish still work together.\n"
+            "- Treat this as a QA checkpoint, not a feature patch.\n\n"
+            "Required test coverage\n"
+            "- Cut-down deck: confirm required cuts, optional cuts, duplicate legality priority, and report loading.\n"
+            "- Build-up deck: confirm cards-needed count, build-up mode, completion prompt, and report loading.\n"
+            "- Companion deck: confirm companion preview/status and backend legality boundaries when available.\n"
+            "- Partner commander deck: confirm command-zone preview and selected deck handoff.\n"
+            "- Collection modes: confirm No collection and Collection only remain clear and honest.\n"
+            "- Output modes: confirm Normal, Debug, and Both still write expected files.\n"
+            "- Output folders: confirm unique timestamped folders preserve commander name and source deck filename.\n"
+            "- Report Viewer: confirm latest reports are detected and load as plain text.\n"
+            "- Guarded execution: confirm main.py runs only after explicit confirmation and captures stdout/stderr.\n"
+            "- Commander Spellbook/API: confirm external combo calls remain disabled/future opt-in.\n\n"
+            "Pass condition\n"
+            "- No regressions in guarded run, report generation, output folder routing, UI staging, or plain-text report viewing.\n"
+            "- This pass is complete. v0.6.8.5 formally locks stable v0.6."
+        )
+        regression_box = self.readonly_text_box(regression_text, min_height=230, max_height=315)
+        regression_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        regression_card.body.addWidget(regression_box)
+        regression_card.body.addWidget(self.default_note("QA checkpoint passed: no new features, backend logic changes, API work, or markdown parser work added."))
+        b_layout.addWidget(regression_card)
+
+        stable_lock_card = ReportCard("Stable v0.6 Lock", self.theme, badges=[("v0.6.8.5", "primary"), ("Locked", "protected")])
+        stable_lock_text = (
+            "Stable v0.6 Lock\n"
+            "Final lock status\n"
+            "- v0.6 is now locked as a stable local Commander deck-review workflow.\n"
+            "- v0.6.7 locked the Desktop UI Foundation.\n"
+            "- v0.6.8 polished prompt wording, report wording, user-facing boundaries, and final regression coverage.\n"
+            "- Guarded main.py execution remains the source-of-truth bridge between the UI and backend.\n"
+            "- Backend-created unique timestamped output folders remain locked.\n"
+            "- Report Viewer remains plain-text reading of generated reports.\n"
+            "- Commander Spellbook/API calls remain disabled and future opt-in only.\n"
+            "- Batch / Aggregate remains a placeholder/future workspace.\n\n"
+            "Next roadmap step\n"
+            "- v0.7 = Desktop UI Alpha Foundation / Alpha Hardening.\n"
+            "- v0.7 builds on this locked v0.6 foundation; it is not a rebuild from scratch.\n"
+            "- Future work should focus on alpha usability, not new major systems unless intentionally scoped."
+        )
+        stable_lock_box = self.readonly_text_box(stable_lock_text, min_height=210, max_height=285)
+        stable_lock_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        stable_lock_card.body.addWidget(stable_lock_box)
+        stable_lock_card.body.addWidget(self.default_note("Stable v0.6 lock checkpoint: preserve this behavior unless a future roadmap patch intentionally changes it."))
+        b_layout.addWidget(stable_lock_card)
+
+        version = ReportCard("App Version", self.theme, badges=[("Stable v0.6", "protected")])
+        version_text = (
+            "The Dragon’s Touch PySide6 Workstation\n"
+            f"Version -> {APP_VERSION}\n"
+            f"Phase -> {APP_PHASE}\n"
+            f"Locked backend -> {LOCKED_BACKEND_VERSION}\n"
+            "Backend -> guarded bridge available through explicit confirmation\n"
+            "Foundation status -> Stable v0.6 locked; v0.6.7 Desktop UI Foundation locked; v0.6.8 polish/regression complete\n"
+            "Stable workflow -> Deck Selection -> Review Setup -> Philosophy Lens -> Collection Source -> Run Analysis -> backend-created unique output folder -> Report Viewer plain-text reading\n"
+            "Output pattern -> Outputs/<CommanderName>_<DeckFileStem>_run_<YYYYMMDD_HHMMSS>/\n"
+            "Boundary -> no hidden API calls; Commander Spellbook/API remains disabled; Report Viewer does not deep-parse markdown yet; required cuts, legality fixes, collection mode, and philosophy guidance remain clearly separated; v0.7 means alpha hardening of this existing UI, not a rebuild."
+        )
+        version_box = self.readonly_text_box(version_text, min_height=135, max_height=185)
+        version_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        version.body.addWidget(version_box)
+        b_layout.addWidget(version)
+
+        content.addWidget(body)
+        content.addStretch(1)
+        layout.addWidget(scroll, stretch=1)
+        return page
 
 def main():
     app = QApplication(sys.argv)
