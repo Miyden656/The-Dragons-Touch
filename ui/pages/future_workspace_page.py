@@ -24,14 +24,14 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
 def build_batch_reports_page(host):
     """Build the Batch / Aggregate placeholder page."""
     self = host
-    page, layout = self.page_container("Batch / Aggregate Reports", "Future workspace for batch runs, combined deck reports, combined debug reports, and output review.")
+    page, layout = self.page_container("Batch / Aggregate Reports", "Future / Not Active Yet. This placeholder does not run batch analysis or create aggregate reports in v0.7 alpha.")
     body = TexturedPanel(self.theme, kind="iron", glow=False); add_shadow(body, blur=24, y=8)
     b_layout = QVBoxLayout(body); b_layout.setContentsMargins(22, 22, 22, 22); b_layout.setSpacing(16)
     top = QHBoxLayout()
     for label, value in [("Batch Files", "Not selected"), ("Deck Reports", "Aggregate later"), ("Debug Reports", "Aggregate later"), ("Prompt Reports", "Not required")]:
         top.addWidget(SmallStat(label, value, self.theme))
     b_layout.addLayout(top)
-    aggregate_panel = ReportCard("Aggregate Output Plan", self.theme, badges=[("v0.6.7 later", "manual")])
+    aggregate_panel = ReportCard("Aggregate Output Plan", self.theme, badges=[("Future / Not Active Yet", "manual")])
     aggregate_panel.body.addWidget(self.make_text(
         "The locked backend already supports useful report outputs. This page will eventually open the combined deck-report and debug-report files so you do not have to enter each deck output folder manually.",
         paper=True
@@ -39,7 +39,7 @@ def build_batch_reports_page(host):
     b_layout.addWidget(aggregate_panel)
     workflow = TexturedPanel(self.theme, kind="iron_2", glow=True)
     w_layout = QVBoxLayout(workflow); w_layout.setContentsMargins(18, 16, 18, 16)
-    w_title = QLabel("v0.6.7 Batch UI Boundary"); w_title.setObjectName("sectionTitle"); w_layout.addWidget(w_title)
+    w_title = QLabel("Batch / Aggregate Boundary"); w_title.setObjectName("sectionTitle"); w_layout.addWidget(w_title)
     w_layout.addWidget(self.make_text("This page is a visual foundation only. The future backend hook should call the existing batch workflow and then surface aggregate markdown/text outputs here."))
     b_layout.addWidget(workflow); b_layout.addStretch(1); layout.addWidget(body, stretch=1); return page
 
@@ -49,7 +49,7 @@ def build_settings_page(host):
     self = host
     page, layout = self.page_container(
         "Settings",
-        "Theme options, saved defaults, v0.6.7 lock QA checklist, release notes, and checkpoint status."
+        "Theme options, alpha status, deferred scope, and checkpoint notes for the modular v0.7 build."
     )
     scroll, content = self.scroll_content()
     body = TexturedPanel(self.theme, kind="iron", glow=False)
@@ -94,9 +94,9 @@ def build_settings_page(host):
     prefs.body.addWidget(self.default_note("Displayed as a checkpoint summary for now. Full editable preferences come after the v0.6.7 foundation lock."))
     b_layout.addWidget(prefs)
 
-    checkpoint = ReportCard("v0.6.7 Desktop UI Foundation Lock", self.theme, badges=[("Locked checkpoint", "protected"), ("CLI source", "manual")])
+    checkpoint = ReportCard("v0.7 Modular Alpha Checkpoint", self.theme, badges=[("Modular checkpoint", "protected"), ("CLI source", "manual")])
     checkpoint_text = (
-        "Desktop UI Foundation Lock\n"
+        "Modular Alpha Checkpoint\n"
         "- Deck Selection, Review Setup, Philosophy Lens, Collection Source, Run Analysis, and Report Viewer are connected into one guarded local workflow.\n"
         "- The UI is a guarded frontend for the existing CLI/backend workflow; it is not a second backend.\n"
         "- CLI/main.py remains the source of truth for legality, strategy, collection loading, cuts, replacements, and report generation.\n"
@@ -110,9 +110,9 @@ def build_settings_page(host):
     checkpoint.body.addWidget(checkpoint_box)
     b_layout.addWidget(checkpoint)
 
-    qa_card = ReportCard("Final v0.6.7 Lock QA Checklist", self.theme, badges=[("QA checkpoint", "manual"), ("No new scope", "protected")])
+    qa_card = ReportCard("Alpha Tester Smoke Checklist", self.theme, badges=[("QA checkpoint", "manual"), ("No new scope", "protected")])
     qa_text = (
-        "Final v0.6.7 Lock QA Checklist\n"
+        "Alpha Tester Smoke Checklist\n"
         "Deck Selection\n"
         "- Choose a deck file and confirm preview loads without overlap.\n"
         "- Confirm single commander, partner/paired commanders, and companion preview status display correctly.\n"
@@ -143,9 +143,9 @@ def build_settings_page(host):
     qa_card.body.addWidget(self.default_note("Checklist only: this patch documents the lock criteria without adding new features."))
     b_layout.addWidget(qa_card)
 
-    release_card = ReportCard("v0.6.7 Release Notes and Deferred Scope", self.theme, badges=[("Release notes", "primary"), ("v0.7 clarified", "manual")])
+    release_card = ReportCard("Modular Alpha Notes and Deferred Scope", self.theme, badges=[("Release notes", "primary"), ("v0.7 active", "manual")])
     release_text = (
-        "v0.6.7 Desktop UI Foundation Release Notes\n"
+        "v0.7 Modular Alpha Notes\n"
         "Locked in this checkpoint\n"
         "- Single-deck desktop UI foundation.\n"
         "- Guarded main.py execution with explicit confirmation.\n"

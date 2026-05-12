@@ -288,7 +288,7 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(14, 8, 14, 8)
         left = QLabel(f"The Dragon's Touch {APP_VERSION}  •  PySide6 Desktop UI Alpha Foundation  •  {BACKEND_STATUS}")
         left.setObjectName("footerText")
-        right = QLabel("Single-deck alpha workflow. Guarded runs only. No automatic deck edits.")
+        right = QLabel("Fantasy frame, practical workflow. Analysis backend hooks come later.")
         right.setObjectName("footerText")
         layout.addWidget(left)
         layout.addStretch(1)
@@ -350,7 +350,7 @@ class MainWindow(QMainWindow):
             layout.addWidget(stat)
         line = QFrame(); line.setObjectName("goldDivider"); line.setFixedHeight(1); layout.addWidget(line)
         notes_title = QLabel("QUICK NOTES"); notes_title.setObjectName("sidebarSectionTitle"); layout.addWidget(notes_title)
-        notes = QLabel("• Single-deck alpha review only\n• Use guarded confirmation before analysis\n• Report Viewer loads plain text\n• Future features stay labeled and disabled")
+        notes = QLabel("• Mock data only\n• Report viewer is the design priority\n• Backend will connect later\n• Responsible API behavior planned")
         notes.setObjectName("mutedText"); notes.setWordWrap(True); layout.addWidget(notes)
         layout.addStretch(1)
         mascot = TexturedPanel(self.theme, kind="iron_2", glow=True, corners=False)
@@ -505,14 +505,14 @@ class MainWindow(QMainWindow):
         QMessageBox.information(
             self,
             "UI Foundation Placeholder",
-            f"This control is a future/placeholder utility in {APP_VERSION}. The active alpha workflow is Deck Selection -> Review Setup -> Philosophy Lens -> Collection Source -> Run Analysis -> Report Viewer."
+            f"This control is part of {APP_VERSION}. The desktop shell is hardened as a guarded CLI frontend; this specific utility control remains a placeholder for later polishing."
         )
 
     def backend_hook_message(self, hook_name):
         QMessageBox.information(
             self,
             "Backend Hook Placeholder",
-            f"{hook_name} is reserved for a later deliberate patch. The active alpha workflow still uses guarded main.py execution and the locked {LOCKED_BACKEND_VERSION} backend boundary."
+            f"{hook_name} is reserved for a later deliberate backend integration patch. The locked {LOCKED_BACKEND_VERSION} command-line backend remains unchanged."
         )
 
     def page_header(self, title, subtitle):

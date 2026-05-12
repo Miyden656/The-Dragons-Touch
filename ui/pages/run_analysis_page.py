@@ -32,7 +32,7 @@ def build_run_analysis_page(window):
     """Build the Run Analysis page while keeping guarded-run behavior on MainWindow."""
     page, layout = window.page_container(
         "Run Analysis",
-        f"Run py main.py through guarded confirmation. {APP_VERSION} keeps diagnostics available here while report reading belongs in Report Viewer."
+        f"Run main.py only after guarded confirmation. {APP_VERSION} shows diagnostics here; generated reports are read in Report Viewer."
     )
     body = QWidget(); body_layout = QHBoxLayout(body); body_layout.setContentsMargins(0, 0, 0, 0); body_layout.setSpacing(14)
 
@@ -61,11 +61,11 @@ def build_run_analysis_page(window):
     readiness.body.addWidget(readiness_box)
     l_layout.addWidget(readiness, stretch=0)
 
-    bridge_status = ReportCard("Bridge Status", window.theme, badges=[("main.py preview", "manual"), ("Execution disabled", "protected")])
+    bridge_status = ReportCard("Bridge Status", window.theme, badges=[("main.py guarded", "manual"), ("User-confirmed only", "protected")])
     bridge_status_box = window.readonly_text_box(
-        "Future backend entrypoint preview: main.py\n"
+        "Active backend entrypoint: main.py\n"
         "Legacy name note: deck_helper.py was the older reference.\n"
-        "Current patch: confirmed QProcess run path is available. No shell=True, no direct external API calls.\n"
+        "Current alpha path: guarded QProcess run with explicit confirmation. No shell=True, no direct external API calls.\n"
         "Combo Tracker: optional future Commander Spellbook workflow, not part of normal deck review.",
         min_height=105,
         max_height=150
@@ -125,7 +125,7 @@ def build_run_analysis_page(window):
     mapping_card.body.addWidget(mapping_box)
     detail_stack.addWidget(mapping_card)
 
-    bridge_card = ReportCard("Safe Backend Bridge Preview", window.theme, badges=[("Preview only", "manual"), ("Execution disabled", "protected")])
+    bridge_card = ReportCard("Safe Backend Bridge Preview", window.theme, badges=[("CLI bridge", "manual"), ("Guarded only", "protected")])
     bridge_box = QPlainTextEdit()
     bridge_box.setReadOnly(True)
     bridge_box.setPlainText(window.backend_bridge_preview_text())

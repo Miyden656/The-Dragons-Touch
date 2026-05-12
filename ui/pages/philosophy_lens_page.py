@@ -20,7 +20,7 @@ def build_philosophy_lens_page(window):
     """Build the Philosophy Lens page while keeping behavior on MainWindow."""
     page, layout = window.page_container(
         "Philosophy Lens",
-        "Choose the review lens and guide voice. This shapes explanations without overriding legality, strategy, or collection honesty."
+        "Choose the review lens and guide voice. This shapes explanations and priorities without overriding legality, budget, collection mode, color identity, pilot intent, or deck evidence."
     )
     body = TexturedPanel(window.theme, kind="iron", glow=False)
     add_shadow(body, blur=24, y=8)

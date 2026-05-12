@@ -32,7 +32,7 @@ except ImportError:  # Allows direct local execution from inside the ui/ folder.
 def build_report_viewer_page(window):
     page, layout = window.page_container(
         "Report Viewer",
-        f"Read latest guarded-run reports from backend-created output folders. {APP_VERSION} keeps plain-text report viewing and final user-facing boundaries explicit."
+        f"Read generated reports from backend-created output folders. {APP_VERSION} keeps reports as plain text; deep markdown rendering is deferred."
     )
     body = QWidget()
     body_layout = QHBoxLayout(body)

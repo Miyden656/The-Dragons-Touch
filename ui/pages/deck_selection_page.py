@@ -30,7 +30,7 @@ def build_deck_selection_page(window):
     """Build the Deck Selection page while keeping behavior on MainWindow."""
     page, layout = window.page_container(
         "Deck Selection",
-        f"Choose a local deck file and preview it safely. {APP_VERSION} uses this staged deck for guarded CLI runs while the backend remains the source of truth."
+        f"Choose one Commander deck file to review. {APP_VERSION} stages the deck for guarded CLI runs while main.py remains the source of truth."
     )
     body = TexturedPanel(window.theme, kind="iron", glow=False)
     add_shadow(body, blur=26, y=8)

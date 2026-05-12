@@ -20,7 +20,7 @@ def build_collection_source_page(window):
     """Build the Collection Source page while keeping staged-state behavior on MainWindow."""
     page, layout = window.page_container(
         "Collection Source",
-        f"Stage collection behavior for future recommendations. {APP_VERSION} auto-stages collection choices immediately and hands them to main.py through the guarded CLI bridge."
+        f"Stage how collection data should guide the review. {APP_VERSION} keeps collection choices honest: they guide suggestions but do not force weak or illegal swaps."
     )
     scroll, content = window.scroll_content()
     body = TexturedPanel(window.theme, kind="iron", glow=False)

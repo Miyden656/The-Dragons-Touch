@@ -189,7 +189,7 @@ Patch v0.7.7L.2 — Launcher Cleanup / Shortcut Retarget
 
 Patch v0.7.7L.3 — Launcher Scope Correction
 
-Patch v0.7.7 — Backend Runner / CLI Bridge Service Extraction (Failure to open Regression causes .pyw launcher to not work) 
+Patch v0.7.7 — Backend Runner / CLI Bridge Service Extraction (Failure to open Regression causes .pyw launcher to not work)
 
 UPDATE: v0.7.7 Passed after v0.7.7.3 hotfix
 
@@ -210,5 +210,11 @@ Patch v0.7.13 — Page Extraction: Run Analysis
 Patch v0.7.14 — Future / Placeholder Pages Extraction
 
 Patch v0.7.15 — Main Window Cleanup / Alpha Hardening Pass
+Patch v0.7.16 — Alpha Modularization Regression Pass / Checkpoint Summary
 
+Patch v0.7.17 — Alpha Tester README / Clean Setup Polish
+
+Patch v0.7.18 — Alpha Tester Packaging Readiness Audit
+
+Patch v0.7.19 — Small UI User-Facing Polish Pass
 

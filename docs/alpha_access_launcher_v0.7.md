@@ -80,3 +80,25 @@ v0.7: Python .pyw launcher / alpha access
 ```
 
 The installer remains the long-term user-friendly goal, but it should come after the v0.7 alpha workflow is stable.
+
+## v0.7.17 Clean Setup Note
+
+The supported alpha launch path remains:
+
+```text
+Launch_The_Dragons_Touch.pyw
+```
+
+The clean ZIP may omit the large local Scryfall cache file:
+
+```text
+data/scryfall_cards.json
+```
+
+If the file is missing, recreate it from the project root:
+
+```text
+python download_scryfall_data.py
+```
+
+This requires internet access.

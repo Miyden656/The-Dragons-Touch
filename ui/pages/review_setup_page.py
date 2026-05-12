@@ -45,7 +45,7 @@ def build_review_setup_page(window):
     """Build the Review Setup page while keeping staged-state behavior on MainWindow."""
     page, layout = window.page_container(
         "Review Setup",
-        f"Stage the same review choices the CLI already supports. {APP_VERSION} auto-stages choices as you change them and hands them to main.py through the guarded CLI bridge."
+        f"Stage review choices for one deck review. {APP_VERSION} updates choices immediately; these settings guide the report and do not edit your deck automatically."
     )
     scroll, content = window.scroll_content()
     grid_panel = TexturedPanel(window.theme, kind="iron", glow=False); add_shadow(grid_panel, blur=24, y=8)
@@ -175,8 +175,8 @@ def build_review_setup_page(window):
 
     note = TexturedPanel(window.theme, kind="iron_2", glow=False)
     n_layout = QVBoxLayout(note); n_layout.setContentsMargins(18, 14, 18, 14)
-    n_title = QLabel("v0.6.7.9.12 Boundary"); n_title.setObjectName("sectionTitle"); n_layout.addWidget(n_title)
-    n_layout.addWidget(window.make_text("These choices auto-stage inside the UI as soon as you change them. Table bracket and collection handoff checkboxes were removed; Bracket Intended and the Collection Source page now carry those staged values directly."))
+    n_title = QLabel("Alpha Boundary"); n_title.setObjectName("sectionTitle"); n_layout.addWidget(n_title)
+    n_layout.addWidget(window.make_text("These choices auto-stage inside the UI as soon as you change them. They guide the guarded report workflow only; The Dragon’s Touch does not automatically edit deck files."))
     grid.addWidget(note, 3, 0, 1, 2)
 
     content.addWidget(grid_panel); content.addStretch(1); layout.addWidget(scroll, stretch=1); return page
