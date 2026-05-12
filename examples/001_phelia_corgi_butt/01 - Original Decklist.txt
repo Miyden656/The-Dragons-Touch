@@ -1,0 +1,85 @@
+Commander
+1 Phelia, Exuberant Shepherd
+
+Artifact
+1 Accorder's Shield
+1 Arcane Signet
+1 Caged Sun
+1 Gauntlet of Power
+1 Helm of the Host
+1 Panharmonicon
+1 Sisay's Ring
+1 Sol Ring
+1 Swiftfoot Boots
+1 Thought Vessel
+
+Creature
+1 Archon of Coronation
+1 Battle Angels of Tyr
+1 Celestine, the Living Saint
+1 Claim Jumper
+1 Crystal Barricade
+1 Daxos, Blessed by the Sun
+1 Dazzling Angel
+1 Distinguished Conjurer
+1 Dwarven Priest
+1 Elesh Norn // The Argent Etchings
+1 Giada, Font of Hope
+1 Guide of Souls
+6 Hare Apparent
+1 Healer of the Pride
+1 Helpful Hunter
+1 Herald of Eternal Dawn
+1 Icewind Stalwart
+1 Kor Celebrant
+1 Lunarch Veteran // Luminous Phantom
+1 Moon-Blessed Cleric
+1 Ocelot Pride
+1 Priest of Ancient Lore
+1 Restoration Angel
+1 Solemn Simulacrum
+1 Spirited Companion
+1 Toby, Beastie Befriender
+1 Triumph of Saint Katherine
+1 Voice of Victory
+
+Enchantment
+1 Case of the Uneaten Feast
+1 Cleric Class
+1 Grasp of Fate
+1 Smile at Death
+1 Soul Tithe
+1 Temporary Lockdown
+1 The Princess Takes Flight
+1 Valkyrie's Call
+
+Instant
+1 Cloudshift
+1 Condemn
+1 Cosmic Intervention
+1 Divine Resilience
+1 Fleeting Flight
+1 Flicker of Fate
+1 Gilded Light
+1 Repel the Abominable
+1 Slip On the Ring
+1 Vanish into Eternity
+
+Land
+1 Kor Haven
+1 Minas Tirith
+1 Mirrex
+26 Plains
+1 Reliquary Tower
+1 Rogue's Passage
+1 Sunken Citadel
+1 Urza's Saga
+
+Planeswalker
+1 The Eternal Wanderer
+
+Sorcery
+1 Another Round
+1 Austere Command
+1 Divine Gambit
+1 Raise the Past

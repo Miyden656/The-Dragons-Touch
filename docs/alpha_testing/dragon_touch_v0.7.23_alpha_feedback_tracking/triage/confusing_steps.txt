@@ -1,0 +1,13 @@
+Confusing Steps
+===============
+
+Use this file for steps testers could complete but did not understand clearly.
+
+Entry Template
+--------------
+Tester:
+Step/page:
+What confused them:
+Suggested wording/UI change:
+Severity:
+Decision:

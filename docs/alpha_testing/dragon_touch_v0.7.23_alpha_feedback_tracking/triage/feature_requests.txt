@@ -1,0 +1,13 @@
+Feature Requests
+================
+
+Use this file for tester ideas that are not bugs.
+
+Entry Template
+--------------
+Tester:
+Requested feature:
+Why they want it:
+Would it improve alpha usability?
+Version target: v0.7.x / v0.8 / v0.9 / v1.0 / v1.1+
+Decision:

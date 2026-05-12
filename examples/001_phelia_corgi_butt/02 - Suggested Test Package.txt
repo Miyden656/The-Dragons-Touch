@@ -1,0 +1,43 @@
+Example 001 — Phelia, Exuberant Shepherd: “Corgi Butt”
+Suggested Test Package
+
+Review Type:
+Optional tuning
+
+Deck Status:
+Legal 100-card Commander deck
+
+Required Cuts:
+0
+
+Budget/Source:
+Collection-only
+$0 outside purchases
+
+Philosophy Lens:
+Theme / Vibe
+
+Guide/Persona:
+Bethany, The Theme Mentor
+
+Corrected Strategy:
+ETB Control / Flicker Control
+with Token Combat / Go-Wide-Go-Tall support
+
+Suggested Test Swaps:
+
+OUT:
+1. Soul Tithe
+2. Divine Gambit
+3. Sisay’s Ring
+
+IN:
+1. Hanged Executioner
+2. Odric, Lunarch Marshal
+3. Ajani, Caller of the Pride
+
+Important Note:
+These swaps are not commands.
+They are a suggested playtest package.
+
+The goal is to test whether the deck becomes more functional while still feeling like a Dog/corgi typal Phelia deck.

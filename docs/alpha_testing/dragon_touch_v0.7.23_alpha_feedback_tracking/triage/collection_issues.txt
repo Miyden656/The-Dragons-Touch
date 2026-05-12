@@ -1,0 +1,15 @@
+Collection Issues
+=================
+
+Use this file for collection loading, collection mode, or collection recommendation issues.
+
+Entry Template
+--------------
+Tester:
+Collection source:
+Collection mode:
+Problem:
+Did collection load?
+Did report respect collection mode?
+Files/screenshots provided:
+Decision:

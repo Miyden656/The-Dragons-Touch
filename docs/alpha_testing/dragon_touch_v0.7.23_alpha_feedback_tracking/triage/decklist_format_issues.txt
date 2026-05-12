@@ -1,0 +1,16 @@
+Decklist Format Issues
+======================
+
+Use this file for decklist parser problems, especially exports from sites other than Archidekt.
+
+Entry Template
+--------------
+Tester:
+Deckbuilding site:
+Copied/pasted or downloaded:
+File extension:
+Problem:
+Cards not found:
+Sections ignored/unparsed:
+Screenshots/files provided:
+Decision:

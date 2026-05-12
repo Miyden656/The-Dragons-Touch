@@ -1,0 +1,14 @@
+Report Quality Notes
+====================
+
+Use this file for report wording, strategy read, cut logic, replacement category, or AI handoff quality notes.
+
+Entry Template
+--------------
+Tester:
+Deck tested:
+Report section:
+Issue or praise:
+Was pilot intent different from report strategy read?
+Did AI follow-up correct it?
+Decision:

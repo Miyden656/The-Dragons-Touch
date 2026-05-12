@@ -1,6 +1,63 @@
-*.txt
-*.json
-*.pyc
-/outputs/
-/old_do_not_use/
-/ui//retired_ui/
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Build / packaging
+build/
+dist/
+*.spec
+
+# Local generated outputs
+Outputs/
+outputs/
+output/
+reports/generated/
+
+# Large downloaded card data
+data/scryfall_cards.json
+data/oracle-cards*.json
+data/default-cards*.json
+data/all-cards*.json
+
+# Local/private collection data
+collection/
+*_collection.txt
+
+# Decklists
+
+Decklists/
+*_Decklists.txt
+
+# Old internal backups
+Old Do not use/
+old_do_not_use/
+Files outside/
+
+# Debug and temp
+debug/
+debug_output/
+logs/
+*.log
+tmp/
+temp/
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Alpha packaging / old alpha handoff folders
+ALPHA TESTING/
+*.zip
+
+# Local dev-only tools
+Dev tools/
