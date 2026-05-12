@@ -221,3 +221,13 @@ Patch v0.7.20 — Alpha Tester Readiness Lock Candidate
 Patch v0.7.21 — Alpha Launcher / Scryfall Setup Repair
 Patch v0.7.22 — Alpha Tester Feedback Packet Handoff (PASS)
 
+v0.7.22 Alpha Tester Handoff Candidate is locked.
+
+
+
+This build passed final fresh-ZIP verification after removing deck\_helper/ as legacy duplicate code. The clean extracted ZIP successfully regenerated Scryfall data, launched the PySide6 UI without Visual Studio Code, completed a full deck-review smoke test, generated reports/prompts/debug outputs, and loaded reports through the Report Viewer.
+
+
+
+Decision: safe for 1–2 trusted alpha testers.
+
