@@ -6,8 +6,8 @@ values only. It must not run backend logic, touch main.py, inspect decks, create
 outputs, or replace the guarded CLI bridge.
 """
 
-APP_VERSION = "v0.8.7.4.1-dev"
-APP_PHASE = "Modular Alpha / Review Setup Layout Cleanup"
+APP_VERSION = "v0.8.7.3-dev"
+APP_PHASE = "Modular Alpha / Optional Combo Awareness UI Toggle"
 BACKEND_STATUS = "Stable v0.6.8.5 workflow preserved — guarded UI bridge uses CLI/main.py as source of truth"
 LOCKED_BACKEND_VERSION = "v0.6.8.5"
 

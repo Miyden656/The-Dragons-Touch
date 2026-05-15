@@ -1650,7 +1650,6 @@ class MainWindow(QMainWindow):
         ordered_markers = [
             ("_deck_report", 10),
             ("_user_guided_prompt", 20),
-            ("combo_awareness_report_section", 30),
             ("_legality_debug", 110),
             ("_strategy_debug", 120),
             ("_bracket_debug", 130),
@@ -1658,8 +1657,6 @@ class MainWindow(QMainWindow):
             ("_replacement_prompt_debug", 150),
             ("_diagnostics_debug", 160),
             ("_full_debug_report", 190),
-            ("combo_awareness_breakdown", 200),
-            ("combo_awareness_error", 210),
         ]
         for marker, rank in ordered_markers:
             if marker in lower:
@@ -1706,12 +1703,6 @@ class MainWindow(QMainWindow):
             role = "Replacement Debug"
         elif "_diagnostics_debug" in lower:
             role = "Diagnostics Debug"
-        elif "combo_awareness_report_section" in lower:
-            role = "Combo Awareness Section"
-        elif "combo_awareness_breakdown" in lower:
-            role = "Combo Awareness Breakdown"
-        elif "combo_awareness_error" in lower:
-            role = "Combo Awareness Error"
         else:
             # Fallback keeps the label readable without forcing horizontal scrolling.
             stem = Path(path_text).stem

@@ -226,11 +226,24 @@ def _is_debug_output_file(path: Path) -> bool:
     older check only recognized names ending exactly in ``_debug.md``, which
     caused valid debug files in the debug folder to be misclassified as normal
     outputs during batch reruns or duplicate commander tests.
+
+    v0.8.7.1-dev also treats optional combo-awareness debug artifacts as
+    debug output. The first guarded combo hook can write files such as
+    ``combo_awareness_breakdown.md`` and ``combo_awareness_error.md`` into the
+    debug folder. Those files are intentionally separate artifacts, not normal
+    reports, so the routing assertion must classify them as debug files.
     """
     stem = path.stem.lower()
     suffix = path.suffix.lower()
-    return (suffix == ".md" and (stem.endswith("_debug") or "_debug_" in stem)) or (
-        suffix == ".txt" and (stem.endswith("_full_debug_report") or "_full_debug_report_" in stem)
+
+    combo_debug_stems = {
+        "combo_awareness_breakdown",
+        "combo_awareness_error",
+    }
+
+    return (
+        (suffix == ".md" and (stem.endswith("_debug") or "_debug_" in stem or stem in combo_debug_stems))
+        or (suffix == ".txt" and (stem.endswith("_full_debug_report") or "_full_debug_report_" in stem))
     )
 
 

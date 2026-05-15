@@ -151,8 +151,6 @@ def build_cli_input_payload(state) -> CLIInputPayload:
     sent_parts: list[str] = []
     if state.selected_deck_path != "No deck file selected":
         sent_parts.append(f"handed selected deck to main.py via MTG_DECK_FILE: {state.selected_deck_path}")
-    combo_mode = getattr(state, "combo_awareness_mode", "Disabled")
-    sent_parts.append(f"combo awareness environment handoff staged by QProcess: {combo_mode}")
     output_value = output_mode_input_value(state)
     input_lines.append(output_value)
     sent_parts.append(f"sent output-mode answer {output_value} for UI Output Mode: {state.output_mode}")
@@ -236,7 +234,6 @@ def cli_input_bridge_preview_text(state) -> str:
         "- bridge_scope -> Build-up, Cut-down, Auto-batch defaults, top-level/subtype philosophy, guide presentation, collection mode, and collection source\n"
         "- strategy -> send staged UI answers in the same order main.py asks for them, then capture any unexpected prompt/error\n"
         f"- selected_deck_handoff -> MTG_DECK_FILE={state.selected_deck_path if state.selected_deck_path != 'No deck file selected' else 'not staged'}\n"
-        f"- combo_awareness_env_handoff -> {getattr(state, 'combo_awareness_mode', 'Disabled')}\n"
         "- known_prompt_1 -> Output mode [1=Normal]:\n"
         f"- ui_output_mode -> {state.output_mode}\n"
         f"- output_mode_stdin_value_to_send -> {output_mode_input_value(state)}\n"

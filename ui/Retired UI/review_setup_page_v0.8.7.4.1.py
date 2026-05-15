@@ -120,7 +120,7 @@ def build_review_setup_page(window):
     budget_card.body.addWidget(QLabel("Bracket Intended"))
     budget_card.body.addWidget(intended_bracket_combo)
     budget_card.body.addWidget(window.default_note("Collection mode and file selection live on the Collection Source page. Bracket and collection values are staged through dropdowns, not checkboxes."))
-    grid.addWidget(budget_card, 2, 1)
+    grid.addWidget(budget_card, 2, 0)
 
     combo_awareness_card = ReportCard("Combo Awareness", window.theme, badges=[("Optional", "protected"), ("Local only", "manual")])
     combo_awareness_combo = QComboBox()
@@ -130,7 +130,7 @@ def build_review_setup_page(window):
     combo_awareness_card.body.addWidget(QLabel("Commander Spellbook combo check"))
     combo_awareness_card.body.addWidget(combo_awareness_combo)
     combo_awareness_card.body.addWidget(window.default_note("Default: Disabled. When enabled, main.py writes separate combo-awareness artifacts only. No API calls and no normal report injection."))
-    grid.addWidget(combo_awareness_card, 2, 0)
+    grid.addWidget(combo_awareness_card, 3, 0)
 
     summary = TexturedPanel(window.theme, kind="iron_2", glow=True)
     s_layout = QVBoxLayout(summary); s_layout.setContentsMargins(18, 16, 18, 16)
@@ -139,7 +139,7 @@ def build_review_setup_page(window):
     s_layout.addWidget(summary_label)
     auto_note = window.default_note("Auto-staged: changes update this summary immediately. No Apply button required.")
     s_layout.addWidget(auto_note)
-    grid.addWidget(summary, 3, 0, 1, 2)
+    grid.addWidget(summary, 2, 1, 2, 1)
 
     def refresh_direction_specific_review_fields():
         direction = direction_combo.currentText()

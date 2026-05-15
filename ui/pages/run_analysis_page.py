@@ -137,7 +137,7 @@ def build_run_analysis_page(window):
     bridge_card.body.addWidget(bridge_box)
     detail_stack.addWidget(bridge_card)
 
-    combo_card = ReportCard("Optional Combo Tracker", window.theme, badges=[("Commander Spellbook later", "manual"), ("Opt-in", "protected")])
+    combo_card = ReportCard("Optional Combo Awareness", window.theme, badges=[("Local index", "manual"), ("Opt-in", "protected")])
     combo_box = QPlainTextEdit()
     combo_box.setReadOnly(True)
     combo_box.setPlainText(window.combo_tracker_preview_text())
@@ -147,10 +147,10 @@ def build_run_analysis_page(window):
     combo_box.setObjectName("comboTrackerPreview")
     window.combo_tracker_preview_box = combo_box
     combo_card.body.addWidget(combo_box)
-    combo_btn = QPushButton("Check Combos Later — Disabled Placeholder")
+    combo_btn = QPushButton("Configured from Review Setup — Optional")
     combo_btn.setEnabled(False)
     combo_card.body.addWidget(combo_btn)
-    combo_card.body.addWidget(window.default_note("Future behavior: only ping Commander Spellbook after explicit user click, and only when the decklist has changed since the last combo check."))
+    combo_card.body.addWidget(window.default_note("Combo Awareness is optional. When enabled in Review Setup, main.py writes separate local combo artifacts; no API calls are made."))
     detail_stack.addWidget(combo_card)
 
     guarded_card = ReportCard("Guarded Execution Bridge", window.theme, badges=[("Preview only", "manual"), ("subprocess disabled", "protected")])
@@ -172,7 +172,7 @@ def build_run_analysis_page(window):
     guarded_card.body.addWidget(guarded_run_btn)
     window.guarded_run_button = guarded_run_btn
     window.guarded_run_buttons.append(guarded_run_btn)
-    guarded_card.body.addWidget(window.default_note("Run requires explicit confirmation. It uses QProcess, captures stdout/stderr, and does not call Commander Spellbook/API."))
+    guarded_card.body.addWidget(window.default_note("Run requires explicit confirmation. It uses QProcess, captures stdout/stderr, and only passes combo awareness when explicitly enabled."))
     detail_stack.addWidget(guarded_card)
 
     result_card = ReportCard("Guarded Run Output / Result", window.theme, badges=[("Captured", "manual"), ("Review after run", "protected")])

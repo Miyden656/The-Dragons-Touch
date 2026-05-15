@@ -25,6 +25,9 @@ data/scryfall_cards.json
 data/oracle-cards*.json
 data/default-cards*.json
 data/all-cards*.json
+data/combo.json
+data/commander_spellbook/combo_index.json
+data/commander_spellbook/combo_index_parity.json
 
 # Local/private collection data
 collection/
@@ -39,6 +42,7 @@ Decklists/
 Old Do not use/
 old_do_not_use/
 Files outside/
+ui\Retired UI
 
 # Debug and temp
 debug/
@@ -59,5 +63,10 @@ desktop.ini
 ALPHA TESTING/
 *.zip
 
-# Local dev-only tools
+# Local dev-only tools & notes
 Dev tools/
+
+#Local Dev documentation folders
+docs/dev documentation note/
+docs/Patch notes/
+docs/Combo Match tester/

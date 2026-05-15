@@ -231,3 +231,63 @@ This build passed final fresh-ZIP verification after removing deck\_helper/ as l
 
 Decision: safe for 1–2 trusted alpha testers.
 
+Patch v0.8.0-dev — Commander Spellbook Combo Data Audit
+
+Patch v0.8.1-dev Local Combo Index Builder Test
+Patch v0.8.2-dev — Isolated Combo Matcher
+
+Patch v0.8.2.1-dev — Combo Matcher Reconciliation Debug
+
+Patch v0.8.2.2-dev — Parser Fix Test
+
+Patch v0.8.2.3-dev — Verification Counts:
+
+Patch v0.8.2.4-dev — Filter Parity Counts:
+
+Patch v0.8.2.5-dev — Combo Finder Check Shortcut
+
+Patch v0.8.2.6-dev — Combo Matcher Dashboard Output
+
+Patch v0.8.3-dev — Combo Breakdown Report Test
+
+Patch v0.8.3.1-dev — Deck Section Scope Filter and Stress Test Mode
+
+Patch v0.8.3.2-dev — commander/header detection cleanup
+
+Patch v0.8.3.3-dec — cut section exclusion cleanup
+
+Patch v0.8.3.4-dev — Token Package and Made Cuts Section Cleanup
+
+Patch v0.8.3.5-dev — Combo Breakdown Readiness Polish
+
+Patch v0.8.3.6-dev — Combo Breakdown Display Limits and Summary Polish
+
+Patch v0.8.3.6.1-dev — Version Label Cleanup:
+
+Patch v0.8.4-dev — Combo Awareness Integration Readiness Review
+
+Patch v0.8.5-dev — Isolated Combo Awareness Report Section Generator
+
+Patch v0.8.5.1-dev — Report Section Deduplication and Readability Polish
+
+Patch v0.8.6-dev — Combo Awareness Runtime Config Contract
+
+Patch v0.8.6.1-dev — Combo Awareness Refactor Audit and Split Plan
+
+Patch v0.8.6.2-dev — Combo Awareness Module Split
+Patch v0.8.6.2.1-dev — Module Split Dataclass Hotfix
+
+Patch v0.8.6.2.2-dev — Module Split Import Hotfix
+
+Patch v0.8.6.2.3-dev — Module Split Version Label Cleanup
+Patch v0.8.7-dev — First Guarded Optional main.py Combo Awareness Hook Preview
+Patch v0.8.7.1-dev — Combo debug routing hotfix
+Patch v0.8.7.2-dev — Combo JSON Data Path Cleanup
+
+Patch v0.8.7.2.1-dev — Combo Path Cleanup Version Label Polish
+
+Patch v0.8.7.3-dev — Optional Combo Awareness UI Toggle Preview
+Patch v0.8.7.4-dev — Combo Awareness UI Regression / Output Cleanup Pass
+Patch v0.8.7.4.1-dev — Review Setup Layout Cleanup
+Patch v0.8.7.5-dev — Alpha Feedback UI Triage Pass
+

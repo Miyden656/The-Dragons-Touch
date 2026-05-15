@@ -12,37 +12,15 @@ UI staged state -> guarded confirmation -> subprocess/main.py -> CLI input bridg
 from pathlib import Path
 
 
-COMBO_AWARENESS_ARTIFACT_BY_MODE = {
-    "Disabled": "report_section",
-    "Report section only": "report_section",
-    "Full debug breakdown only": "breakdown",
-    "Both report section and breakdown": "both",
-}
-
-
 def backend_entrypoint_path(state) -> Path:
     """Resolve the backend entrypoint relative to the staged working directory."""
     return Path(state.backend_working_directory) / state.backend_entrypoint
 
 
-def combo_awareness_enabled(state) -> bool:
-    """Return True only when the user explicitly enables combo awareness in the UI."""
-    return getattr(state, "combo_awareness_mode", "Disabled") != "Disabled"
-
-
-def combo_awareness_artifact_value(state) -> str:
-    """Map the user-facing combo awareness selection to the backend artifact value."""
-    mode = getattr(state, "combo_awareness_mode", "Disabled")
-    return COMBO_AWARENESS_ARTIFACT_BY_MODE.get(mode, "report_section")
-
-
 def guarded_command_preview(state) -> str:
     """Build the visible command preview for the guarded bridge."""
     deck_path = state.selected_deck_path if state.selected_deck_path != "No deck file selected" else "No UI deck selected; main.py may prompt interactively"
-    combo_note = "combo awareness disabled"
-    if combo_awareness_enabled(state):
-        combo_note = f"combo awareness={combo_awareness_artifact_value(state)}"
-    return f'py {state.backend_entrypoint}  # guarded run; MTG_DECK_FILE="{deck_path}"; {combo_note}'
+    return f'py {state.backend_entrypoint}  # guarded run; MTG_DECK_FILE="{deck_path}"'
 
 
 def guarded_command_parts(state) -> list[str]:
@@ -52,14 +30,11 @@ def guarded_command_parts(state) -> list[str]:
 
 def environment_values(state) -> dict[str, str]:
     """Return environment values passed to the guarded main.py process."""
-    values = {
+    return {
         "MTG_DECK_FILE": state.selected_deck_path,
         "MTG_BUDGET_NOTE": state.budget_note,
         "MTG_INTENDED_BRACKET": state.intended_bracket,
-        "MTG_COMBO_AWARENESS_ENABLED": "1" if combo_awareness_enabled(state) else "0",
-        "MTG_COMBO_AWARENESS_ARTIFACT": combo_awareness_artifact_value(state),
     }
-    return values
 
 
 def trim_process_output(text: str, limit: int = 6000) -> str:

@@ -293,6 +293,11 @@ class RuntimeConfig:
     collection_file: str = ""
     collection_source_mode: str = "none"
     collection_files: tuple[str, ...] = ()
+    combo_awareness_enabled: bool = False
+    combo_awareness_artifact: str = "report_section"
+    combo_report_section_complete_limit: int = 10
+    combo_report_section_potential_limit: int = 10
+    combo_breakdown_potential_limit: int = 25
 
 
 
@@ -301,6 +306,36 @@ def yes_no_to_bool(value: object, default: bool = False) -> bool:
     if not text:
         return default
     return text in {"y", "yes", "true", "1"}
+
+
+def _int_env(name: str, default: int) -> int:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+def get_combo_awareness_settings_from_env() -> tuple[bool, str, int, int, int]:
+    """Return optional combo-awareness settings.
+
+    v0.8.7-dev keeps combo awareness off by default and does not add a new
+    interactive prompt yet. This preserves the existing UI/CLI bridge. Future UI
+    work can set these environment variables from a visible user toggle.
+    """
+    enabled = yes_no_to_bool(os.environ.get("MTG_COMBO_AWARENESS_ENABLED"), False)
+    artifact = os.environ.get("MTG_COMBO_AWARENESS_ARTIFACT", "report_section").strip().lower() or "report_section"
+    if artifact not in {"report_section", "breakdown", "both"}:
+        artifact = "report_section"
+    return (
+        enabled,
+        artifact,
+        max(0, _int_env("MTG_COMBO_REPORT_SECTION_COMPLETE_LIMIT", 10)),
+        max(0, _int_env("MTG_COMBO_REPORT_SECTION_POTENTIAL_LIMIT", 10)),
+        max(0, _int_env("MTG_COMBO_BREAKDOWN_POTENTIAL_LIMIT", 25)),
+    )
 
 
 
@@ -555,6 +590,11 @@ def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_car
             collection_file=runtime_config.collection_file,
             collection_source_mode=runtime_config.collection_source_mode,
             collection_files=runtime_config.collection_files,
+            combo_awareness_enabled=runtime_config.combo_awareness_enabled,
+            combo_awareness_artifact=runtime_config.combo_awareness_artifact,
+            combo_report_section_complete_limit=runtime_config.combo_report_section_complete_limit,
+            combo_report_section_potential_limit=runtime_config.combo_report_section_potential_limit,
+            combo_breakdown_potential_limit=runtime_config.combo_breakdown_potential_limit,
         )
 
     cut_config = dict(runtime_config.cut_depth_config)
@@ -589,6 +629,11 @@ def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_car
         collection_file=runtime_config.collection_file,
         collection_source_mode=runtime_config.collection_source_mode,
         collection_files=runtime_config.collection_files,
+        combo_awareness_enabled=runtime_config.combo_awareness_enabled,
+        combo_awareness_artifact=runtime_config.combo_awareness_artifact,
+        combo_report_section_complete_limit=runtime_config.combo_report_section_complete_limit,
+        combo_report_section_potential_limit=runtime_config.combo_report_section_potential_limit,
+        combo_breakdown_potential_limit=runtime_config.combo_breakdown_potential_limit,
     )
 
 
@@ -816,6 +861,13 @@ def get_runtime_config() -> RuntimeConfig:
     collection_mode, collection_file, collection_source_mode, collection_files = get_collection_settings_from_user(review_direction)
     budget_note = os.environ.get("MTG_BUDGET_NOTE", "").strip() or "No budget note provided"
     intended_bracket = os.environ.get("MTG_INTENDED_BRACKET", "").strip() or "Not sure yet"
+    (
+        combo_awareness_enabled,
+        combo_awareness_artifact,
+        combo_report_section_complete_limit,
+        combo_report_section_potential_limit,
+        combo_breakdown_potential_limit,
+    ) = get_combo_awareness_settings_from_env()
 
     return RuntimeConfig(
         output_mode=output_mode,
@@ -831,6 +883,11 @@ def get_runtime_config() -> RuntimeConfig:
         collection_file=collection_file,
         collection_source_mode=collection_source_mode,
         collection_files=collection_files,
+        combo_awareness_enabled=combo_awareness_enabled,
+        combo_awareness_artifact=combo_awareness_artifact,
+        combo_report_section_complete_limit=combo_report_section_complete_limit,
+        combo_report_section_potential_limit=combo_report_section_potential_limit,
+        combo_breakdown_potential_limit=combo_breakdown_potential_limit,
     )
 
 
@@ -847,6 +904,10 @@ def print_runtime_config_summary(runtime_config: RuntimeConfig) -> None:
     print(f"Intended bracket: {runtime_config.intended_bracket}")
     print(f"Budget note: {runtime_config.budget_note}")
     print(f"Collection mode: {COLLECTION_MODE_DISPLAY.get(runtime_config.collection_mode, runtime_config.collection_mode)}")
+    if getattr(runtime_config, "combo_awareness_enabled", False):
+        print(f"Combo awareness: enabled, separate artifact = {runtime_config.combo_awareness_artifact}")
+    else:
+        print("Combo awareness: off")
     if runtime_config.collection_mode != "none":
         print(f"Collection source: {COLLECTION_SOURCE_MODE_DISPLAY.get(runtime_config.collection_source_mode, runtime_config.collection_source_mode)}")
         if runtime_config.collection_source_mode == "selected_files":

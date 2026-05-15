@@ -45,10 +45,10 @@ try:
         APP_VERSION, APP_PHASE, BACKEND_STATUS, LOCKED_BACKEND_VERSION,
         OUTPUT_MODE_OPTIONS, REVIEW_DIRECTION_OPTIONS, REVIEW_INTENSITY_OPTIONS, BUILD_UP_MODE_OPTIONS,
         PROMPT_MODE_OPTIONS, INTENDED_BRACKET_OPTIONS, GUIDE_PRESENTATION_OPTIONS,
-        PHILOSOPHY_SUBTYPE_OPTIONS, RUN_DETAIL_OPTIONS, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS, COMBO_AWARENESS_OPTIONS,
+        PHILOSOPHY_SUBTYPE_OPTIONS, RUN_DETAIL_OPTIONS, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS,
         DEFAULT_SELECTED_PHILOSOPHY, DEFAULT_PHILOSOPHY_SUBTYPE, DEFAULT_GUIDE_PRESENTATION,
         DEFAULT_OUTPUT_MODE, DEFAULT_REVIEW_DIRECTION, DEFAULT_REVIEW_INTENSITY, DEFAULT_BUILD_UP_MODE,
-        DEFAULT_PROMPT_MODE, DEFAULT_INTENDED_BRACKET, DEFAULT_COLLECTION_MODE, DEFAULT_COLLECTION_SOURCE_MODE, DEFAULT_COMBO_AWARENESS_MODE,
+        DEFAULT_PROMPT_MODE, DEFAULT_INTENDED_BRACKET, DEFAULT_COLLECTION_MODE, DEFAULT_COLLECTION_SOURCE_MODE,
     )
     from ui.styles.theme import DRAGON_FORGE, ADVENTURERS_MAP, build_main_qss
     from ui.widgets import (
@@ -68,10 +68,10 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
         APP_VERSION, APP_PHASE, BACKEND_STATUS, LOCKED_BACKEND_VERSION,
         OUTPUT_MODE_OPTIONS, REVIEW_DIRECTION_OPTIONS, REVIEW_INTENSITY_OPTIONS, BUILD_UP_MODE_OPTIONS,
         PROMPT_MODE_OPTIONS, INTENDED_BRACKET_OPTIONS, GUIDE_PRESENTATION_OPTIONS,
-        PHILOSOPHY_SUBTYPE_OPTIONS, RUN_DETAIL_OPTIONS, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS, COMBO_AWARENESS_OPTIONS,
+        PHILOSOPHY_SUBTYPE_OPTIONS, RUN_DETAIL_OPTIONS, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS,
         DEFAULT_SELECTED_PHILOSOPHY, DEFAULT_PHILOSOPHY_SUBTYPE, DEFAULT_GUIDE_PRESENTATION,
         DEFAULT_OUTPUT_MODE, DEFAULT_REVIEW_DIRECTION, DEFAULT_REVIEW_INTENSITY, DEFAULT_BUILD_UP_MODE,
-        DEFAULT_PROMPT_MODE, DEFAULT_INTENDED_BRACKET, DEFAULT_COLLECTION_MODE, DEFAULT_COLLECTION_SOURCE_MODE, DEFAULT_COMBO_AWARENESS_MODE,
+        DEFAULT_PROMPT_MODE, DEFAULT_INTENDED_BRACKET, DEFAULT_COLLECTION_MODE, DEFAULT_COLLECTION_SOURCE_MODE,
     )
     from styles.theme import DRAGON_FORGE, ADVENTURERS_MAP, build_main_qss
     from widgets import (
@@ -789,13 +789,12 @@ class MainWindow(QMainWindow):
             f"Prompt mode: {self.state.prompt_mode}\n"
             f"Budget note: {self.state.budget_note}\n"
             f"Intended bracket: {self.state.intended_bracket}\n"
-            f"Combo awareness: {self.state.combo_awareness_mode}\n"
             f"Collection mode: {self.state.collection_mode}\n"
             f"Collection source: {self.state.collection_source_mode}\n"
             "Backend config mapping: staged by guarded bridge when run is confirmed"
         )
 
-    def stage_review_settings(self, output_combo, direction_combo, cut_combo, build_up_combo, prompt_combo, budget_input, intended_bracket_combo, combo_awareness_combo=None, summary_label=None, intensity_meaning_label=None):
+    def stage_review_settings(self, output_combo, direction_combo, cut_combo, build_up_combo, prompt_combo, budget_input, intended_bracket_combo, summary_label=None, intensity_meaning_label=None):
         """Auto-stage Review Setup choices without requiring an Apply button or popup."""
         self.state.output_mode = output_combo.currentText()
         self.state.review_direction = direction_combo.currentText()
@@ -804,8 +803,6 @@ class MainWindow(QMainWindow):
         self.state.prompt_mode = prompt_combo.currentText()
         self.state.budget_note = budget_input.text().strip() or "No budget note provided"
         self.state.intended_bracket = intended_bracket_combo.currentText()
-        if combo_awareness_combo is not None:
-            self.state.combo_awareness_mode = combo_awareness_combo.currentText()
         self.state.bracket = self.state.intended_bracket if self.state.intended_bracket != "Not sure yet" else "Not estimated"
         self.state.status = "Review settings auto-staged"
         if summary_label is not None:
@@ -872,7 +869,6 @@ class MainWindow(QMainWindow):
             f"- Prompt mode: {self.state.prompt_mode}\n"
             f"- Budget note: {self.state.budget_note}\n"
             f"- Intended bracket: {self.state.intended_bracket}\n"
-            f"- Combo awareness: {self.state.combo_awareness_mode}\n"
             f"- Collection mode: {self.state.collection_mode}\n"
             f"- Collection source: {self.state.collection_source_mode}\n\n"
             "Philosophy lens\n"
@@ -941,9 +937,6 @@ class MainWindow(QMainWindow):
             f"- prompt_mode -> {self.state.prompt_mode}\n"
             f"- budget_note -> {self.state.budget_note}\n"
             f"- intended_bracket -> {self.state.intended_bracket}\n"
-            f"- combo_awareness_mode -> {self.state.combo_awareness_mode}\n"
-            "- combo_awareness_default -> Disabled; user opt-in required\n"
-            "- combo_awareness_backend_behavior -> separate artifact only; no normal report injection\n"
             "- table_boundary_checkbox -> removed in v0.6.7.9.12; intended bracket is the staged value\n"
             "- collection_handoff_checkbox -> removed in v0.6.7.9.12; Collection Source page is the staged value\n\n"
             "Philosophy Contract\n"
@@ -1009,7 +1002,6 @@ class MainWindow(QMainWindow):
             f"- review_intensity -> {self.state.cut_depth}\n"
             f"- intended_bracket -> {self.state.intended_bracket}\n"
             f"- collection_mode -> {self.state.collection_mode}\n"
-            f"- combo_awareness_mode -> {self.state.combo_awareness_mode}\n"
             f"- collection_source_detail -> {source_detail}\n\n"
             "Bridge Safety Gates For A Later Patch\n"
             "- require visible command preview before execution -> True\n"
@@ -1018,8 +1010,6 @@ class MainWindow(QMainWindow):
             "- require output folder handling plan -> True\n"
             "- require error capture and user-readable failure message -> True\n"
             "- guarded_execution_bridge_preview_ready -> True\n"
-            f"- combo_awareness_mode -> {self.state.combo_awareness_mode}\n"
-            "- combo_awareness_optional -> True\n"
             "- ready_for_actual_qprocess_execution -> guarded confirmation required"
         )
 
@@ -1093,9 +1083,6 @@ class MainWindow(QMainWindow):
             "Execution Readiness Checklist\n"
             f"- deck_file_selected_for_ui_context -> {deck_ready}\n"
             f"- selected_deck_handoff_env -> {self.state.selected_deck_path if deck_ready else 'not set; run blocked until a deck is selected'}\n"
-            f"- combo_awareness_mode -> {self.state.combo_awareness_mode}\n"
-            f"- combo_awareness_env_enabled -> {backend_runner.combo_awareness_enabled(self.state)}\n"
-            f"- combo_awareness_env_artifact -> {backend_runner.combo_awareness_artifact_value(self.state)}\n"
             f"- companion_preview_handoff_status -> {'detected for backend validation' if self.state.companion_detected else 'no companion detected in UI preview'}\n"
             "- deck_file_required_by_guarded_run -> True for UI handoff; main.py receives MTG_DECK_FILE\n"
             f"- runtime_contract_visible -> {runtime_contract_ready}\n"
@@ -1385,7 +1372,6 @@ class MainWindow(QMainWindow):
             f"{self.state.last_guarded_run_stderr}\n\n"
             f"{self.report_output_summary_text()}\n"
             "Boundary\n"
-            "- Combo awareness is optional, local-only, and writes separate artifacts when enabled.\n"
             "- Commander Spellbook/API calls are not part of this run path.\n"
             "- The UI detects report file paths and folders but does not parse report contents yet.\n"
             "- CLI/main.py remains the source of truth.\n"
@@ -1444,7 +1430,6 @@ class MainWindow(QMainWindow):
             f"Entrypoint:\n{entrypoint_path}\n\n"
             f"Command preview:\n{self.guarded_command_preview()}\n\n"
             f"Selected deck handoff (MTG_DECK_FILE):\n{deck_note}\n\n"
-            f"Combo awareness mode:\n{self.state.combo_awareness_mode}\n\n"
             "Safety boundary:\n"
             "- CLI/main.py remains the source of truth.\n"
             "- The UI does not call Commander Spellbook or any external API here.\n"
@@ -1460,7 +1445,6 @@ class MainWindow(QMainWindow):
             f"- If collection is enabled and the known CLI path reaches Collection Source, the UI will send collection source {self.cli_collection_source_input_value()} for {self.state.collection_source_mode}.\n"
             "- Specific philosophy subtypes are answered only when the optional subtype dropdown is set away from None / top-level only.\n"
             "- The selected Deck Selection file is handed to main.py through MTG_DECK_FILE.\n"
-            "- Combo awareness is passed by environment variable only when explicitly enabled in Review Setup.\n"
             "- Collection folder/file readiness is normalized before the run: Entire collection folder uses the staged folder/default backend path, while Select collection files sends only explicit selected file payloads.\n"
             "- stdin is closed after the known answers, so the next unknown interactive prompt may produce EOF and be captured safely.\n\n"
             "Run py main.py now?"
@@ -1570,37 +1554,38 @@ class MainWindow(QMainWindow):
         return backend_runner.trim_process_output(text, limit=limit)
 
     def combo_tracker_preview_text(self):
-        """Preview the optional local Commander Spellbook combo-awareness handoff. No API calls."""
+        """Preview the future optional Commander Spellbook combo tracker. No API calls."""
         deck_path = self.state.selected_deck_path if self.state.selected_deck_path != "No deck file selected" else "None"
         deck_loaded = deck_path != "None"
         deck_signature_preview = "No deck file loaded"
         if deck_loaded:
             deck_signature_preview = f"{Path(deck_path).name} | size_preview={self.state.deck_size} | commander={self.state.commander}"
 
-        artifact_note = backend_runner.combo_awareness_artifact_value(self.state)
-        enabled = backend_runner.combo_awareness_enabled(self.state)
         return (
-            "Optional Combo Awareness Preview\n"
-            "- Current integration target -> local Commander Spellbook combo index\n"
+            "Optional Combo Tracker Preview\n"
+            "- Future integration target -> Commander Spellbook API\n"
+            "- Current patch behavior -> placeholder only\n"
             "- External API calls -> disabled\n"
-            "- User opt-in required -> True\n"
-            "- Default behavior -> Disabled\n"
-            "- Normal report injection -> disabled\n"
-            "- Generated output -> separate combo-awareness artifact(s) only\n\n"
-            "Current UI Selection\n"
-            f"- combo_awareness_mode -> {self.state.combo_awareness_mode}\n"
-            f"- enabled_for_next_guarded_run -> {enabled}\n"
-            f"- backend_artifact_mode -> {artifact_note}\n\n"
-            "When Enabled\n"
-            "- report_section -> writes normal/combo_awareness_report_section.md\n"
-            "- breakdown -> writes debug/combo_awareness_breakdown.md\n"
-            "- both -> writes both separate artifacts\n"
-            "- missing combo cards remain findings, not automatic recommendations\n\n"
+            "- Automatic combo lookup during normal deck review -> disabled\n"
+            "- User opt-in required -> True\n\n"
+            "Intended Future Behavior\n"
+            "- Combo lookup should run only when the user clicks a dedicated button.\n"
+            "- If the decklist has not changed since the last combo check, the button should be disabled or report deck unchanged.\n"
+            "- Local state should track the last checked decklist signature/hash.\n"
+            "- The UI should avoid repeated API pings for the same unchanged decklist.\n"
+            "- Normal deck analysis should remain separate from combo lookup.\n\n"
+            "Future Result Targets\n"
+            "- total_combos_found\n"
+            "- combo names\n"
+            "- combo pieces\n"
+            "- combo steps, if returned by the API\n"
+            "- whether each combo is fully contained within the current deck\n"
+            "- optional notes for partial/missing pieces later\n\n"
             "Current Deck Change Preview\n"
             f"- deck_loaded -> {deck_loaded}\n"
             f"- deck_signature_preview -> {deck_signature_preview}\n"
-            "- local_combo_index_expected -> data/commander_spellbook/combo_index.json\n"
-            "- raw_combo_json_expected -> data/combo.json\n"
+            "- last_combo_check_signature -> Not stored in this patch\n"
+            "- combo_check_button_state -> Disabled / placeholder in this patch\n"
             "- commander_spellbook_request_allowed -> False"
         )
 
@@ -1650,7 +1635,6 @@ class MainWindow(QMainWindow):
         ordered_markers = [
             ("_deck_report", 10),
             ("_user_guided_prompt", 20),
-            ("combo_awareness_report_section", 30),
             ("_legality_debug", 110),
             ("_strategy_debug", 120),
             ("_bracket_debug", 130),
@@ -1658,8 +1642,6 @@ class MainWindow(QMainWindow):
             ("_replacement_prompt_debug", 150),
             ("_diagnostics_debug", 160),
             ("_full_debug_report", 190),
-            ("combo_awareness_breakdown", 200),
-            ("combo_awareness_error", 210),
         ]
         for marker, rank in ordered_markers:
             if marker in lower:
@@ -1706,12 +1688,6 @@ class MainWindow(QMainWindow):
             role = "Replacement Debug"
         elif "_diagnostics_debug" in lower:
             role = "Diagnostics Debug"
-        elif "combo_awareness_report_section" in lower:
-            role = "Combo Awareness Section"
-        elif "combo_awareness_breakdown" in lower:
-            role = "Combo Awareness Breakdown"
-        elif "combo_awareness_error" in lower:
-            role = "Combo Awareness Error"
         else:
             # Fallback keeps the label readable without forcing horizontal scrolling.
             stem = Path(path_text).stem

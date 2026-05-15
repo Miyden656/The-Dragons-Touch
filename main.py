@@ -52,9 +52,10 @@ from reports.batch_aggregate import BatchAggregateWriter
 from reports.debug_sections import DebugSectionPaths, write_debug_sections
 from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
+from combo_awareness.main_hook import write_optional_combo_awareness_artifacts
 
 
-VERSION_LABEL = "v0.6.8.5 — Stable v0.6 Lock"
+VERSION_LABEL = "v0.8.7-dev — Optional Combo Awareness Hook Preview"
 
 
 def build_analysis_context(
@@ -180,6 +181,19 @@ def process_single_deck(
         ]
         written_paths.extend(section_paths)
         written_paths.append(merge_debug_reports(folders.debug, parsed_deck.safe_commander_name, section_paths))
+
+    # v0.8.7-dev guarded preview: combo awareness is optional and off by default.
+    # When explicitly enabled by runtime config, it writes separate artifacts only.
+    # It does not inject into normal reports and it must not break normal output.
+    written_paths.extend(
+        write_optional_combo_awareness_artifacts(
+            deck_file=deck_file,
+            runtime_config=resolved_config,
+            normal_folder=folders.normal,
+            debug_folder=folders.debug,
+            scryfall_lookup=scryfall_lookup,
+        )
+    )
 
     assert_output_routing(written_paths, folders.normal, folders.debug)
     return written_paths
