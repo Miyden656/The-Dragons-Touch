@@ -34,7 +34,7 @@ def build_run_analysis_page(window):
     """Build the Run Analysis page while keeping guarded-run behavior on MainWindow."""
     page, layout = window.page_container(
         "Run Analysis",
-        f"Run the selected deck through the guarded backend. {APP_VERSION} keeps User-Facing Mode clean while Dev-Facing Mode preserves diagnostics."
+        f"Run the selected deck through the guarded backend. {APP_VERSION} keeps the normal view clean and shows the helper-dragon loading view only during active runs."
     )
     body = QWidget(); body_layout = QHBoxLayout(body); body_layout.setContentsMargins(0, 0, 0, 0); body_layout.setSpacing(14)
 
@@ -57,7 +57,7 @@ def build_run_analysis_page(window):
 
     run_card = ReportCard("Ready to Run", window.theme, badges=[("Guarded", "protected"), ("Optional combo", "manual")])
     run_card.body.addWidget(window.default_note(
-        window.interface_mode_run_analysis_note() + " Combo Awareness only runs if you enabled it in Review Setup."
+        "Run Analysis uses the existing guarded main.py workflow. Combo Awareness only runs if you enabled it in Review Setup."
     ))
     run_guarded_btn = QPushButton("Run Analysis")
     run_guarded_btn.setMinimumHeight(58)
@@ -100,29 +100,20 @@ def build_run_analysis_page(window):
     window.run_config_preview_box = preview
     summary_card.body.addWidget(preview)
     summary_card.body.addWidget(window.default_note("This is a compact confirmation of the staged settings that will be sent to the guarded backend."))
-    summary_card.body.addWidget(window.default_note(window.interface_mode_summary_text()))
     r_layout.addWidget(summary_card, stretch=0)
 
     advanced_toggle = QPushButton("Show Advanced Run Details")
     advanced_toggle.setCheckable(True)
     advanced_toggle.setMinimumHeight(42)
-    advanced_toggle.setChecked(window.is_dev_mode())
-    advanced_toggle.setText("Hide Advanced Run Details" if window.is_dev_mode() else "Show Advanced Run Details")
     r_layout.addWidget(advanced_toggle)
 
     advanced_container = QWidget()
     advanced_layout = QVBoxLayout(advanced_container)
     advanced_layout.setContentsMargins(0, 0, 0, 0)
     advanced_layout.setSpacing(14)
-    advanced_container.setVisible(window.is_dev_mode())
+    advanced_container.setVisible(False)
     window.run_advanced_details_container = advanced_container
     window.run_advanced_details_toggle = advanced_toggle
-    # v0.8.9.7 user/dev visibility boundary
-    if hasattr(window, 'is_dev_facing_mode'):
-        advanced_toggle.setVisible(window.is_dev_facing_mode())
-        advanced_container.setVisible(window.is_dev_facing_mode())
-        advanced_toggle.setChecked(window.is_dev_facing_mode())
-        advanced_toggle.setText('Hide Advanced Run Details' if window.is_dev_facing_mode() else 'Show Advanced Run Details')
 
     bridge_status = ReportCard("Bridge Status", window.theme, badges=[("main.py guarded", "manual"), ("User-confirmed only", "protected")])
     bridge_status_box = window.readonly_text_box(
@@ -245,7 +236,7 @@ def build_run_analysis_page(window):
     report_output_card.body.addWidget(window.default_note("Folder buttons use detected paths from the backend Files written block. Report contents are viewed in Report Viewer."))
     detail_stack.addWidget(report_output_card)
 
-    boundary_card = ReportCard("Safety Boundary and Future Stages", window.theme, badges=[("v0.8.9.6", "manual")])
+    boundary_card = ReportCard("Safety Boundary and Future Stages", window.theme, badges=[("v0.8.8.1", "manual")])
     stage_text = (
         "Future Backend Bridge Stages\n"
         "1. Runtime config contract is visible and refreshes live.\n"
@@ -277,37 +268,40 @@ def build_run_analysis_page(window):
     run_scroll.setWidget(body)
     run_content_stack.addWidget(run_scroll)
 
+
     running_panel = TexturedPanel(window.theme, kind="iron", glow=True)
     add_shadow(running_panel, blur=34, y=10)
     running_layout = QVBoxLayout(running_panel)
-    running_layout.setContentsMargins(14, 14, 14, 14)
+    running_layout.setContentsMargins(0, 0, 0, 0)
     running_layout.setSpacing(0)
 
     # Active-run loading canvas only. The normal Run Analysis page remains the default when idle.
-    # This version keeps a single outer loading frame and treats the ForgeOrb as the full
-    # background visual, with only the title/status bands overlaid in the foreground.
-    loading_stage = QWidget()
-    loading_stage.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    loading_stage_grid = QGridLayout(loading_stage)
-    loading_stage_grid.setContentsMargins(0, 0, 0, 0)
-    loading_stage_grid.setSpacing(0)
+    # The ForgeOrb is treated as a full-background loading visual, with title/status overlays
+    # placed above it so the run state feels intentional and readable.
+    running_orb_panel = TexturedPanel(window.theme, kind="iron_2", glow=True, corners=False)
+    running_orb_panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    running_orb_panel.setMinimumHeight(720)
+
+    running_overlay_grid = QGridLayout(running_orb_panel)
+    running_overlay_grid.setContentsMargins(0, 0, 0, 0)
+    running_overlay_grid.setSpacing(0)
 
     running_orb = ForgeOrb(window.theme)
     running_orb.setMinimumSize(1200, 720)
     running_orb.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    loading_stage_grid.addWidget(running_orb, 0, 0)
+    running_overlay_grid.addWidget(running_orb, 0, 0)
 
     running_overlay = QWidget()
     running_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, True)
     running_overlay.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     running_overlay_layout = QVBoxLayout(running_overlay)
-    running_overlay_layout.setContentsMargins(34, 28, 34, 28)
+    running_overlay_layout.setContentsMargins(26, 24, 26, 24)
     running_overlay_layout.setSpacing(12)
 
     title_band = TexturedPanel(window.theme, kind="iron", glow=True, corners=True)
-    title_band.setMaximumHeight(88)
+    title_band.setMaximumHeight(92)
     title_band_layout = QVBoxLayout(title_band)
-    title_band_layout.setContentsMargins(18, 10, 18, 10)
+    title_band_layout.setContentsMargins(18, 12, 18, 12)
     running_title = QLabel("Running Analysis")
     running_title.setObjectName("pageTitle")
     running_title.setAlignment(Qt.AlignCenter)
@@ -317,9 +311,9 @@ def build_run_analysis_page(window):
     running_overlay_layout.addStretch(1)
 
     status_band = TexturedPanel(window.theme, kind="iron", glow=True, corners=True)
-    status_band.setMaximumHeight(76)
+    status_band.setMaximumHeight(90)
     status_band_layout = QVBoxLayout(status_band)
-    status_band_layout.setContentsMargins(18, 10, 18, 10)
+    status_band_layout.setContentsMargins(18, 12, 18, 12)
     running_status = QLabel("The helper dragon is working through the guarded backend. Report Viewer will open as soon as the run completes successfully.")
     running_status.setObjectName("helperText")
     running_status.setAlignment(Qt.AlignCenter)
@@ -328,8 +322,8 @@ def build_run_analysis_page(window):
     status_band_layout.addWidget(running_status)
     running_overlay_layout.addWidget(status_band, stretch=0)
 
-    loading_stage_grid.addWidget(running_overlay, 0, 0)
-    running_layout.addWidget(loading_stage, stretch=1)
+    running_overlay_grid.addWidget(running_overlay, 0, 0)
+    running_layout.addWidget(running_orb_panel, stretch=1)
 
     run_content_stack.addWidget(running_panel)
 

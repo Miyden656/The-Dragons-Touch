@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""v0.8.7.2.1-dev — markdown/report formatting for combo awareness.
+"""v0.8.10.1-alpha — markdown/report formatting for combo awareness.
 
 Scope guard: reporting split only; no wording/behavior changes, no app integration.
 """
@@ -50,7 +50,7 @@ def build_markdown_summary(
     collection_loaded: bool,
 ) -> str:
     lines: list[str] = [
-        "# v0.8.7.2.1-dev — Isolated Combo Matcher Summary",
+        "# v0.8.10.1-alpha — Isolated Combo Matcher Summary",
         "",
         "## Scope Guard",
         "",
@@ -125,7 +125,7 @@ def build_markdown_summary(
         "- These are combo-awareness findings, not automatic recommendations.",
         "- Missing combo cards should not become replacement suggestions unless the user later selects combo optimization.",
         "- Template/state requirements still need manual review before a combo is treated as reliable.",
-        "- This isolated matcher is a stepping stone toward a later Breakdown Report.",
+        "- This local matcher is a stepping stone toward a later Breakdown Report.",
         "",
     ])
     return "\n".join(lines)
@@ -321,12 +321,15 @@ def build_combo_report_section_markdown(
     collection_loaded: bool,
     max_complete: int = 10,
     max_collection_potential: int = 10,
+    standalone_artifact: bool = True,
 ) -> str:
-    """Build a concise v0.8.7.2.1-dev combo awareness section for future reports.
+    """Build a concise v0.8.10.1-alpha combo awareness section.
 
-    This is still an isolated artifact. It is not injected into the normal Dragon's
-    Touch report yet. It intentionally uses only strict Dragon's Touch findings and
-    avoids parity/raw debug counts.
+    In standalone artifact mode, this writes the separate report-section file.
+    In embedded mode, the same concise user-facing section can be appended to the
+    normal Dragon's Touch deck report after explicit user opt-in.
+    It intentionally uses only strict Dragon's Touch findings and avoids
+    parity/raw debug counts.
     """
     complete_results = strict_summary.complete_combos
     prioritized_potential_results = prioritize_potential_results(strict_summary.one_card_away_combos)
@@ -342,19 +345,34 @@ def build_combo_report_section_markdown(
         else grouped_collection_potentials[:max_collection_potential]
     )
 
-    lines: list[str] = [
-        "# v0.8.7.2.1-dev — Isolated Combo Awareness Report Section",
-        "",
-        "## Scope Guard",
-        "",
-        "- This is a standalone report-section draft only.",
-        "- It was not inserted into a normal Dragon's Touch report.",
-        "- No API calls were made.",
-        "- `main.py`, the PySide6 UI, and normal report generation were not changed.",
-        "- Findings are informational by default, not automatic recommendations.",
-        "",
-        "## Combo Awareness",
-        "",
+    if standalone_artifact:
+        lines: list[str] = [
+            "# v0.8.10.1-alpha — Combo Awareness Report Section",
+            "",
+            "## Scope Guard",
+            "",
+            "- This is a standalone report-section artifact.",
+            "- The same concise section may also be appended to the normal Dragon's Touch report when the user opts into report-section mode.",
+            "- No API calls were made.",
+            "- Findings are informational by default, not automatic recommendations.",
+            "- For report-section modes, this concise Combo Awareness section is embedded in the normal deck report for AI handoff.",
+            "",
+            "## Combo Awareness",
+            "",
+        ]
+    else:
+        lines = [
+            "",
+            "---",
+            "",
+            "## Combo Awareness",
+            "",
+            "_This optional section was added because Combo Awareness was enabled for this run._",
+            "_Findings are informational by default and are not automatic card recommendations._",
+            "",
+        ]
+
+    lines.extend([
         f"Deck checked: `{deck.path}`",
         f"Commander(s): {', '.join(deck.commander_names) if deck.commander_names else 'Not detected'}",
         f"Commander identity: {identity_to_string(commander_identity) if commander_identity is not None else 'Unavailable/not applied'}",
@@ -362,13 +380,16 @@ def build_combo_report_section_markdown(
         "### Combo Summary",
         "",
         f"- Infinite combos found in deck: {len(strict_summary.complete_combos):,}",
+        f"- Relevant potential combos found: {len(strict_summary.one_card_away_combos):,}",
         f"- Dragon's Touch Potential Combos: {len(strict_summary.one_card_away_combos):,}",
-    ]
+    ])
 
     if collection_loaded:
         lines.append(f"- Collection-completable potential combos: {len(collection_potential_results):,}")
+        lines.append(f"- Collection completion check: {len(collection_potential_results):,} of {len(strict_summary.one_card_away_combos):,} relevant potential combo(s) can be completed from the loaded collection files.")
     else:
         lines.append("- Collection-completable potential combos: collection files not loaded")
+        lines.append("- Collection completion check: unavailable because collection files were not loaded for Combo Awareness.")
 
     lines.extend([
         "",
@@ -425,6 +446,65 @@ def build_combo_report_section_markdown(
 
     return "\n".join(lines)
 
+
+def build_combo_ai_handoff_prompt_addendum(
+    *,
+    deck: DeckData,
+    strict_summary: MatchSummary,
+    commander_identity: set[str] | None,
+    collection_loaded: bool,
+) -> str:
+    """Build a self-contained AI prompt addendum for opted-in Combo Awareness.
+
+    This is appended to the generated user-guided prompt only when the user
+    selected a report-section Combo Awareness mode. It tells the reviewing AI to
+    use the embedded Combo Awareness section in the normal deck report instead
+    of asking the user for separate combo artifacts.
+    """
+    collection_potential_results = [
+        result for result in strict_summary.one_card_away_combos
+        if _result_has_collection_source(result)
+    ]
+
+    lines: list[str] = [
+        "",
+        "---",
+        "",
+        "## Combo Awareness AI Handoff Addendum",
+        "",
+        "Combo Awareness was enabled for this Dragon's Touch run.",
+        "",
+        "The normal deck report already includes an embedded **Combo Awareness** section. Do **not** require the pilot to upload or paste `combo_awareness_report_section.md` or `combo_awareness_breakdown.md` before continuing the guided review.",
+        "",
+        "### Combo Awareness Counts to Use",
+        "",
+        f"- Commanders checked: {', '.join(deck.commander_names) if deck.commander_names else 'Not detected'}",
+        f"- Commander identity used: {identity_to_string(commander_identity) if commander_identity is not None else 'Unavailable/not applied'}",
+        f"- Infinite combos already in deck: {len(strict_summary.complete_combos):,}",
+        f"- Relevant potential combos found: {len(strict_summary.one_card_away_combos):,}",
+    ]
+
+    if collection_loaded:
+        lines.append(f"- Collection-completable potential combos: {len(collection_potential_results):,}")
+        lines.append(f"- Collection completion check: {len(collection_potential_results):,} of {len(strict_summary.one_card_away_combos):,} relevant potential combo(s) can be completed from the loaded collection files.")
+    else:
+        lines.append("- Collection-completable potential combos: collection files not loaded")
+        lines.append("- Collection completion check: unavailable because collection files were not loaded for Combo Awareness.")
+
+    lines.extend([
+        "",
+        "### How the Reviewing Assistant Should Use This",
+        "",
+        "1. Treat Combo Awareness as context, not as automatic card recommendations.",
+        "2. If the pilot welcomes combos, use the embedded Combo Awareness section to discuss confirmed combos, near-combos, missing pieces, and collection-completable options.",
+        "3. If the pilot dislikes or wants to avoid combos, use this context to avoid accidentally recommending cards that complete unwanted combos.",
+        "4. If the pilot's answers conflict with the combo findings, the pilot's stated table intent wins.",
+        "5. The full combo breakdown artifact is optional/dev-facing support. Do not require it for the normal interactive review unless the pilot asks for deeper combo troubleshooting.",
+        "",
+    ])
+
+    return "\n".join(lines)
+
 def build_combo_breakdown_markdown(
     *,
     deck: DeckData,
@@ -476,7 +556,7 @@ def build_combo_breakdown_markdown(
     )
 
     lines: list[str] = [
-        "# v0.8.7.2.1-dev — Commander Spellbook Combo Awareness Breakdown",
+        "# v0.8.10.1-alpha — Commander Spellbook Combo Awareness Breakdown",
         "",
         "## Scope Guard",
         "",
@@ -625,9 +705,13 @@ def build_combo_breakdown_markdown(
         f"- Non-collection potential combos: {len(non_collection_potential_results):,}.",
         "- Verify template/state requirements before treating a combo as actually executable in-game.",
         "- Check whether your playgroup is comfortable with known infinite combos before adding missing pieces.",
-        "- This v0.8.7.2.1-dev breakdown should remain isolated until a later report integration patch intentionally connects it.",
+        "- This v0.8.10.1-alpha breakdown should remain isolated until a later report integration patch intentionally connects it.",
         "",
     ])
 
     return "\n".join(lines)
 
+
+
+# v0.8.10.1-alpha handoff polish note retained for future prompt/report wording.
+COMBO_AI_HANDOFF_POLISH_NOTE = 'The embedded Combo Awareness section in the deck report is the source of truth for normal AI handoff. Do not require the user to attach combo_awareness_report_section.md or combo_awareness_breakdown.md unless troubleshooting.'

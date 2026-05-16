@@ -290,4 +290,78 @@ Patch v0.8.7.3-dev — Optional Combo Awareness UI Toggle Preview
 Patch v0.8.7.4-dev — Combo Awareness UI Regression / Output Cleanup Pass
 Patch v0.8.7.4.1-dev — Review Setup Layout Cleanup
 Patch v0.8.7.5-dev — Alpha Feedback UI Triage Pass
+Patch v0.8.8-dev — Combo Awareness UI Integration + Alpha Feedback Checkpoint
+Patch v0.8.8.1-dev — Alpha Feedback Run Analysis Streamlining Pass
+
+Patch v0.8.8.2 Run Analysis loading handoff polish
+
+Patch v0.8.8.2.1-dev — Run Analysis Loading View Cleanup
+
+Patch v0.8.8.2.2-dev — Run Analysis Loading Canvas Final Cleanup
+
+Patch v0.8.8.2.3-dev — Loading Canvas Cleanup Script Hotfix
+Patch v0.8.8.2.4-dev — Run Analysis Loading View Targeted Cleanup
+
+Patch v0.8.8.2.5-dev — Run Analysis Loading Canvas Fit Cleanup
+Patch v0.8.8.2.6-dev — Run Analysis Full Loading Canvas Polish
+Patch v0.8.8.2.7-dev — Run Analysis Loading Canvas Overlay Cleanup
+
+Patch v0.8.8.2.8-dev — Run Analysis Loading Overlay Text Polish
+
+Patch v0.8.8.2.9-dev — Run Analysis Loading Frame Polish
+Patch v0.8.8.2.10-dev — Run Analysis Loading Single-Frame Cleanup
+
+Patch v0.8.8.3-dev — Run Analysis / Combo Awareness Regression Checkpoint
+
+Patch v0.8.8.4-dev — Alpha Onboarding / Navigation Clarity Pass
+Patch v0.8.8.4.1-dev — Alpha Onboarding Visibility Hotfix: Fail
+Patch v0.8.8.4.2-dev — Deck Selection Syntax Hotfix
+
+Patch v0.8.8.6-dev — Settings / Collection Source Navigation Review
+Patch v0.8.8.6.1-dev — Collection Source Syntax Hotfix
+Patch v0.8.8.7-dev — Alpha UI Feedback Cleanup Checkpoint
+Patch v0.8.9-dev — Opt-In Combo Awareness Deck Report Insertion Planning
+
+Patch v0.8.9.1-dev — Locate normal deck report insertion point
+
+Patch v0.8.9.2-dev — Add Opt-In Combo Awareness Report Insertion
+Patch v0.8.9.3-dev — Combo Awareness Report Insertion Regression Checkpoint
+
+Patch v0.8.9.4-dev — User-Facing / Dev-Facing Mode Split Planning
+Patch v0.8.9.5-dev — User/Dev Mode UI Contract
+
+Patch v0.8.9.6-dev — User/Dev Mode Toggle Implementation Preview
+
+Patch v0.8.9.6.1-dev introduced a missing constants import error.
+
+Patch v0.8.9.6.2-dev — Launch fixed
+
+Patch v0.8.9.6.3-dev — Interface Mode Current Mode Line Removal
+
+Patch v0.8.9.7-dev — User-Facing Mode Cleanup + User/Dev Regression Notes
+
+Patch v0.8.9.8-dev — Dev-Facing Protection Boundary Notes
+
+Patch v0.8.9.8.1-dev — Dev Missing constant hotfix 
+
+Patch v0.8.9.8.2-dev — User Dev Mode Import Cleanup hotfix
+
+Patch v0.8.9.9-dev — Combo Awareness / Report Viewer Final Regression + Cleanup
+Patch v0.8.9.9.1-dev — Hotfix
+
+Patch v0.8.9.10-dev — Combo Awareness AI Handoff Polish + Final Report Viewer Regression
+
+Patch v0.8.9.10.1-dev — Combo Awareness AI Handoff Polish + Final Report Viewer Regression Hotfix
+
+Patch v0.8.9.11-dev — Stable v0.8 Candidate Cleanup
+
+Patch v0.8.9.12-dev — Stable v0.8 Full Regression Pass
+Patch v0.8.10-dev — Stable v0.8 Lock
+Patch v0.8.10.1-alpha — Alpha ZIP Handoff Cleanup and Smoke Test
+
+
+
+
+
+
 

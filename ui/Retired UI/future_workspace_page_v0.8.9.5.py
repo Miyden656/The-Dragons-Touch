@@ -7,34 +7,16 @@ deferred features.
 
 try:
     from PySide6.QtCore import Qt
-    from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+    from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
-    from ui.constants import (
-        APP_PHASE,
-        APP_VERSION,
-        LOCKED_BACKEND_VERSION,
-        DEV_MODE_PROTECTION_NOTE,
-        INTERFACE_MODE_OPTIONS,
-        INTERFACE_MODE_HELP_TEXT,
-        USER_FACING_MODE_HELP_TEXT,
-        DEV_FACING_MODE_HELP_TEXT,
-    )
+    from ui.constants import APP_PHASE, APP_VERSION, LOCKED_BACKEND_VERSION
     from ui.styles.theme import ADVENTURERS_MAP, DRAGON_FORGE
     from ui.widgets import add_shadow, ReportCard, SmallStat, TexturedPanel
 except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
     from PySide6.QtCore import Qt
-    from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+    from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
-    from constants import (
-        APP_PHASE,
-        APP_VERSION,
-        LOCKED_BACKEND_VERSION,
-        DEV_MODE_PROTECTION_NOTE,
-        INTERFACE_MODE_OPTIONS,
-        INTERFACE_MODE_HELP_TEXT,
-        USER_FACING_MODE_HELP_TEXT,
-        DEV_FACING_MODE_HELP_TEXT,
-    )
+    from constants import APP_PHASE, APP_VERSION, LOCKED_BACKEND_VERSION
     from styles.theme import ADVENTURERS_MAP, DRAGON_FORGE
     from widgets import add_shadow, ReportCard, SmallStat, TexturedPanel
 
@@ -67,7 +49,7 @@ def build_settings_page(host):
     self = host
     page, layout = self.page_container(
         "Settings",
-        "Theme options, interface mode, alpha status, deferred scope, and checkpoint notes for the modular v0.8 build."
+        "Theme options, alpha status, deferred scope, and checkpoint notes for the modular v0.7 build."
     )
     scroll, content = self.scroll_content()
     body = TexturedPanel(self.theme, kind="iron", glow=False)
@@ -94,30 +76,6 @@ def build_settings_page(host):
         paper=True
     ))
     b_layout.addWidget(theme_card)
-
-    interface_card = ReportCard("Interface Mode", self.theme, badges=[("Default: User", "primary"), ("Developer / Testing", "manual")])
-    interface_row = QHBoxLayout()
-    interface_label = QLabel("Mode")
-    interface_label.setObjectName("helperText")
-    interface_combo = QComboBox()
-    interface_combo.addItems(INTERFACE_MODE_OPTIONS)
-    interface_combo.setCurrentText(self.state.interface_mode)
-    interface_combo.setMinimumWidth(260)
-    self.configure_combo_popup(interface_combo)
-    interface_combo.currentTextChanged.connect(self.stage_interface_mode)
-    self.interface_mode_combo = interface_combo
-    interface_row.addWidget(interface_label)
-    interface_row.addWidget(interface_combo)
-    interface_row.addStretch(1)
-    interface_card.body.addLayout(interface_row)
-    interface_card.body.addWidget(self.default_note(INTERFACE_MODE_HELP_TEXT))
-    interface_card.body.addWidget(self.default_note(DEV_MODE_PROTECTION_NOTE))
-    interface_card.body.addWidget(self.make_text(
-        f"User-Facing Mode: {USER_FACING_MODE_HELP_TEXT}\n\n"
-        f"Dev-Facing Mode: {DEV_FACING_MODE_HELP_TEXT}",
-        paper=True
-    ))
-    b_layout.addWidget(interface_card)
 
     prefs = ReportCard("UI Preferences Checkpoint", self.theme, badges=[("Future controls", "manual")])
     prefs_box = self.readonly_text_box(

@@ -45,11 +45,10 @@ try:
         APP_VERSION, APP_PHASE, BACKEND_STATUS, LOCKED_BACKEND_VERSION,
         OUTPUT_MODE_OPTIONS, REVIEW_DIRECTION_OPTIONS, REVIEW_INTENSITY_OPTIONS, BUILD_UP_MODE_OPTIONS,
         PROMPT_MODE_OPTIONS, INTENDED_BRACKET_OPTIONS, GUIDE_PRESENTATION_OPTIONS,
-        PHILOSOPHY_SUBTYPE_OPTIONS, RUN_DETAIL_OPTIONS, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS, COMBO_AWARENESS_OPTIONS, INTERFACE_MODE_OPTIONS, DEFAULT_INTERFACE_MODE,
+        PHILOSOPHY_SUBTYPE_OPTIONS, RUN_DETAIL_OPTIONS, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS, COMBO_AWARENESS_OPTIONS,
         DEFAULT_SELECTED_PHILOSOPHY, DEFAULT_PHILOSOPHY_SUBTYPE, DEFAULT_GUIDE_PRESENTATION,
         DEFAULT_OUTPUT_MODE, DEFAULT_REVIEW_DIRECTION, DEFAULT_REVIEW_INTENSITY, DEFAULT_BUILD_UP_MODE,
         DEFAULT_PROMPT_MODE, DEFAULT_INTENDED_BRACKET, DEFAULT_COLLECTION_MODE, DEFAULT_COLLECTION_SOURCE_MODE, DEFAULT_COMBO_AWARENESS_MODE,
-        USER_MODE_RUN_ANALYSIS_NOTE, DEV_MODE_RUN_ANALYSIS_NOTE, USER_MODE_REPORT_VIEWER_NOTE, DEV_MODE_REPORT_VIEWER_NOTE,
     )
     from ui.styles.theme import DRAGON_FORGE, ADVENTURERS_MAP, build_main_qss
     from ui.widgets import (
@@ -69,11 +68,10 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
         APP_VERSION, APP_PHASE, BACKEND_STATUS, LOCKED_BACKEND_VERSION,
         OUTPUT_MODE_OPTIONS, REVIEW_DIRECTION_OPTIONS, REVIEW_INTENSITY_OPTIONS, BUILD_UP_MODE_OPTIONS,
         PROMPT_MODE_OPTIONS, INTENDED_BRACKET_OPTIONS, GUIDE_PRESENTATION_OPTIONS,
-        PHILOSOPHY_SUBTYPE_OPTIONS, RUN_DETAIL_OPTIONS, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS, COMBO_AWARENESS_OPTIONS, INTERFACE_MODE_OPTIONS, DEFAULT_INTERFACE_MODE,
+        PHILOSOPHY_SUBTYPE_OPTIONS, RUN_DETAIL_OPTIONS, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS, COMBO_AWARENESS_OPTIONS,
         DEFAULT_SELECTED_PHILOSOPHY, DEFAULT_PHILOSOPHY_SUBTYPE, DEFAULT_GUIDE_PRESENTATION,
         DEFAULT_OUTPUT_MODE, DEFAULT_REVIEW_DIRECTION, DEFAULT_REVIEW_INTENSITY, DEFAULT_BUILD_UP_MODE,
         DEFAULT_PROMPT_MODE, DEFAULT_INTENDED_BRACKET, DEFAULT_COLLECTION_MODE, DEFAULT_COLLECTION_SOURCE_MODE, DEFAULT_COMBO_AWARENESS_MODE,
-        USER_MODE_RUN_ANALYSIS_NOTE, DEV_MODE_RUN_ANALYSIS_NOTE, USER_MODE_REPORT_VIEWER_NOTE, DEV_MODE_REPORT_VIEWER_NOTE,
     )
     from styles.theme import DRAGON_FORGE, ADVENTURERS_MAP, build_main_qss
     from widgets import (
@@ -88,15 +86,6 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
     from pages.run_analysis_page import build_run_analysis_page
     from pages.report_viewer_page import build_report_viewer_page
     from pages.future_workspace_page import build_batch_reports_page, build_settings_page
-
-
-try:
-    USER_MODE_RUN_ANALYSIS_NOTE
-except NameError:
-    USER_MODE_RUN_ANALYSIS_NOTE = "User-Facing Mode keeps Run Analysis focused on the normal player workflow."
-    DEV_MODE_RUN_ANALYSIS_NOTE = "Dev-Facing Mode exposes advanced diagnostics for testing."
-    USER_MODE_REPORT_VIEWER_NOTE = "User-Facing Mode prioritizes normal reports."
-    DEV_MODE_REPORT_VIEWER_NOTE = "Dev-Facing Mode shows normal reports plus breakdown/debug artifacts."
 
 # Future backend integration notes:
 # - v0.6.7.2 adds real deck-file selection and local preview.
@@ -155,7 +144,6 @@ class MainWindow(QMainWindow):
         self.context_value_labels = {}
         self.theme_button = None
         self.settings_theme_buttons = []
-        self.interface_mode_combo = None
         self.collection_mode_combo = None
         self.collection_source_combo = None
         self.collection_folder_button = None
@@ -210,55 +198,6 @@ class MainWindow(QMainWindow):
     def theme(self):
         return self.state.theme
 
-    def is_dev_facing_mode(self):
-        return getattr(self.state, "interface_mode", "User-Facing Mode") == "Dev-Facing Mode"
-
-    def is_user_facing_mode(self):
-        return not self.is_dev_facing_mode()
-
-    def interface_mode_run_analysis_note(self):
-        return DEV_MODE_RUN_ANALYSIS_NOTE if self.is_dev_facing_mode() else USER_MODE_RUN_ANALYSIS_NOTE
-
-    def interface_mode_report_viewer_note(self):
-        return DEV_MODE_REPORT_VIEWER_NOTE if self.is_dev_facing_mode() else USER_MODE_REPORT_VIEWER_NOTE
-
-
-    def is_dev_mode(self):
-        """Return True when the UI is in development/testing visibility mode."""
-        return getattr(self.state, "interface_mode", "User-Facing Mode") == "Dev-Facing Mode"
-
-    def stage_interface_mode(self, mode):
-        """Stage the User-Facing / Dev-Facing UI mode without changing backend behavior."""
-        self.state.interface_mode = mode
-        self.state.status = f"Interface mode staged: {mode}"
-        if getattr(self, "interface_mode_combo", None) is not None and self.interface_mode_combo.currentText() != mode:
-            blocker = QSignalBlocker(self.interface_mode_combo)
-            self.interface_mode_combo.setCurrentText(mode)
-            del blocker
-        if getattr(self, "run_advanced_details_toggle", None) is not None:
-            self.run_advanced_details_toggle.setChecked(self.is_dev_mode())
-        self.refresh_context_panel_values()
-        self.refresh_run_analysis_previews()
-        self.refresh_report_viewer_file_list()
-
-    def interface_mode_summary_text(self):
-        """Small user-readable summary of current interface mode behavior."""
-        if self.is_dev_mode():
-            return (
-                "Interface mode: Dev-Facing Mode\n"
-                "- Advanced run details default open.\n"
-                "- Breakdown/debug report files remain visible in Report Viewer.\n"
-                "- Runtime contract, bridge preview, diagnostics, and combo breakdown visibility are preserved for QA.\n"
-                "- Backend behavior, combo awareness, and report writing are unchanged."
-            )
-        return (
-            "Interface mode: User-Facing Mode\n"
-            "- Clean single-deck workflow is the default.\n"
-            "- Advanced run details default closed.\n"
-            "- Breakdown/debug report files are hidden from the Report Viewer list unless Dev-Facing Mode is selected.\n"
-            "- Backend behavior, combo awareness, and report writing are unchanged."
-        )
-
     def build_shell(self):
         self.build_header()
         app_body = QWidget()
@@ -282,7 +221,6 @@ class MainWindow(QMainWindow):
         self.nav_buttons = []
         self.progress_bars = []
         self.settings_theme_buttons = []
-        self.interface_mode_combo = None
         self.collection_mode_combo = None
         self.collection_source_combo = None
         self.collection_folder_button = None
@@ -424,7 +362,7 @@ class MainWindow(QMainWindow):
             layout.addWidget(stat)
         line = QFrame(); line.setObjectName("goldDivider"); line.setFixedHeight(1); layout.addWidget(line)
         notes_title = QLabel("QUICK NOTES"); notes_title.setObjectName("sidebarSectionTitle"); layout.addWidget(notes_title)
-        notes = QLabel("• Single-deck alpha review only\n• Use guarded confirmation before analysis\n• Report Viewer loads plain text\n• Future features stay labeled and disabled; Batch Tools are future / not active yet\n• Interface Mode controls user-facing vs dev-facing visibility")
+        notes = QLabel("• Single-deck alpha review only\n• Use guarded confirmation before analysis\n• Report Viewer loads plain text\n• Future features stay labeled and disabled; Batch Tools are future / not active yet")
         notes.setObjectName("mutedText"); notes.setWordWrap(True); layout.addWidget(notes)
         layout.addStretch(1)
         mascot = TexturedPanel(self.theme, kind="iron_2", glow=True, corners=False)
@@ -552,8 +490,6 @@ class MainWindow(QMainWindow):
             self.report_output_preview_box.setPlainText(self.report_output_summary_text())
         self.refresh_report_output_buttons()
         self.refresh_report_viewer_file_list()
-        if getattr(self, "run_advanced_details_toggle", None) is not None and self.is_dev_mode():
-            self.run_advanced_details_toggle.setChecked(True)
         if getattr(self, "run_analysis_content_stack", None) is not None:
             self.run_analysis_content_stack.setCurrentIndex(1 if self.is_guarded_run_active() else 0)
         if getattr(self, "run_analysis_running_status_label", None) is not None:
@@ -961,7 +897,6 @@ class MainWindow(QMainWindow):
             f"- Budget note: {self.state.budget_note}\n"
             f"- Intended bracket: {self.state.intended_bracket}\n"
             f"- Combo awareness: {self.state.combo_awareness_mode}\n"
-            f"- Interface mode: {self.state.interface_mode}\n"
             f"- Collection mode: {self.state.collection_mode}\n"
             f"- Collection source: {self.state.collection_source_mode}\n\n"
             "Philosophy lens\n"
@@ -1031,9 +966,8 @@ class MainWindow(QMainWindow):
             f"- budget_note -> {self.state.budget_note}\n"
             f"- intended_bracket -> {self.state.intended_bracket}\n"
             f"- combo_awareness_mode -> {self.state.combo_awareness_mode}\n"
-            f"- interface_mode -> {self.state.interface_mode}\n"
             "- combo_awareness_default -> Disabled; user opt-in required\n"
-            "- combo_awareness_backend_behavior -> opt-in report section can append to normal report; breakdown remains dev-facing\n"
+            "- combo_awareness_backend_behavior -> separate artifact only; no normal report injection\n"
             "- table_boundary_checkbox -> removed in v0.6.7.9.12; intended bracket is the staged value\n"
             "- collection_handoff_checkbox -> removed in v0.6.7.9.12; Collection Source page is the staged value\n\n"
             "Philosophy Contract\n"
@@ -1678,8 +1612,8 @@ class MainWindow(QMainWindow):
             "- External API calls -> disabled\n"
             "- User opt-in required -> True\n"
             "- Default behavior -> Disabled\n"
-            "- Normal report insertion -> enabled only for opted-in report-section modes\n"
-            "- Generated output -> concise normal report section when selected; breakdown artifact when selected\n\n"
+            "- Normal report injection -> disabled\n"
+            "- Generated output -> separate combo-awareness artifact(s) only\n\n"
             "Current UI Selection\n"
             f"- combo_awareness_mode -> {self.state.combo_awareness_mode}\n"
             f"- enabled_for_next_guarded_run -> {enabled}\n"
@@ -1818,8 +1752,7 @@ class MainWindow(QMainWindow):
             if category == "Normal":
                 grouped["Normal Reports"].append((category, path_text))
             elif category == "Debug":
-                if self.is_dev_mode():
-                    grouped["Breakdown Reports"].append((category, path_text))
+                grouped["Breakdown Reports"].append((category, path_text))
             else:
                 grouped["Other Files"].append((category, path_text))
         return grouped
@@ -1926,7 +1859,6 @@ class MainWindow(QMainWindow):
             f"Status: {self.state.report_viewer_current_status}\n"
             f"Loaded file: {current_name}\n"
             f"Detected files: {len(entries)} total | Normal: {normal_count} | Breakdown: {debug_count}\n"
-            f"Interface mode: {self.state.interface_mode}\n"
             f"{self.latest_successful_run_checkpoint_text()}\n"
             f"Latest run folder: {output_name}\n"
             "Boundary: plain text preview only; structured navigation and markdown rendering come later."

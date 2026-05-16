@@ -21,10 +21,10 @@ from PySide6.QtWidgets import (
 )
 
 try:
-    from ui.constants import APP_VERSION, ARCHIDEKT_EXPORT_HELP_TEXT
+    from ui.constants import APP_VERSION
     from ui.widgets import add_shadow, TexturedPanel, ReportCard
 except ImportError:  # Allows direct local execution from inside the ui/ folder.
-    from constants import APP_VERSION, ARCHIDEKT_EXPORT_HELP_TEXT
+    from constants import APP_VERSION
     from widgets import add_shadow, TexturedPanel, ReportCard
 
 
@@ -106,13 +106,12 @@ def build_deck_selection_page(window):
     progress.setValue(100 if window.state.selected_deck_path != "No deck file selected" else 0)
     status_layout.addWidget(progress)
     quick = ReportCard("Forge Note", window.theme)
-    forge_note_text = (
-        f"{APP_VERSION} keeps real local deck-file selection, preserves preview spacing, "
-        "and stages the selected file for guarded CLI handoff. Backend validation, legality, "
-        "collection loading, and report generation remain owned by main.py.\n\n"
-        f"{ARCHIDEKT_EXPORT_HELP_TEXT}"
-    )
-    quick.body.addWidget(window.make_text(forge_note_text, paper=True))
+    quick.body.addWidget(window.make_text(
+        f"{APP_VERSION} keeps real local deck-file selection, preserves preview spacing, and stages the selected file for guarded CLI handoff. Backend validation, legality, collection loading, and report generation remain owned by main.py.
+
+Archidekt export help: open your deck on Archidekt, use Export / Download, copy or save the plain-text decklist, then choose that .txt file here. Keep commanders clearly listed and keep maybeboard/tokens/considering under their own headings.",
+        paper=True
+    ))
     right.addWidget(status)
     right.addWidget(quick)
     right.addStretch(1)

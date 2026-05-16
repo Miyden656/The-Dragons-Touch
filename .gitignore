@@ -70,3 +70,10 @@ Dev tools/
 docs/dev documentation note/
 docs/Patch notes/
 docs/Combo Match tester/
+
+# Added by v0.8.9.11 stable v0.8 candidate cleanup
+# The Dragon's Touch generated / oversized combo data
+data/Combo.json
+data/commander_spellbook/*.tmp
+# The Dragon's Touch local-only working docs
+# The Dragon's Touch generated output / test packages

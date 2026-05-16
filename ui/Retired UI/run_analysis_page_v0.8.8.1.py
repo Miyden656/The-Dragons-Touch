@@ -9,7 +9,6 @@ Report Viewer handoff.
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QComboBox,
-    QGridLayout,
     QHBoxLayout,
     QLabel,
     QPlainTextEdit,
@@ -17,7 +16,6 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QSizePolicy,
     QStackedWidget,
-    QStackedLayout,
     QVBoxLayout,
     QWidget,
 )
@@ -34,32 +32,19 @@ def build_run_analysis_page(window):
     """Build the Run Analysis page while keeping guarded-run behavior on MainWindow."""
     page, layout = window.page_container(
         "Run Analysis",
-        f"Run the selected deck through the guarded backend. {APP_VERSION} keeps User-Facing Mode clean while Dev-Facing Mode preserves diagnostics."
+        f"Run the selected deck through the guarded backend. {APP_VERSION} keeps advanced diagnostics available, but the default view stays focused on running the analysis."
     )
     body = QWidget(); body_layout = QHBoxLayout(body); body_layout.setContentsMargins(0, 0, 0, 0); body_layout.setSpacing(14)
-
-    run_content_stack = QStackedWidget()
-    window.run_analysis_content_stack = run_content_stack
-
-    # Capture the standard page header created by page_container().
-    # During an active run, the loading canvas should own the full center view.
-    run_analysis_header_widget = None
-    try:
-        header_item = layout.itemAt(0)
-        if header_item is not None:
-            run_analysis_header_widget = header_item.widget()
-    except Exception:
-        run_analysis_header_widget = None
-    window.run_analysis_header_widget = run_analysis_header_widget
 
     left = TexturedPanel(window.theme, kind="iron", glow=True); add_shadow(left, blur=28, y=8)
     l_layout = QVBoxLayout(left); l_layout.setContentsMargins(24, 24, 24, 24); l_layout.setSpacing(16)
 
     run_card = ReportCard("Ready to Run", window.theme, badges=[("Guarded", "protected"), ("Optional combo", "manual")])
     run_card.body.addWidget(window.default_note(
-        window.interface_mode_run_analysis_note() + " Combo Awareness only runs if you enabled it in Review Setup."
+        "Run Analysis uses the existing guarded main.py workflow. Combo Awareness only runs if you enabled it in Review Setup."
     ))
     run_guarded_btn = QPushButton("Run Analysis")
+    run_guarded_btn.setObjectName("primaryButton")
     run_guarded_btn.setMinimumHeight(58)
     run_guarded_btn.clicked.connect(window.start_guarded_backend_run)
     window.guarded_run_button = run_guarded_btn
@@ -84,12 +69,19 @@ def build_run_analysis_page(window):
     result_box.setObjectName("guardedRunResultPreview")
     window.guarded_run_result_box = result_box
     result_card.body.addWidget(result_box)
-    result_card.body.addWidget(window.default_note("After a successful run, Report Viewer opens automatically. You can also return here from the navigation map."))
+    result_card.body.addWidget(window.default_note("After a successful run, you can open Report Viewer from the prompt or from the navigation map."))
     l_layout.addWidget(result_card, stretch=1)
 
-    # Idle Run Analysis intentionally does not show the helper-dragon loading forge.
-    # The large helper-dragon loading canvas is reserved only for active guarded backend runs.
-    l_layout.addStretch(1)
+    orb_panel = TexturedPanel(window.theme, kind="iron_2", glow=True, corners=False)
+    orb_layout = QVBoxLayout(orb_panel); orb_layout.setContentsMargins(12, 12, 12, 12)
+    orb = ForgeOrb(window.theme)
+    orb.setMinimumSize(180, 180)
+    orb.setMaximumHeight(220)
+    orb_layout.addWidget(orb, stretch=1)
+    status = QLabel("The forge is ready. Advanced diagnostics are available below when needed.")
+    status.setObjectName("helperText"); status.setAlignment(Qt.AlignCenter); status.setWordWrap(True)
+    orb_layout.addWidget(status)
+    l_layout.addWidget(orb_panel, stretch=1)
 
     right = TexturedPanel(window.theme, kind="iron", glow=False); add_shadow(right, blur=28, y=8)
     r_layout = QVBoxLayout(right); r_layout.setContentsMargins(24, 24, 24, 24); r_layout.setSpacing(14)
@@ -100,29 +92,20 @@ def build_run_analysis_page(window):
     window.run_config_preview_box = preview
     summary_card.body.addWidget(preview)
     summary_card.body.addWidget(window.default_note("This is a compact confirmation of the staged settings that will be sent to the guarded backend."))
-    summary_card.body.addWidget(window.default_note(window.interface_mode_summary_text()))
     r_layout.addWidget(summary_card, stretch=0)
 
     advanced_toggle = QPushButton("Show Advanced Run Details")
     advanced_toggle.setCheckable(True)
     advanced_toggle.setMinimumHeight(42)
-    advanced_toggle.setChecked(window.is_dev_mode())
-    advanced_toggle.setText("Hide Advanced Run Details" if window.is_dev_mode() else "Show Advanced Run Details")
     r_layout.addWidget(advanced_toggle)
 
     advanced_container = QWidget()
     advanced_layout = QVBoxLayout(advanced_container)
     advanced_layout.setContentsMargins(0, 0, 0, 0)
     advanced_layout.setSpacing(14)
-    advanced_container.setVisible(window.is_dev_mode())
+    advanced_container.setVisible(False)
     window.run_advanced_details_container = advanced_container
     window.run_advanced_details_toggle = advanced_toggle
-    # v0.8.9.7 user/dev visibility boundary
-    if hasattr(window, 'is_dev_facing_mode'):
-        advanced_toggle.setVisible(window.is_dev_facing_mode())
-        advanced_container.setVisible(window.is_dev_facing_mode())
-        advanced_toggle.setChecked(window.is_dev_facing_mode())
-        advanced_toggle.setText('Hide Advanced Run Details' if window.is_dev_facing_mode() else 'Show Advanced Run Details')
 
     bridge_status = ReportCard("Bridge Status", window.theme, badges=[("main.py guarded", "manual"), ("User-confirmed only", "protected")])
     bridge_status_box = window.readonly_text_box(
@@ -211,6 +194,7 @@ def build_run_analysis_page(window):
     guarded_preview_btn.clicked.connect(window.guarded_execution_placeholder_message)
     guarded_card.body.addWidget(guarded_preview_btn)
     guarded_run_btn = QPushButton("Run Analysis")
+    guarded_run_btn.setObjectName("primaryButton")
     guarded_run_btn.clicked.connect(window.start_guarded_backend_run)
     guarded_card.body.addWidget(guarded_run_btn)
     window.guarded_run_buttons.append(guarded_run_btn)
@@ -245,7 +229,7 @@ def build_run_analysis_page(window):
     report_output_card.body.addWidget(window.default_note("Folder buttons use detected paths from the backend Files written block. Report contents are viewed in Report Viewer."))
     detail_stack.addWidget(report_output_card)
 
-    boundary_card = ReportCard("Safety Boundary and Future Stages", window.theme, badges=[("v0.8.9.6", "manual")])
+    boundary_card = ReportCard("Safety Boundary and Future Stages", window.theme, badges=[("v0.8.8.1", "manual")])
     stage_text = (
         "Future Backend Bridge Stages\n"
         "1. Runtime config contract is visible and refreshes live.\n"
@@ -275,74 +259,5 @@ def build_run_analysis_page(window):
     run_scroll = QScrollArea()
     run_scroll.setWidgetResizable(True)
     run_scroll.setWidget(body)
-    run_content_stack.addWidget(run_scroll)
-
-    running_panel = TexturedPanel(window.theme, kind="iron", glow=True)
-    add_shadow(running_panel, blur=34, y=10)
-    running_layout = QVBoxLayout(running_panel)
-    running_layout.setContentsMargins(14, 14, 14, 14)
-    running_layout.setSpacing(0)
-
-    # Active-run loading canvas only. The normal Run Analysis page remains the default when idle.
-    # This version keeps a single outer loading frame and treats the ForgeOrb as the full
-    # background visual, with only the title/status bands overlaid in the foreground.
-    loading_stage = QWidget()
-    loading_stage.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    loading_stage_grid = QGridLayout(loading_stage)
-    loading_stage_grid.setContentsMargins(0, 0, 0, 0)
-    loading_stage_grid.setSpacing(0)
-
-    running_orb = ForgeOrb(window.theme)
-    running_orb.setMinimumSize(1200, 720)
-    running_orb.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    loading_stage_grid.addWidget(running_orb, 0, 0)
-
-    running_overlay = QWidget()
-    running_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, True)
-    running_overlay.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    running_overlay_layout = QVBoxLayout(running_overlay)
-    running_overlay_layout.setContentsMargins(34, 28, 34, 28)
-    running_overlay_layout.setSpacing(12)
-
-    title_band = TexturedPanel(window.theme, kind="iron", glow=True, corners=True)
-    title_band.setMaximumHeight(88)
-    title_band_layout = QVBoxLayout(title_band)
-    title_band_layout.setContentsMargins(18, 10, 18, 10)
-    running_title = QLabel("Running Analysis")
-    running_title.setObjectName("pageTitle")
-    running_title.setAlignment(Qt.AlignCenter)
-    title_band_layout.addWidget(running_title)
-    running_overlay_layout.addWidget(title_band, stretch=0)
-
-    running_overlay_layout.addStretch(1)
-
-    status_band = TexturedPanel(window.theme, kind="iron", glow=True, corners=True)
-    status_band.setMaximumHeight(76)
-    status_band_layout = QVBoxLayout(status_band)
-    status_band_layout.setContentsMargins(18, 10, 18, 10)
-    running_status = QLabel("The helper dragon is working through the guarded backend. Report Viewer will open as soon as the run completes successfully.")
-    running_status.setObjectName("helperText")
-    running_status.setAlignment(Qt.AlignCenter)
-    running_status.setWordWrap(True)
-    window.run_analysis_running_status_label = running_status
-    status_band_layout.addWidget(running_status)
-    running_overlay_layout.addWidget(status_band, stretch=0)
-
-    loading_stage_grid.addWidget(running_overlay, 0, 0)
-    running_layout.addWidget(loading_stage, stretch=1)
-
-    run_content_stack.addWidget(running_panel)
-
-    def _toggle_run_analysis_header_for_loading(index):
-        if run_analysis_header_widget is not None:
-            run_analysis_header_widget.setVisible(index == 0)
-
-    run_content_stack.currentChanged.connect(_toggle_run_analysis_header_for_loading)
-
-    # Always build the normal Run Analysis page as the default view.
-    # refresh_run_analysis_previews() switches to this loading page only while an actual guarded run is in progress.
-    run_content_stack.setCurrentIndex(0)
-    _toggle_run_analysis_header_for_loading(0)
-
-    layout.addWidget(run_content_stack, stretch=1)
+    layout.addWidget(run_scroll, stretch=1)
     return page

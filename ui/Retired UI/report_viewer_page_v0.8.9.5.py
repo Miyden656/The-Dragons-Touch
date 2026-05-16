@@ -32,7 +32,7 @@ except ImportError:  # Allows direct local execution from inside the ui/ folder.
 def build_report_viewer_page(window):
     page, layout = window.page_container(
         "Report Viewer",
-        f"Read generated reports from backend-created output folders. {APP_VERSION} keeps User-Facing Mode focused on normal reports and Dev-Facing Mode available for breakdown review."
+        f"Read generated reports from backend-created output folders. {APP_VERSION} keeps reports as plain text; deep markdown rendering is deferred."
     )
     body = QWidget()
     body_layout = QHBoxLayout(body)
@@ -48,11 +48,6 @@ def build_report_viewer_page(window):
     cap = QLabel("DETECTED REPORT FILES")
     cap.setObjectName("smallCaps")
     rn_layout.addWidget(cap)
-    mode_note = QLabel(window.interface_mode_report_viewer_note())
-    mode_note.setObjectName("mutedText")
-    mode_note.setWordWrap(True)
-    rn_layout.addWidget(mode_note)
-    rn_layout.addWidget(window.default_note("User-Facing Mode shows normal reports by default. Dev-Facing Mode also shows breakdown/debug files."))
     file_scroll = QScrollArea()
     file_scroll.setWidgetResizable(True)
     file_inner = QWidget()

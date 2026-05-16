@@ -55,7 +55,7 @@ from reports.report_builder import write_normal_report
 from combo_awareness.main_hook import write_optional_combo_awareness_artifacts
 
 
-VERSION_LABEL = "v0.8.7-dev — Optional Combo Awareness Hook Preview"
+VERSION_LABEL = "v0.8.10.1-alpha — Combo Awareness Reporting String Hotfix"
 
 
 def build_analysis_context(
@@ -165,9 +165,13 @@ def process_single_deck(
     resolved_config: RuntimeConfig = context["runtime_config"]
     output_mode = resolved_config.output_mode
 
+    normal_report_path: Path | None = None
+    user_prompt_path: Path | None = None
     if output_mode in {"normal", "both"}:
-        written_paths.append(write_normal_report(folders.normal, parsed_deck.safe_commander_name, context))
-        written_paths.append(write_user_guided_prompt(folders.normal, parsed_deck.safe_commander_name, context))
+        normal_report_path = write_normal_report(folders.normal, parsed_deck.safe_commander_name, context)
+        written_paths.append(normal_report_path)
+        user_prompt_path = write_user_guided_prompt(folders.normal, parsed_deck.safe_commander_name, context)
+        written_paths.append(user_prompt_path)
 
     if output_mode in {"debug", "both"}:
         debug_paths: DebugSectionPaths = write_debug_sections(folders.debug, parsed_deck.safe_commander_name, context)
@@ -182,9 +186,10 @@ def process_single_deck(
         written_paths.extend(section_paths)
         written_paths.append(merge_debug_reports(folders.debug, parsed_deck.safe_commander_name, section_paths))
 
-    # v0.8.7-dev guarded preview: combo awareness is optional and off by default.
-    # When explicitly enabled by runtime config, it writes separate artifacts only.
-    # It does not inject into normal reports and it must not break normal output.
+    # v0.8.10.1-alpha: combo awareness remains optional and off by default.
+    # When the user explicitly selects a report-section mode, write the separate
+    # combo artifact and append the same concise, user-facing section to the
+    # normal deck report when one exists. Breakdown-only mode stays dev-facing.
     written_paths.extend(
         write_optional_combo_awareness_artifacts(
             deck_file=deck_file,
@@ -192,6 +197,8 @@ def process_single_deck(
             normal_folder=folders.normal,
             debug_folder=folders.debug,
             scryfall_lookup=scryfall_lookup,
+            normal_report_path=normal_report_path,
+            user_prompt_path=user_prompt_path,
         )
     )
 

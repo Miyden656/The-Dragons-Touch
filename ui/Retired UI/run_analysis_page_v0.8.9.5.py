@@ -34,7 +34,7 @@ def build_run_analysis_page(window):
     """Build the Run Analysis page while keeping guarded-run behavior on MainWindow."""
     page, layout = window.page_container(
         "Run Analysis",
-        f"Run the selected deck through the guarded backend. {APP_VERSION} keeps User-Facing Mode clean while Dev-Facing Mode preserves diagnostics."
+        f"Run the selected deck through the guarded backend. {APP_VERSION} keeps the normal view clean and shows the helper-dragon loading view only during active runs."
     )
     body = QWidget(); body_layout = QHBoxLayout(body); body_layout.setContentsMargins(0, 0, 0, 0); body_layout.setSpacing(14)
 
@@ -57,7 +57,7 @@ def build_run_analysis_page(window):
 
     run_card = ReportCard("Ready to Run", window.theme, badges=[("Guarded", "protected"), ("Optional combo", "manual")])
     run_card.body.addWidget(window.default_note(
-        window.interface_mode_run_analysis_note() + " Combo Awareness only runs if you enabled it in Review Setup."
+        "Run Analysis uses the existing guarded main.py workflow. Combo Awareness only runs if you enabled it in Review Setup."
     ))
     run_guarded_btn = QPushButton("Run Analysis")
     run_guarded_btn.setMinimumHeight(58)
@@ -100,29 +100,20 @@ def build_run_analysis_page(window):
     window.run_config_preview_box = preview
     summary_card.body.addWidget(preview)
     summary_card.body.addWidget(window.default_note("This is a compact confirmation of the staged settings that will be sent to the guarded backend."))
-    summary_card.body.addWidget(window.default_note(window.interface_mode_summary_text()))
     r_layout.addWidget(summary_card, stretch=0)
 
     advanced_toggle = QPushButton("Show Advanced Run Details")
     advanced_toggle.setCheckable(True)
     advanced_toggle.setMinimumHeight(42)
-    advanced_toggle.setChecked(window.is_dev_mode())
-    advanced_toggle.setText("Hide Advanced Run Details" if window.is_dev_mode() else "Show Advanced Run Details")
     r_layout.addWidget(advanced_toggle)
 
     advanced_container = QWidget()
     advanced_layout = QVBoxLayout(advanced_container)
     advanced_layout.setContentsMargins(0, 0, 0, 0)
     advanced_layout.setSpacing(14)
-    advanced_container.setVisible(window.is_dev_mode())
+    advanced_container.setVisible(False)
     window.run_advanced_details_container = advanced_container
     window.run_advanced_details_toggle = advanced_toggle
-    # v0.8.9.7 user/dev visibility boundary
-    if hasattr(window, 'is_dev_facing_mode'):
-        advanced_toggle.setVisible(window.is_dev_facing_mode())
-        advanced_container.setVisible(window.is_dev_facing_mode())
-        advanced_toggle.setChecked(window.is_dev_facing_mode())
-        advanced_toggle.setText('Hide Advanced Run Details' if window.is_dev_facing_mode() else 'Show Advanced Run Details')
 
     bridge_status = ReportCard("Bridge Status", window.theme, badges=[("main.py guarded", "manual"), ("User-confirmed only", "protected")])
     bridge_status_box = window.readonly_text_box(
@@ -245,7 +236,7 @@ def build_run_analysis_page(window):
     report_output_card.body.addWidget(window.default_note("Folder buttons use detected paths from the backend Files written block. Report contents are viewed in Report Viewer."))
     detail_stack.addWidget(report_output_card)
 
-    boundary_card = ReportCard("Safety Boundary and Future Stages", window.theme, badges=[("v0.8.9.6", "manual")])
+    boundary_card = ReportCard("Safety Boundary and Future Stages", window.theme, badges=[("v0.8.8.1", "manual")])
     stage_text = (
         "Future Backend Bridge Stages\n"
         "1. Runtime config contract is visible and refreshes live.\n"

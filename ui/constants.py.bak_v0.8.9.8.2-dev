@@ -1,5 +1,5 @@
-APP_PHASE = 'Modular Alpha / User-Dev Mode Import Cleanup Hotfix'
-APP_VERSION = 'v0.8.10.1-alpha'
+APP_PHASE = "Modular Alpha / Dev-Facing Protection Boundary Import Hotfix"
+APP_VERSION = "v0.8.9.8.1-dev"
 """
 The Dragon's Touch - UI constants for v0.7 alpha hardening.
 
@@ -8,8 +8,8 @@ values only. It must not run backend logic, touch main.py, inspect decks, create
 outputs, or replace the guarded CLI bridge.
 """
 
-APP_VERSION = 'v0.8.10.1-alpha'
-APP_PHASE = 'Modular Alpha / User-Dev Mode Import Cleanup Hotfix'
+APP_VERSION = 'v0.8.9.6.2-dev'
+APP_PHASE = 'Modular Alpha / User-Dev Mode Missing Constants Hotfix'
 BACKEND_STATUS = "Stable v0.6.8.5 workflow preserved — guarded UI bridge uses CLI/main.py as source of truth"
 LOCKED_BACKEND_VERSION = "v0.6.8.5"
 
@@ -115,42 +115,6 @@ DEV_MODE_PROTECTION_NOTE = (
     "Dev-Facing Mode is currently available for active development and trusted alpha testing. Before beta, public preview, "
     "or v1.0, this mode should be hidden, gated, or otherwise protected so normal users cannot accidentally open "
     "developer-only diagnostics."
-)
-
-USER_MODE_RUN_ANALYSIS_NOTE = (
-    'User-Facing Mode keeps Run Analysis focused on the normal player workflow. Advanced diagnostics stay hidden unless Dev-Facing Mode is selected.'
-)
-
-DEV_MODE_RUN_ANALYSIS_NOTE = (
-    'Dev-Facing Mode is for development and testing. It exposes advanced run details, bridge/runtime previews, diagnostics, and breakdown visibility for QA.'
-)
-
-USER_MODE_REPORT_VIEWER_NOTE = (
-    'User-Facing Mode focuses Report Viewer on normal player-facing reports.'
-)
-
-DEV_MODE_REPORT_VIEWER_NOTE = (
-    'Dev-Facing Mode shows breakdown/debug reports for development and QA.'
-)
-
-DEV_FACING_PROTECTION_NOTE = (
-    'Dev-Facing Mode is intended for development/testing and should be hidden, gated, or protected before beta, public preview, or v1.0 release.'
-)
-
-USER_FACING_MODE_HELP_TEXT = (
-    'User-Facing Mode keeps the main workflow focused on Deck Selection, Review Setup, optional Collection Source, Run Analysis, and the normal deck report. Advanced details can still be opened when needed, but they are not the default view.'
-)
-
-DEV_FACING_MODE_HELP_TEXT = (
-    'Dev-Facing Mode is for development/testing. It keeps advanced run details, runtime contracts, bridge previews, diagnostics, breakdown reports, and combo breakdown artifacts visible for QA.'
-)
-
-USER_DEV_REGRESSION_NOTE = (
-    'User/Dev mode regression note: User-Facing Mode remains the default clean workflow; Dev-Facing Mode remains available for active development and QA until it is gated before beta/public release.'
-)
-
-DEV_MODE_PROTECTION_NOTE = (
-    'Dev-Facing Mode is currently available for active development and trusted alpha testing. Before beta, public preview, or v1.0, this mode should be hidden, gated, or otherwise protected so normal users cannot accidentally open developer-only diagnostics.'
 )
 
 USER_MODE_RUN_ANALYSIS_NOTE = (

@@ -6,8 +6,8 @@ values only. It must not run backend logic, touch main.py, inspect decks, create
 outputs, or replace the guarded CLI bridge.
 """
 
-APP_VERSION = "v0.8.7.4.1-dev"
-APP_PHASE = "Modular Alpha / Review Setup Layout Cleanup"
+APP_VERSION = "v0.8.8.6.1-dev"
+APP_PHASE = "Modular Alpha / Collection Source Syntax Hotfix"
 BACKEND_STATUS = "Stable v0.6.8.5 workflow preserved — guarded UI bridge uses CLI/main.py as source of truth"
 LOCKED_BACKEND_VERSION = "v0.6.8.5"
 
@@ -69,3 +69,33 @@ DEFAULT_INTENDED_BRACKET = "Not sure yet"
 DEFAULT_COLLECTION_MODE = "No collection"
 DEFAULT_COLLECTION_SOURCE_MODE = "Entire collection folder"
 DEFAULT_COMBO_AWARENESS_MODE = "Disabled"
+
+# User-facing navigation labels introduced during alpha-feedback cleanup.
+BATCH_NAV_LABEL = "Batch Tools"
+BATCH_NAV_HELP = "Batch Tools are for later multi-deck or aggregate workflows. Single-deck reviews should use Run Analysis."
+ARCHIDEKT_EXPORT_HELP = "Archidekt export tip: export or copy your decklist as plain text, save it as a .txt file, then select it on Deck Selection."
+
+ARCHIDEKT_EXPORT_HELP_TEXT = (
+    "Archidekt setup: open your deck on Archidekt, use Export / Download, "
+    "copy or save the plain-text decklist, then choose that .txt file here. "
+    "The Dragon's Touch works best when the commander is clearly listed and non-deck sections "
+    "such as maybeboard, tokens, and considering are kept under their own headings."
+)
+
+BATCH_TOOLS_HELP_TEXT = (
+    "Batch Tools are future / not active yet. This area is reserved for later multi-deck, "
+    "aggregate report, and folder-level workflows. Current alpha testing should use single-deck Run Analysis."
+)
+
+# Alpha navigation clarity notes introduced in v0.8.8.6-dev.
+COLLECTION_SOURCE_HELP_TEXT = (
+    "Collection Source is optional. Use it when you want The Dragon's Touch to prefer, limit, "
+    "or compare against cards from your collection. Leave it alone for normal deck reviews."
+)
+PHILOSOPHY_LENS_HELP_TEXT = (
+    "Philosophy Lens is playstyle guidance. It helps shape tone and priorities, but it does not override "
+    "commander legality, deck strategy, bracket, budget, or explicit user intent."
+)
+SETTINGS_HELP_TEXT = (
+    "Settings are for app preferences and future utilities. Normal single-deck reviews do not require changing Settings."
+)

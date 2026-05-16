@@ -9,10 +9,10 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
 try:
-    from ui.constants import GUIDE_PRESENTATION_OPTIONS, PHILOSOPHY_SUBTYPE_OPTIONS, PHILOSOPHY_LENS_HELP_TEXT
+    from ui.constants import GUIDE_PRESENTATION_OPTIONS, PHILOSOPHY_SUBTYPE_OPTIONS
     from ui.widgets import add_shadow, TexturedPanel, ReportCard
 except ImportError:  # Allows direct local execution from inside the ui/ folder.
-    from constants import GUIDE_PRESENTATION_OPTIONS, PHILOSOPHY_SUBTYPE_OPTIONS, PHILOSOPHY_LENS_HELP_TEXT
+    from constants import GUIDE_PRESENTATION_OPTIONS, PHILOSOPHY_SUBTYPE_OPTIONS
     from widgets import add_shadow, TexturedPanel, ReportCard
 
 
@@ -20,7 +20,7 @@ def build_philosophy_lens_page(window):
     """Build the Philosophy Lens page while keeping behavior on MainWindow."""
     page, layout = window.page_container(
         "Philosophy Lens",
-        "Optional playstyle guidance for tone and priorities. It does not override legality, budget, collection mode, color identity, pilot intent, or deck evidence."
+        "Choose the review lens and guide voice. This shapes explanations and priorities without overriding legality, budget, collection mode, color identity, pilot intent, or deck evidence."
     )
     body = TexturedPanel(window.theme, kind="iron", glow=False)
     add_shadow(body, blur=24, y=8)
@@ -55,7 +55,7 @@ def build_philosophy_lens_page(window):
         cards.addWidget(card)
     body_layout.addLayout(cards)
 
-    guide_card = ReportCard("Guide Presentation", window.theme, badges=[("Optional guidance", "manual")])
+    guide_card = ReportCard("Guide Presentation", window.theme, badges=[("CLI bridge", "manual")])
     guide_card.setMinimumHeight(150)
     guide_card.body.addWidget(window.make_text(
         "Choose how the philosophy guide should be presented. This belongs with the Philosophy Lens, not cut/build mechanics.",
@@ -68,8 +68,10 @@ def build_philosophy_lens_page(window):
     window.configure_combo_popup(guide_combo)
     guide_combo.currentTextChanged.connect(window.stage_guide_presentation)
     guide_card.body.addWidget(guide_combo)
-    guide_card.body.addWidget(window.default_note(PHILOSOPHY_LENS_HELP_TEXT))
-    guide_card.body.addWidget(window.default_note("Default: Either / random. Used after the top-level philosophy lens in the guarded CLI bridge."))
+    guide_card.body.addWidget(window.default_note(
+        "Philosophy Lens is optional playstyle guidance. It shapes tone and priorities, but legality, strategy, bracket, budget, and explicit user intent still come first."
+    )
+    # "Default: Either / random. Used after the top-level philosophy lens in the guarded CLI bridge."))
     body_layout.addWidget(guide_card)
 
     subtype_card = ReportCard("Specific Philosophy Subtype", window.theme, badges=[("optional bridge", "manual")])

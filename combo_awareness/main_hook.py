@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""v0.8.7.2.1-dev — optional guarded main.py hook for combo awareness.
+"""v0.8.10-dev — optional guarded main.py hook for combo awareness.
 
 Scope guard:
 - No API calls.
 - Combo awareness is off by default.
 - Runs only when RuntimeConfig explicitly enables it.
-- Writes separate artifacts only; does not inject into normal Dragon's Touch reports.
+- Writes separate artifacts and can append the concise combo section to the normal report and user-guided prompt when the user opts into report-section mode.
 - Does not make combo recommendations.
 """
 
@@ -28,6 +28,7 @@ from .combo_matcher import (
 )
 from .models import CollectionIndex
 from .normalization import canonical_identity, normalize_card_name
+from .reporting import build_combo_ai_handoff_prompt_addendum
 
 COMBO_INDEX_PATH = Path("data/commander_spellbook/combo_index.json")
 COMBO_PARITY_INDEX_PATH = Path("data/commander_spellbook/combo_index_parity.json")
@@ -163,6 +164,39 @@ def _build_combo_summaries(
     return result
 
 
+def _append_combo_section_to_normal_report(normal_report_path: Path | None, markdown: str) -> None:
+    """Append the concise combo section to the normal deck report when available.
+
+    This is intentionally append-only for v0.8.10-dev. It avoids changing the
+    normal report builder and keeps the feature fully opt-in through the existing
+    Combo Awareness report-section modes.
+    """
+    if normal_report_path is None:
+        return
+    path = Path(normal_report_path)
+    if not path.exists() or not path.is_file():
+        return
+    existing = path.read_text(encoding="utf-8")
+    combined = existing.rstrip() + "\n\n" + markdown.strip() + "\n"
+    path.write_text(combined, encoding="utf-8")
+
+
+
+def _append_combo_ai_handoff_to_user_prompt(user_prompt_path: Path | None, markdown: str) -> None:
+    """Append Combo Awareness guidance to the generated AI prompt when available.
+
+    This makes opted-in Combo Awareness self-contained for the normal interactive
+    AI handoff. Separate combo artifacts remain optional support/dev files.
+    """
+    if user_prompt_path is None:
+        return
+    path = Path(user_prompt_path)
+    if not path.exists() or not path.is_file():
+        return
+    existing = path.read_text(encoding="utf-8")
+    combined = existing.rstrip() + "\n\n" + markdown.strip() + "\n"
+    path.write_text(combined, encoding="utf-8")
+
 def write_optional_combo_awareness_artifacts(
     *,
     deck_file: Path,
@@ -170,12 +204,17 @@ def write_optional_combo_awareness_artifacts(
     normal_folder: Path,
     debug_folder: Path,
     scryfall_lookup: dict[str, dict[str, Any]] | None = None,
+    normal_report_path: Path | None = None,
+    user_prompt_path: Path | None = None,
 ) -> list[Path]:
     """Write optional combo awareness artifacts for one backend run.
 
-    Returns written paths. If combo awareness is disabled, returns an empty list.
-    Any failure is caught and written as a small diagnostic artifact so this
-    optional feature cannot break normal Dragon's Touch output generation.
+    Returns written artifact paths. If combo awareness is disabled, returns an empty list.
+    Report-section modes also append a concise Combo Awareness section to the
+    normal deck report and a Combo Awareness handoff note to the generated
+    user-guided prompt when those files exist. Any failure is caught and written as a
+    small diagnostic artifact so this optional feature cannot break normal
+    Dragon's Touch output generation.
     """
     if not getattr(runtime_config, "combo_awareness_enabled", False):
         return []
@@ -210,9 +249,29 @@ def write_optional_combo_awareness_artifacts(
                 collection_loaded=collection_loaded,
                 max_complete=complete_limit,
                 max_collection_potential=report_limit,
+                standalone_artifact=True,
             )
             path = get_unique_output_path(normal_folder, "combo_awareness_report_section", ".md")
             written.append(write_text_file(path, markdown))
+
+            embedded_markdown = build_combo_report_section_markdown(
+                deck=deck,
+                strict_summary=strict_summary,
+                commander_identity=commander_identity,
+                collection_loaded=collection_loaded,
+                max_complete=complete_limit,
+                max_collection_potential=report_limit,
+                standalone_artifact=False,
+            )
+            _append_combo_section_to_normal_report(normal_report_path, embedded_markdown)
+
+            ai_handoff_markdown = build_combo_ai_handoff_prompt_addendum(
+                deck=deck,
+                strict_summary=strict_summary,
+                commander_identity=commander_identity,
+                collection_loaded=collection_loaded,
+            )
+            _append_combo_ai_handoff_to_user_prompt(user_prompt_path, ai_handoff_markdown)
 
         if write_breakdown:
             breakdown_limit = _safe_int(getattr(runtime_config, "combo_breakdown_potential_limit", 25), 25)
@@ -233,7 +292,7 @@ def write_optional_combo_awareness_artifacts(
 
     except Exception as exc:  # noqa: BLE001 - optional hook must never break main reports.
         lines = [
-            "# v0.8.7.2.1-dev — Optional Combo Awareness Hook Error",
+            "# v0.8.10-dev — Optional Combo Awareness Hook Error",
             "",
             "Combo awareness was explicitly enabled, but the optional artifact could not be written.",
             "Normal Dragon's Touch report generation was allowed to continue.",
@@ -241,7 +300,7 @@ def write_optional_combo_awareness_artifacts(
             f"- Deck file: `{deck_file}`",
             f"- Error: `{type(exc).__name__}: {exc}`",
             "",
-            "Scope guard: no API calls were made and no normal report injection was attempted.",
+            "Scope guard: no API calls were made and normal report / AI prompt generation was allowed to continue.",
         ]
         path = get_unique_output_path(debug_folder, "combo_awareness_error", ".md")
         written.append(write_text_file(path, "\n".join(lines)))

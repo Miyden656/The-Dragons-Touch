@@ -9,10 +9,10 @@ CLI/main.py execution.
 from PySide6.QtWidgets import QComboBox, QGridLayout, QLabel, QPushButton, QVBoxLayout
 
 try:
-    from ui.constants import APP_VERSION, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS, COLLECTION_SOURCE_HELP_TEXT
+    from ui.constants import APP_VERSION, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS
     from ui.widgets import add_shadow, TexturedPanel, ReportCard
 except ImportError:  # Allows direct local execution from inside the ui/ folder.
-    from constants import APP_VERSION, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS, COLLECTION_SOURCE_HELP_TEXT
+    from constants import APP_VERSION, COLLECTION_MODE_OPTIONS, COLLECTION_SOURCE_OPTIONS
     from widgets import add_shadow, TexturedPanel, ReportCard
 
 
@@ -20,7 +20,7 @@ def build_collection_source_page(window):
     """Build the Collection Source page while keeping staged-state behavior on MainWindow."""
     page, layout = window.page_container(
         "Collection Source",
-        f"Stage optional collection guidance for the review. {APP_VERSION} keeps collection choices honest: they guide suggestions but do not force weak or illegal swaps."
+        f"Stage how collection data should guide the review. {APP_VERSION} keeps collection choices honest: they guide suggestions but do not force weak or illegal swaps."
     )
     scroll, content = window.scroll_content()
     body = TexturedPanel(window.theme, kind="iron", glow=False)
@@ -31,7 +31,7 @@ def build_collection_source_page(window):
     b_layout.setColumnStretch(0, 1)
     b_layout.setColumnStretch(1, 1)
 
-    mode_card = ReportCard("Collection Mode", window.theme, badges=[("Optional", "manual"), ("Staged UI", "primary")])
+    mode_card = ReportCard("Collection Mode", window.theme, badges=[("Staged UI", "primary")])
     mode_card.setMinimumHeight(230)
     mode_card.body.addWidget(window.make_text(
         "Choose how owned cards should affect future recommendations once backend hooks are connected.",
@@ -44,8 +44,10 @@ def build_collection_source_page(window):
     window.configure_combo_popup(mode_combo)
     mode_combo.currentTextChanged.connect(lambda text: window.stage_collection_mode(text))
     mode_card.body.addWidget(mode_combo)
-    mode_card.body.addWidget(window.default_note(COLLECTION_SOURCE_HELP_TEXT))
-    mode_card.body.addWidget(window.default_note("Default: No collection"))
+    mode_card.body.addWidget(window.default_note(
+        "Collection Source is optional. Use this page only when you want the review to prefer, limit, or compare against your own cards. For a normal deck review, you can leave collection mode set to No collection."
+    )
+    # "Default: No collection"))
     mode_card.body.addWidget(window.make_text(
         "Collection-only still stays honest: if no owned card is a real fit, the report should say so instead of forcing a weak recommendation.",
         paper=True
@@ -62,7 +64,7 @@ def build_collection_source_page(window):
     source_card.body.addWidget(source_combo)
     source_card.body.addWidget(window.default_note("Default: Entire collection folder"))
     source_card.body.addWidget(window.make_text(
-        "Only the relevant chooser is shown for the selected source mode. Collection files are local only and remain optional for normal single-deck reviews.",
+        "Only the relevant chooser is shown for the selected source mode.",
         paper=True
     ))
     folder_btn = QPushButton("Choose Collection Folder")
