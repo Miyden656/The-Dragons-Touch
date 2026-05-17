@@ -342,7 +342,7 @@ Patch v0.8.9.7-dev — User-Facing Mode Cleanup + User/Dev Regression Notes
 
 Patch v0.8.9.8-dev — Dev-Facing Protection Boundary Notes
 
-Patch v0.8.9.8.1-dev — Dev Missing constant hotfix 
+Patch v0.8.9.8.1-dev — Dev Missing constant hotfix
 
 Patch v0.8.9.8.2-dev — User Dev Mode Import Cleanup hotfix
 
@@ -359,9 +359,64 @@ Patch v0.8.9.12-dev — Stable v0.8 Full Regression Pass
 Patch v0.8.10-dev — Stable v0.8 Lock
 Patch v0.8.10.1-alpha — Alpha ZIP Handoff Cleanup and Smoke Test
 
+Patch v0.9.0-dev — Dev Folder Baseline Check
 
+Patch v0.9.1-dev — Replacement Candidate Data Model Foundation
 
+Patch v0.9.2-dev — Replacement Need Detection Cleanup
 
+Patch v0.9.3-dev — Collection-First Candidate Pool Hardening
 
+Patch v0.9.3.1-dev — Collection-First Candidate Pool Hardening-hotfix
 
+Patch v0.9.4-dev — Collection-First Ranking
+Patch v0.9.4.1-dev — Collection Ranking Wiring Hotfix
+
+Patch v0.9.4.2-dev — Report Builder Future Import Hotfix
+
+Patch v0.9.4.3-dev — Collection Ranking Score Population Hotfix
+
+Patch v0.9.4.4-dev — Ranking Confidence Ceiling Cleanup
+
+Patch v0.9.4.5-dev — Confidence Ceiling Wiring Hotfix
+
+Patch v0.9.4.5.1-dev — Confidence Ceiling Wiring Hotfix: Repair
+
+Patch v0.9.4.5.2-dev — Confidence Ceiling Preview Flag Display Hotfix
+
+Patch v0.9.4.6-dev — Dragon Need Semantic Gate Cleanup
+
+Patch v0.9.4.6.1-dev — Dragon Semantic Gate Evidence-Source Hotfix
+Patch v0.9.4.6.3-dev — Dragon Gate Visible Candidate Field Rewrite Hotfix
+
+Patch v0.9.4.6.4-dev — hotfix
+
+Patch v0.9.4.6.10-dev — Strong Owned Render Loop Direct Suppression Hotfix
+
+Patch v0.9.4.7-dev — Dragon Gate Regression / Redshift Safety Check
+v0.9.5-dev — Full-Card-Pool Fallback Preview
+v0.9.5.1-dev — Full-Pool Preview Need Extraction Cleanup + Batch Verifier
+Patch v0.9.5.2-dev — Exact Full-Pool Candidate Preview
+Patch v0.9.5.3-dev — Exact Preview Color Identity / Commander Legality Guard
+
+v0.9.5.4-dev — Exact Preview Budget / Bracket Safety Labels
+
+v0.9.5.5-dev — Exact Preview Role-to-Need Alignment Cleanup
+v0.9.5.5.2-dev — Final Report Need Addendum Postprocessor Hotfix
+v0.9.5.6-dev — Combo-Aware Regression Stress Check
+
+v0.9.5.7-dev — v0.9.5 Lock Candidate / Final Regression Sweep
+v0.9.6.1-dev — Do-Not-Recommend Reason Field Standardization
+
+v0.9.6.2-dev — Candidate Source / Ownership Field Verification
+
+v0.9.6.3-dev — Candidate Explanation Field Verification
+
+v0.9.6.4-dev — Preference Protection + Filter Reason Verification
+
+v0.9.7-dev — Replacement Candidate Regression Suite
+
+v0.9.8-dev — v0.9 Stable Candidate Final Regression
+
+v0.9 Stable Lock Package
 

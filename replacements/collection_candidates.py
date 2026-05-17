@@ -304,6 +304,33 @@ def _infer_collection_roles(card: dict[str, Any]) -> list[str]:
         roles.add("finisher_or_payoff")
     if _contains_any(text, NARROW_TYPAL_REQUIREMENT_PHRASES):
         roles.add("narrow_typal_requirement")
+    # v0.9.3: Dragon-specific replacement needs require Dragon-specific evidence.
+    # Generic creatures, generic token makers, and broad typal support should not
+    # satisfy "More Dragon density" or "More Dragon payoff" by themselves.
+    if has_type_on_any_face(card, "Dragon"):
+        roles.add("dragon_card")
+    if "changeling" in text or "is every creature type" in text or "are every creature type" in text:
+        roles.add("all_creature_types")
+    if "dragon token" in text or "dragon tokens" in text:
+        roles.update({"dragon_token_production", "token_production", "typal_or_theme_support"})
+    if (
+        "dragon you control" in text
+        or "dragons you control" in text
+        or "dragon spells you cast" in text
+        or "whenever a dragon" in text
+        or "dragon card" in text
+        or "dragon cards" in text
+    ):
+        roles.update({"dragon_typal_support", "typal_or_theme_support"})
+    if (
+        "token that's a copy" in text
+        or "tokens that are copies" in text
+        or "copy of target creature" in text
+        or "copy target creature" in text
+        or "copy target permanent" in text
+        or "create a token that's a copy" in text
+    ):
+        roles.update({"copy_token_payoff", "token_production"})
     if _contains_any(text, ARTIFACT_CONTEXT_PHRASES):
         roles.add("artifact_context_dependent")
 
@@ -810,6 +837,78 @@ def _card_has_narrow_requirement(card: dict[str, Any]) -> bool:
     return "narrow_typal_requirement" in set(_infer_collection_roles(card))
 
 
+
+def _v093_strict_strong_fit_needs(candidate: CollectionCandidate) -> list[str]:
+    # v0.9.3 strict role gates for visible Strong owned candidates.
+    roles = set(getattr(candidate, "role_tags", []) or [])
+    filtered: list[str] = []
+
+    for category in list(getattr(candidate, "strong_fit_needs", []) or getattr(candidate, "matched_needs", []) or []):
+        cat = str(category).lower()
+
+        if "dragon density" in cat:
+            if roles & {"dragon_card", "dragon_token_production", "all_creature_types"}:
+                filtered.append(category)
+            continue
+
+        if "dragon payoff" in cat:
+            if roles & {"dragon_card", "dragon_typal_support", "dragon_token_production", "copy_token_payoff", "all_creature_types"}:
+                filtered.append(category)
+            continue
+
+        if "copy-token payoff" in cat or "copy token payoff" in cat:
+            if roles & {"copy_token_payoff", "dragon_token_production"}:
+                filtered.append(category)
+            continue
+
+        if "commander protection" in cat:
+            if roles & {"board_protection_specific", "commander_protection_specific"}:
+                filtered.append(category)
+            continue
+
+        filtered.append(category)
+
+    return list(dict.fromkeys(filtered))
+
+
+def _v093_harden_visible_strong_candidates(
+    strong: list[tuple[int, CollectionCandidate]],
+    possible: list[tuple[int, CollectionCandidate]],
+    summary: CollectionCandidateSummary,
+    downgrade_reasons: Counter[str],
+) -> list[tuple[int, CollectionCandidate]]:
+    # Move overbroad Strong candidates to Possible before report visibility.
+    hardened: list[tuple[int, CollectionCandidate]] = []
+
+    for score, candidate in strong:
+        original_strong_fits = list(getattr(candidate, "strong_fit_needs", []) or getattr(candidate, "matched_needs", []) or [])
+        filtered = _v093_strict_strong_fit_needs(candidate)
+
+        if filtered:
+            candidate.strong_fit_needs = filtered
+            candidate.matched_needs = [need for need in list(getattr(candidate, "matched_needs", []) or []) if need in filtered] or filtered
+            hardened.append((score, candidate))
+            continue
+
+        candidate.confidence = "Possible"
+        candidate.fit_type = "Owned card may fit current deck needs; pilot review recommended"
+        candidate.strong_fit_needs = []
+        candidate.matched_needs = original_strong_fits
+        warning = "v0.9.3 strict category gate: broad role overlap was not enough for a visible Strong owned candidate."
+        if warning not in candidate.warnings:
+            candidate.warnings.append(warning)
+        if candidate.quality_gate:
+            if "v0.9.3 strict category gate" not in candidate.quality_gate:
+                candidate.quality_gate += "; v0.9.3 strict category gate moved this from Strong to Possible"
+        else:
+            candidate.quality_gate = "v0.9.3 strict category gate moved this from Strong to Possible"
+        possible.append((score, candidate))
+        summary.downgraded_to_possible += 1
+        downgrade_reasons["v0_9_3_strict_category_gate"] += 1
+
+    return hardened
+
+
 def build_collection_candidate_summary(
     collection_summary: Any | None = None,
     replacement_needs: Any | None = None,
@@ -848,6 +947,7 @@ def build_collection_candidate_summary(
         "Collection gaps are tracked per replacement category using strict strong-fit evidence, not broad multi-category overlap.",
         "Artifact-context-dependent cards are capped at Possible unless the deck has artifact-token/artifact-creature/artifact-strategy support.",
         "v0.6.6.6 replacement-bias lock is active: philosophy nudges are counted, exampled, and still cannot override quality gates.",
+        "v0.9.3 collection-first hardening active: Dragon density/payoff and copy-token payoff use stricter Strong-candidate gates.",
     ])
 
     if not active:
@@ -1108,6 +1208,8 @@ def build_collection_candidate_summary(
                 if philosophy_replacement_nudge > 0:
                     summary.replacement_bias_shakeup_adjusted_cards += 1
                 shakeup.append((score, candidate))
+
+    strong = _v093_harden_visible_strong_candidates(strong, possible, summary, downgrade_reasons)
 
     strong.sort(key=lambda item: (-item[0], item[1].card_name.lower()))
     possible.sort(key=lambda item: (-item[0], item[1].card_name.lower()))

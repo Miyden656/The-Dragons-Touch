@@ -47,6 +47,7 @@ from legality.commander_detection import build_command_zone_summary
 from legality.commander_legality import build_commander_legality_summary
 from parsing.deck_parser import ParsedDeck, parse_deck_file
 from replacements.collection_candidates import build_collection_candidate_summary
+from replacements.replacement_candidates import apply_collection_first_confidence_ceiling, apply_dragon_gate_visible_field_rewrite, apply_dragon_need_semantic_gate, build_replacement_candidate_summary
 from replacements.deck_completion import build_deck_completion_summary
 from reports.batch_aggregate import BatchAggregateWriter
 from reports.debug_sections import DebugSectionPaths, write_debug_sections
@@ -93,6 +94,16 @@ def build_analysis_context(
         runtime_config=resolved_config,
         philosophy_context=philosophy_context,
     )
+    replacement_candidates = build_replacement_candidate_summary(
+        collection_candidates=collection_candidates,
+        replacement_needs=replacement_needs,
+        strategy_summary=strategy_summary,
+        runtime_config=resolved_config,
+        philosophy_context=philosophy_context,
+    )
+    replacement_candidates = apply_collection_first_confidence_ceiling(replacement_candidates)
+    replacement_candidates = apply_dragon_need_semantic_gate(replacement_candidates)
+    replacement_candidates = apply_dragon_gate_visible_field_rewrite(replacement_candidates)
 
     return {
         "version_label": VERSION_LABEL,
@@ -111,6 +122,7 @@ def build_analysis_context(
         "possible_cuts": possible_cuts,
         "replacement_needs": replacement_needs,
         "deck_completion": deck_completion,
+        "replacement_candidates": replacement_candidates,
         "collection_candidates": collection_candidates,
         "collection_summary": collection_summary or CollectionLoadSummary(),
         "philosophy_context": philosophy_context,

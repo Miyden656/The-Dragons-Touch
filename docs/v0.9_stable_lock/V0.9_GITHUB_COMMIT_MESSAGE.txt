@@ -1,0 +1,17 @@
+v0.9 stable lock: replacement candidate engine foundation
+
+- Locked v0.9 Replacement Candidate Engine foundation
+- Verified normal report scope across 109 reports
+- Verified combo-aware report scope across 109 reports
+- Confirmed Replacement Candidate Engine Preview appears in all reports
+- Confirmed Full-Card-Pool Fallback Preview appears in all reports
+- Confirmed collection-first boundary and Automatic swaps: No remain present
+- Confirmed need-rich exact previews are not generic-only
+- Confirmed exact preview keeps color identity guard and budget/price labels
+- Confirmed exact preview does not claim collection ownership
+- Confirmed exact preview does not show unsuppressed combo examples
+- Confirmed source, ownership, confidence, explanation, caution, filter/manual-review, and preference-protection surfaces appear across reports
+- Confirmed combo-aware reports preserve replacement and fallback preview sections
+- Confirmed aggregate outputs include success line and Failures: 0
+- Confirmed no NameError, RecursionError, IndexError, SyntaxError, or Traceback text
+- Documented v0.9 known limitations and v0.10 Simple View handoff direction

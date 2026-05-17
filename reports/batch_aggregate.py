@@ -173,6 +173,8 @@ class BatchAggregateWriter:
         deck_text = self._header("Deck Reports") + summary + "".join(self._deck_report_chunks).rstrip() + "\n"
         debug_text = self._header("Debug Reports") + summary + "".join(self._debug_report_chunks).rstrip() + "\n"
 
+        deck_path.parent.mkdir(parents=True, exist_ok=True)
         deck_path.write_text(deck_text, encoding="utf-8")
+        debug_path.parent.mkdir(parents=True, exist_ok=True)
         debug_path.write_text(debug_text, encoding="utf-8")
         return BatchAggregatePaths(deck_reports=deck_path, debug_reports=debug_path)
