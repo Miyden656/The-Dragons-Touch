@@ -24,7 +24,7 @@ BUILD_UP_MODE_OPTIONS = [
 ]
 PROMPT_MODE_OPTIONS = ["Interactive AI chat", "One-shot worksheet"]
 INTENDED_BRACKET_OPTIONS = ["Not sure yet", "Bracket 1", "Bracket 2", "Bracket 3", "Bracket 4", "Bracket 5"]
-GUIDE_PRESENTATION_OPTIONS = ["Masculine guide", "Feminine guide", "Either / random", "No named guide, just philosophy labels"]
+GUIDE_PRESENTATION_OPTIONS = ["Masculine guide", "Feminine guide", "Either / random", "Neither / no named guide"]
 PHILOSOPHY_SUBTYPE_OPTIONS = [
     "None / top-level only",
     "Michael / Michelle — Big Moment",
@@ -55,10 +55,15 @@ RUN_DETAIL_OPTIONS = [
     "Report Output",
     "Safety Boundary",
 ]
-COLLECTION_MODE_OPTIONS = ["No collection", "Prefer collection first", "Collection only", "Collection shakeup"]
+COLLECTION_MODE_OPTIONS = [
+    "Collection first, then full card pool",
+    "Collection only",
+    "Full card pool only",
+    "No replacement suggestions",
+]
 COLLECTION_SOURCE_OPTIONS = ["Entire collection folder", "Select collection files"]
-COMBO_AWARENESS_OPTIONS = ["Disabled", "Report section only", "Full debug breakdown only", "Both report section and breakdown"]
-INTERFACE_MODE_OPTIONS = ["User-Facing Mode", "Dev-Facing Mode"]
+COMBO_AWARENESS_OPTIONS = ["Always included"]
+INTERFACE_MODE_OPTIONS = ["User Mode", "Developer Mode"]
 
 DEFAULT_SELECTED_PHILOSOPHY = "Balanced / Unknown"
 DEFAULT_PHILOSOPHY_SUBTYPE = "None / top-level only"
@@ -69,10 +74,10 @@ DEFAULT_REVIEW_INTENSITY = "Normal"
 DEFAULT_BUILD_UP_MODE = "Finalize — 10 or fewer cards needed"
 DEFAULT_PROMPT_MODE = "Interactive AI chat"
 DEFAULT_INTENDED_BRACKET = "Not sure yet"
-DEFAULT_COLLECTION_MODE = "No collection"
+DEFAULT_COLLECTION_MODE = "Collection first, then full card pool"
 DEFAULT_COLLECTION_SOURCE_MODE = "Entire collection folder"
-DEFAULT_COMBO_AWARENESS_MODE = "Disabled"
-DEFAULT_INTERFACE_MODE = "User-Facing Mode"
+DEFAULT_COMBO_AWARENESS_MODE = "Always included"
+DEFAULT_INTERFACE_MODE = "User Mode"
 
 # User-facing navigation labels introduced during alpha-feedback cleanup.
 BATCH_NAV_LABEL = "Batch Tools"
@@ -87,7 +92,7 @@ ARCHIDEKT_EXPORT_HELP_TEXT = (
 )
 
 BATCH_TOOLS_HELP_TEXT = (
-    "Batch Tools are future / not active yet. This area is reserved for later multi-deck, "
+    "Batch Tools are removed from UI navigation for v0.10.5. This area is reserved for later multi-deck, "
     "aggregate report, and folder-level workflows. Current alpha testing should use single-deck Run Analysis."
 )
 
@@ -106,70 +111,87 @@ SETTINGS_HELP_TEXT = (
 
 # User/dev interface mode notes introduced in v0.8.9.6-dev.
 INTERFACE_MODE_HELP_TEXT = (
-    "User-Facing Mode is the clean default for normal deck reviews. Dev-Facing Mode is for development, "
+    "User Mode is the clean default for normal deck reviews. Developer Mode is for development, "
     "diagnostics, stress testing, and troubleshooting while The Dragon's Touch is still being built."
 )
 
 
 DEV_MODE_PROTECTION_NOTE = (
-    "Dev-Facing Mode is currently available for active development and trusted alpha testing. Before beta, public preview, "
+    "Developer Mode is currently available for active development and trusted alpha testing. Before beta, public preview, "
     "or v1.0, this mode should be hidden, gated, or otherwise protected so normal users cannot accidentally open "
     "developer-only diagnostics."
 )
 
 USER_MODE_RUN_ANALYSIS_NOTE = (
-    'User-Facing Mode keeps Run Analysis focused on the normal player workflow. Advanced diagnostics stay hidden unless Dev-Facing Mode is selected.'
+    'User Mode keeps Run Analysis focused on the normal player workflow. Advanced diagnostics stay hidden unless Developer Mode is selected.'
 )
 
 DEV_MODE_RUN_ANALYSIS_NOTE = (
-    'Dev-Facing Mode is for development and testing. It exposes advanced run details, bridge/runtime previews, diagnostics, and breakdown visibility for QA.'
+    'Developer Mode is for development and testing. It exposes advanced run details, bridge/runtime previews, diagnostics, and breakdown visibility for QA.'
 )
 
 USER_MODE_REPORT_VIEWER_NOTE = (
-    'User-Facing Mode focuses Report Viewer on normal player-facing reports.'
+    'User Mode focuses Report Viewer on normal player-facing reports.'
 )
 
 DEV_MODE_REPORT_VIEWER_NOTE = (
-    'Dev-Facing Mode shows breakdown/debug reports for development and QA.'
+    'Developer Mode shows breakdown/debug reports for development and QA.'
 )
 
 DEV_FACING_PROTECTION_NOTE = (
-    'Dev-Facing Mode is intended for development/testing and should be hidden, gated, or protected before beta, public preview, or v1.0 release.'
+    'Developer Mode is intended for development/testing and should be hidden, gated, or protected before beta, public preview, or v1.0 release.'
 )
 
 USER_FACING_MODE_HELP_TEXT = (
-    'User-Facing Mode keeps the main workflow focused on Deck Selection, Review Setup, optional Collection Source, Run Analysis, and the normal deck report. Advanced details can still be opened when needed, but they are not the default view.'
+    'User Mode keeps the main workflow focused on Deck Selection, Review Setup, optional Collection Source, Run Analysis, and the normal deck report. Advanced details can still be opened when needed, but they are not the default view.'
 )
 
 DEV_FACING_MODE_HELP_TEXT = (
-    'Dev-Facing Mode is for development/testing. It keeps advanced run details, runtime contracts, bridge previews, diagnostics, breakdown reports, and combo breakdown artifacts visible for QA.'
+    'Developer Mode is for development/testing. It keeps advanced run details, runtime contracts, bridge previews, diagnostics, breakdown reports, and combo breakdown artifacts visible for QA.'
 )
 
 USER_DEV_REGRESSION_NOTE = (
-    'User/Dev mode regression note: User-Facing Mode remains the default clean workflow; Dev-Facing Mode remains available for active development and QA until it is gated before beta/public release.'
+    'User/Dev mode regression note: User Mode remains the default clean workflow; Developer Mode remains available for active development and QA until it is gated before beta/public release.'
 )
 
 DEV_MODE_PROTECTION_NOTE = (
-    'Dev-Facing Mode is currently available for active development and trusted alpha testing. Before beta, public preview, or v1.0, this mode should be hidden, gated, or otherwise protected so normal users cannot accidentally open developer-only diagnostics.'
+    'Developer Mode is currently available for active development and trusted alpha testing. Before beta, public preview, or v1.0, this mode should be hidden, gated, or otherwise protected so normal users cannot accidentally open developer-only diagnostics.'
 )
 
 USER_MODE_RUN_ANALYSIS_NOTE = (
-    'User-Facing Mode keeps Run Analysis focused on the normal player workflow. Advanced diagnostics stay hidden unless Dev-Facing Mode is selected.'
+    'User Mode keeps Run Analysis focused on the normal player workflow. Advanced diagnostics stay hidden unless Developer Mode is selected.'
 )
 
 DEV_MODE_RUN_ANALYSIS_NOTE = (
-    'Dev-Facing Mode is for development and testing. It exposes advanced run details, bridge/runtime previews, diagnostics, and breakdown visibility for QA.'
+    'Developer Mode is for development and testing. It exposes advanced run details, bridge/runtime previews, diagnostics, and breakdown visibility for QA.'
 )
 
 USER_MODE_REPORT_VIEWER_NOTE = (
-    'User-Facing Mode focuses Report Viewer on normal player-facing reports.'
+    'User Mode focuses Report Viewer on normal player-facing reports.'
 )
 
 DEV_MODE_REPORT_VIEWER_NOTE = (
-    'Dev-Facing Mode shows breakdown/debug reports for development and QA.'
+    'Developer Mode shows breakdown/debug reports for development and QA.'
 )
 
 DEV_FACING_PROTECTION_NOTE = (
-    'Dev-Facing Mode is intended for development/testing and should be hidden, gated, or protected before beta, public preview, or v1.0 release.'
+    'Developer Mode is intended for development/testing and should be hidden, gated, or protected before beta, public preview, or v1.0 release.'
 )
 
+
+
+# v0.10.5.1 persistent app setting options.
+APP_COLLECTION_SOURCE_DEFAULT_OPTIONS = [
+    "Local collection folder",
+    "Specific local collection files",
+    "CardMill CSV/export placeholder",
+    "Moxfield export placeholder",
+    "Future source placeholder",
+]
+
+UI_DENSITY_OPTIONS = ["Comfortable", "Normal", "Compact"]
+REPORT_VIEWER_DEV_VIEW_OPTIONS = ["User View", "Dev View"]
+
+# v0.10.6.1: combo awareness is no longer optional.
+COMBO_AWARENESS_ALWAYS_ON = True
+COMBO_AWARENESS_ARTIFACT_MODE = "both"

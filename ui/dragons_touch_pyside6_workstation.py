@@ -30,6 +30,7 @@ Run:
 import sys
 from datetime import datetime
 from pathlib import Path
+import re
 
 from PySide6.QtCore import Qt, QTimer, QSignalBlocker, QProcess, QProcessEnvironment, QUrl
 from PySide6.QtGui import QFont, QDesktopServices, QTextCursor
@@ -56,14 +57,15 @@ try:
         add_shadow, TexturedPanel, ForgeOrb, SidebarButton, Badge, ReportCard, SmallStat, PillButton
     )
     from ui.state import AppState
-    from ui.services import report_detector, cli_bridge, backend_runner
+    from ui.services import report_detector, cli_bridge, backend_runner, user_settings
     from ui.pages.deck_selection_page import build_deck_selection_page
     from ui.pages.review_setup_page import build_review_setup_page
     from ui.pages.philosophy_lens_page import build_philosophy_lens_page
     from ui.pages.collection_source_page import build_collection_source_page
     from ui.pages.run_analysis_page import build_run_analysis_page
     from ui.pages.report_viewer_page import build_report_viewer_page
-    from ui.pages.future_workspace_page import build_batch_reports_page, build_settings_page
+    from ui.pages.future_workspace_page import build_batch_reports_page
+    from ui.pages.settings_page import build_settings_page
 except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
     from constants import (
         APP_VERSION, APP_PHASE, BACKEND_STATUS, LOCKED_BACKEND_VERSION,
@@ -80,14 +82,15 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
         add_shadow, TexturedPanel, ForgeOrb, SidebarButton, Badge, ReportCard, SmallStat, PillButton
     )
     from state import AppState
-    from services import report_detector, cli_bridge, backend_runner
+    from services import report_detector, cli_bridge, backend_runner, user_settings
     from pages.deck_selection_page import build_deck_selection_page
     from pages.review_setup_page import build_review_setup_page
     from pages.philosophy_lens_page import build_philosophy_lens_page
     from pages.collection_source_page import build_collection_source_page
     from pages.run_analysis_page import build_run_analysis_page
     from pages.report_viewer_page import build_report_viewer_page
-    from pages.future_workspace_page import build_batch_reports_page, build_settings_page
+    from pages.future_workspace_page import build_batch_reports_page
+    from pages.settings_page import build_settings_page
 
 
 try:
@@ -131,6 +134,7 @@ except NameError:
 # - v0.6.7.9.6 adds a durable Guide Presentation UI field and bridges the guide presentation CLI prompt.
 # - v0.6.7.9.7 bridges the Collection Mode CLI prompt using the existing Collection Source page setting.
 # - v0.6.7.9.13 adds companion-section preview detection and handoff status without validating companion legality.
+# v0.10.4.3.1-dev launcher crash hotfix: refresh_report_viewer_file_list now uses clear_layout_widgets, not missing clear_layout.
 # v0.6.7.12 checkpoint: desktop UI foundation is locked; future work should build on this guarded bridge rather than replacing it.
 # v0.7.0 alpha hardening boundary: preserve UI staged state -> guarded confirmation -> subprocess/main.py -> CLI input bridge -> backend output folder -> report detection -> plain-text Report Viewer.
 # Do not bypass main.py, silently execute backend commands, or create a second backend workflow.
@@ -149,6 +153,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.state = AppState(theme=DRAGON_FORGE)
+        self.app_settings = user_settings.load_app_settings()
+        user_settings.apply_settings_to_state(self.state, self.app_settings, DRAGON_FORGE, ADVENTURERS_MAP)
         self.nav_buttons = []
         self.progress_bars = []
         self.progress_tick = 0
@@ -156,6 +162,8 @@ class MainWindow(QMainWindow):
         self.theme_button = None
         self.settings_theme_buttons = []
         self.interface_mode_combo = None
+        self.settings_collection_folder_label = None
+        self.settings_report_folder_label = None
         self.collection_mode_combo = None
         self.collection_source_combo = None
         self.collection_folder_button = None
@@ -167,6 +175,10 @@ class MainWindow(QMainWindow):
         self.combo_tracker_preview_box = None
         self.guarded_execution_preview_box = None
         self.guarded_run_result_box = None
+        self.run_readiness_box = None
+        self.run_latest_output_card = None
+        self.run_analysis_mode_note_label = None
+        self.run_analysis_summary_mode_note_label = None
         self.report_output_preview_box = None
         self.report_viewer_file_buttons_layout = None
         self.report_viewer_text_box = None
@@ -179,6 +191,10 @@ class MainWindow(QMainWindow):
         self.report_viewer_open_current_folder_button = None
         self.report_viewer_search_input = None
         self.report_viewer_wrap_button = None
+        self.report_viewer_open_detected_file = None
+        self.report_viewer_show_user_prompt = None
+        self.report_viewer_show_deck_report = None
+        self.report_viewer_show_user_section = None
         self.open_output_folder_button = None
         self.open_normal_report_folder_button = None
         self.open_debug_report_folder_button = None
@@ -210,8 +226,11 @@ class MainWindow(QMainWindow):
     def theme(self):
         return self.state.theme
 
+    def interface_mode_display_text(self):
+        return user_settings.normalize_interface_mode(getattr(self.state, "interface_mode", "User Mode"))
+
     def is_dev_facing_mode(self):
-        return getattr(self.state, "interface_mode", "User-Facing Mode") == "Dev-Facing Mode"
+        return self.interface_mode_display_text() == "Developer Mode"
 
     def is_user_facing_mode(self):
         return not self.is_dev_facing_mode()
@@ -222,40 +241,115 @@ class MainWindow(QMainWindow):
     def interface_mode_report_viewer_note(self):
         return DEV_MODE_REPORT_VIEWER_NOTE if self.is_dev_facing_mode() else USER_MODE_REPORT_VIEWER_NOTE
 
-
     def is_dev_mode(self):
         """Return True when the UI is in development/testing visibility mode."""
-        return getattr(self.state, "interface_mode", "User-Facing Mode") == "Dev-Facing Mode"
+        return self.is_dev_facing_mode()
 
+    def persist_user_settings(self):
+        """Persist app-wide settings only. Review Setup remains current-run state."""
+        self.app_settings["interface_mode"] = self.interface_mode_display_text()
+        self.app_settings["guide_presentation"] = user_settings.normalize_guide_presentation(self.state.guide_presentation)
+        self.app_settings["collection_source_default"] = self.collection_source_default_display_text()
+        self.app_settings["collection_source_path"] = self.state.collection_folder
+        self.app_settings["collection_source_files"] = list(self.state.selected_collection_files)
+        self.app_settings["report_output_folder"] = getattr(self.state, "report_output_folder", "Outputs")
+        self.app_settings["theme"] = self.theme()["name"]
+        self.app_settings["ui_density"] = getattr(self.state, "ui_density", "Normal")
+        self.app_settings["developer_report_viewer_last_view"] = getattr(self.state, "developer_report_viewer_last_view", "User View")
+        user_settings.save_app_settings(self.app_settings)
+
+    def user_settings_path_text(self):
+        return str(user_settings.settings_path())
+
+    def collection_source_default_display_text(self):
+        if getattr(self.state, "collection_source_mode", "Entire collection folder") == "Select collection files":
+            return "Specific local collection files"
+        return user_settings.normalize_collection_source_default(self.app_settings.get("collection_source_default", "Local collection folder"))
+
+    # v0.10.5.1.1 flash hotfix: mode changes persist immediately but do not rebuild
+    # the active Settings page during the combo-box change event.
     def stage_interface_mode(self, mode):
-        """Stage the User-Facing / Dev-Facing UI mode without changing backend behavior."""
-        self.state.interface_mode = mode
-        self.state.status = f"Interface mode staged: {mode}"
-        if getattr(self, "interface_mode_combo", None) is not None and self.interface_mode_combo.currentText() != mode:
+        """Stage and persist the User / Developer UI mode without changing backend behavior."""
+        normalized = user_settings.normalize_interface_mode(mode)
+        self.state.interface_mode = normalized
+        self.state.status = f"Interface mode staged: {normalized}"
+        self.persist_user_settings()
+        if getattr(self, "interface_mode_combo", None) is not None and self.interface_mode_combo.currentText() != normalized:
             blocker = QSignalBlocker(self.interface_mode_combo)
-            self.interface_mode_combo.setCurrentText(mode)
+            self.interface_mode_combo.setCurrentText(normalized)
             del blocker
         if getattr(self, "run_advanced_details_toggle", None) is not None:
             self.run_advanced_details_toggle.setChecked(self.is_dev_mode())
         self.refresh_context_panel_values()
         self.refresh_run_analysis_previews()
+        self.refresh_report_viewer_mode_controls()
         self.refresh_report_viewer_file_list()
+        # v0.10.5.1.1: Do not rebuild the current page during combo-box mode changes.
+        # Rebuilding while the Settings combo popup is closing creates a visible flash.
+        # The new mode is persisted immediately; page-specific visibility will update
+        # when the user navigates or reopens the page.
+
+    def stage_ui_density(self, value):
+        self.state.ui_density = user_settings.normalize_ui_density(value)
+        self.state.status = f"UI density saved: {self.state.ui_density}"
+        self.persist_user_settings()
+        self.refresh_context_panel_values()
+
+    def stage_collection_source_default(self, value):
+        normalized = user_settings.normalize_collection_source_default(value)
+        self.app_settings["collection_source_default"] = normalized
+        if normalized == "Specific local collection files":
+            self.state.collection_source_mode = "Select collection files"
+        elif normalized == "Local collection folder":
+            self.state.collection_source_mode = "Entire collection folder"
+        self.state.status = f"Collection source default saved: {normalized}"
+        self.persist_user_settings()
+        self.refresh_collection_page_widgets()
+        self.refresh_context_panel_values()
+
+    def choose_report_output_folder(self):
+        folder = QFileDialog.getExistingDirectory(self, "Choose Report / Output Folder", getattr(self.state, "report_output_folder", "Outputs") or "")
+        if not folder:
+            return
+        self.state.report_output_folder = folder
+        self.state.status = "Report folder saved"
+        self.persist_user_settings()
+        if getattr(self, "settings_report_folder_label", None) is not None:
+            self.settings_report_folder_label.setText(folder)
+        self.refresh_context_panel_values()
+        self.refresh_report_viewer_file_list()
+
+    def reset_user_settings_to_defaults(self):
+        reply = QMessageBox.question(
+            self,
+            "Reset Settings",
+            "Reset app-wide settings to defaults? This will not edit decks or reports.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply != QMessageBox.Yes:
+            return
+        self.app_settings = user_settings.reset_app_settings()
+        user_settings.apply_settings_to_state(self.state, self.app_settings, DRAGON_FORGE, ADVENTURERS_MAP)
+        self.state.status = "Settings reset to defaults"
+        self.rebuild_shell(self.SETTINGS)
 
     def interface_mode_summary_text(self):
         """Small user-readable summary of current interface mode behavior."""
         if self.is_dev_mode():
             return (
-                "Interface mode: Dev-Facing Mode\n"
+                "Interface mode: Developer Mode\n"
+                "- Developer Mode Enabled.\n"
                 "- Advanced run details default open.\n"
                 "- Breakdown/debug report files remain visible in Report Viewer.\n"
                 "- Runtime contract, bridge preview, diagnostics, and combo breakdown visibility are preserved for QA.\n"
                 "- Backend behavior, combo awareness, and report writing are unchanged."
             )
         return (
-            "Interface mode: User-Facing Mode\n"
+            "Interface mode: User Mode\n"
             "- Clean single-deck workflow is the default.\n"
             "- Advanced run details default closed.\n"
-            "- Breakdown/debug report files are hidden from the Report Viewer list unless Dev-Facing Mode is selected.\n"
+            "- Developer-only report files and diagnostics are hidden.\n"
             "- Backend behavior, combo awareness, and report writing are unchanged."
         )
 
@@ -338,6 +432,10 @@ class MainWindow(QMainWindow):
         title_box.addWidget(title)
         title_box.addWidget(tagline)
         layout.addLayout(title_box, stretch=1)
+        if self.is_dev_mode():
+            dev_badge = QLabel("Developer Mode Enabled")
+            dev_badge.setObjectName("warningText")
+            layout.addWidget(dev_badge)
         theme_btn = QPushButton(f"Theme: {self.theme()['name']}")
         self.theme_button = theme_btn
         theme_btn.setObjectName("utilityButton")
@@ -371,24 +469,23 @@ class MainWindow(QMainWindow):
         title = QLabel("FORGE NAVIGATION")
         title.setObjectName("sidebarSectionTitle")
         layout.addWidget(title)
+        # v0.10.5.2: Collection Source and Batch Tools are removed from visible navigation.
+        # Collection defaults now live in Settings; Collection Mode moves to Review Setup later.
+        # Batch and stress testing remain outside the UI.
         nav_items = [
             ("🃏  Deck Selection", self.DECK_SELECTION), ("⚙  Review Setup", self.REVIEW_SETUP),
-            ("🧠  Philosophy Lens", self.PHILOSOPHY), ("🗃  Collection Source", self.COLLECTION),
+            ("🧠  Philosophy Lens", self.PHILOSOPHY),
             ("🔥  Run Analysis", self.RUN_ANALYSIS), ("📜  Report Viewer", self.REPORT),
-            ("📚  Batch Tools", self.BATCH_REPORTS), ("⚒  Settings", self.SETTINGS),
+            ("⚒  Settings", self.SETTINGS),
         ]
         group = QButtonGroup(self)
         group.setExclusive(True)
         for text, index in nav_items:
             btn = SidebarButton(text, index)
-            if index == self.COLLECTION:
-                btn.setToolTip("Optional: choose collection folder/files for collection-aware reviews.")
-            elif index == self.PHILOSOPHY:
+            if index == self.PHILOSOPHY:
                 btn.setToolTip("Optional playstyle guidance; does not override legality or strategy.")
             elif index == self.SETTINGS:
                 btn.setToolTip("App preferences and future utilities; not required for a normal run.")
-            elif index == self.BATCH_REPORTS:
-                btn.setToolTip("Future multi-deck tools; not active for normal single-deck reviews.")
             btn.clicked.connect(lambda checked=False, idx=index: self.go_to(idx))
             group.addButton(btn)
             self.nav_buttons.append(btn)
@@ -424,7 +521,7 @@ class MainWindow(QMainWindow):
             layout.addWidget(stat)
         line = QFrame(); line.setObjectName("goldDivider"); line.setFixedHeight(1); layout.addWidget(line)
         notes_title = QLabel("QUICK NOTES"); notes_title.setObjectName("sidebarSectionTitle"); layout.addWidget(notes_title)
-        notes = QLabel("• Single-deck alpha review only\n• Use guarded confirmation before analysis\n• Report Viewer loads plain text\n• Future features stay labeled and disabled; Batch Tools are future / not active yet\n• Interface Mode controls user-facing vs dev-facing visibility")
+        notes = QLabel("• Single-deck alpha review only\n• Use guarded confirmation before analysis\n• Report Viewer loads plain text\n• Collection Source and Batch Tools are hidden for v0.10.5 cleanup\n• Interface Mode controls user-facing vs dev-facing visibility")
         notes.setObjectName("mutedText"); notes.setWordWrap(True); layout.addWidget(notes)
         layout.addStretch(1)
         mascot = TexturedPanel(self.theme, kind="iron_2", glow=True, corners=False)
@@ -498,10 +595,12 @@ class MainWindow(QMainWindow):
 
     def toggle_theme(self):
         self.state.theme = ADVENTURERS_MAP if self.theme()["name"] == "Dragon Forge" else DRAGON_FORGE
+        self.persist_user_settings()
         self.refresh_theme_in_place()
 
     def set_theme(self, theme):
         self.state.theme = theme
+        self.persist_user_settings()
         self.refresh_theme_in_place()
 
     def refresh_theme_in_place(self):
@@ -522,20 +621,69 @@ class MainWindow(QMainWindow):
         return build_main_qss(t)
 
     def go_to(self, index):
+        # v0.10.5.2 removed-page navigation guard:
+        # Collection Source and Batch Tools are no longer visible navigation pages.
+        if index == self.COLLECTION:
+            self.state.status = "Collection Source moved to Settings / Review Setup"
+            index = self.SETTINGS
+        elif index == self.BATCH_REPORTS:
+            self.state.status = "Batch Tools removed from UI navigation"
+            index = self.REPORT
+
         self.stack.setCurrentIndex(index)
         for btn in self.nav_buttons:
             btn.setChecked(btn.index == index)
         if index == self.RUN_ANALYSIS:
             self.refresh_run_analysis_previews()
         if index == self.REPORT:
+            self.refresh_report_viewer_mode_controls()
             self.refresh_report_viewer_file_list()
 
     def is_guarded_run_active(self):
         """Return True only while a guarded backend process is actively running."""
         return bool(self.state.guarded_run_in_progress and self.backend_process is not None)
 
+
+    def refresh_run_analysis_mode_controls(self):
+        """Refresh Run Analysis User Mode / Developer Mode visibility.
+
+        v0.10.5.5:
+        User Mode shows only the player-facing run controls, current run summary,
+        and Ready to Run checklist. Developer Mode reveals captured output and
+        diagnostic detail panels. This does not rebuild the page and does not
+        affect the Running Analysis animation.
+        """
+        is_dev = self.is_dev_mode()
+
+        if getattr(self, "run_latest_output_card", None) is not None:
+            self.run_latest_output_card.setVisible(is_dev)
+
+        if getattr(self, "run_advanced_details_toggle", None) is not None:
+            self.run_advanced_details_toggle.setVisible(is_dev)
+            if is_dev:
+                self.run_advanced_details_toggle.setChecked(True)
+                self.run_advanced_details_toggle.setText("Hide Advanced Run Details")
+            else:
+                self.run_advanced_details_toggle.setChecked(False)
+                self.run_advanced_details_toggle.setText("Show Advanced Run Details")
+
+        if getattr(self, "run_advanced_details_container", None) is not None:
+            self.run_advanced_details_container.setVisible(is_dev)
+
+        if getattr(self, "run_analysis_mode_note_label", None) is not None:
+            self.run_analysis_mode_note_label.setText(
+                self.interface_mode_run_analysis_note()
+                + " Combo analysis is always included when combo data is available."
+            )
+
+        if getattr(self, "run_analysis_summary_mode_note_label", None) is not None:
+            self.run_analysis_summary_mode_note_label.setText(self.interface_mode_summary_text())
+
     def refresh_run_analysis_previews(self):
         """Refresh Run Analysis preview text from current staged UI state without rebuilding pages."""
+        self.refresh_run_analysis_mode_controls()
+        if getattr(self, "run_readiness_box", None) is not None:
+            self.run_readiness_box.setPlainText(self.run_readiness_text())
         if self.run_config_preview_box is not None:
             self.run_config_preview_box.setPlainText(self.run_config_preview_text())
         if self.runtime_mapping_preview_box is not None:
@@ -552,8 +700,6 @@ class MainWindow(QMainWindow):
             self.report_output_preview_box.setPlainText(self.report_output_summary_text())
         self.refresh_report_output_buttons()
         self.refresh_report_viewer_file_list()
-        if getattr(self, "run_advanced_details_toggle", None) is not None and self.is_dev_mode():
-            self.run_advanced_details_toggle.setChecked(True)
         if getattr(self, "run_analysis_content_stack", None) is not None:
             self.run_analysis_content_stack.setCurrentIndex(1 if self.is_guarded_run_active() else 0)
         if getattr(self, "run_analysis_running_status_label", None) is not None:
@@ -593,7 +739,7 @@ class MainWindow(QMainWindow):
         QMessageBox.information(
             self,
             "UI Foundation Placeholder",
-            f"This control is a future/placeholder utility in {APP_VERSION}. The active alpha workflow is Deck Selection -> Review Setup -> Philosophy Lens -> optional Collection Source -> Run Analysis -> Report Viewer. Settings and Batch Tools are not required for normal single-deck reviews."
+            f"This control is a future/placeholder utility in {APP_VERSION}. The active alpha workflow is Deck Selection -> Review Setup -> Philosophy Lens -> Run Analysis -> Report Viewer. Settings holds app-wide defaults."
         )
 
     def backend_hook_message(self, hook_name):
@@ -667,6 +813,64 @@ class MainWindow(QMainWindow):
                 return str(candidate)
         return str(Path.home())
 
+
+    def sanitize_deck_file_name(self, name):
+        """Return a filesystem-safe deck name for pasted decklist saves."""
+        cleaned = re.sub(r'[<>:"/\\|?*]+', " ", str(name or "").strip())
+        cleaned = re.sub(r"\s+", " ", cleaned).strip(" .")
+        return cleaned or "Pasted Deck"
+
+    def next_decklist_number(self, folder):
+        """Return the next main integer prefix for saved pasted decklists."""
+        path = Path(folder or "Decklists")
+        path.mkdir(parents=True, exist_ok=True)
+        highest = 0
+
+        for file_path in path.iterdir():
+            if not file_path.is_file():
+                continue
+            match = re.match(r"^\s*(\d+)(?:[.\s-]|$)", file_path.name)
+            if not match:
+                continue
+            try:
+                highest = max(highest, int(match.group(1)))
+            except ValueError:
+                continue
+
+        return highest + 1
+
+    def save_pasted_decklist_to_deck_folder(self, deck_text, deck_name):
+        """Save a pasted decklist into the Decklist Folder using next-number naming."""
+        text = str(deck_text or "").strip()
+        if not text:
+            QMessageBox.information(self, "No Decklist Pasted", "Paste a decklist before saving it.")
+            return ""
+
+        safe_name = self.sanitize_deck_file_name(deck_name)
+        folder = Path(getattr(self.state, "deck_folder", "Decklists") or "Decklists")
+        folder.mkdir(parents=True, exist_ok=True)
+
+        number = self.next_decklist_number(folder)
+        candidate = folder / f"{number}. {safe_name}.txt"
+
+        # Never overwrite. If something unusual exists, add a suffix.
+        suffix = 2
+        while candidate.exists():
+            candidate = folder / f"{number}. {safe_name} ({suffix}).txt"
+            suffix += 1
+
+        candidate.write_text(text + "\n", encoding="utf-8")
+        return str(candidate)
+
+    def create_temp_pasted_decklist(self, deck_text):
+        """Create a temporary run-only pasted decklist file under Outputs/_temp_pasted_decklists."""
+        text = str(deck_text or "").strip()
+        temp_root = Path(getattr(self.state, "report_output_folder", "Outputs") or "Outputs") / "_temp_pasted_decklists"
+        temp_root.mkdir(parents=True, exist_ok=True)
+        path = temp_root / "current_pasted_decklist.txt"
+        path.write_text(text + "\n", encoding="utf-8")
+        return str(path)
+
     def choose_deck_file(self):
         path, _ = QFileDialog.getOpenFileName(
             self,
@@ -698,6 +902,7 @@ class MainWindow(QMainWindow):
 
         summary = self.summarize_deck_preview(text, Path(path).stem)
         self.state.selected_deck_path = path
+        self.state.deck_folder = str(Path(path).parent)
         self.state.deck_preview_text = text[:12000] + ("\n\n... preview truncated for UI responsiveness ..." if len(text) > 12000 else "")
         self.state.deck_name = summary["deck_name"]
         self.state.commander = summary["commander"]
@@ -877,13 +1082,14 @@ class MainWindow(QMainWindow):
             f"Prompt mode: {self.state.prompt_mode}\n"
             f"Budget note: {self.state.budget_note}\n"
             f"Intended bracket: {self.state.intended_bracket}\n"
-            f"Combo awareness: {self.state.combo_awareness_mode}\n"
+            f"Combo analysis: {self.state.combo_awareness_mode}\n"
             f"Collection mode: {self.state.collection_mode}\n"
             f"Collection source: {self.state.collection_source_mode}\n"
             "Backend config mapping: staged by guarded bridge when run is confirmed"
         )
 
-    def stage_review_settings(self, output_combo, direction_combo, cut_combo, build_up_combo, prompt_combo, budget_input, intended_bracket_combo, combo_awareness_combo=None, summary_label=None, intensity_meaning_label=None):
+    # v0.10.6.1 combo awareness always-on: Review Setup no longer controls combo enablement.
+    def stage_review_settings(self, output_combo, direction_combo, cut_combo, build_up_combo, prompt_combo, budget_input, intended_bracket_combo, combo_awareness_combo=None, collection_mode_combo=None, summary_label=None, intensity_meaning_label=None):
         """Auto-stage Review Setup choices without requiring an Apply button or popup."""
         self.state.output_mode = output_combo.currentText()
         self.state.review_direction = direction_combo.currentText()
@@ -892,8 +1098,14 @@ class MainWindow(QMainWindow):
         self.state.prompt_mode = prompt_combo.currentText()
         self.state.budget_note = budget_input.text().strip() or "No budget note provided"
         self.state.intended_bracket = intended_bracket_combo.currentText()
-        if combo_awareness_combo is not None:
-            self.state.combo_awareness_mode = combo_awareness_combo.currentText()
+        self.state.combo_awareness_mode = "Always included"
+        if collection_mode_combo is not None:
+            self.state.collection_mode = collection_mode_combo.currentText()
+            self.state.use_collection_settings = self.state.collection_mode not in {"No collection", "Full card pool only", "No replacement suggestions"}
+            if self.state.use_collection_settings:
+                self.state.collection_source_note = "Collection mode staged from Review Setup. Source default remains managed in Settings."
+            else:
+                self.state.collection_source_note = "Collection not used for this staged run."
         self.state.bracket = self.state.intended_bracket if self.state.intended_bracket != "Not sure yet" else "Not estimated"
         self.state.status = "Review settings auto-staged"
         if summary_label is not None:
@@ -910,9 +1122,10 @@ class MainWindow(QMainWindow):
         return build_philosophy_lens_page(self)
 
     def stage_guide_presentation(self, text):
-        """Auto-stage guide presentation from Philosophy Lens without requiring Apply."""
-        self.state.guide_presentation = text
-        self.state.status = "Guide presentation auto-staged"
+        """Save guide presentation as an app-wide setting."""
+        self.state.guide_presentation = user_settings.normalize_guide_presentation(text)
+        self.state.status = "Guide presentation saved"
+        self.persist_user_settings()
         self.refresh_context_panel_values()
         self.refresh_run_analysis_previews()
 
@@ -960,7 +1173,7 @@ class MainWindow(QMainWindow):
             f"- Prompt mode: {self.state.prompt_mode}\n"
             f"- Budget note: {self.state.budget_note}\n"
             f"- Intended bracket: {self.state.intended_bracket}\n"
-            f"- Combo awareness: {self.state.combo_awareness_mode}\n"
+            f"- Combo analysis: {self.state.combo_awareness_mode}\n"
             f"- Interface mode: {self.state.interface_mode}\n"
             f"- Collection mode: {self.state.collection_mode}\n"
             f"- Collection source: {self.state.collection_source_mode}\n\n"
@@ -1290,11 +1503,11 @@ class MainWindow(QMainWindow):
                 self.state.collection_txt_file_count = len(list(Path(self.state.collection_folder).glob("*.txt")))
             except Exception:
                 self.state.collection_txt_file_count = 0
-            if self.state.collection_mode != "No collection":
+            if self.state.collection_mode not in {"No collection", "Full card pool only", "No replacement suggestions"}:
                 self.state.collection_source_note = "Entire collection folder staged for guarded run. Selected file payload will not be sent."
         elif self.state.collection_source_mode == "Select collection files":
             self.state.collection_txt_file_count = len(self.state.selected_collection_files)
-            if self.state.collection_mode != "No collection":
+            if self.state.collection_mode not in {"No collection", "Full card pool only", "No replacement suggestions"}:
                 self.state.collection_source_note = "Selected collection files staged for guarded run. Folder payload will not be sent."
 
     def cli_input_bridge_preview_text(self):
@@ -1508,7 +1721,7 @@ class MainWindow(QMainWindow):
             return
 
         self.normalize_collection_source_for_guarded_run()
-        if self.state.collection_mode != "No collection" and not self.collection_source_detail_answered():
+        if self.state.collection_mode not in {"No collection", "Full card pool only", "No replacement suggestions"} and not self.collection_source_detail_answered():
             QMessageBox.warning(
                 self,
                 "Collection Source Detail Required",
@@ -1673,7 +1886,7 @@ class MainWindow(QMainWindow):
         artifact_note = backend_runner.combo_awareness_artifact_value(self.state)
         enabled = backend_runner.combo_awareness_enabled(self.state)
         return (
-            "Optional Combo Awareness Preview\n"
+            "Combo analysis Preview\n"
             "- Current integration target -> local Commander Spellbook combo index\n"
             "- External API calls -> disabled\n"
             "- User opt-in required -> True\n"
@@ -1712,14 +1925,18 @@ class MainWindow(QMainWindow):
     def run_readiness_text(self):
         deck_ready = self.state.selected_deck_path != "No deck file selected"
         commander_ready = self.state.commander_detected
-        collection_ready = self.state.collection_source_note != "Collection source not staged yet." or self.state.collection_mode == "No collection"
+        collection_disabled = self.state.collection_mode in {"No collection", "Full card pool only", "No replacement suggestions"}
+        collection_ready = collection_disabled or self.state.collection_source_note != "Collection source not staged yet."
+        review_ready = True
+        philosophy_ready = True
+
         return (
-            f"{'✓' if deck_ready else '⚠'} Deck file selected: {'Yes' if deck_ready else 'No'}\n"
-            f"{'✓' if commander_ready else '⚠'} Commander detected in preview: {'Yes' if commander_ready else 'No'}\n"
-            "✓ Review settings staged: UI defaults or applied values are available\n"
-            f"{'✓' if collection_ready else '⚠'} Collection source staged or optional: {'Yes' if collection_ready else 'No'}\n"
-            "✓ Philosophy lens available: Yes\n"
-            "⚠ Backend execution: guarded confirmation required"
+            f"{'✅' if deck_ready else '❌'} Deck selected: {'Yes' if deck_ready else 'No'}\n"
+            f"{'✅' if commander_ready else '❌'} Commander detected: {'Yes' if commander_ready else 'No'}\n"
+            f"{'✅' if review_ready else '❌'} Review settings staged: Yes\n"
+            f"{'✅' if collection_ready else '❌'} Collection ready or optional: {'Yes' if collection_ready else 'No'}\n"
+            f"{'✅' if philosophy_ready else '❌'} Philosophy lens available: Yes\n"
+            "⚠️ Backend execution still requires guarded confirmation"
         )
 
     def run_placeholder_message(self):
@@ -1959,7 +2176,56 @@ class MainWindow(QMainWindow):
         if self.report_viewer_copy_button is not None:
             self.report_viewer_copy_button.setEnabled(bool(self.state.report_viewer_current_text.strip()))
 
+    def report_viewer_file_button_clicked(self, path_text):
+        """Handle Report Viewer detected-file buttons in either User View or Dev View."""
+        handler = getattr(self, "report_viewer_open_detected_file", None)
+        if callable(handler):
+            handler(path_text)
+        else:
+            self.load_report_file_into_viewer(path_text)
+
+
+    def refresh_report_viewer_mode_controls(self):
+        """Refresh Report Viewer User/Dev visibility from the current Interface Mode.
+
+        v0.10.5.3.3:
+        Report Viewer pages are built once with both lanes available. This method
+        keeps User Mode clean while allowing Developer Mode to reveal Dev View
+        without rebuilding the active Settings page and causing the flash popup.
+        """
+        is_dev = self.is_dev_mode()
+
+        if getattr(self, "report_viewer_nav_panel", None) is not None:
+            self.report_viewer_nav_panel.setVisible(is_dev)
+
+        if getattr(self, "report_viewer_dev_view_button", None) is not None:
+            self.report_viewer_dev_view_button.setVisible(is_dev)
+
+        if getattr(self, "report_viewer_mode_intro_label", None) is not None:
+            self.report_viewer_mode_intro_label.setText(
+                "User View is for AI handoff and readable guidance. Raw report tools are available in Dev View."
+                if is_dev
+                else "User View is for AI handoff and readable guidance."
+            )
+
+        if not is_dev and getattr(self, "report_viewer_mode_stack", None) is not None:
+            self.report_viewer_mode_stack.setCurrentIndex(0)
+            if getattr(self, "report_viewer_user_view_button", None) is not None:
+                self.report_viewer_user_view_button.setObjectName("primaryButton")
+                self.report_viewer_user_view_button.style().unpolish(self.report_viewer_user_view_button)
+                self.report_viewer_user_view_button.style().polish(self.report_viewer_user_view_button)
+            if getattr(self, "report_viewer_dev_view_button", None) is not None:
+                self.report_viewer_dev_view_button.setObjectName("utilityButton")
+                self.report_viewer_dev_view_button.style().unpolish(self.report_viewer_dev_view_button)
+                self.report_viewer_dev_view_button.style().polish(self.report_viewer_dev_view_button)
+
     def refresh_report_viewer_file_list(self):
+        if self.is_user_facing_mode():
+            layout = getattr(self, "report_viewer_file_buttons_layout", None)
+            if layout is not None:
+                self.clear_layout_widgets(layout)
+            return
+
         """Populate Report Viewer with grouped files detected from the latest guarded run."""
         if self.report_viewer_file_buttons_layout is None:
             return
@@ -1984,7 +2250,7 @@ class MainWindow(QMainWindow):
                     btn.setObjectName("utilityButton")
                     btn.setMinimumHeight(38)
                     btn.setToolTip(f"{Path(path_text).name}\n{path_text}")
-                    btn.clicked.connect(lambda checked=False, p=path_text: self.load_report_file_into_viewer(p))
+                    btn.clicked.connect(lambda checked=False, p=path_text: self.report_viewer_file_button_clicked(p))
                     self.report_viewer_file_buttons_layout.addWidget(btn)
                 self.report_viewer_file_buttons_layout.addSpacing(8)
         self.report_viewer_file_buttons_layout.addStretch(1)
@@ -2081,8 +2347,8 @@ class MainWindow(QMainWindow):
 
     def stage_collection_mode(self, mode):
         self.state.collection_mode = mode
-        self.state.use_collection_settings = mode != "No collection"
-        if mode == "No collection":
+        self.state.use_collection_settings = mode not in {"No collection", "Full card pool only", "No replacement suggestions"}
+        if mode in {"No collection", "Full card pool only", "No replacement suggestions"}:
             self.state.collection_source_note = "Collection disabled for this staged run."
             self.state.status = "Collection disabled"
         else:
@@ -2101,7 +2367,7 @@ class MainWindow(QMainWindow):
         else:
             self.state.collection_txt_file_count = len(self.state.selected_collection_files)
             self.state.collection_source_note = "Specific collection files selected in UI. Use Select Collection Files to choose one or more .txt files."
-        self.state.use_collection_settings = self.state.collection_mode != "No collection"
+        self.state.use_collection_settings = self.state.collection_mode not in {"No collection", "Full card pool only", "No replacement suggestions"}
         self.state.status = "Collection settings auto-staged"
         self.refresh_collection_page_widgets()
 
@@ -2116,8 +2382,11 @@ class MainWindow(QMainWindow):
             self.state.collection_txt_file_count = 0
         self.state.collection_source_mode = "Entire collection folder"
         self.state.collection_source_note = "Collection folder staged in UI. Backend loader is not connected yet."
-        self.state.use_collection_settings = self.state.collection_mode != "No collection"
+        self.state.use_collection_settings = self.state.collection_mode not in {"No collection", "Full card pool only", "No replacement suggestions"}
         self.state.status = "Collection folder auto-staged"
+        self.persist_user_settings()
+        if getattr(self, "settings_collection_folder_label", None) is not None:
+            self.settings_collection_folder_label.setText(folder)
         self.refresh_collection_page_widgets()
 
     def choose_collection_files(self):
@@ -2134,14 +2403,17 @@ class MainWindow(QMainWindow):
         self.state.collection_source_mode = "Select collection files"
         self.state.collection_txt_file_count = len(files)
         self.state.collection_source_note = "Specific collection files staged in UI. Backend loader is not connected yet."
-        self.state.use_collection_settings = self.state.collection_mode != "No collection"
+        self.state.use_collection_settings = self.state.collection_mode not in {"No collection", "Full card pool only", "No replacement suggestions"}
         self.state.status = "Collection files auto-staged"
+        self.persist_user_settings()
+        if getattr(self, "settings_collection_folder_label", None) is not None:
+            self.settings_collection_folder_label.setText(f"{len(files)} selected file(s)")
         self.refresh_collection_page_widgets()
 
     def stage_collection_settings(self, summary_label=None):
         """Auto-stage collection settings without requiring an Apply button or popup."""
-        self.state.use_collection_settings = self.state.collection_mode != "No collection"
-        if self.state.collection_mode == "No collection":
+        self.state.use_collection_settings = self.state.collection_mode not in {"No collection", "Full card pool only", "No replacement suggestions"}
+        if self.state.collection_mode in {"No collection", "Full card pool only", "No replacement suggestions"}:
             self.state.collection_source_note = "Collection disabled for this staged run."
         elif self.state.collection_source_mode == "Entire collection folder":
             try:

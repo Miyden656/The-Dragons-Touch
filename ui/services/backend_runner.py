@@ -1,3 +1,4 @@
+# v0.10.6.2 combo always-on backend cleanup: local combo awareness is always enabled.
 """Guarded backend runner helpers for The Dragon's Touch desktop UI.
 
 This module is intentionally small and non-visual. It does not start QProcess by
@@ -13,10 +14,11 @@ from pathlib import Path
 
 
 COMBO_AWARENESS_ARTIFACT_BY_MODE = {
-    "Disabled": "report_section",
-    "Report section only": "report_section",
-    "Full debug breakdown only": "breakdown",
-    "Both report section and breakdown": "both",
+    "Always included": "both",
+    "Yes": "both",
+    "Enabled": "both",
+    "Both": "both",
+    "both": "both",
 }
 
 
@@ -26,20 +28,17 @@ def backend_entrypoint_path(state) -> Path:
 
 
 def combo_awareness_enabled(state) -> bool:
-    """Return True only when the user explicitly enables combo awareness in the UI."""
-    return getattr(state, "combo_awareness_mode", "Disabled") != "Disabled"
-
+    """Combo awareness mode is Always included as of v0.10.6.2."""
+    return True
 
 def combo_awareness_artifact_value(state) -> str:
-    """Map the user-facing combo awareness selection to the backend artifact value."""
-    mode = getattr(state, "combo_awareness_mode", "Disabled")
-    return COMBO_AWARENESS_ARTIFACT_BY_MODE.get(mode, "report_section")
-
+    """Always request both combo-aware outputs/artifacts."""
+    return "both"
 
 def guarded_command_preview(state) -> str:
     """Build the visible command preview for the guarded bridge."""
     deck_path = state.selected_deck_path if state.selected_deck_path != "No deck file selected" else "No UI deck selected; main.py may prompt interactively"
-    combo_note = "combo awareness disabled"
+    combo_note = "combo awareness always included"
     if combo_awareness_enabled(state):
         combo_note = f"combo awareness={combo_awareness_artifact_value(state)}"
     return f'py {state.backend_entrypoint}  # guarded run; MTG_DECK_FILE="{deck_path}"; {combo_note}'
@@ -68,3 +67,7 @@ def trim_process_output(text: str, limit: int = 6000) -> str:
     if len(text) <= limit:
         return text
     return text[-limit:] + "\n\n... output truncated to the most recent captured text ..."
+
+def combo_artifact_input_value(state) -> str:
+    """Compatibility alias: always request both combo-aware outputs/artifacts."""
+    return "both"

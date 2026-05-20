@@ -1,5 +1,21 @@
 """Run Analysis page builder for The Dragon's Touch v0.8 alpha hardening.
 
+v0.10.5.5-dev — Run Analysis User/Developer Mode Cleanup:
+- User/Developer Mode visibility cleanup.
+
+v0.10.5.6-dev — Report Viewer User Mode Final Polish:
+- Report Viewer User Mode final polish.
+
+v0.10.5.6.1-dev — Remove Floating Preview Popup Hotfix:
+- Removes the unattached Current Run Summary Preview QLabel to prevent floating popup.
+- Current Run Summary Preview badge is hidden in User Mode and visible in Developer Mode.
+- User Mode shows only Run Analysis, Current Run Summary, and Ready to Run.
+- Developer Mode reveals Latest Run Output and advanced diagnostics.
+- Running Analysis animation remains unchanged.
+
+v0.10.6.1-dev:
+- Combo analysis is always included when combo data is available.
+
 This module intentionally builds only the Run Analysis page layout and local
 widget wiring. The active MainWindow remains the workflow owner for guarded
 confirmation, QProcess execution, CLI bridge state, report detection, and
@@ -55,10 +71,12 @@ def build_run_analysis_page(window):
     left = TexturedPanel(window.theme, kind="iron", glow=True); add_shadow(left, blur=28, y=8)
     l_layout = QVBoxLayout(left); l_layout.setContentsMargins(24, 24, 24, 24); l_layout.setSpacing(16)
 
-    run_card = ReportCard("Ready to Run", window.theme, badges=[("Guarded", "protected"), ("Optional combo", "manual")])
-    run_card.body.addWidget(window.default_note(
-        window.interface_mode_run_analysis_note() + " Combo Awareness only runs if you enabled it in Review Setup."
-    ))
+    run_card = ReportCard("Run Analysis", window.theme, badges=[("Guarded", "protected"), ("Combo included", "manual")])
+    run_mode_note = window.default_note(
+        window.interface_mode_run_analysis_note() + " Combo analysis is always included when combo data is available."
+    )
+    window.run_analysis_mode_note_label = run_mode_note
+    run_card.body.addWidget(run_mode_note)
     run_guarded_btn = QPushButton("Run Analysis")
     run_guarded_btn.setMinimumHeight(58)
     run_guarded_btn.clicked.connect(window.start_guarded_backend_run)
@@ -68,13 +86,14 @@ def build_run_analysis_page(window):
     run_card.body.addWidget(window.default_note("You will still receive the guarded confirmation before backend execution."))
     l_layout.addWidget(run_card, stretch=0)
 
-    readiness = ReportCard("Quick Readiness", window.theme, badges=[("No engine call", "manual")])
+    readiness = ReportCard("Ready to Run", window.theme, badges=[("Checklist", "protected")])
     readiness_box = window.readonly_text_box(window.run_readiness_text(), min_height=95, max_height=145)
     readiness_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+    window.run_readiness_box = readiness_box
     readiness.body.addWidget(readiness_box)
     l_layout.addWidget(readiness, stretch=0)
 
-    result_card = ReportCard("Latest Run Output", window.theme, badges=[("Captured", "manual"), ("Review after run", "protected")])
+    result_card = ReportCard("Latest Run Output", window.theme, badges=[("Developer", "manual"), ("Captured", "protected")])
     result_box = QPlainTextEdit()
     result_box.setReadOnly(True)
     result_box.setPlainText(window.guarded_run_result_text())
@@ -85,6 +104,8 @@ def build_run_analysis_page(window):
     window.guarded_run_result_box = result_box
     result_card.body.addWidget(result_box)
     result_card.body.addWidget(window.default_note("After a successful run, Report Viewer opens automatically. You can also return here from the navigation map."))
+    window.run_latest_output_card = result_card
+    result_card.setVisible(window.is_dev_mode())
     l_layout.addWidget(result_card, stretch=1)
 
     # Idle Run Analysis intentionally does not show the helper-dragon loading forge.
@@ -94,13 +115,15 @@ def build_run_analysis_page(window):
     right = TexturedPanel(window.theme, kind="iron", glow=False); add_shadow(right, blur=28, y=8)
     r_layout = QVBoxLayout(right); r_layout.setContentsMargins(24, 24, 24, 24); r_layout.setSpacing(14)
 
-    summary_card = ReportCard("Current Run Summary", window.theme, badges=[("Preview", "manual")])
+    summary_card = ReportCard("Current Run Summary", window.theme)
     preview = QPlainTextEdit(); preview.setReadOnly(True); preview.setPlainText(window.run_config_preview_text()); preview.setMinimumHeight(130); preview.setMaximumHeight(190); preview.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded); preview.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
     preview.setObjectName("runConfigPreview")
     window.run_config_preview_box = preview
     summary_card.body.addWidget(preview)
     summary_card.body.addWidget(window.default_note("This is a compact confirmation of the staged settings that will be sent to the guarded backend."))
-    summary_card.body.addWidget(window.default_note(window.interface_mode_summary_text()))
+    run_summary_mode_note = window.default_note(window.interface_mode_summary_text())
+    window.run_analysis_summary_mode_note_label = run_summary_mode_note
+    summary_card.body.addWidget(run_summary_mode_note)
     r_layout.addWidget(summary_card, stretch=0)
 
     advanced_toggle = QPushButton("Show Advanced Run Details")
@@ -117,7 +140,8 @@ def build_run_analysis_page(window):
     advanced_container.setVisible(window.is_dev_mode())
     window.run_advanced_details_container = advanced_container
     window.run_advanced_details_toggle = advanced_toggle
-    # v0.8.9.7 user/dev visibility boundary
+    advanced_toggle.setVisible(window.is_dev_mode())
+    # v0.10.5.5 user/developer visibility boundary
     if hasattr(window, 'is_dev_facing_mode'):
         advanced_toggle.setVisible(window.is_dev_facing_mode())
         advanced_container.setVisible(window.is_dev_facing_mode())
@@ -129,7 +153,7 @@ def build_run_analysis_page(window):
         "Active backend entrypoint: main.py\n"
         "Legacy name note: deck_helper.py was the older reference.\n"
         "Current alpha path: guarded QProcess run with explicit confirmation. No shell=True, no direct external API calls.\n"
-        "Combo Awareness: optional local index workflow, not part of normal deck review unless enabled.",
+        "Combo analysis: optional local index workflow, not part of normal deck review unless enabled.",
         min_height=95,
         max_height=140
     )
@@ -181,7 +205,7 @@ def build_run_analysis_page(window):
     bridge_card.body.addWidget(bridge_box)
     detail_stack.addWidget(bridge_card)
 
-    combo_card = ReportCard("Optional Combo Awareness", window.theme, badges=[("Local index", "manual"), ("Opt-in", "protected")])
+    combo_card = ReportCard("Combo analysis", window.theme, badges=[("Local index", "manual"), ("Opt-in", "protected")])
     combo_box = QPlainTextEdit()
     combo_box.setReadOnly(True)
     combo_box.setPlainText(window.combo_tracker_preview_text())
@@ -194,7 +218,7 @@ def build_run_analysis_page(window):
     combo_btn = QPushButton("Configured from Review Setup — Optional")
     combo_btn.setEnabled(False)
     combo_card.body.addWidget(combo_btn)
-    combo_card.body.addWidget(window.default_note("Combo Awareness is optional. When enabled in Review Setup, main.py writes separate local combo artifacts; no API calls are made."))
+    combo_card.body.addWidget(window.default_note("Combo analysis is optional. When enabled in Review Setup, main.py writes separate local combo artifacts; no API calls are made."))
     detail_stack.addWidget(combo_card)
 
     guarded_card = ReportCard("Guarded Execution Bridge", window.theme, badges=[("Preview only", "manual"), ("subprocess disabled", "protected")])
@@ -250,7 +274,7 @@ def build_run_analysis_page(window):
         "Future Backend Bridge Stages\n"
         "1. Runtime config contract is visible and refreshes live.\n"
         "2. Safe backend bridge preview is available only in Advanced Run Details.\n"
-        "3. Optional Combo Awareness is configured from Review Setup and remains disabled by default.\n"
+        "3. Combo analysis is configured from Review Setup and remains always included when combo data is available.\n"
         "4. Backend execution remains guarded by explicit user approval.\n"
         "5. Report generation is still handled only by the locked CLI backend.\n\n"
         f"{window.backend_runtime_config_boundary_text()}"

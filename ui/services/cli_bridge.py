@@ -1,3 +1,4 @@
+# v0.10.6.2 combo always-on CLI cleanup: no Disabled combo mode defaults.
 """CLI input bridge helpers for The Dragon's Touch desktop UI.
 
 This module maps staged UI values into the known main.py interactive answers.
@@ -103,8 +104,21 @@ def should_send_guide_presentation_input(state) -> bool:
 
 
 def collection_mode_input_value(state) -> str:
-    mapping = {"No collection": "1", "Prefer collection first": "2", "Collection only": "3", "Collection shakeup": "4"}
-    return mapping.get(state.collection_mode, "1")
+    # v0.10.5.4 keeps the UI user-facing while preserving the existing CLI bridge.
+    # Existing backend prompt mapping:
+    # 1 = no collection preference, 2 = prefer collection first,
+    # 3 = collection only, 4 = collection shakeup.
+    mapping = {
+        "Collection first, then full card pool": "2",
+        "Collection only": "3",
+        "Full card pool only": "1",
+        "No replacement suggestions": "1",
+        # Legacy compatibility:
+        "No collection": "1",
+        "Prefer collection first": "2",
+        "Collection shakeup": "4",
+    }
+    return mapping.get(state.collection_mode, "2")
 
 
 def should_send_collection_mode_input(state) -> bool:
@@ -117,11 +131,12 @@ def collection_source_input_value(state) -> str:
 
 
 def should_send_collection_source_input(state) -> bool:
-    return should_send_collection_mode_input(state) and state.collection_mode != "No collection"
+    collection_disabled = state.collection_mode in {"No collection", "Full card pool only", "No replacement suggestions"}
+    return should_send_collection_mode_input(state) and not collection_disabled
 
 
 def collection_source_detail_answered(state) -> bool:
-    if state.collection_mode == "No collection":
+    if state.collection_mode in {"No collection", "Full card pool only", "No replacement suggestions"}:
         return True
     if state.collection_source_mode == "Entire collection folder":
         return bool(str(state.collection_folder).strip())
@@ -131,7 +146,7 @@ def collection_source_detail_answered(state) -> bool:
 
 
 def collection_source_detail_preview_text(state) -> str:
-    if state.collection_mode == "No collection":
+    if state.collection_mode in {"No collection", "Full card pool only", "No replacement suggestions"}:
         return "not required because Collection Mode is No collection"
     if state.collection_source_mode == "Entire collection folder":
         folder = str(state.collection_folder).strip() or "not staged"
@@ -151,7 +166,7 @@ def build_cli_input_payload(state) -> CLIInputPayload:
     sent_parts: list[str] = []
     if state.selected_deck_path != "No deck file selected":
         sent_parts.append(f"handed selected deck to main.py via MTG_DECK_FILE: {state.selected_deck_path}")
-    combo_mode = getattr(state, "combo_awareness_mode", "Disabled")
+    combo_mode = getattr(state, "combo_awareness_mode", "Always included")
     sent_parts.append(f"combo awareness environment handoff staged by QProcess: {combo_mode}")
     output_value = output_mode_input_value(state)
     input_lines.append(output_value)
@@ -236,7 +251,7 @@ def cli_input_bridge_preview_text(state) -> str:
         "- bridge_scope -> Build-up, Cut-down, Auto-batch defaults, top-level/subtype philosophy, guide presentation, collection mode, and collection source\n"
         "- strategy -> send staged UI answers in the same order main.py asks for them, then capture any unexpected prompt/error\n"
         f"- selected_deck_handoff -> MTG_DECK_FILE={state.selected_deck_path if state.selected_deck_path != 'No deck file selected' else 'not staged'}\n"
-        f"- combo_awareness_env_handoff -> {getattr(state, 'combo_awareness_mode', 'Disabled')}\n"
+        f"- combo_awareness_env_handoff -> {getattr(state, 'combo_awareness_mode', 'Always included')}\n"
         "- known_prompt_1 -> Output mode [1=Normal]:\n"
         f"- ui_output_mode -> {state.output_mode}\n"
         f"- output_mode_stdin_value_to_send -> {output_mode_input_value(state)}\n"
@@ -279,3 +294,13 @@ def cli_input_bridge_preview_text(state) -> str:
         "- unknown_future_prompts_answered -> False\n"
         "- safety_note -> this patch attempts all known gaps, but still captures surprises instead of hiding them\n"
     )
+
+
+def combo_awareness_enabled(state) -> bool:
+    # v0.10.6.2: Combo awareness is always on / Always included.
+    return True
+
+def combo_artifact_input_value(state) -> str:
+    # v0.10.6.2: Always request both combo-aware outputs/artifacts.
+    return "both"
+

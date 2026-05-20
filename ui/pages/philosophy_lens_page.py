@@ -1,5 +1,9 @@
 """Philosophy Lens page builder for The Dragon's Touch v0.7 alpha hardening.
 
+v0.10.5.7-dev:
+- App-wide guide style selection now lives in Settings only.
+- Philosophy Lens remains focused on deckbuilding philosophy/persona direction.
+
 This module intentionally builds only the Philosophy Lens page layout and local
 signal wiring. The active MainWindow remains the workflow owner for staged
 state, Run Analysis refreshes, backend handoff, and CLI/main.py execution.
@@ -9,10 +13,10 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
 try:
-    from ui.constants import GUIDE_PRESENTATION_OPTIONS, PHILOSOPHY_SUBTYPE_OPTIONS, PHILOSOPHY_LENS_HELP_TEXT
+    from ui.constants import PHILOSOPHY_SUBTYPE_OPTIONS, PHILOSOPHY_LENS_HELP_TEXT
     from ui.widgets import add_shadow, TexturedPanel, ReportCard
 except ImportError:  # Allows direct local execution from inside the ui/ folder.
-    from constants import GUIDE_PRESENTATION_OPTIONS, PHILOSOPHY_SUBTYPE_OPTIONS, PHILOSOPHY_LENS_HELP_TEXT
+    from constants import PHILOSOPHY_SUBTYPE_OPTIONS, PHILOSOPHY_LENS_HELP_TEXT
     from widgets import add_shadow, TexturedPanel, ReportCard
 
 
@@ -54,23 +58,6 @@ def build_philosophy_lens_page(window):
         card.body.addWidget(btn)
         cards.addWidget(card)
     body_layout.addLayout(cards)
-
-    guide_card = ReportCard("Guide Presentation", window.theme, badges=[("Optional guidance", "manual")])
-    guide_card.setMinimumHeight(150)
-    guide_card.body.addWidget(window.make_text(
-        "Choose how the philosophy guide should be presented. This belongs with the Philosophy Lens, not cut/build mechanics.",
-        paper=True
-    ))
-    guide_combo = QComboBox()
-    guide_combo.setMinimumHeight(44)
-    guide_combo.addItems(GUIDE_PRESENTATION_OPTIONS)
-    guide_combo.setCurrentText(window.state.guide_presentation)
-    window.configure_combo_popup(guide_combo)
-    guide_combo.currentTextChanged.connect(window.stage_guide_presentation)
-    guide_card.body.addWidget(guide_combo)
-    guide_card.body.addWidget(window.default_note(PHILOSOPHY_LENS_HELP_TEXT))
-    guide_card.body.addWidget(window.default_note("Default: Either / random. Used after the top-level philosophy lens in the guarded CLI bridge."))
-    body_layout.addWidget(guide_card)
 
     subtype_card = ReportCard("Specific Philosophy Subtype", window.theme, badges=[("optional bridge", "manual")])
     subtype_card.setMinimumHeight(150)

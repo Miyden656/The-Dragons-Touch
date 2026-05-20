@@ -420,3 +420,45 @@ v0.9.8-dev — v0.9 Stable Candidate Final Regression
 
 v0.9 Stable Lock Package
 
+v0.10.0 — Simple View / Human-Readable UI Presentation Layer
+
+v0.10.1-dev — Simple View UI Placeholder
+v0.10.1.3-dev — Simple View Placeholder Visual Cleanup
+
+v0.10.1.10-dev — Direct Report Viewer Replacement: VISUAL PASS / LOCKABLE
+
+v0.10.2-dev - User View Report Section Extraction MVP
+
+v0.10.3-dev — User View Snippet Readability Polish
+
+v0.10.3.1-dev — Owned Candidate Extraction Polish + Combo View Button
+v0.10.3.2-dev — Combo View Expansion + Single-Card Completion Alerts
+
+v0.10.3.3-dev — Combo View Completion Alert + Artifact Fallback
+
+v0.10.4-dev — User/Dev Mode Visibility Cleanup
+
+v0.10.5-dev — 
+
+v0.10.5.1-dev — Settings Page Foundation / Persistence
+
+v0.10.5.2-dev — Navigation Cleanup / Remove Collection Source + Batch Tools
+
+v0.10.5.3-dev — Deck Selection Upgrade: File / Paste / Link Placeholder
+
+v0.10.5.4-dev — Review Setup Compact Layout + Collection Mode Move
+
+v0.10.5.5-dev — Run Analysis User/Developer Mode Cleanup
+
+v0.10.5.6-dev — Report Viewer User Mode Final Polish
+
+v0.10.5.7-dev — Interface Mode Regression Sweep
+
+v0.10.5.8-dev — v0.10.5 Architecture Cleanup Lock
+
+v0.10.6-dev — Full Report Viewer Regression Pass
+
+v0.10.7-dev — Batch / Combo Regression Smoke Test
+
+v0.10.8-dev — v0.10 Stable Lock Package
+

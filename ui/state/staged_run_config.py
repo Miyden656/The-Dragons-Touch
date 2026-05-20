@@ -58,8 +58,11 @@ class AppState:
     use_collection_settings: bool = False
     collection_mode: str = DEFAULT_COLLECTION_MODE
     collection_source_mode: str = DEFAULT_COLLECTION_SOURCE_MODE
-    combo_awareness_mode: str = DEFAULT_COMBO_AWARENESS_MODE
+    combo_awareness_mode: str = "Always included"
     interface_mode: str = DEFAULT_INTERFACE_MODE
+    report_output_folder: str = "Outputs"
+    ui_density: str = "Normal"
+    developer_report_viewer_last_view: str = "User View"
     collection_folder: str = "collection"
     selected_collection_files: list[str] = field(default_factory=list)
     collection_txt_file_count: int = 0

@@ -5,10 +5,11 @@ wiring. The active MainWindow remains the workflow owner for staged state,
 Run Analysis refreshes, backend handoff, and CLI/main.py execution.
 """
 
-from PySide6.QtCore import QSignalBlocker
+from PySide6.QtCore import QSignalBlocker, Qt
 from PySide6.QtWidgets import (
     QComboBox,
     QGridLayout,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
     QSizePolicy,
@@ -27,6 +28,8 @@ try:
         PROMPT_MODE_OPTIONS,
         INTENDED_BRACKET_OPTIONS,
         COMBO_AWARENESS_OPTIONS,
+        COLLECTION_MODE_OPTIONS,
+        COLLECTION_MODE_OPTIONS,
     )
     from ui.widgets import add_shadow, TexturedPanel, ReportCard
 except ImportError:  # Allows direct local execution from inside the ui/ folder.
@@ -43,154 +46,190 @@ except ImportError:  # Allows direct local execution from inside the ui/ folder.
     from widgets import add_shadow, TexturedPanel, ReportCard
 
 
+
+def _compact_row(window, label_text, widget, note_text=""):
+    row = QWidget()
+    row_layout = QHBoxLayout(row)
+    row_layout.setContentsMargins(0, 0, 0, 0)
+    row_layout.setSpacing(12)
+
+    label = QLabel(label_text)
+    label.setObjectName("helperText")
+    label.setFixedWidth(120)
+    label.setWordWrap(True)
+
+    row_layout.addWidget(label)
+    row_layout.addWidget(widget, stretch=1)
+
+    if note_text:
+        note = QLabel(note_text)
+        note.setObjectName("defaultNote")
+        note.setWordWrap(True)
+        note.setMinimumWidth(140)
+        row_layout.addWidget(note, stretch=1)
+
+    return row
+
+
+def _make_combo(window, options, current):
+    combo = QComboBox()
+    combo.addItems(options)
+    combo.setCurrentText(current)
+    window.configure_combo_popup(combo)
+    combo.setMinimumHeight(30)
+    return combo
+
+
 def build_review_setup_page(window):
-    """Build the Review Setup page while keeping staged-state behavior on MainWindow."""
+    """Build compact current-run Review Setup controls.
+
+    v0.10.5.4-dev:
+    - Compact current-run settings layout.
+
+    v0.10.5.4.1-dev:
+    - Readability and combo Yes/No hotfix.
+
+    v0.10.5.4.2-dev:
+    - Dashboard-fit layout.
+
+    v0.10.6.1-dev:
+    - Combo awareness is always included and no longer a user toggle.
+    - Settings owns app-wide defaults.
+    - Review Setup owns current-run choices.
+    - Collection Mode now lives here.
+    """
     page, layout = window.page_container(
         "Review Setup",
-        f"Stage review choices for one deck review. {APP_VERSION} updates choices immediately; these settings guide the report and do not edit your deck automatically."
+        f"Stage current-run choices for one deck review. {APP_VERSION} keeps app-wide defaults in Settings and run choices here."
     )
+
     scroll, content = window.scroll_content()
-    grid_panel = TexturedPanel(window.theme, kind="iron", glow=False); add_shadow(grid_panel, blur=24, y=8)
-    grid = QGridLayout(grid_panel); grid.setContentsMargins(22, 22, 22, 22); grid.setSpacing(16)
+    scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+    grid_panel = TexturedPanel(window.theme, kind="iron", glow=False)
+    add_shadow(grid_panel, blur=24, y=8)
+    grid = QGridLayout(grid_panel)
+    grid.setContentsMargins(14, 14, 14, 14)
+    grid.setSpacing(10)
     grid.setColumnStretch(0, 1)
     grid.setColumnStretch(1, 1)
 
-    output_card = ReportCard("Output Mode", window.theme)
-    output_combo = QComboBox(); output_combo.addItems(OUTPUT_MODE_OPTIONS); output_combo.setCurrentText(window.state.output_mode); window.configure_combo_popup(output_combo)
-    output_card.body.addWidget(output_combo); output_card.body.addWidget(window.default_note("Default: Both")); grid.addWidget(output_card, 0, 0)
+    # ------------------------------------------------------------------
+    # Review basics.
+    # ------------------------------------------------------------------
+    basics_card = ReportCard("Review Basics", window.theme, badges=[("Current run", "primary")])
 
-    direction_card = ReportCard("Review Direction", window.theme)
-    direction_combo = QComboBox(); direction_combo.addItems(REVIEW_DIRECTION_OPTIONS); direction_combo.setCurrentText(window.state.review_direction); window.configure_combo_popup(direction_combo)
-    direction_card.body.addWidget(direction_combo)
-    direction_card.body.addWidget(window.default_note("Default: Cut down. Auto batch is development-oriented and will move behind development mode later."))
-    grid.addWidget(direction_card, 0, 1)
+    output_combo = _make_combo(window, OUTPUT_MODE_OPTIONS, window.state.output_mode)
+    direction_combo = _make_combo(window, REVIEW_DIRECTION_OPTIONS, window.state.review_direction)
+    cut_combo = _make_combo(window, REVIEW_INTENSITY_OPTIONS, window.state.cut_depth)
+    build_up_combo = _make_combo(window, BUILD_UP_MODE_OPTIONS, window.state.build_up_mode)
+    prompt_combo = _make_combo(window, PROMPT_MODE_OPTIONS, window.state.prompt_mode)
 
-    cut_card = ReportCard("Review Intensity", window.theme)
-    cut_combo = QComboBox(); cut_combo.addItems(REVIEW_INTENSITY_OPTIONS); cut_combo.setCurrentText(window.state.cut_depth); window.configure_combo_popup(cut_combo)
-    cut_card.body.addWidget(cut_combo)
-    intensity_meaning_label = window.make_text(window.review_intensity_meaning(), paper=True)
-    cut_card.body.addWidget(intensity_meaning_label)
-    cut_card.body.addWidget(window.default_note("Used when Review Direction is Cut down. Also used as an Auto batch default."))
+    basics_card.body.addWidget(_compact_row(window, "Output mode", output_combo, "Normal, debug, or both report paths."))
+    basics_card.body.addWidget(_compact_row(window, "Review direction", direction_combo, "Cut down, build up, or auto batch."))
+    basics_card.body.addWidget(_compact_row(window, "Review intensity", cut_combo, "How hard the review should press on cuts."))
+    basics_card.body.addWidget(_compact_row(window, "Build-up mode", build_up_combo, "Used when the deck needs cards added."))
+    basics_card.body.addWidget(_compact_row(window, "Prompt mode", prompt_combo, "Interactive AI chat or one-shot worksheet."))
 
-    build_up_card = ReportCard("Build-Up Mode", window.theme)
-    build_up_combo = QComboBox()
-    build_up_combo.addItems(BUILD_UP_MODE_OPTIONS)
-    build_up_combo.setCurrentText(window.state.build_up_mode)
-    window.configure_combo_popup(build_up_combo)
-    build_up_card.body.addWidget(build_up_combo)
-    build_up_card.body.addWidget(window.default_note("Used when Review Direction is Build up. Auto batch may show both fields as global defaults."))
+    intensity_meaning_label = window.default_note(window.review_intensity_meaning())
+    basics_card.body.addWidget(intensity_meaning_label)
 
-    direction_mode_stack = QStackedWidget()
-    direction_mode_stack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    direction_mode_stack.addWidget(cut_card)
-    direction_mode_stack.addWidget(build_up_card)
-    auto_batch_panel = QWidget()
-    auto_panel_layout = QVBoxLayout(auto_batch_panel)
-    auto_panel_layout.setContentsMargins(0, 0, 0, 0)
-    auto_panel_layout.setSpacing(12)
-    # Clone-like dedicated cards keep the Auto batch view from moving the single-mode cards out of the stack.
-    auto_cut_card = ReportCard("Review Intensity", window.theme)
-    auto_cut_combo = QComboBox(); auto_cut_combo.addItems(REVIEW_INTENSITY_OPTIONS); auto_cut_combo.setCurrentText(window.state.cut_depth); window.configure_combo_popup(auto_cut_combo)
-    auto_cut_card.body.addWidget(auto_cut_combo)
-    auto_intensity_label = window.make_text(window.review_intensity_meaning(), paper=True)
-    auto_cut_card.body.addWidget(auto_intensity_label)
-    auto_cut_card.body.addWidget(window.default_note("Auto batch default for 100+ card / cut-down style reviews."))
-    auto_build_card = ReportCard("Build-Up Mode", window.theme)
-    auto_build_combo = QComboBox(); auto_build_combo.addItems(BUILD_UP_MODE_OPTIONS); auto_build_combo.setCurrentText(window.state.build_up_mode); window.configure_combo_popup(auto_build_combo)
-    auto_build_card.body.addWidget(auto_build_combo)
-    auto_build_card.body.addWidget(window.default_note("Auto batch default for under-100-card / build-up style reviews."))
-    auto_panel_layout.addWidget(auto_cut_card)
-    auto_panel_layout.addWidget(auto_build_card)
-    auto_panel_layout.addWidget(window.default_note("Auto batch remains development-oriented and will move behind development mode later."))
-    direction_mode_stack.addWidget(auto_batch_panel)
-    grid.addWidget(direction_mode_stack, 1, 0)
+    # ------------------------------------------------------------------
+    # Table, collection, and combo boundaries.
+    # ------------------------------------------------------------------
+    boundaries_card = ReportCard("Table / Collection Boundaries", window.theme, badges=[("Current run", "primary")])
 
-    prompt_card = ReportCard("Prompt Mode", window.theme)
-    prompt_combo = QComboBox(); prompt_combo.addItems(PROMPT_MODE_OPTIONS); prompt_combo.setCurrentText(window.state.prompt_mode); window.configure_combo_popup(prompt_combo)
-    prompt_card.body.addWidget(prompt_combo); prompt_card.body.addWidget(window.default_note("Default: Interactive AI chat")); grid.addWidget(prompt_card, 1, 1)
-
-    budget_card = ReportCard("Table / Budget Boundaries", window.theme)
+    intended_bracket_combo = _make_combo(window, INTENDED_BRACKET_OPTIONS, window.state.intended_bracket)
     budget_input = QLineEdit(window.state.budget_note)
-    intended_bracket_combo = QComboBox()
-    intended_bracket_combo.addItems(INTENDED_BRACKET_OPTIONS)
-    intended_bracket_combo.setCurrentText(window.state.intended_bracket)
-    window.configure_combo_popup(intended_bracket_combo)
-    budget_card.body.addWidget(QLabel("Budget Note"))
-    budget_card.body.addWidget(budget_input)
-    budget_card.body.addWidget(QLabel("Bracket Intended"))
-    budget_card.body.addWidget(intended_bracket_combo)
-    budget_card.body.addWidget(window.default_note("Collection mode and file selection live on the Collection Source page. Bracket and collection values are staged through dropdowns, not checkboxes."))
-    grid.addWidget(budget_card, 2, 1)
+    budget_input.setMinimumHeight(30)
 
-    combo_awareness_card = ReportCard("Combo Awareness", window.theme, badges=[("Optional", "protected"), ("Local only", "manual")])
-    combo_awareness_combo = QComboBox()
-    combo_awareness_combo.addItems(COMBO_AWARENESS_OPTIONS)
-    combo_awareness_combo.setCurrentText(window.state.combo_awareness_mode)
-    window.configure_combo_popup(combo_awareness_combo)
-    combo_awareness_card.body.addWidget(QLabel("Commander Spellbook combo check"))
-    combo_awareness_card.body.addWidget(combo_awareness_combo)
-    combo_awareness_card.body.addWidget(window.default_note("Default: Disabled. When enabled, main.py writes separate combo-awareness artifacts only. No API calls and no normal report injection."))
-    grid.addWidget(combo_awareness_card, 2, 0)
+    collection_mode_combo = _make_combo(window, COLLECTION_MODE_OPTIONS, window.state.collection_mode)
+    window.state.combo_awareness_mode = "Always included"
+    combo_awareness_label = QLabel("Always included")
+    combo_awareness_label.setObjectName("defaultNote")
+    combo_awareness_label.setWordWrap(True)
 
-    summary = TexturedPanel(window.theme, kind="iron_2", glow=True)
-    s_layout = QVBoxLayout(summary); s_layout.setContentsMargins(18, 16, 18, 16)
-    s_title = QLabel("Run Settings Summary"); s_title.setObjectName("sectionTitle"); s_layout.addWidget(s_title)
-    summary_label = window.make_text(window.review_settings_summary_text())
-    s_layout.addWidget(summary_label)
-    auto_note = window.default_note("Auto-staged: changes update this summary immediately. No Apply button required.")
-    s_layout.addWidget(auto_note)
-    grid.addWidget(summary, 3, 0, 1, 2)
+    boundaries_card.body.addWidget(_compact_row(window, "Intended bracket", intended_bracket_combo, "Used as table-fit guidance, not legality."))
+    boundaries_card.body.addWidget(_compact_row(window, "Budget note", budget_input, "Optional note such as $25/card."))
+    boundaries_card.body.addWidget(_compact_row(window, "Collection mode", collection_mode_combo, "Current-run replacement source behavior."))
+    boundaries_card.body.addWidget(_compact_row(window, "Combo analysis", combo_awareness_label, "Always included when combo data is available. The report should give the deck builder every useful option."))
+    boundaries_card.body.addWidget(window.default_note(
+        "Collection Source default lives in Settings. Collection Mode lives here because it changes the current review run."
+    ))
 
-    def refresh_direction_specific_review_fields():
-        direction = direction_combo.currentText()
-        if direction == "Build up":
-            direction_mode_stack.setCurrentIndex(1)
-        elif direction == "Auto batch":
-            direction_mode_stack.setCurrentIndex(2)
-        else:
-            direction_mode_stack.setCurrentIndex(0)
+    # ------------------------------------------------------------------
+    # Summary.
+    # ------------------------------------------------------------------
+    summary = ReportCard("Run Settings Summary", window.theme)
+    summary_label = window.make_text(window.review_settings_summary_text(), paper=True)
+    summary_label.setMinimumHeight(205)
+    summary_label.setStyleSheet("""
+        QPlainTextEdit {
+            color: #1f1208;
+            background-color: rgba(246, 226, 170, 235);
+            border: 1px solid rgba(126, 75, 26, 130);
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 12px;
+        }
+    """)
+    summary.body.addWidget(summary_label)
+    summary.body.addWidget(window.default_note("Auto-staged: changes update this summary immediately. No Apply button required."))
 
-    def sync_auto_batch_mirrors():
-        blocker_a = QSignalBlocker(auto_cut_combo)
-        auto_cut_combo.setCurrentText(cut_combo.currentText())
-        del blocker_a
-        blocker_b = QSignalBlocker(auto_build_combo)
-        auto_build_combo.setCurrentText(build_up_combo.currentText())
-        del blocker_b
-        auto_intensity_label.setText(window.review_intensity_meaning())
+    # ------------------------------------------------------------------
+    # Safety note.
+    # ------------------------------------------------------------------
+    note = ReportCard("Safety Boundary", window.theme)
+    safety_text = window.make_text(
+        "These choices guide the generated review. The Dragon's Touch does not automatically edit deck files. "
+        "Settings controls app-wide defaults; Review Setup controls this run.",
+        paper=True,
+    )
+    safety_text.setMinimumHeight(120)
+    safety_text.setStyleSheet("""
+        QPlainTextEdit {
+            color: #1f1208;
+            background-color: rgba(246, 226, 170, 235);
+            border: 1px solid rgba(126, 75, 26, 130);
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 12px;
+        }
+    """)
+    note.body.addWidget(safety_text)
+
+    # v0.10.5.4.2 dashboard-fit layout:
+    # four readable sections in a 2x2 grid with no oversized side badges.
+    grid.addWidget(basics_card, 0, 0)
+    grid.addWidget(summary, 0, 1)
+    grid.addWidget(boundaries_card, 1, 0)
+    grid.addWidget(note, 1, 1)
 
     def auto_stage_review():
-        if direction_combo.currentText() == "Auto batch":
-            # Keep the single-mode controls in sync with the Auto batch mirror controls.
-            blocker_cut = QSignalBlocker(cut_combo)
-            cut_combo.setCurrentText(auto_cut_combo.currentText())
-            del blocker_cut
-            blocker_build = QSignalBlocker(build_up_combo)
-            build_up_combo.setCurrentText(auto_build_combo.currentText())
-            del blocker_build
-        window.stage_review_settings(output_combo, direction_combo, cut_combo, build_up_combo, prompt_combo, budget_input, intended_bracket_combo, combo_awareness_combo, summary_label, intensity_meaning_label)
-        sync_auto_batch_mirrors()
-        refresh_direction_specific_review_fields()
-
-    refresh_direction_specific_review_fields()
-    sync_auto_batch_mirrors()
+        window.stage_review_settings(
+            output_combo,
+            direction_combo,
+            cut_combo,
+            build_up_combo,
+            prompt_combo,
+            budget_input,
+            intended_bracket_combo,
+            None,
+            collection_mode_combo,
+            summary_label,
+            intensity_meaning_label,
+        )
 
     output_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
     direction_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
     cut_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
     build_up_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
-    auto_cut_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
-    auto_build_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
     prompt_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
     budget_input.textChanged.connect(lambda _text: auto_stage_review())
     intended_bracket_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
-    combo_awareness_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
+    collection_mode_combo.currentTextChanged.connect(lambda _text: auto_stage_review())
 
-    note = TexturedPanel(window.theme, kind="iron_2", glow=False)
-    n_layout = QVBoxLayout(note); n_layout.setContentsMargins(18, 14, 18, 14)
-    n_title = QLabel("Alpha Boundary"); n_title.setObjectName("sectionTitle"); n_layout.addWidget(n_title)
-    n_layout.addWidget(window.make_text("These choices auto-stage inside the UI as soon as you change them. Combo Awareness is optional and writes separate artifacts only. The Dragon’s Touch does not automatically edit deck files."))
-    grid.addWidget(note, 4, 0, 1, 2)
-
-    content.addWidget(grid_panel); content.addStretch(1); layout.addWidget(scroll, stretch=1); return page
-
+    content.addWidget(grid_panel)
+    content.addStretch(1)
+    layout.addWidget(scroll, stretch=1)
+    return page

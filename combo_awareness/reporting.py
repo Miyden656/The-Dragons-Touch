@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """v0.8.10.1-alpha — markdown/report formatting for combo awareness.
 
+v0.10.7.1.1 actual combo reporting source wording hotfix:
+- Combo report text no longer describes combo analysis as optional or enabled only for a run.
+
 Scope guard: reporting split only; no wording/behavior changes, no app integration.
 """
 
@@ -323,11 +326,10 @@ def build_combo_report_section_markdown(
     max_collection_potential: int = 10,
     standalone_artifact: bool = True,
 ) -> str:
-    """Build a concise v0.8.10.1-alpha combo awareness section.
+    """Build a concise combo analysis section.
 
     In standalone artifact mode, this writes the separate report-section file.
-    In embedded mode, the same concise user-facing section can be appended to the
-    normal Dragon's Touch deck report after explicit user opt-in.
+    In embedded mode, the same concise user-facing section is appended to the normal Dragon's Touch deck report when combo data is available.
     It intentionally uses only strict Dragon's Touch findings and avoids
     parity/raw debug counts.
     """
@@ -352,10 +354,10 @@ def build_combo_report_section_markdown(
             "## Scope Guard",
             "",
             "- This is a standalone report-section artifact.",
-            "- The same concise section may also be appended to the normal Dragon's Touch report when the user opts into report-section mode.",
+            "- The same concise section may also be appended to the normal Dragon's Touch report when combo data is available.",
             "- No API calls were made.",
             "- Findings are informational by default, not automatic recommendations.",
-            "- For report-section modes, this concise Combo Awareness section is embedded in the normal deck report for AI handoff.",
+            "- This concise Combo Awareness section is embedded in the normal deck report for AI handoff when combo data is available.",
             "",
             "## Combo Awareness",
             "",
@@ -367,7 +369,7 @@ def build_combo_report_section_markdown(
             "",
             "## Combo Awareness",
             "",
-            "_This optional section was added because Combo Awareness was enabled for this run._",
+            "_This section is included because combo analysis is always part of The Dragon's Touch when combo data is available._",
             "_Findings are informational by default and are not automatic card recommendations._",
             "",
         ]
@@ -440,7 +442,7 @@ def build_combo_report_section_markdown(
         "- Full combo variant details remain available in the isolated combo awareness breakdown artifact.",
         "- Verify template/state requirements before treating a combo as actually executable in-game.",
         "- Check whether the playgroup is comfortable with known infinite combos before adding missing pieces.",
-        "- Future integration should keep combo optimization opt-in.",
+        "- Missing-card combo optimization should remain opt-in; combo analysis itself is always included when data is available.",
         "",
     ])
 
@@ -454,10 +456,9 @@ def build_combo_ai_handoff_prompt_addendum(
     commander_identity: set[str] | None,
     collection_loaded: bool,
 ) -> str:
-    """Build a self-contained AI prompt addendum for opted-in Combo Awareness.
+    """Build a self-contained AI prompt addendum for always-on combo analysis.
 
-    This is appended to the generated user-guided prompt only when the user
-    selected a report-section Combo Awareness mode. It tells the reviewing AI to
+    This is appended to the generated user-guided prompt when combo report data is available. It tells the reviewing AI to
     use the embedded Combo Awareness section in the normal deck report instead
     of asking the user for separate combo artifacts.
     """
@@ -472,7 +473,7 @@ def build_combo_ai_handoff_prompt_addendum(
         "",
         "## Combo Awareness AI Handoff Addendum",
         "",
-        "Combo Awareness was enabled for this Dragon's Touch run.",
+        "Combo analysis is always included for Dragon's Touch runs when combo data is available.",
         "",
         "The normal deck report already includes an embedded **Combo Awareness** section. Do **not** require the pilot to upload or paste `combo_awareness_report_section.md` or `combo_awareness_breakdown.md` before continuing the guided review.",
         "",
