@@ -8,5 +8,5 @@
   "report_output_folder": "Outputs",
   "schema_version": 1,
   "theme": "Dragon Forge",
-  "ui_density": "Normal"
+  "ui_density": "Compact"
 }

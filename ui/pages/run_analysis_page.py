@@ -46,6 +46,131 @@ except ImportError:  # Allows direct local execution from inside the ui/ folder.
     from widgets import add_shadow, TexturedPanel, ForgeOrb, ReportCard
 
 
+def _get_run_analysis_data_setup_status():
+    """Load runtime data setup status without adding hard page-level imports."""
+    try:
+        from ui.services.data_setup_service import get_data_setup_status
+    except ImportError:
+        from services.data_setup_service import get_data_setup_status
+
+    return get_data_setup_status()
+
+
+def _format_run_analysis_data_readiness_guidance():
+    """Return Run Analysis-friendly guidance for missing runtime data."""
+    try:
+        status = _get_run_analysis_data_setup_status()
+    except Exception as exc:
+        return (
+            "Runtime data readiness could not be checked.\n\n"
+            f"Error: {exc}\n\n"
+            "Go to Settings → Data Setup and confirm Scryfall data, combo data, and combo indexes are ready.\n"
+            "No downloads or builds run automatically from this page."
+        )
+
+    lines = [
+        "Runtime Data Readiness",
+        "======================",
+        f"Basic analysis ready: {'Yes' if status.ready_for_basic_analysis else 'No'}",
+        f"Combo analysis ready: {'Yes' if status.ready_for_combo_analysis else 'No'}",
+        "",
+    ]
+
+    if status.ready_for_basic_analysis:
+        lines.append("Basic analysis: Ready. Scryfall card data is available.")
+    else:
+        lines.extend([
+            "Basic analysis: Not ready.",
+            "- Missing or unavailable Scryfall card data.",
+            "- Go to Settings → Data Setup → Download / Update Scryfall.",
+            "- Run Analysis may fail or produce incomplete results until this is fixed.",
+        ])
+
+    lines.append("")
+
+    if status.ready_for_combo_analysis:
+        lines.append("Combo Awareness: Ready. Combo data and the normal combo index are available.")
+    else:
+        lines.append("Combo Awareness: Not ready or incomplete.")
+
+        if not status.commander_spellbook_bulk.exists:
+            lines.append("- Missing Commander Spellbook combo bulk data.")
+            lines.append("- Go to Settings → Data Setup → Download / Update Combo Data.")
+        else:
+            lines.append("- Commander Spellbook combo bulk data is available.")
+
+        if not status.combo_index.exists:
+            lines.append("- Missing normal combo index.")
+            lines.append("- Go to Settings → Data Setup → Build Combo Index.")
+        else:
+            lines.append("- Normal combo index is available.")
+
+        lines.append("- Basic analysis may still run if Scryfall data is ready, but Combo Awareness sections may be limited or unavailable.")
+
+    lines.extend([
+        "",
+        "Setup order for first-run users:",
+        "1. Settings → Data Setup → Download / Update Scryfall",
+        "2. Settings → Data Setup → Download / Update Combo Data",
+        "3. Settings → Data Setup → Build Combo Index",
+        "",
+        "No downloads or builds run automatically from Run Analysis.",
+    ])
+
+    return "\n".join(lines)
+
+
+def _format_run_analysis_soft_warning():
+    """Return a concise soft warning for the Run Analysis page."""
+    try:
+        status = _get_run_analysis_data_setup_status()
+    except Exception as exc:
+        return (
+            "Soft warning: Runtime data readiness could not be checked. "
+            "Run Analysis remains available, but setup problems may cause errors. "
+            f"Details: {exc}"
+        )
+
+    if status.ready_for_basic_analysis and status.ready_for_combo_analysis:
+        return (
+            "Ready: Basic analysis and Combo Awareness data are available. "
+            "Run Analysis can continue normally."
+        )
+
+    warnings = ["Soft warning: Run Analysis is still available, but runtime data is incomplete."]
+
+    if not status.ready_for_basic_analysis:
+        warnings.append(
+            "Basic analysis is not ready because Scryfall card data is missing or unavailable. "
+            "The run may fail or produce incomplete card lookup, legality, strategy, cut, or report results."
+        )
+        warnings.append(
+            "Recommended fix: Settings → Data Setup → Download / Update Scryfall."
+        )
+
+    if not status.ready_for_combo_analysis:
+        warnings.append(
+            "Combo Awareness is not ready because Commander Spellbook combo data and/or the normal combo index is missing. "
+            "Basic deck analysis may still run if Scryfall is ready, but combo sections may be limited or unavailable."
+        )
+
+        if not status.commander_spellbook_bulk.exists:
+            warnings.append(
+                "Recommended fix: Settings → Data Setup → Download / Update Combo Data."
+            )
+
+        if not status.combo_index.exists:
+            warnings.append(
+                "Recommended fix: Settings → Data Setup → Build Combo Index."
+            )
+
+    warnings.append(
+        "Nothing will be downloaded or built automatically from Run Analysis."
+    )
+
+    return "\n\n".join(warnings)
+
+
 def build_run_analysis_page(window):
     """Build the Run Analysis page while keeping guarded-run behavior on MainWindow."""
     page, layout = window.page_container(
@@ -369,4 +494,13 @@ def build_run_analysis_page(window):
     _toggle_run_analysis_header_for_loading(0)
 
     layout.addWidget(run_content_stack, stretch=1)
+    # Runtime Data Readiness guidance.
+    data_readiness_card = ReportCard("Runtime Data Readiness", window.theme, badges=[("Data Setup", "manual")])
+    data_readiness_card.body.addWidget(window.make_text(_format_run_analysis_data_readiness_guidance(), paper=True))
+    l_layout.addWidget(data_readiness_card)
+
+    # Soft warning for missing runtime data.
+    data_soft_warning_card = ReportCard("Run Analysis Data Warning", window.theme, badges=[("Soft Warning", "manual")])
+    data_soft_warning_card.body.addWidget(window.make_text(_format_run_analysis_soft_warning(), paper=True))
+    l_layout.addWidget(data_soft_warning_card)
     return page

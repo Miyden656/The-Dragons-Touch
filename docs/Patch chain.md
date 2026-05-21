@@ -438,7 +438,7 @@ v0.10.3.3-dev — Combo View Completion Alert + Artifact Fallback
 
 v0.10.4-dev — User/Dev Mode Visibility Cleanup
 
-v0.10.5-dev — 
+v0.10.5-dev —
 
 v0.10.5.1-dev — Settings Page Foundation / Persistence
 
@@ -461,4 +461,74 @@ v0.10.6-dev — Full Report Viewer Regression Pass
 v0.10.7-dev — Batch / Combo Regression Smoke Test
 
 v0.10.8-dev — v0.10 Stable Lock Package
+
+v0.11.0-dev — Beta EXE Packaging Plan / Readiness Check
+
+v0.11.0.1-dev — Beta Readiness Verifier Local Data Hotfix
+
+v0.11.1-dev — PyInstaller Build Script Foundation
+
+v0.11.1.1-dev — PyInstaller Build Verifier Hotfix
+
+v0.11.1.4-dev — PyInstaller Clean Staging Build
+
+v0.11.1.5-dev — PyInstaller Docs Staging Cleanup
+
+v0.11.2-dev — Runtime Path Resolution + Data File Expectations
+
+v0.11.3.1-dev — EXE Report Wording / Combo Availability Cleanup
+
+v0.11.4-dev — First-Run Data Setup Foundation
+
+v0.11.4.2-dev — Scryfall Bulk Download HTTP 400 Hotfix
+
+v0.11.5-dev — Data Setup UI in Settings
+
+v0.11.5.1-dev — Settings Data Setup UI Smoke Test / Layout Cleanup
+
+v0.11.6-dev — Data Setup Action Buttons
+
+v0.11.6.2-dev — Settings Import Block Repair + Safe Buttons Hotfix
+
+v0.11.7-dev — Data Setup Download Buttons / Guarded Long-Running Actions
+
+v0.11.7.0-dev — Guarded Scryfall Download Button
+
+v0.11.7.1-dev — Guarded Commander Spellbook Combo Download Button
+
+v0.11.7.2-dev — Guarded Combo Index Button
+
+v0.11.7.3-dev — Data Setup Button Layout / Long-Action Polish
+
+v0.11.7.3.1-dev — Data Setup Status-Only Wording Cleanup
+
+v0.11.7.4-dev — Data Setup Guarded Action Smoke / Lock Verification
+
+v0.11.7.5-dev — v0.11.7 Lock Notes / Commit Prep
+
+v0.11.8-dev — First-Run / Missing Data User Guidance
+
+v0.11.8.1-dev — Run Analysis Missing Data Guidance
+
+v0.11.8.2-dev — Run Analysis Missing Data Button Behavior / Soft Warning
+
+v0.11.8.3-dev — Missing Data Smoke / Edge Case Verification
+
+v0.11.8.4-dev — v0.11.8 Lock Notes / Commit Prep
+
+v0.11.9-dev — EXE Build / Clean Beta Package Validation
+
+v0.11.9.1-dev — Clean Runtime Data Folder Smoke Test
+
+v0.11.9.2-dev — EXE Data Setup End-to-End Test
+
+v0.11.9.2.3-dev — EXE Runtime Build Combo Index Tool Bundle Hotfix
+
+v0.11.9.2.7-dev — Source Beta README / Requirements Cleanup
+
+v0.12.0 — Source-Run Beta Smoke Test Checklist
+
+v0.12.2: NEXT — First-Run Troubleshooting Section
+
+v0.12.3-v0.12.6: NEXT — Source-Run Beta Handoff Polish Roll-Up
 

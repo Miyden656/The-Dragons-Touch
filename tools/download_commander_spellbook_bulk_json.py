@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+r"""
 Download Commander Spellbook bulk combo JSON for The Dragon's Touch.
 
 Default behavior:
@@ -60,7 +60,7 @@ def download_file(url: str, temp_path: Path, chunk_size: int = 1024 * 1024 * 8) 
     request = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "The-Dragons-Touch/0.10 Commander Spellbook bulk importer"
+            "User-Agent": "The-Dragons-Touch/0.11 Commander Spellbook bulk importer"
         },
     )
 

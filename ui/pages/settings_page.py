@@ -1,3 +1,7 @@
+import os
+import sys
+from pathlib import Path
+import subprocess
 """Settings page for The Dragon's Touch.
 
 v0.10.5.1-dev:
@@ -10,7 +14,7 @@ Guide Presentation is confirmed as an app-wide Settings control, not a Philosoph
 
 try:
     from PySide6.QtCore import Qt
-    from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+    from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QApplication, QMessageBox
 
     from ui.constants import (
         INTERFACE_MODE_OPTIONS,
@@ -20,9 +24,10 @@ try:
     )
     from ui.styles.theme import ADVENTURERS_MAP, DRAGON_FORGE
     from ui.widgets import add_shadow, ReportCard, TexturedPanel
+    from ui.services.data_setup_service import get_data_setup_status, download_scryfall_cards, download_commander_spellbook_combo_bulk
 except ImportError:
     from PySide6.QtCore import Qt
-    from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+    from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QApplication, QMessageBox
 
     from constants import (
         INTERFACE_MODE_OPTIONS,
@@ -32,6 +37,7 @@ except ImportError:
     )
     from styles.theme import ADVENTURERS_MAP, DRAGON_FORGE
     from widgets import add_shadow, ReportCard, TexturedPanel
+    from services.data_setup_service import get_data_setup_status, download_scryfall_cards, download_commander_spellbook_combo_bulk
 
 
 def _row(label_text, widget, note_text=None):
@@ -52,7 +58,368 @@ def _combo(window, values, current):
     window.configure_combo_popup(combo)
     return combo
 
+def _format_data_file_status(item):
+    """Format one runtime data file status line for the Settings Data Setup card."""
+    mark = "READY" if getattr(item, "exists", False) else "MISSING"
+    size = getattr(item, "size_bytes", 0)
+    size_text = f"{size:,} bytes" if size else "0 bytes"
+    label = getattr(item, "label", "Runtime data file")
+    path = getattr(item, "path", "")
+    return f"{mark} — {label} ({size_text})\n  {path}"
 
+
+def _format_data_setup_first_run_guidance(status):
+    """Return first-run guidance for missing runtime data."""
+    guidance = ["", "First-run setup guidance:"]
+
+    if status.ready_for_basic_analysis and status.ready_for_combo_analysis:
+        return [
+            "",
+            "First-run setup guidance:",
+            "- Runtime data is ready. You can run deck analysis and Combo Awareness.",
+            "- Use the guarded buttons below only when you want to update local data.",
+        ]
+
+    if not status.scryfall_cards.exists:
+        guidance.append("- Step 1: Click Download / Update Scryfall to enable basic card lookup and deck analysis.")
+    else:
+        guidance.append("- Step 1: Scryfall data is ready.")
+
+    if not status.commander_spellbook_bulk.exists:
+        guidance.append("- Step 2: Click Download / Update Combo Data to fetch Commander Spellbook combo data.")
+    else:
+        guidance.append("- Step 2: Commander Spellbook combo data is ready.")
+
+    if not status.combo_index.exists:
+        if status.commander_spellbook_bulk.exists:
+            guidance.append("- Step 3: Click Build Combo Index to enable report-ready combo analysis.")
+        else:
+            guidance.append("- Step 3: Build Combo Index after Combo Data has been downloaded.")
+    else:
+        guidance.append("- Step 3: Normal combo index is ready.")
+
+    if not status.ready_for_basic_analysis:
+        guidance.append("- Basic analysis is not ready yet. Scryfall data is required.")
+
+    if not status.ready_for_combo_analysis:
+        guidance.append("- Combo analysis is not ready yet. Combo data and the normal combo index are required.")
+
+    guidance.append("- No setup action runs automatically; each download/build button requires confirmation.")
+
+    return guidance
+
+def _format_data_setup_status_text():
+    """Return compact Settings-friendly runtime data setup status text."""
+    try:
+        status = get_data_setup_status()
+    except Exception as exc:
+        return (
+            "Data setup status could not be loaded.\n\n"
+            f"Error: {exc}\n\n"
+            "Run from PowerShell:\n"
+            "py tools\\data_setup.py --status"
+        )
+
+    basic_ready = "Yes" if status.ready_for_basic_analysis else "No"
+    combo_ready = "Yes" if status.ready_for_combo_analysis else "No"
+
+    lines = [
+        "Runtime Data Setup",
+        "==================",
+        f"Basic analysis ready: {basic_ready}",
+        f"Combo analysis ready: {combo_ready}",
+        "",
+        "Runtime folders:",
+        f"- Root: {status.runtime_root}",
+        f"- Data: {status.data_dir}",
+        "",
+        "Data files:",
+        _format_data_file_status(status.scryfall_cards),
+        _format_data_file_status(status.commander_spellbook_bulk),
+        _format_data_file_status(status.combo_index),
+        _format_data_file_status(status.combo_index_parity),
+    ]
+
+    if status.next_steps:
+        lines.extend(["", "Next steps:"])
+        lines.extend(f"- {step}" for step in status.next_steps)
+    else:
+        lines.extend(["", "Status: All required runtime data currently appears ready."])
+
+    lines.extend(_format_data_setup_first_run_guidance(status))
+
+    lines.extend([
+        "",
+        "PowerShell setup commands:",
+        "- py tools\\data_setup.py --status",
+        "- py tools\\data_setup.py --download-scryfall --overwrite",
+        "- py tools\\data_setup.py --download-combos --overwrite",
+        "- py tools\\data_setup.py --commands",
+        "",
+        "Note: Safe actions are local. Download/build actions are guarded and require confirmation.",
+    ])
+
+    return "\n".join(lines)
+
+
+def _data_setup_commands_text():
+    """Return copy-ready PowerShell data setup commands."""
+    return "\n".join([
+        "py tools\\data_setup.py --status",
+        "py tools\\data_setup.py --download-scryfall --overwrite",
+        "py tools\\data_setup.py --download-combos --overwrite",
+        "py tools\\data_setup.py --commands",
+    ])
+
+
+def _set_text_widget_value(widget, text):
+    """Best-effort text update for QLabel/QTextEdit/QPlainTextEdit style widgets."""
+    for method_name in ("setPlainText", "setText"):
+        method = getattr(widget, method_name, None)
+        if callable(method):
+            method(text)
+            return True
+    return False
+
+
+def _refresh_data_setup_status_widget(widget):
+    """Refresh the Settings Data Setup status text."""
+    return _set_text_widget_value(widget, _format_data_setup_status_text())
+
+
+def _open_runtime_data_folder():
+    """Open the active runtime data folder in the OS file browser."""
+    status = get_data_setup_status()
+    data_dir = status.data_dir
+    try:
+        os.startfile(data_dir)
+    except Exception as exc:
+        print(f"Could not open data folder: {exc}")
+
+
+def _copy_data_setup_commands_to_clipboard():
+    """Copy data setup commands to the system clipboard."""
+    try:
+        QApplication.clipboard().setText(_data_setup_commands_text())
+    except Exception as exc:
+        print(f"Could not copy data setup commands: {exc}")
+
+
+def _make_data_setup_button(label, callback):
+    """Create a small Settings Data Setup action button."""
+    button = QPushButton(label)
+    button.clicked.connect(callback)
+    return button
+
+
+def _show_data_setup_message(title, message, *, error=False):
+    """Show a small Settings Data Setup message dialog."""
+    try:
+        icon = QMessageBox.Icon.Critical if error else QMessageBox.Icon.Information
+        box = QMessageBox()
+        box.setIcon(icon)
+        box.setWindowTitle(title)
+        box.setText(message)
+        box.exec()
+    except Exception as exc:
+        print(f"{title}: {message}")
+        print(f"Could not show message dialog: {exc}")
+
+
+def _confirm_data_setup_action(title, message):
+    """Return True if the user confirms a guarded data setup action."""
+    try:
+        result = QMessageBox.question(
+            None,
+            title,
+            message,
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        return result == QMessageBox.StandardButton.Yes
+    except Exception as exc:
+        print(f"Could not show confirmation dialog: {exc}")
+        return False
+
+
+def _download_scryfall_data_guarded(status_widget):
+    """Download/update Scryfall card data after explicit user confirmation."""
+    if not _confirm_data_setup_action(
+        "Download / Update Scryfall Data",
+        "This will download or replace the local Scryfall card data file. "
+        "The download can take a while and the app may appear busy until it finishes.\n\n"
+        "Continue?",
+    ):
+        return
+
+    try:
+        path = download_scryfall_cards(overwrite=True)
+        _refresh_data_setup_status_widget(status_widget)
+        _show_data_setup_message(
+            "Scryfall Data Updated",
+            f"Scryfall card data was downloaded successfully.\n\n{path}",
+        )
+    except Exception as exc:
+        _refresh_data_setup_status_widget(status_widget)
+        _show_data_setup_message(
+            "Scryfall Download Failed",
+            str(exc),
+            error=True,
+        )
+
+
+def _download_combo_data_guarded(status_widget):
+    """Download/update Commander Spellbook combo data after explicit user confirmation."""
+    if not _confirm_data_setup_action(
+        "Download / Update Combo Data",
+        "This will download or replace the local Commander Spellbook combo data file. "
+        "The download is large and the app may appear busy until it finishes.\n\n"
+        "This does not build combo indexes yet. Continue?",
+    ):
+        return
+
+    try:
+        path = download_commander_spellbook_combo_bulk(overwrite=True)
+        _refresh_data_setup_status_widget(status_widget)
+        _show_data_setup_message(
+            "Combo Data Updated",
+            f"Commander Spellbook combo data was downloaded successfully.\n\n{path}\n\n"
+            "Next step: build the combo index.",
+        )
+    except Exception as exc:
+        _refresh_data_setup_status_widget(status_widget)
+        _show_data_setup_message(
+            "Combo Data Download Failed",
+            str(exc),
+            error=True,
+        )
+
+
+def _build_combo_index_guarded(status_widget):
+    """Build the normal Commander Spellbook combo index after explicit user confirmation."""
+    if not _confirm_data_setup_action(
+        "Build Combo Index",
+        "This will rebuild the local Commander Spellbook combo index used by Combo Awareness. "
+        "The app may appear busy until it finishes.\n\n"
+        "This builds the normal user-facing combo_index.json only, not the parity index. Continue?",
+    ):
+        return
+
+    try:
+        import runpy
+        import subprocess
+        import sys
+        from pathlib import Path
+
+        status = get_data_setup_status()
+
+        if not status.commander_spellbook_bulk.exists:
+            _show_data_setup_message(
+                "Combo Index Build Blocked",
+                "Commander Spellbook combo bulk data is missing.\n\n"
+                "Run Download / Update Combo Data first.",
+                error=True,
+            )
+            _refresh_data_setup_status_widget(status_widget)
+            return
+
+        project_root = Path(status.runtime_root)
+        internal_root = project_root / "_internal"
+        meipass_root = Path(getattr(sys, "_MEIPASS", internal_root))
+
+        build_script_candidates = [
+            project_root / "tools" / "build_combo_index.py",
+            internal_root / "tools" / "build_combo_index.py",
+            meipass_root / "tools" / "build_combo_index.py",
+        ]
+
+        build_script = next((candidate for candidate in build_script_candidates if candidate.exists()), None)
+
+        if build_script is None:
+            candidate_text = "\n".join(str(candidate) for candidate in build_script_candidates)
+            _show_data_setup_message(
+                "Combo Index Build Blocked",
+                "Could not find combo index builder script in any expected runtime location:\n\n"
+                f"{candidate_text}",
+                error=True,
+            )
+            _refresh_data_setup_status_widget(status_widget)
+            return
+
+        output_path = Path(status.combo_index.path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        command_args = [
+            str(build_script),
+            "--input",
+            status.commander_spellbook_bulk.path,
+            "--output",
+            str(output_path),
+        ]
+
+        if getattr(sys, "frozen", False):
+            old_argv = sys.argv[:]
+            try:
+                sys.argv = command_args[:]
+                try:
+                    runpy.run_path(str(build_script), run_name="__main__")
+                    return_code = 0
+                except SystemExit as exc:
+                    return_code = exc.code if isinstance(exc.code, int) else 0
+            finally:
+                sys.argv = old_argv
+
+            _refresh_data_setup_status_widget(status_widget)
+
+            if return_code not in (0, None):
+                _show_data_setup_message(
+                    "Combo Index Build Failed",
+                    f"Combo index builder exited with code {return_code}.\n\nScript:\n{build_script}",
+                    error=True,
+                )
+                return
+        else:
+            command = [sys.executable] + command_args
+            result = subprocess.run(
+                command,
+                cwd=str(project_root),
+                capture_output=True,
+                text=True,
+            )
+
+            _refresh_data_setup_status_widget(status_widget)
+
+            if result.returncode != 0:
+                details = "\n".join([
+                    "Combo index build failed.",
+                    "",
+                    "Command:",
+                    " ".join(command),
+                    "",
+                    "STDOUT:",
+                    result.stdout or "(none)",
+                    "",
+                    "STDERR:",
+                    result.stderr or "(none)",
+                ])
+                _show_data_setup_message(
+                    "Combo Index Build Failed",
+                    details,
+                    error=True,
+                )
+                return
+
+        _show_data_setup_message(
+            "Combo Index Built",
+            f"Combo index was built successfully.\n\n{output_path}",
+        )
+    except Exception as exc:
+        _refresh_data_setup_status_widget(status_widget)
+        _show_data_setup_message(
+            "Combo Index Build Failed",
+            str(exc),
+            error=True,
+        )
 def build_settings_page(window):
     page, layout = window.page_container(
         "Settings",
@@ -177,6 +544,55 @@ def build_settings_page(window):
         "User Mode Report Viewer will use this folder as the default place to find the latest user-facing handoff."
     ))
     b_layout.addWidget(report_card)
+
+
+    # Data Setup.
+    data_setup_card = ReportCard("Data Setup", window.theme, badges=[("Beta", "primary"), ("Runtime", "manual")])
+    data_setup_card.body.addWidget(window.default_note(
+        "Shows whether this install has the local runtime data needed for full analysis and combo awareness. "
+        "Safe actions are local; download/build actions are guarded and require confirmation."
+    ))
+    data_setup_status_widget = window.make_text(_format_data_setup_status_text(), paper=True)
+    data_setup_card.body.addWidget(data_setup_status_widget)
+
+    safe_actions_label = QLabel("Safe local actions")
+    safe_actions_label.setObjectName("helperText")
+    data_setup_card.body.addWidget(safe_actions_label)
+
+    data_setup_safe_actions = QHBoxLayout()
+    data_setup_safe_actions.addWidget(_make_data_setup_button(
+        "Refresh Data Status",
+        lambda: _refresh_data_setup_status_widget(data_setup_status_widget),
+    ))
+    data_setup_safe_actions.addWidget(_make_data_setup_button(
+        "Open Data Folder",
+        _open_runtime_data_folder,
+    ))
+    data_setup_safe_actions.addWidget(_make_data_setup_button(
+        "Copy Setup Commands",
+        _copy_data_setup_commands_to_clipboard,
+    ))
+    data_setup_card.body.addLayout(data_setup_safe_actions)
+
+    guarded_actions_label = QLabel("Guarded data actions")
+    guarded_actions_label.setObjectName("helperText")
+    data_setup_card.body.addWidget(guarded_actions_label)
+
+    data_setup_guarded_actions = QHBoxLayout()
+    data_setup_guarded_actions.addWidget(_make_data_setup_button(
+        "Download / Update Scryfall",
+        lambda: _download_scryfall_data_guarded(data_setup_status_widget),
+    ))
+    data_setup_guarded_actions.addWidget(_make_data_setup_button(
+        "Download / Update Combo Data",
+        lambda: _download_combo_data_guarded(data_setup_status_widget),
+    ))
+    data_setup_guarded_actions.addWidget(_make_data_setup_button(
+        "Build Combo Index",
+        lambda: _build_combo_index_guarded(data_setup_status_widget),
+    ))
+    data_setup_card.body.addLayout(data_setup_guarded_actions)
+    b_layout.addWidget(data_setup_card)
 
     # Developer settings status.
     dev_card = ReportCard("Developer Settings", window.theme, badges=[("Settings only", "manual")])

@@ -54,9 +54,16 @@ from reports.debug_sections import DebugSectionPaths, write_debug_sections
 from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
 from combo_awareness.main_hook import write_optional_combo_awareness_artifacts
+from ui.services.app_paths import ensure_runtime_folders, get_runtime_paths, runtime_data_status
 
 
 VERSION_LABEL = "v0.8.10.1-alpha — Combo Awareness Reporting String Hotfix"
+
+# v0.11.3-dev: central runtime paths for source mode and PyInstaller EXE mode.
+_RUNTIME_PATHS = ensure_runtime_folders()
+RUNTIME_SCRYFALL_FILE = _RUNTIME_PATHS.scryfall_cards_json
+RUNTIME_OUTPUT_FOLDER = _RUNTIME_PATHS.outputs_dir
+RUNTIME_BATCH_AGGREGATE_OUTPUT_FOLDER = _RUNTIME_PATHS.outputs_dir / "_batch_reports"
 
 
 def build_analysis_context(
@@ -165,7 +172,7 @@ def process_single_deck(
     # distinction, and a run timestamp instead of merging repeated runs into a
     # plain commander-name folder.
     output_deck_name = make_run_output_deck_name(parsed_deck.safe_commander_name, deck_file)
-    folders = create_unique_run_output_folders(output_deck_name, OUTPUT_FOLDER)
+    folders = create_unique_run_output_folders(output_deck_name, RUNTIME_OUTPUT_FOLDER)
     written_paths: list[Path] = []
 
     if not scryfall_lookup:
@@ -220,7 +227,7 @@ def process_single_deck(
 
 def load_scryfall_or_none() -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]], Exception | None]:
     try:
-        scryfall_cards, scryfall_lookup = load_scryfall_lookup(SCRYFALL_FILE)
+        scryfall_cards, scryfall_lookup = load_scryfall_lookup(RUNTIME_SCRYFALL_FILE)
         print(f"Scryfall data loaded: {len(scryfall_cards)} cards")
         return scryfall_cards, scryfall_lookup, None
     except ScryfallDataError as exc:
@@ -279,7 +286,7 @@ def run_many_decks(
     print()
 
     aggregate_writer = BatchAggregateWriter.create(
-        base_folder=BATCH_AGGREGATE_OUTPUT_FOLDER,
+        base_folder=RUNTIME_BATCH_AGGREGATE_OUTPUT_FOLDER,
         version_label=VERSION_LABEL,
         runtime_config=runtime_config,
         deck_count=len(deck_files),
@@ -318,6 +325,8 @@ def run_many_decks(
 
 def main() -> None:
     print(f"RUNNING THE DRAGON'S TOUCH {VERSION_LABEL}")
+    print(f"Runtime root: {_RUNTIME_PATHS.root}")
+    print(f"Runtime data folder: {_RUNTIME_PATHS.data_dir}")
     deck_files = resolve_deck_files()
     runtime_config = get_runtime_config()
     scryfall_cards, scryfall_lookup, scryfall_error = load_scryfall_or_none()
@@ -334,7 +343,7 @@ def main() -> None:
     if scryfall_error:
         parsed_deck = parse_deck_file(deck_files[0], scryfall_lookup={})
         output_deck_name = make_run_output_deck_name(parsed_deck.safe_commander_name, deck_files[0])
-        folders = create_unique_run_output_folders(output_deck_name, OUTPUT_FOLDER)
+        folders = create_unique_run_output_folders(output_deck_name, RUNTIME_OUTPUT_FOLDER)
         written_paths = [write_parser_only_checkpoint(folders.normal, parsed_deck, scryfall_error)]
     else:
         written_paths = process_single_deck(deck_files[0], runtime_config, scryfall_lookup, collection_summary)

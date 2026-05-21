@@ -16,6 +16,7 @@ from typing import Any
 
 from app_io.output_writer import get_unique_output_path, write_text_file
 from config import RuntimeConfig
+from ui.services.app_paths import get_runtime_paths
 
 from .collection_loader import read_csv_collection_file, read_text_collection_file
 from .combo_matcher import (
@@ -30,8 +31,10 @@ from .models import CollectionIndex
 from .normalization import canonical_identity, normalize_card_name
 from .reporting import build_combo_ai_handoff_prompt_addendum
 
-COMBO_INDEX_PATH = Path("data/commander_spellbook/combo_index.json")
-COMBO_PARITY_INDEX_PATH = Path("data/commander_spellbook/combo_index_parity.json")
+# v0.11.3-dev: resolve combo indexes from the active runtime data folder.
+_RUNTIME_PATHS = get_runtime_paths()
+COMBO_INDEX_PATH = _RUNTIME_PATHS.combo_index_json
+COMBO_PARITY_INDEX_PATH = _RUNTIME_PATHS.combo_index_parity_json
 
 
 def _safe_int(value: object, default: int) -> int:

@@ -81,3 +81,9 @@ data/commander_spellbook/*.tmp
 
 #Retired UI
 Retired UI/
+
+#exe old
+exe tests/
+
+# dist
+dist/
