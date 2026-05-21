@@ -4,14 +4,13 @@ v0.11.4.2-dev — First-run data setup service for The Dragon's Touch.
 Purpose:
 - Provide a backend/service foundation for future Settings/Data Setup UI.
 - Detect whether required runtime data exists.
-- Download Scryfall card data to data/scryfall_cards.json.
+- Download Scryfall default_cards data to data/scryfall_cards.json.
 - Download Commander Spellbook combo data to data/combo.json.
 - Provide clear next-step guidance for building combo indexes.
 
 Hotfix:
 - Use cleaner API request headers for Scryfall.
-- Prefer Scryfall's direct oracle_cards bulk-data endpoint.
-- Fall back to the all bulk-data endpoint if needed.
+- Select Scryfall default_cards from the bulk-data endpoint.
 - Print useful HTTP error bodies instead of opaque tracebacks.
 
 This module does not run automatically on app startup.
@@ -33,8 +32,7 @@ from ui.services.app_paths import ensure_runtime_folders, get_runtime_paths
 
 
 SCRYFALL_BULK_DATA_API = "https://api.scryfall.com/bulk-data"
-SCRYFALL_ORACLE_CARDS_API = "https://api.scryfall.com/bulk-data/oracle-cards"
-SCRYFALL_ORACLE_CARDS_TYPE = "oracle_cards"
+SCRYFALL_DEFAULT_CARDS_BULK_TYPE = "default_cards"
 COMMANDER_SPELLBOOK_VARIANTS_URL = "https://json.commanderspellbook.com/variants.json"
 
 USER_AGENT = "The-Dragons-Touch/0.11"
@@ -226,61 +224,48 @@ def _load_json_url(url: str) -> dict[str, Any]:
         return json.loads(response.read().decode("utf-8"))
 
 
-def _get_scryfall_oracle_download_uri_from_direct_endpoint() -> str:
-    payload = _load_json_url(SCRYFALL_ORACLE_CARDS_API)
-    uri = payload.get("download_uri")
-    if not uri:
-        raise RuntimeError("Scryfall oracle-cards bulk endpoint did not include download_uri.")
-    return str(uri)
-
-
-def _get_scryfall_oracle_download_uri_from_bulk_list() -> str:
+def _get_scryfall_default_cards_download_uri_from_bulk_list() -> str:
     payload = _load_json_url(SCRYFALL_BULK_DATA_API)
 
     for item in payload.get("data", []):
-        if item.get("type") == SCRYFALL_ORACLE_CARDS_TYPE:
+        if item.get("type") == SCRYFALL_DEFAULT_CARDS_BULK_TYPE:
             uri = item.get("download_uri")
             if not uri:
-                raise RuntimeError("Scryfall oracle_cards entry did not include download_uri.")
+                raise RuntimeError("Scryfall default_cards entry did not include download_uri.")
             return str(uri)
 
-    raise RuntimeError("Could not find oracle_cards in Scryfall bulk-data response.")
+    raise RuntimeError("Could not find default_cards in Scryfall bulk-data response.")
 
 
-def _get_scryfall_oracle_download_uri() -> str:
+def _get_scryfall_default_cards_download_uri() -> str:
     """
-    Return the current Scryfall oracle_cards download URI.
+    Return the current Scryfall default_cards download URI.
 
-    Primary path:
-      https://api.scryfall.com/bulk-data/oracle-cards
-
-    Fallback path:
+    Path:
       https://api.scryfall.com/bulk-data
-      then select type == oracle_cards.
+      then select type == default_cards.
     """
     try:
-        return _get_scryfall_oracle_download_uri_from_direct_endpoint()
-    except Exception as direct_error:
-        try:
-            return _get_scryfall_oracle_download_uri_from_bulk_list()
-        except Exception as list_error:
-            raise RuntimeError(
-                "Could not resolve Scryfall oracle_cards download URI.\n\n"
-                f"Direct endpoint error:\n{direct_error}\n\n"
-                f"Bulk list endpoint error:\n{list_error}"
-            ) from list_error
-
+        return _get_scryfall_default_cards_download_uri_from_bulk_list()
+    except Exception as exc:
+        raise RuntimeError(
+            "Could not resolve Scryfall default_cards download URI.\n"
+            "The Download / Update Scryfall action expects Scryfall bulk-data "
+            "type == default_cards."
+        ) from exc
 
 def download_scryfall_cards(*, overwrite: bool = False) -> Path:
     """
-    Download Scryfall oracle card data into the runtime data folder.
+    Download Scryfall default_cards bulk data into the runtime data folder.
 
     Output:
       data/scryfall_cards.json
     """
     paths = ensure_runtime_folders()
-    download_uri = _get_scryfall_oracle_download_uri()
+    print("Downloading Scryfall default_cards bulk data...")
+    download_uri = _get_scryfall_default_cards_download_uri()
     output = _download_file(download_uri, paths.scryfall_cards_json, overwrite=overwrite)
+    print(f"Saved Scryfall default_cards to {output}")
     write_data_setup_status_json()
     return output
 

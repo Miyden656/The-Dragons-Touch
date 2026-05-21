@@ -5,7 +5,7 @@
     "label": "Scryfall card data",
     "path": "C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\data\\scryfall_cards.json",
     "exists": true,
-    "size_bytes": 173103913,
+    "size_bytes": 538900466,
     "required_for": "legality, card lookup, strategy detection, cuts, replacements, reports"
   },
   "commander_spellbook_bulk": {

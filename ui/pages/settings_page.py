@@ -13,7 +13,7 @@ Guide Presentation is confirmed as an app-wide Settings control, not a Philosoph
 """
 
 try:
-    from PySide6.QtCore import Qt
+    from PySide6.QtCore import Qt, QObject, QThread, Signal, Slot
     from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QApplication, QMessageBox
 
     from ui.constants import (
@@ -26,7 +26,7 @@ try:
     from ui.widgets import add_shadow, ReportCard, TexturedPanel
     from ui.services.data_setup_service import get_data_setup_status, download_scryfall_cards, download_commander_spellbook_combo_bulk
 except ImportError:
-    from PySide6.QtCore import Qt
+    from PySide6.QtCore import Qt, QObject, QThread, Signal, Slot
     from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QApplication, QMessageBox
 
     from constants import (
@@ -57,6 +57,110 @@ def _combo(window, values, current):
     combo.setMinimumWidth(260)
     window.configure_combo_popup(combo)
     return combo
+
+class _DataSetupWorker(QObject):
+    """Run one long Data Setup action without blocking the Settings UI."""
+
+    finished = Signal(object)
+    failed = Signal(str)
+
+    def __init__(self, action):
+        super().__init__()
+        self._action = action
+
+    def run(self):
+        try:
+            self.finished.emit(self._action())
+        except Exception as exc:  # noqa: BLE001 - surfaced to user dialog.
+            self.failed.emit(str(exc))
+
+
+class _DataSetupCompletionBridge(QObject):
+    """Handle worker completion on the Qt/UI side and release refs safely."""
+
+    def __init__(self, status_widget, action_button, original_text):
+        super().__init__()
+        self.status_widget = status_widget
+        self.action_button = action_button
+        self.original_text = original_text
+
+    @Slot()
+    def restore_button(self):
+        if self.action_button is not None:
+            self.action_button.setEnabled(True)
+            self.action_button.setText(self.original_text)
+
+    @Slot(object)
+    def on_scryfall_finished(self, path):
+        _refresh_data_setup_status_widget(self.status_widget)
+        self.restore_button()
+        _show_data_setup_message(
+            "Scryfall Data Updated",
+            f"Scryfall default_cards data was downloaded successfully.\n\n{path}",
+        )
+
+    @Slot(str)
+    def on_scryfall_failed(self, message):
+        _refresh_data_setup_status_widget(self.status_widget)
+        self.restore_button()
+        _show_data_setup_message(
+            "Scryfall Download Failed",
+            message,
+            error=True,
+        )
+
+    @Slot()
+    def release_worker_refs(self):
+        if self.action_button is not None:
+            self.action_button._data_setup_thread = None
+            self.action_button._data_setup_worker = None
+            self.action_button._data_setup_bridge = None
+
+
+def _append_status_note(status_widget, note):
+    """Show a temporary progress note without requiring a custom progress widget."""
+    try:
+        base_text = _format_data_setup_status_text()
+    except Exception:
+        base_text = "Runtime Data Setup"
+    _set_text_widget_value(status_widget, f"{base_text}\n\n{note}")
+
+
+def _run_scryfall_download_in_worker(status_widget, action_button):
+    """Download Scryfall data in a background Qt worker thread."""
+    original_text = action_button.text() if action_button is not None else "Download / Update Scryfall"
+
+    if action_button is not None:
+        action_button.setEnabled(False)
+        action_button.setText("Downloading Scryfall...")
+
+    _append_status_note(
+        status_widget,
+        "Scryfall download is running. The app should remain responsive. "
+        "This can take several minutes for default_cards.",
+    )
+
+    thread = QThread()
+    worker = _DataSetupWorker(lambda: download_scryfall_cards(overwrite=True))
+    bridge = _DataSetupCompletionBridge(status_widget, action_button, original_text)
+    worker.moveToThread(thread)
+
+    worker.finished.connect(bridge.on_scryfall_finished)
+    worker.failed.connect(bridge.on_scryfall_failed)
+    worker.finished.connect(thread.quit)
+    worker.failed.connect(thread.quit)
+    thread.started.connect(worker.run)
+    thread.finished.connect(worker.deleteLater)
+    thread.finished.connect(bridge.release_worker_refs)
+    thread.finished.connect(thread.deleteLater)
+
+    # Keep references alive until the worker thread has fully finished.
+    if action_button is not None:
+        action_button._data_setup_thread = thread
+        action_button._data_setup_worker = worker
+        action_button._data_setup_bridge = bridge
+
+    thread.start()
 
 def _format_data_file_status(item):
     """Format one runtime data file status line for the Settings Data Setup card."""
@@ -242,30 +346,18 @@ def _confirm_data_setup_action(title, message):
         return False
 
 
-def _download_scryfall_data_guarded(status_widget):
+def _download_scryfall_data_guarded(status_widget, action_button=None):
     """Download/update Scryfall card data after explicit user confirmation."""
     if not _confirm_data_setup_action(
         "Download / Update Scryfall Data",
-        "This will download or replace the local Scryfall card data file. "
-        "The download can take a while and the app may appear busy until it finishes.\n\n"
+        "This will download or replace the local Scryfall default_cards data file. "
+        "The download is large and may take several minutes. "
+        "The Settings page should remain responsive while it runs.\n\n"
         "Continue?",
     ):
         return
 
-    try:
-        path = download_scryfall_cards(overwrite=True)
-        _refresh_data_setup_status_widget(status_widget)
-        _show_data_setup_message(
-            "Scryfall Data Updated",
-            f"Scryfall card data was downloaded successfully.\n\n{path}",
-        )
-    except Exception as exc:
-        _refresh_data_setup_status_widget(status_widget)
-        _show_data_setup_message(
-            "Scryfall Download Failed",
-            str(exc),
-            error=True,
-        )
+    _run_scryfall_download_in_worker(status_widget, action_button)
 
 
 def _download_combo_data_guarded(status_widget):
@@ -579,10 +671,14 @@ def build_settings_page(window):
     data_setup_card.body.addWidget(guarded_actions_label)
 
     data_setup_guarded_actions = QHBoxLayout()
-    data_setup_guarded_actions.addWidget(_make_data_setup_button(
+    scryfall_download_button = _make_data_setup_button(
         "Download / Update Scryfall",
-        lambda: _download_scryfall_data_guarded(data_setup_status_widget),
-    ))
+        lambda: None,
+    )
+    scryfall_download_button.clicked.connect(
+        lambda: _download_scryfall_data_guarded(data_setup_status_widget, scryfall_download_button)
+    )
+    data_setup_guarded_actions.addWidget(scryfall_download_button)
     data_setup_guarded_actions.addWidget(_make_data_setup_button(
         "Download / Update Combo Data",
         lambda: _download_combo_data_guarded(data_setup_status_widget),
