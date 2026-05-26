@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tdt.strategy_file.frontmatter.schema.v1.0",
+  "title": "The Dragon's Touch Strategy Knowledge File Frontmatter Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "strategy_id",
+    "display_name",
+    "layer",
+    "category_profile",
+    "status",
+    "primary_aliases",
+    "related_strategies",
+    "conflicts_with",
+    "primary_role_buckets",
+    "secondary_role_buckets",
+    "strategy_specific_roles",
+    "core_signal_tags",
+    "commander_signal_tags",
+    "cut_protection_tags",
+    "false_positive_tags",
+    "replacement_priority_tags",
+    "build_from_collection_priority",
+    "basic_land_policy",
+    "nonbasic_land_policy",
+    "minimum_quality_targets"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "strategy_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$",
+      "description": "Stable machine-readable ID. Must match markdown filename without .md."
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 2
+    },
+    "layer": {
+      "type": "string",
+      "enum": [
+        "01_macro_archetypes",
+        "02_mechanical_themes",
+        "03_board_politics_and_table_roles",
+        "04_typal_tribal",
+        "05_niche_themes",
+        "06_fringe_themes",
+        "07_emergent_themes"
+      ]
+    },
+    "category_profile": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$",
+      "description": "Functional strategy profile, not flavor. Example: sacrifice_death_trigger_engine."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "draft_reviewed",
+        "schema_locked",
+        "qa_warning",
+        "runtime_ready",
+        "deprecated"
+      ]
+    },
+    "primary_aliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 2
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "related_strategies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+      },
+      "uniqueItems": true
+    },
+    "conflicts_with": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+      },
+      "uniqueItems": true
+    },
+    "primary_role_buckets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ramp_mana_development",
+          "card_draw_card_advantage",
+          "targeted_removal",
+          "board_wipes",
+          "protection",
+          "recursion",
+          "strategy_enablers",
+          "strategy_payoffs",
+          "finishers_win_conditions",
+          "mana_base_support",
+          "flex_theme_slots"
+        ]
+      },
+      "minItems": 2,
+      "uniqueItems": true
+    },
+    "secondary_role_buckets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ramp_mana_development",
+          "card_draw_card_advantage",
+          "targeted_removal",
+          "board_wipes",
+          "protection",
+          "recursion",
+          "strategy_enablers",
+          "strategy_payoffs",
+          "finishers_win_conditions",
+          "mana_base_support",
+          "flex_theme_slots"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "strategy_specific_roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+      },
+      "minItems": 2,
+      "uniqueItems": true
+    },
+    "core_signal_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+      },
+      "minItems": 3,
+      "uniqueItems": true
+    },
+    "commander_signal_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "cut_protection_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "false_positive_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "replacement_priority_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "build_from_collection_priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "basic_land_policy": {
+      "type": "string",
+      "const": "assume_available"
+    },
+    "nonbasic_land_policy": {
+      "type": "string",
+      "enum": [
+        "collection_first_unless_upgrades_allowed",
+        "collection_first_only",
+        "outside_upgrades_allowed"
+      ]
+    },
+    "minimum_quality_targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum_file_size_kb",
+        "minimum_word_count",
+        "requires_cut_logic",
+        "requires_protection_logic",
+        "requires_replacement_logic",
+        "requires_build_from_collection_guidance"
+      ],
+      "properties": {
+        "minimum_file_size_kb": {
+          "type": "integer",
+          "minimum": 40
+        },
+        "minimum_word_count": {
+          "type": "integer",
+          "minimum": 5000
+        },
+        "requires_cut_logic": {
+          "type": "boolean",
+          "const": true
+        },
+        "requires_protection_logic": {
+          "type": "boolean",
+          "const": true
+        },
+        "requires_replacement_logic": {
+          "type": "boolean",
+          "const": true
+        },
+        "requires_build_from_collection_guidance": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    }
+  }
+}

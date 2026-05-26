@@ -1,0 +1,70 @@
+{
+  "integration_version": "v1.4.38",
+  "recovery_version": "v1.4.38.2",
+  "integration_name": "Active Scoring Report Generator Integration",
+  "runtime_behavior_changed": true,
+  "report_generator_integration_performed": true,
+  "active_scoring_profiles": 249,
+  "legacy_preview_profile_count": 5,
+  "legacy_preview_status": "deprecated_fallback_only",
+  "scoring_source": "strategy_knowledge/index/strategy_profile_index.latest.json",
+  "top_matches_available": true,
+  "source_patch": {
+    "patched_file_count": 0,
+    "sections": {
+      "exists": true,
+      "changed": false,
+      "changes": [
+        "replace:Legacy Fallback Strategy Role Profiles",
+        "replace:Strategy Knowledge Integration"
+      ],
+      "has_marker": true,
+      "has_active_scoring_call": true,
+      "raw_old_five_profile_line_present": false
+    },
+    "bridge": {
+      "exists": true,
+      "changed": false,
+      "changes": [],
+      "has_helper": true,
+      "has_active_scoring_profiles_key": true
+    }
+  },
+  "source_checks": {
+    "reports/strategy_knowledge_sections.py": {
+      "exists": true,
+      "changed": false,
+      "changes": [
+        "replace:Legacy Fallback Strategy Role Profiles",
+        "replace:Strategy Knowledge Integration"
+      ],
+      "has_marker": true,
+      "has_active_scoring_call": true,
+      "raw_old_five_profile_line_present": false
+    },
+    "reports/strategy_live_bridge.py": {
+      "exists": true,
+      "changed": false,
+      "changes": [],
+      "has_helper": true,
+      "has_active_scoring_profiles_key": true
+    }
+  },
+  "generated_report_smoke_has_249_language": true,
+  "generated_report_smoke_has_fallback_language": true,
+  "generated_report_smoke_has_old_misleading_language": true,
+  "main_py_changed": false,
+  "gate_checks": {
+    "active_scoring_profiles_is_249": true,
+    "legacy_preview_profile_count_is_5": true,
+    "legacy_preview_is_fallback_only": true,
+    "top_matches_available": true,
+    "strategy_sections_has_active_scoring_surface": true,
+    "live_bridge_has_active_scoring_surface": true,
+    "generated_report_smoke_surfaces_249": true,
+    "generated_report_smoke_marks_legacy_fallback": true,
+    "generated_report_smoke_omits_old_misleading_language": false,
+    "main_py_not_changed": true
+  },
+  "next_safe_step": "v1.4.39 \u2014 Batch Output Cleanup / Player-Facing Strategy Status Polish"
+}

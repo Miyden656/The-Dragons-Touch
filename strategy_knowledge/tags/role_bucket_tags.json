@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "global_role_buckets": [
+    "ramp_mana_development",
+    "card_draw_card_advantage",
+    "targeted_removal",
+    "board_wipes",
+    "protection",
+    "recursion",
+    "strategy_enablers",
+    "strategy_payoffs",
+    "finishers_win_conditions",
+    "mana_base_support",
+    "flex_theme_slots"
+  ],
+  "note": "Keep global buckets stable and broad. Strategy-specific roles belong in each strategy file frontmatter."
+}

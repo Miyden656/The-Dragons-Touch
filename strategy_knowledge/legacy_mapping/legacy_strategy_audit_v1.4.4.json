@@ -1,0 +1,1785 @@
+{
+  "audit_version": "v1.4.4",
+  "status": "PASS",
+  "runtime_behavior_changed": false,
+  "active_runtime_replacement": false,
+  "legacy_strategy_logic_removal_allowed": false,
+  "mapping_issues": [],
+  "scan": {
+    "files_scanned": 79,
+    "files_with_strategy_related_hits": 74,
+    "group_counts": {
+      "strategy_recognition": 41,
+      "commander_intent": 68,
+      "role_logic": 45,
+      "cut_logic": 48,
+      "protection_logic": 35,
+      "replacement_logic": 37,
+      "build_from_collection": 34,
+      "generation_boundaries": 31
+    },
+    "matched_files": [
+      {
+        "path": "analysis\\__init__.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ]
+        }
+      },
+      {
+        "path": "analysis\\bracket_analysis.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy"
+          ],
+          "commander_intent": [
+            "intent"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "replacement_logic": [
+            "upgrade"
+          ],
+          "generation_boundaries": [
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "analysis\\deck_building_philosophies.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "archetype",
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "commander",
+            "commander_support",
+            "intent"
+          ],
+          "role_logic": [
+            "bucket",
+            "draw",
+            "enabler",
+            "payoff",
+            "protection",
+            "ramp",
+            "recursion",
+            "removal",
+            "role",
+            "wipe"
+          ],
+          "cut_logic": [
+            "cut",
+            "off-plan",
+            "replaceable"
+          ],
+          "protection_logic": [
+            "core",
+            "do not cut",
+            "engine",
+            "protect",
+            "protected"
+          ],
+          "replacement_logic": [
+            "replacement",
+            "upgrade"
+          ]
+        }
+      },
+      {
+        "path": "analysis\\plan_fit.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "archetype",
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "draw",
+            "enabler",
+            "payoff",
+            "protection",
+            "ramp",
+            "recursion",
+            "removal",
+            "role",
+            "wipe"
+          ],
+          "cut_logic": [
+            "cut",
+            "off-plan"
+          ],
+          "protection_logic": [
+            "core",
+            "engine",
+            "protect"
+          ]
+        }
+      },
+      {
+        "path": "analysis\\role_tag_cleanup.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "draw",
+            "payoff",
+            "removal",
+            "role",
+            "wipe"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "generation_boundaries": [
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "analysis\\role_tags.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "draw",
+            "enabler",
+            "payoff",
+            "protection",
+            "ramp",
+            "recursion",
+            "removal",
+            "role",
+            "wipe"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "engine",
+            "protect",
+            "protected"
+          ],
+          "generation_boundaries": [
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "analysis\\strategy_gates.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "archetype",
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "commander_support"
+          ],
+          "role_logic": [
+            "draw",
+            "enabler",
+            "payoff",
+            "protection",
+            "ramp",
+            "recursion",
+            "role"
+          ],
+          "protection_logic": [
+            "core",
+            "engine",
+            "protect"
+          ],
+          "generation_boundaries": [
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "analysis\\strategy_scoring.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "archetype",
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "commander",
+            "commander_support",
+            "intent"
+          ],
+          "role_logic": [
+            "draw",
+            "enabler",
+            "payoff",
+            "protection",
+            "ramp",
+            "recursion",
+            "removal",
+            "role",
+            "wipe"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "engine",
+            "protect"
+          ],
+          "generation_boundaries": [
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\__init__.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "bucket",
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "replacement",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "build_from_collection",
+            "full_100_card_draft",
+            "owned_cards_by_role",
+            "rough_shell"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\basic_lands.py",
+        "hit_groups": {
+          "replacement_logic": [
+            "collection-first"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\build_depth.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "bucket",
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "full_100_card_draft",
+            "owned_cards_by_role",
+            "rough_shell"
+          ],
+          "generation_boundaries": [
+            "mana_base",
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\build_output_contract.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "bucket",
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "full_100_card_draft",
+            "owned_cards_by_role",
+            "rough_shell"
+          ],
+          "generation_boundaries": [
+            "mana_base",
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\build_setup.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "bucket",
+            "role"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\build_start_report_writer.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "build_from_collection"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\build_start_summary.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ],
+          "generation_boundaries": [
+            "mana_base",
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\candidate_pool.py",
+        "hit_groups": {
+          "commander_intent": [
+            "intent"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "replacement"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\collection_source_preferences.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ],
+          "generation_boundaries": [
+            "mana_base",
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\commander_preference_preview.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "bucket",
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core"
+          ],
+          "replacement_logic": [
+            "replacement"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\full_100_card_draft_output.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "full_100_card_draft"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\full_100_card_draft_report_writer.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "build_from_collection": [
+            "build_from_collection",
+            "full_100_card_draft"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\models.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "replacement"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\output_execution_guard.py",
+        "hit_groups": {
+          "commander_intent": [
+            "intent"
+          ],
+          "role_logic": [
+            "protection",
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "protect"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "build_from_collection",
+            "full_100_card_draft",
+            "owned_cards_by_role",
+            "rough_shell"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\output_execution_ui.py",
+        "hit_groups": {
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "build_from_collection"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\output_execution_ui_polish.py",
+        "hit_groups": {
+          "commander_intent": [
+            "intent"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "build_from_collection",
+            "full_100_card_draft",
+            "owned_cards_by_role",
+            "rough_shell"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\output_router.py",
+        "hit_groups": {
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "build_from_collection",
+            "full_100_card_draft",
+            "owned_cards_by_role",
+            "rough_shell"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\output_selected_report_executor.py",
+        "hit_groups": {
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "build_from_collection",
+            "full_100_card_draft",
+            "owned_cards_by_role",
+            "rough_shell"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\output_selector_ui.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "build_from_collection",
+            "full_100_card_draft",
+            "owned_cards_by_role",
+            "rough_shell"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\owned_cards_by_role_output.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "bucket",
+            "draw",
+            "enabler",
+            "payoff",
+            "protection",
+            "ramp",
+            "recursion",
+            "removal",
+            "role",
+            "wipe"
+          ],
+          "protection_logic": [
+            "protect"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "owned_cards_by_role"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\owned_cards_by_role_report_writer.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "build_from_collection": [
+            "build_from_collection",
+            "owned_cards_by_role"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\owned_role_classification.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy",
+            "theme"
+          ],
+          "role_logic": [
+            "bucket",
+            "draw",
+            "enabler",
+            "payoff",
+            "protection",
+            "ramp",
+            "recursion",
+            "removal",
+            "role",
+            "wipe"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "protect"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "replacement"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ],
+          "generation_boundaries": [
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\philosophy_bracket_preferences.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "theme"
+          ],
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "engine"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ],
+          "generation_boundaries": [
+            "mana_base",
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\preferences.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "bucket",
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "replacement_logic": [
+            "collection first",
+            "collection-first",
+            "replacement"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\report_output_smoke_test.py",
+        "hit_groups": {
+          "commander_intent": [
+            "intent"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "build_from_collection",
+            "full_100_card_draft",
+            "owned_cards_by_role",
+            "rough_shell"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\role_buckets.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "bucket",
+            "draw",
+            "enabler",
+            "payoff",
+            "protection",
+            "ramp",
+            "recursion",
+            "removal",
+            "role",
+            "wipe"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "engine",
+            "protect"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "replacement",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ],
+          "generation_boundaries": [
+            "mana_base"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\rough_shell_output.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "bucket",
+            "role"
+          ],
+          "protection_logic": [
+            "core"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "rough_shell"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\rough_shell_report_writer.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "build_from_collection": [
+            "build_from_collection",
+            "rough_shell"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\scope.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "replacement"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\setup_summary.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "bucket",
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core"
+          ],
+          "replacement_logic": [
+            "collection first",
+            "collection-first",
+            "replacement",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "build_from_collection"
+          ],
+          "generation_boundaries": [
+            "mana_base",
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\shell_skeleton.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "bucket",
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "replacement"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ],
+          "generation_boundaries": [
+            "mana_base",
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\strategy_role_mapping.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "bucket",
+            "draw",
+            "enabler",
+            "payoff",
+            "protection",
+            "ramp",
+            "recursion",
+            "removal",
+            "role",
+            "wipe"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "protect"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "replacement"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ]
+        }
+      },
+      {
+        "path": "build_from_collection\\strategy_selection.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "bucket",
+            "draw",
+            "ramp",
+            "recursion",
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "build from collection"
+          ],
+          "generation_boundaries": [
+            "mana_base",
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "commander_discovery\\__init__.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "cut_logic": [
+            "cut"
+          ]
+        }
+      },
+      {
+        "path": "commander_discovery\\candidate_rules.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ]
+        }
+      },
+      {
+        "path": "commander_discovery\\collection_scanner.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "bucket"
+          ]
+        }
+      },
+      {
+        "path": "commander_discovery\\discovery.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ],
+          "replacement_logic": [
+            "replacement"
+          ]
+        }
+      },
+      {
+        "path": "commander_discovery\\eligibility.py",
+        "hit_groups": {
+          "commander_intent": [
+            "background",
+            "commander",
+            "intent",
+            "partner"
+          ]
+        }
+      },
+      {
+        "path": "commander_discovery\\filters.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "protection_logic": [
+            "core"
+          ]
+        }
+      },
+      {
+        "path": "commander_discovery\\models.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander"
+          ]
+        }
+      },
+      {
+        "path": "commander_discovery\\reporting.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "replacement"
+          ]
+        }
+      },
+      {
+        "path": "commander_discovery\\ui_scan_path.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander",
+            "intent"
+          ]
+        }
+      },
+      {
+        "path": "main.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "protect",
+            "protected"
+          ],
+          "replacement_logic": [
+            "replacement"
+          ],
+          "generation_boundaries": [
+            "role_count"
+          ]
+        }
+      },
+      {
+        "path": "README.md",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "protect",
+            "protected"
+          ],
+          "replacement_logic": [
+            "replacement"
+          ]
+        }
+      },
+      {
+        "path": "README_START_HERE.txt",
+        "hit_groups": {
+          "commander_intent": [
+            "commander",
+            "intent"
+          ]
+        }
+      },
+      {
+        "path": "ui\\constants.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "protection"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "engine",
+            "protect",
+            "protected"
+          ],
+          "replacement_logic": [
+            "collection first",
+            "replacement"
+          ]
+        }
+      },
+      {
+        "path": "ui\\dragons_touch_pyside6_workstation.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "background",
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "draw",
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "engine",
+            "protect"
+          ],
+          "replacement_logic": [
+            "replacement",
+            "upgrade"
+          ]
+        }
+      },
+      {
+        "path": "ui\\pages\\collection_source_page.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "intent"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "protect",
+            "protected"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "swap"
+          ]
+        }
+      },
+      {
+        "path": "ui\\pages\\commander_discovery_page.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "primary_strategy",
+            "secondary_strategy",
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "background",
+            "commander",
+            "partner"
+          ],
+          "role_logic": [
+            "bucket",
+            "ramp",
+            "recursion",
+            "role"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "engine",
+            "protect",
+            "protected"
+          ],
+          "replacement_logic": [
+            "collection first",
+            "collection-first",
+            "replacement",
+            "upgrade"
+          ],
+          "build_from_collection": [
+            "build from collection",
+            "build_from_collection",
+            "full_100_card_draft",
+            "owned_cards_by_role",
+            "rough_shell"
+          ],
+          "generation_boundaries": [
+            "generates_deck",
+            "inserts_lands",
+            "mana_base",
+            "role_count",
+            "selects_exact_cards"
+          ]
+        }
+      },
+      {
+        "path": "ui\\pages\\deck_selection_page.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "theme"
+          ],
+          "commander_intent": [
+            "background",
+            "commander",
+            "intent"
+          ],
+          "cut_logic": [
+            "cut"
+          ]
+        }
+      },
+      {
+        "path": "ui\\pages\\future_workspace_page.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent",
+            "partner"
+          ],
+          "role_logic": [
+            "protection"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "engine",
+            "protect",
+            "protected"
+          ],
+          "replacement_logic": [
+            "collection first",
+            "replacement"
+          ]
+        }
+      },
+      {
+        "path": "ui\\pages\\philosophy_lens_page.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "theme"
+          ],
+          "commander_intent": [
+            "intent"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "engine"
+          ]
+        }
+      },
+      {
+        "path": "ui\\pages\\report_viewer_page.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "role_logic": [
+            "role"
+          ],
+          "cut_logic": [
+            "cut",
+            "off-plan"
+          ],
+          "protection_logic": [
+            "core",
+            "engine",
+            "protect",
+            "protected"
+          ],
+          "replacement_logic": [
+            "collection-first",
+            "replacement",
+            "swap"
+          ]
+        }
+      },
+      {
+        "path": "ui\\pages\\review_setup_page.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "theme"
+          ],
+          "commander_intent": [
+            "background",
+            "intent"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core"
+          ],
+          "replacement_logic": [
+            "replacement"
+          ]
+        }
+      },
+      {
+        "path": "ui\\pages\\run_analysis_page.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "background",
+            "commander",
+            "intent"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core",
+            "engine",
+            "protect",
+            "protected"
+          ]
+        }
+      },
+      {
+        "path": "ui\\pages\\settings_page.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "theme"
+          ],
+          "commander_intent": [
+            "background",
+            "commander",
+            "intent"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "core"
+          ]
+        }
+      },
+      {
+        "path": "ui\\services\\app_paths.py",
+        "hit_groups": {
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "cut_logic": [
+            "cut"
+          ]
+        }
+      },
+      {
+        "path": "ui\\services\\backend_runner.py",
+        "hit_groups": {
+          "commander_intent": [
+            "intent"
+          ]
+        }
+      },
+      {
+        "path": "ui\\services\\cli_bridge.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy",
+            "theme"
+          ],
+          "commander_intent": [
+            "commander"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "protection_logic": [
+            "engine"
+          ],
+          "replacement_logic": [
+            "collection first",
+            "replacement"
+          ]
+        }
+      },
+      {
+        "path": "ui\\services\\data_setup_service.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "strategy"
+          ],
+          "commander_intent": [
+            "commander",
+            "intent"
+          ],
+          "cut_logic": [
+            "cut"
+          ],
+          "replacement_logic": [
+            "replacement"
+          ]
+        }
+      },
+      {
+        "path": "ui\\services\\report_detector.py",
+        "hit_groups": {
+          "commander_intent": [
+            "intent"
+          ]
+        }
+      },
+      {
+        "path": "ui\\services\\user_settings.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "theme"
+          ],
+          "commander_intent": [
+            "intent"
+          ]
+        }
+      },
+      {
+        "path": "ui\\state\\staged_run_config.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "theme"
+          ],
+          "commander_intent": [
+            "commander"
+          ],
+          "cut_logic": [
+            "cut"
+          ]
+        }
+      },
+      {
+        "path": "ui\\styles\\theme.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "theme"
+          ],
+          "commander_intent": [
+            "background"
+          ],
+          "protection_logic": [
+            "protect",
+            "protected"
+          ]
+        }
+      },
+      {
+        "path": "ui\\widgets\\__init__.py",
+        "hit_groups": {
+          "protection_logic": [
+            "core"
+          ]
+        }
+      },
+      {
+        "path": "ui\\widgets\\core.py",
+        "hit_groups": {
+          "strategy_recognition": [
+            "theme"
+          ],
+          "commander_intent": [
+            "background",
+            "intent"
+          ],
+          "role_logic": [
+            "draw"
+          ],
+          "protection_logic": [
+            "core"
+          ]
+        }
+      }
+    ],
+    "truncated": false
+  },
+  "next_safe_step": "v1.4.5 \u2014 Strategy Knowledge Loader Preview"
+}

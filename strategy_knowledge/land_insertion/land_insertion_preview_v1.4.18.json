@@ -1,0 +1,296 @@
+{
+  "land_insertion_preview_version": "v1.4.18",
+  "integration_mode": "land_insertion_preview",
+  "land_insertion_preview_enabled": true,
+  "land_insertion_enabled": true,
+  "land_insertion_mode": "preview_only_no_deck_write",
+  "runtime_behavior_changed": true,
+  "report_output_changed": true,
+  "prompt_output_changed": true,
+  "report_viewer_changed": true,
+  "main_py_changed": false,
+  "legacy_fallback_required": true,
+  "active_runtime_replacement": false,
+  "exact_card_selection_enabled": true,
+  "exact_card_selection_mode": "preview_candidates_only",
+  "role_count_generation_enabled": true,
+  "role_count_generation_mode": "target_bands_only",
+  "shell_generation_enabled": true,
+  "shell_generation_mode": "rough_strategy_shell_planning_only",
+  "mana_base_planning_enabled": true,
+  "mana_base_generation_enabled": false,
+  "final_land_list_generation_enabled": false,
+  "final_deck_inclusion_enabled": false,
+  "deck_generation_enabled": false,
+  "full_100_card_draft_generation_enabled": false,
+  "basic_lands_assumed_available": true,
+  "nonbasic_lands_collection_first": true,
+  "gate_checks": {
+    "runtime_contract_available": true,
+    "strategy_knowledge_selected_with_fallback": true,
+    "scoring_preview_available": true,
+    "role_mapping_available": true,
+    "cut_protect_available": true,
+    "report_handoff_available": true,
+    "shell_planning_available": true,
+    "candidate_preview_available": true,
+    "role_count_generation_available": true,
+    "mana_base_planning_available": true
+  },
+  "checked_strategy_count": 5,
+  "land_insertion_previews": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "land_insertion_mode": "preview_recommendations_only",
+      "target_land_slots": 37,
+      "recommended_land_band": {
+        "min": 35,
+        "target": 37,
+        "max": 38
+      },
+      "preview_basic_land_floor": 18,
+      "preview_nonbasic_review_slots": 19,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "preview_land_slot_guidance": {
+        "basic_slots": {
+          "preview_minimum": 18,
+          "status": "assumed_available_not_collection_required",
+          "note": "Assume needed basics are available; use them to stabilize colors after owned nonbasic review."
+        },
+        "nonbasic_slots": {
+          "preview_review_slots": 19,
+          "status": "collection_first_review_only",
+          "priorities": [
+            "untapped duals/fixing lands from collection",
+            "sacrifice-friendly utility lands if already owned",
+            "graveyard/recursion utility lands only if color consistency remains stable"
+          ]
+        }
+      },
+      "priority_notes": [
+        "Start from owned fixing lands, then use basics to stabilize colors.",
+        "Utility lands remain review-only and should support the main strategy.",
+        "Tapped lands should be limited if the deck needs early setup."
+      ],
+      "land_insertion_boundaries": {
+        "land_insertion_preview_enabled": true,
+        "land_insertion_enabled": true,
+        "land_insertion_mode": "preview_only_no_deck_write",
+        "mana_base_generation_enabled": false,
+        "final_land_list_generation_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "land_insertion_mode": "preview_recommendations_only",
+      "target_land_slots": 39,
+      "recommended_land_band": {
+        "min": 37,
+        "target": 39,
+        "max": 42
+      },
+      "preview_basic_land_floor": 19,
+      "preview_nonbasic_review_slots": 20,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "preview_land_slot_guidance": {
+        "basic_slots": {
+          "preview_minimum": 19,
+          "status": "assumed_available_not_collection_required",
+          "note": "Assume needed basics are available; basics are especially important because many landfall enablers search for basic lands."
+        },
+        "nonbasic_slots": {
+          "preview_review_slots": 20,
+          "status": "collection_first_review_only",
+          "priorities": [
+            "owned fetch-style lands and evolving/wilds effects",
+            "lands that enter and sacrifice or recur",
+            "utility lands that produce landfall value without damaging color consistency"
+          ]
+        }
+      },
+      "priority_notes": [
+        "Preview more land slots than normal because landfall wants higher land density.",
+        "Preserve basics for basic-search effects.",
+        "Review owned fetch-style lands, sacrifice lands, and land-recursion utility lands first."
+      ],
+      "land_insertion_boundaries": {
+        "land_insertion_preview_enabled": true,
+        "land_insertion_enabled": true,
+        "land_insertion_mode": "preview_only_no_deck_write",
+        "mana_base_generation_enabled": false,
+        "final_land_list_generation_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "land_insertion_mode": "preview_recommendations_only",
+      "target_land_slots": 36,
+      "recommended_land_band": {
+        "min": 34,
+        "target": 36,
+        "max": 37
+      },
+      "preview_basic_land_floor": 18,
+      "preview_nonbasic_review_slots": 18,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "preview_land_slot_guidance": {
+        "basic_slots": {
+          "preview_minimum": 18,
+          "status": "assumed_available_not_collection_required",
+          "note": "Assume needed basics are available; use basics to keep colors stable after owned spell-support lands."
+        },
+        "nonbasic_slots": {
+          "preview_review_slots": 18,
+          "status": "collection_first_review_only",
+          "priorities": [
+            "owned untapped fixing lands",
+            "spell-support lands only if color consistency remains strong",
+            "utility lands that copy/rebuy spells only when not slowing early interaction"
+          ]
+        }
+      },
+      "priority_notes": [
+        "Prioritize untapped colored sources for cheap spells and interaction.",
+        "Spell-support utility lands should not crowd out color consistency.",
+        "Tapped lands are previewed cautiously because double-spelling matters."
+      ],
+      "land_insertion_boundaries": {
+        "land_insertion_preview_enabled": true,
+        "land_insertion_enabled": true,
+        "land_insertion_mode": "preview_only_no_deck_write",
+        "mana_base_generation_enabled": false,
+        "final_land_list_generation_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "land_insertion_mode": "preview_recommendations_only",
+      "target_land_slots": 37,
+      "recommended_land_band": {
+        "min": 35,
+        "target": 37,
+        "max": 38
+      },
+      "preview_basic_land_floor": 18,
+      "preview_nonbasic_review_slots": 19,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "preview_land_slot_guidance": {
+        "basic_slots": {
+          "preview_minimum": 18,
+          "status": "assumed_available_not_collection_required",
+          "note": "Assume needed basics are available; use basics to support stable early token production."
+        },
+        "nonbasic_slots": {
+          "preview_review_slots": 19,
+          "status": "collection_first_review_only",
+          "priorities": [
+            "owned fixing lands that enter untapped early",
+            "utility lands that produce tokens only if they do not weaken color access",
+            "go-wide support lands if already owned and on-plan"
+          ]
+        }
+      },
+      "priority_notes": [
+        "Start from owned fixing lands, then use basics to stabilize colors.",
+        "Utility lands remain review-only and should support the main strategy.",
+        "Tapped lands should be limited if the deck needs early setup."
+      ],
+      "land_insertion_boundaries": {
+        "land_insertion_preview_enabled": true,
+        "land_insertion_enabled": true,
+        "land_insertion_mode": "preview_only_no_deck_write",
+        "mana_base_generation_enabled": false,
+        "final_land_list_generation_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "land_insertion_mode": "preview_recommendations_only",
+      "target_land_slots": 36,
+      "recommended_land_band": {
+        "min": 34,
+        "target": 36,
+        "max": 38
+      },
+      "preview_basic_land_floor": 18,
+      "preview_nonbasic_review_slots": 18,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "preview_land_slot_guidance": {
+        "basic_slots": {
+          "preview_minimum": 18,
+          "status": "assumed_available_not_collection_required",
+          "note": "Assume needed basics are available; use basics to support reliable commander casting."
+        },
+        "nonbasic_slots": {
+          "preview_review_slots": 18,
+          "status": "collection_first_review_only",
+          "priorities": [
+            "owned untapped fixing lands",
+            "utility lands that protect or give evasion only if colors remain stable",
+            "equipment-support lands if already owned and not too slow"
+          ]
+        }
+      },
+      "priority_notes": [
+        "Prioritize early untapped sources for reliable commander casting.",
+        "Review utility lands only if they do not delay the commander.",
+        "Protection/evasion lands are review candidates, not automatic insertions."
+      ],
+      "land_insertion_boundaries": {
+        "land_insertion_preview_enabled": true,
+        "land_insertion_enabled": true,
+        "land_insertion_mode": "preview_only_no_deck_write",
+        "mana_base_generation_enabled": false,
+        "final_land_list_generation_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    }
+  ],
+  "integration_contract": {
+    "may_preview_land_slot_insertion": true,
+    "may_write_lands_into_deck": false,
+    "may_generate_finished_mana_base": false,
+    "may_generate_final_land_list": false,
+    "may_select_final_deck_cards": false,
+    "may_make_final_deck_inclusion_decisions": false,
+    "may_generate_full_deck": false,
+    "must_assume_basic_lands_available": true,
+    "must_keep_nonbasic_lands_collection_first_unless_upgrades_allowed": true,
+    "must_label_output_as_preview_only": true,
+    "next_integration_step": "v1.4.19 \u2014 Full 100-Card Draft Preview"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.18 previews land slot insertion only. It does not write lands into a deck, generate a finished mana base, or create a final deck.",
+    "next_safe_step": "v1.4.19 \u2014 Full 100-Card Draft Preview"
+  }
+}

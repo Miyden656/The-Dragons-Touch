@@ -1,0 +1,1046 @@
+{
+  "role_mapping_version": "v1.4.11",
+  "mapping_mode": "strategy_role_bucket_mapping_integration_preview",
+  "runtime_behavior_changed": false,
+  "strategy_role_mapping_enabled": true,
+  "live_role_count_generation_changed": false,
+  "owned_card_role_classification_runtime_changed": false,
+  "legacy_fallback_required": true,
+  "active_runtime_replacement": false,
+  "deck_generation_enabled": false,
+  "exact_card_selection_enabled": false,
+  "final_deck_inclusion_enabled": false,
+  "role_count_generation_enabled": false,
+  "mana_base_generation_enabled": false,
+  "land_insertion_enabled": false,
+  "shell_generation_enabled": false,
+  "full_100_card_draft_generation_enabled": false,
+  "main_py_changed": false,
+  "report_viewer_changed": false,
+  "global_role_buckets": [
+    "ramp_mana_development",
+    "card_draw_card_advantage",
+    "targeted_removal",
+    "board_wipes",
+    "protection",
+    "recursion",
+    "strategy_enablers",
+    "strategy_payoffs",
+    "finishers_win_conditions",
+    "mana_base_support",
+    "flex_theme_slots"
+  ],
+  "gate_checks": {
+    "runtime_contract_selected_strategy_knowledge": true,
+    "scoring_preview_passed": true,
+    "loader_preview_available": true,
+    "all_strategy_profiles_role_mapping_ready": true
+  },
+  "strategy_profile_count": 5,
+  "strategy_role_profiles": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "layer": "02_mechanical_themes",
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "recursion",
+        "finishers_win_conditions"
+      ],
+      "secondary_role_buckets": [
+        "card_draw_card_advantage",
+        "targeted_removal",
+        "protection"
+      ],
+      "strategy_specific_roles": [
+        "free_sacrifice_outlets",
+        "repeatable_sacrifice_outlets",
+        "death_trigger_payoffs",
+        "token_fodder",
+        "creature_recursion",
+        "drain_finishers"
+      ],
+      "core_signal_tags": [
+        "sacrifice_outlet",
+        "death_trigger_payoff",
+        "token_fodder",
+        "graveyard_recursion",
+        "blood_artist_effect"
+      ],
+      "commander_signal_tags": [
+        "sacrifice_outlet_in_command_zone",
+        "death_trigger_payoff_in_command_zone",
+        "token_fodder_engine_in_command_zone"
+      ],
+      "cut_protection_tags": [
+        "free_sacrifice_outlet",
+        "repeatable_token_fodder",
+        "low_mv_death_payoff",
+        "recursion_engine"
+      ],
+      "false_positive_tags": [
+        "single_sacrifice_card",
+        "incidental_treasure_sacrifice",
+        "one_death_trigger_without_support"
+      ],
+      "replacement_priority_tags": [
+        "more_sacrifice_outlets",
+        "more_death_payoffs",
+        "more_recursive_fodder",
+        "more_drain_finishers"
+      ],
+      "invalid_global_roles": [],
+      "role_mapping_ready": true,
+      "role_mapping_usage": {
+        "can_inform_owned_card_role_classification": true,
+        "can_inform_future_role_counts": true,
+        "can_inform_future_cut_protection": true,
+        "can_generate_role_counts_now": false,
+        "can_select_exact_cards_now": false,
+        "can_make_final_deck_inclusion_decisions_now": false
+      }
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "layer": "02_mechanical_themes",
+      "primary_role_buckets": [
+        "ramp_mana_development",
+        "strategy_enablers",
+        "strategy_payoffs",
+        "mana_base_support"
+      ],
+      "secondary_role_buckets": [
+        "card_draw_card_advantage",
+        "recursion",
+        "finishers_win_conditions"
+      ],
+      "strategy_specific_roles": [
+        "extra_land_drops",
+        "landfall_payoffs",
+        "land_recursion",
+        "fetch_lands_and_land_tutors",
+        "land_token_payoffs",
+        "big_mana_finishers"
+      ],
+      "core_signal_tags": [
+        "landfall_trigger",
+        "extra_land_drop",
+        "land_recursion",
+        "lands_in_graveyard_matter",
+        "land_entering_payoff"
+      ],
+      "commander_signal_tags": [
+        "landfall_payoff_in_command_zone",
+        "extra_land_drop_commander",
+        "land_token_engine_in_command_zone",
+        "commander_created_landfall"
+      ],
+      "cut_protection_tags": [
+        "extra_land_drop_engine",
+        "repeatable_landfall_payoff",
+        "land_recursion_engine",
+        "commander_created_landfall_support"
+      ],
+      "false_positive_tags": [
+        "normal_ramp_package_only",
+        "single_landfall_card",
+        "high_land_count_without_payoffs"
+      ],
+      "replacement_priority_tags": [
+        "more_extra_land_drops",
+        "more_landfall_payoffs",
+        "more_land_recursion",
+        "more_land_based_card_advantage"
+      ],
+      "invalid_global_roles": [],
+      "role_mapping_ready": true,
+      "role_mapping_usage": {
+        "can_inform_owned_card_role_classification": true,
+        "can_inform_future_role_counts": true,
+        "can_inform_future_cut_protection": true,
+        "can_generate_role_counts_now": false,
+        "can_select_exact_cards_now": false,
+        "can_make_final_deck_inclusion_decisions_now": false
+      }
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "layer": "02_mechanical_themes",
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "card_draw_card_advantage",
+        "finishers_win_conditions"
+      ],
+      "secondary_role_buckets": [
+        "targeted_removal",
+        "protection",
+        "ramp_mana_development"
+      ],
+      "strategy_specific_roles": [
+        "cheap_cantrips",
+        "spell_payoffs",
+        "cost_reducers",
+        "copy_effects",
+        "graveyard_spell_recursion",
+        "spell_based_finishers"
+      ],
+      "core_signal_tags": [
+        "instant_sorcery_density",
+        "magecraft_trigger",
+        "prowess_trigger",
+        "spell_copy_effect",
+        "cost_reduction_for_spells"
+      ],
+      "commander_signal_tags": [
+        "spell_payoff_in_command_zone",
+        "instant_sorcery_cost_reducer_in_command_zone",
+        "spell_copy_commander"
+      ],
+      "cut_protection_tags": [
+        "cheap_cantrip",
+        "repeatable_spell_payoff",
+        "cost_reducer",
+        "spell_recursion_engine"
+      ],
+      "false_positive_tags": [
+        "few_good_spells_only",
+        "removal_suite_without_payoffs",
+        "single_magecraft_card_without_density"
+      ],
+      "replacement_priority_tags": [
+        "more_low_mv_spells",
+        "more_spell_payoffs",
+        "more_velocity_draw",
+        "more_spell_based_finishers"
+      ],
+      "invalid_global_roles": [],
+      "role_mapping_ready": true,
+      "role_mapping_usage": {
+        "can_inform_owned_card_role_classification": true,
+        "can_inform_future_role_counts": true,
+        "can_inform_future_cut_protection": true,
+        "can_generate_role_counts_now": false,
+        "can_select_exact_cards_now": false,
+        "can_make_final_deck_inclusion_decisions_now": false
+      }
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "layer": "02_mechanical_themes",
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "finishers_win_conditions",
+        "card_draw_card_advantage"
+      ],
+      "secondary_role_buckets": [
+        "ramp_mana_development",
+        "protection",
+        "targeted_removal"
+      ],
+      "strategy_specific_roles": [
+        "repeatable_token_makers",
+        "burst_token_makers",
+        "anthem_payoffs",
+        "token_draw_payoffs",
+        "token_finishers",
+        "fodder_converters"
+      ],
+      "core_signal_tags": [
+        "token_maker",
+        "go_wide_payoff",
+        "anthem_effect",
+        "creature_count_payoff",
+        "convoke_or_affinity_support"
+      ],
+      "commander_signal_tags": [
+        "token_maker_in_command_zone",
+        "token_payoff_in_command_zone",
+        "creature_count_scaler_in_command_zone"
+      ],
+      "cut_protection_tags": [
+        "repeatable_token_engine",
+        "low_mv_token_payoff",
+        "anthem_finisher",
+        "skullclamp_style_draw_engine"
+      ],
+      "false_positive_tags": [
+        "one_shot_token_card",
+        "incidental_treasure_tokens",
+        "single_populate_card_without_density"
+      ],
+      "replacement_priority_tags": [
+        "more_repeatable_token_makers",
+        "more_payoffs_for_wide_boards",
+        "more_board_protection",
+        "more_card_draw_from_creatures"
+      ],
+      "invalid_global_roles": [],
+      "role_mapping_ready": true,
+      "role_mapping_usage": {
+        "can_inform_owned_card_role_classification": true,
+        "can_inform_future_role_counts": true,
+        "can_inform_future_cut_protection": true,
+        "can_generate_role_counts_now": false,
+        "can_select_exact_cards_now": false,
+        "can_make_final_deck_inclusion_decisions_now": false
+      }
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "layer": "02_mechanical_themes",
+      "primary_role_buckets": [
+        "protection",
+        "strategy_enablers",
+        "strategy_payoffs",
+        "finishers_win_conditions"
+      ],
+      "secondary_role_buckets": [
+        "ramp_mana_development",
+        "card_draw_card_advantage",
+        "targeted_removal"
+      ],
+      "strategy_specific_roles": [
+        "evasion_granting_cards",
+        "protection_spells",
+        "equipment_or_aura_payoffs",
+        "commander_damage_scalers",
+        "combat_card_draw",
+        "recovery_after_removal"
+      ],
+      "core_signal_tags": [
+        "commander_damage_plan",
+        "equipment_density",
+        "aura_density",
+        "evasion_granting_effect",
+        "protect_the_commander_effect"
+      ],
+      "commander_signal_tags": [
+        "combat_scaling_commander",
+        "evasive_commander",
+        "keyword_soup_commander",
+        "equipment_or_aura_commander"
+      ],
+      "cut_protection_tags": [
+        "cheap_protection_spell",
+        "repeatable_evasion",
+        "efficient_equipment",
+        "commander_damage_payoff"
+      ],
+      "false_positive_tags": [
+        "one_equipment_card",
+        "large_commander_without_support",
+        "combat_creature_without_protection"
+      ],
+      "replacement_priority_tags": [
+        "more_commander_protection",
+        "more_evasion",
+        "more_card_advantage_attached_to_combat",
+        "lower_curve_suit_up_pieces"
+      ],
+      "invalid_global_roles": [],
+      "role_mapping_ready": true,
+      "role_mapping_usage": {
+        "can_inform_owned_card_role_classification": true,
+        "can_inform_future_role_counts": true,
+        "can_inform_future_cut_protection": true,
+        "can_generate_role_counts_now": false,
+        "can_select_exact_cards_now": false,
+        "can_make_final_deck_inclusion_decisions_now": false
+      }
+    }
+  ],
+  "sample_mapping_count": 6,
+  "sample_mapping_warning_count": 0,
+  "sample_mappings": [
+    {
+      "sample_id": "free_sacrifice_outlet",
+      "effect_tags": [
+        "sacrifice_outlet",
+        "free_sacrifice_outlet",
+        "strategy_enabler"
+      ],
+      "mapped_global_roles": [
+        "card_draw_card_advantage",
+        "finishers_win_conditions",
+        "mana_base_support",
+        "protection",
+        "ramp_mana_development",
+        "recursion",
+        "strategy_enablers",
+        "strategy_payoffs"
+      ],
+      "strategy_hits": [
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "matched_terms": [
+            "free",
+            "free_sacrifice_outlet",
+            "outlet",
+            "sacrifice",
+            "sacrifice_outlet",
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "recursion",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "matched_terms": [
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "ramp_mana_development",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "mana_base_support"
+          ]
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "matched_terms": [
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "card_draw_card_advantage",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "matched_terms": [
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions",
+            "card_draw_card_advantage"
+          ]
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "matched_terms": [
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "protection",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions"
+          ]
+        }
+      ],
+      "expected_global_roles": [
+        "strategy_enablers"
+      ],
+      "expected_strategy_hits": [
+        "aristocrats"
+      ],
+      "expected_roles_present": [
+        "strategy_enablers"
+      ],
+      "missing_expected_roles": [],
+      "expected_strategies_present": [
+        "aristocrats"
+      ],
+      "missing_expected_strategies": [],
+      "mapping_status": "PASS"
+    },
+    {
+      "sample_id": "death_trigger_payoff",
+      "effect_tags": [
+        "death_trigger_payoff",
+        "drain_payoff",
+        "strategy_payoff"
+      ],
+      "mapped_global_roles": [
+        "card_draw_card_advantage",
+        "finishers_win_conditions",
+        "mana_base_support",
+        "protection",
+        "ramp_mana_development",
+        "recursion",
+        "strategy_enablers",
+        "strategy_payoffs"
+      ],
+      "strategy_hits": [
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "matched_terms": [
+            "death",
+            "death_trigger_payoff",
+            "drain",
+            "payoff",
+            "strategy",
+            "trigger"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "recursion",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "matched_terms": [
+            "payoff",
+            "strategy",
+            "trigger"
+          ],
+          "primary_role_buckets": [
+            "ramp_mana_development",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "mana_base_support"
+          ]
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "matched_terms": [
+            "payoff",
+            "strategy",
+            "trigger"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "card_draw_card_advantage",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "matched_terms": [
+            "payoff",
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions",
+            "card_draw_card_advantage"
+          ]
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "matched_terms": [
+            "payoff",
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "protection",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions"
+          ]
+        }
+      ],
+      "expected_global_roles": [
+        "finishers_win_conditions",
+        "strategy_payoffs"
+      ],
+      "expected_strategy_hits": [
+        "aristocrats"
+      ],
+      "expected_roles_present": [
+        "finishers_win_conditions",
+        "strategy_payoffs"
+      ],
+      "missing_expected_roles": [],
+      "expected_strategies_present": [
+        "aristocrats"
+      ],
+      "missing_expected_strategies": [],
+      "mapping_status": "PASS"
+    },
+    {
+      "sample_id": "token_fodder_engine",
+      "effect_tags": [
+        "token_engine",
+        "token_fodder",
+        "creature_tokens",
+        "strategy_enabler"
+      ],
+      "mapped_global_roles": [
+        "card_draw_card_advantage",
+        "finishers_win_conditions",
+        "mana_base_support",
+        "protection",
+        "ramp_mana_development",
+        "recursion",
+        "strategy_enablers",
+        "strategy_payoffs"
+      ],
+      "strategy_hits": [
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "matched_terms": [
+            "creature",
+            "engine",
+            "fodder",
+            "strategy",
+            "token",
+            "token_fodder"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "recursion",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "matched_terms": [
+            "engine",
+            "strategy",
+            "token"
+          ],
+          "primary_role_buckets": [
+            "ramp_mana_development",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "mana_base_support"
+          ]
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "matched_terms": [
+            "engine",
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "card_draw_card_advantage",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "matched_terms": [
+            "creature",
+            "engine",
+            "fodder",
+            "strategy",
+            "token"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions",
+            "card_draw_card_advantage"
+          ]
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "matched_terms": [
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "protection",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions"
+          ]
+        }
+      ],
+      "expected_global_roles": [
+        "strategy_enablers"
+      ],
+      "expected_strategy_hits": [
+        "aristocrats",
+        "tokens"
+      ],
+      "expected_roles_present": [
+        "strategy_enablers"
+      ],
+      "missing_expected_roles": [],
+      "expected_strategies_present": [
+        "aristocrats",
+        "tokens"
+      ],
+      "missing_expected_strategies": [],
+      "mapping_status": "PASS"
+    },
+    {
+      "sample_id": "spell_payoff_engine",
+      "effect_tags": [
+        "spell_payoff",
+        "instant",
+        "sorcery",
+        "magecraft",
+        "strategy_payoff"
+      ],
+      "mapped_global_roles": [
+        "card_draw_card_advantage",
+        "finishers_win_conditions",
+        "mana_base_support",
+        "protection",
+        "ramp_mana_development",
+        "recursion",
+        "strategy_enablers",
+        "strategy_payoffs"
+      ],
+      "strategy_hits": [
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "matched_terms": [
+            "payoff",
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "recursion",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "matched_terms": [
+            "payoff",
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "ramp_mana_development",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "mana_base_support"
+          ]
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "matched_terms": [
+            "instant",
+            "magecraft",
+            "payoff",
+            "sorcery",
+            "spell",
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "card_draw_card_advantage",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "matched_terms": [
+            "payoff",
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions",
+            "card_draw_card_advantage"
+          ]
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "matched_terms": [
+            "payoff",
+            "spell",
+            "strategy"
+          ],
+          "primary_role_buckets": [
+            "protection",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions"
+          ]
+        }
+      ],
+      "expected_global_roles": [
+        "strategy_payoffs"
+      ],
+      "expected_strategy_hits": [
+        "spellslinger"
+      ],
+      "expected_roles_present": [
+        "strategy_payoffs"
+      ],
+      "missing_expected_roles": [],
+      "expected_strategies_present": [
+        "spellslinger"
+      ],
+      "missing_expected_strategies": [],
+      "mapping_status": "PASS"
+    },
+    {
+      "sample_id": "extra_land_drop_engine",
+      "effect_tags": [
+        "landfall",
+        "extra_land_drop",
+        "land_engine",
+        "mana_base_support"
+      ],
+      "mapped_global_roles": [
+        "card_draw_card_advantage",
+        "finishers_win_conditions",
+        "mana_base_support",
+        "protection",
+        "ramp_mana_development",
+        "recursion",
+        "strategy_enablers",
+        "strategy_payoffs"
+      ],
+      "strategy_hits": [
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "matched_terms": [
+            "engine"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "recursion",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "matched_terms": [
+            "base",
+            "drop",
+            "engine",
+            "extra",
+            "extra_land_drop",
+            "land",
+            "landfall",
+            "mana",
+            "mana_base_support",
+            "support"
+          ],
+          "primary_role_buckets": [
+            "ramp_mana_development",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "mana_base_support"
+          ]
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "matched_terms": [
+            "engine",
+            "mana"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "card_draw_card_advantage",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "matched_terms": [
+            "engine",
+            "mana",
+            "support"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions",
+            "card_draw_card_advantage"
+          ]
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "matched_terms": [
+            "mana"
+          ],
+          "primary_role_buckets": [
+            "protection",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions"
+          ]
+        }
+      ],
+      "expected_global_roles": [
+        "mana_base_support",
+        "ramp_mana_development",
+        "strategy_enablers"
+      ],
+      "expected_strategy_hits": [
+        "landfall_lands_matter"
+      ],
+      "expected_roles_present": [
+        "mana_base_support",
+        "ramp_mana_development",
+        "strategy_enablers"
+      ],
+      "missing_expected_roles": [],
+      "expected_strategies_present": [
+        "landfall_lands_matter"
+      ],
+      "missing_expected_strategies": [],
+      "mapping_status": "PASS"
+    },
+    {
+      "sample_id": "commander_protection_piece",
+      "effect_tags": [
+        "protection",
+        "commander_protection",
+        "evasion",
+        "voltron"
+      ],
+      "mapped_global_roles": [
+        "card_draw_card_advantage",
+        "finishers_win_conditions",
+        "mana_base_support",
+        "protection",
+        "ramp_mana_development",
+        "recursion",
+        "strategy_enablers",
+        "strategy_payoffs"
+      ],
+      "strategy_hits": [
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "matched_terms": [
+            "protection"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "recursion",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "matched_terms": [
+            "commander"
+          ],
+          "primary_role_buckets": [
+            "ramp_mana_development",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "mana_base_support"
+          ]
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "matched_terms": [
+            "commander",
+            "protection"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "card_draw_card_advantage",
+            "finishers_win_conditions"
+          ]
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "matched_terms": [
+            "protection"
+          ],
+          "primary_role_buckets": [
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions",
+            "card_draw_card_advantage"
+          ]
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "matched_terms": [
+            "commander",
+            "evasion",
+            "protection"
+          ],
+          "primary_role_buckets": [
+            "protection",
+            "strategy_enablers",
+            "strategy_payoffs",
+            "finishers_win_conditions"
+          ]
+        }
+      ],
+      "expected_global_roles": [
+        "protection",
+        "strategy_enablers"
+      ],
+      "expected_strategy_hits": [
+        "voltron"
+      ],
+      "expected_roles_present": [
+        "protection",
+        "strategy_enablers"
+      ],
+      "missing_expected_roles": [],
+      "expected_strategies_present": [
+        "voltron"
+      ],
+      "missing_expected_strategies": [],
+      "mapping_status": "PASS"
+    }
+  ],
+  "integration_contract": {
+    "may_inform_owned_card_role_classification": true,
+    "may_inform_future_role_count_generation": true,
+    "may_inform_future_cut_protection_logic": true,
+    "may_generate_role_counts_in_this_patch": false,
+    "may_select_exact_cards_in_this_patch": false,
+    "may_make_final_deck_inclusion_decisions_in_this_patch": false,
+    "must_keep_legacy_fallback": true,
+    "next_integration_step": "v1.4.12 \u2014 Strategy Cut / Protect / Replacement Integration"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.11 maps Strategy Knowledge roles for future owned-card classification and role counts but does not generate counts or choose cards yet.",
+    "next_safe_step": "v1.4.12 \u2014 Strategy Cut / Protect / Replacement Integration"
+  }
+}

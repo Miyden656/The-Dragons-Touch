@@ -16,7 +16,7 @@ from typing import Any
 
 from app_io.output_writer import get_unique_output_path, write_text_file
 from config import RuntimeConfig
-from ui.services.app_paths import get_runtime_paths
+from app_io.project_paths import get_runtime_paths
 
 from .collection_loader import read_csv_collection_file, read_text_collection_file
 from .combo_matcher import (

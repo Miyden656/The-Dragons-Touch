@@ -1,0 +1,282 @@
+{
+  "cut_protect_replacement_version": "v1.4.12",
+  "integration_mode": "strategy_cut_protect_replacement_integration_preview",
+  "runtime_behavior_changed": false,
+  "strategy_cut_protect_replacement_enabled": true,
+  "live_cut_logic_changed": false,
+  "live_protection_logic_changed": false,
+  "live_replacement_logic_changed": false,
+  "legacy_fallback_required": true,
+  "active_runtime_replacement": false,
+  "deck_generation_enabled": false,
+  "exact_card_selection_enabled": false,
+  "final_deck_inclusion_enabled": false,
+  "role_count_generation_enabled": false,
+  "mana_base_generation_enabled": false,
+  "land_insertion_enabled": false,
+  "shell_generation_enabled": false,
+  "full_100_card_draft_generation_enabled": false,
+  "main_py_changed": false,
+  "report_viewer_changed": false,
+  "gate_checks": {
+    "runtime_contract_selected_strategy_knowledge": true,
+    "scoring_preview_passed": true,
+    "role_mapping_passed": true,
+    "loader_preview_available": true
+  },
+  "sample_evaluation_count": 6,
+  "sample_warning_count": 0,
+  "protected_sample_count": 4,
+  "possible_cut_sample_count": 2,
+  "replacement_need_sample_count": 2,
+  "evaluations": [
+    {
+      "sample_id": "aristocrats_free_sacrifice_outlet",
+      "strategy_id": "aristocrats",
+      "card_context": "Low raw power but essential free sacrifice outlet.",
+      "card_tags": [
+        "free_sacrifice_outlet",
+        "sacrifice_outlet",
+        "strategy_enabler"
+      ],
+      "protected_from_cuts": true,
+      "possible_cut_candidate": false,
+      "replacement_need_flag": false,
+      "manual_review": true,
+      "protected_hits": [
+        "free",
+        "free_sacrifice_outlet",
+        "outlet",
+        "sacrifice",
+        "sacrifice_outlet"
+      ],
+      "exact_protection_hits": [
+        "free_sacrifice_outlet",
+        "sacrifice_outlet"
+      ],
+      "cut_pressure_hits": [],
+      "replacement_hits": [
+        "sacrifice"
+      ],
+      "false_positive_hits": [
+        "sacrifice"
+      ],
+      "expected_protect": true,
+      "expected_cut_candidate": false,
+      "expected_replacement_need": false,
+      "status": "PASS",
+      "status_reasons": [],
+      "report_language": "Protect this card from cuts: it may look replaceable by raw power, but it supports the strategy's core engine."
+    },
+    {
+      "sample_id": "aristocrats_death_payoff",
+      "strategy_id": "aristocrats",
+      "card_context": "Payoff that turns death triggers into win pressure.",
+      "card_tags": [
+        "death_trigger_payoff",
+        "drain_payoff",
+        "strategy_payoff"
+      ],
+      "protected_from_cuts": true,
+      "possible_cut_candidate": false,
+      "replacement_need_flag": false,
+      "manual_review": true,
+      "protected_hits": [
+        "death",
+        "death_trigger_payoff",
+        "drain",
+        "payoff",
+        "trigger"
+      ],
+      "exact_protection_hits": [
+        "death_trigger_payoff"
+      ],
+      "cut_pressure_hits": [],
+      "replacement_hits": [
+        "death",
+        "drain"
+      ],
+      "false_positive_hits": [
+        "death",
+        "trigger"
+      ],
+      "expected_protect": true,
+      "expected_cut_candidate": false,
+      "expected_replacement_need": false,
+      "status": "PASS",
+      "status_reasons": [],
+      "report_language": "Protect this card from cuts: it may look replaceable by raw power, but it supports the strategy's core engine."
+    },
+    {
+      "sample_id": "tokens_generic_off_plan_big_spell",
+      "strategy_id": "tokens",
+      "card_context": "Generically strong card that does not support the token plan.",
+      "card_tags": [
+        "generic_goodstuff",
+        "high_mv",
+        "low_synergy",
+        "off_plan"
+      ],
+      "protected_from_cuts": false,
+      "possible_cut_candidate": true,
+      "replacement_need_flag": true,
+      "manual_review": false,
+      "protected_hits": [
+        "low",
+        "mv"
+      ],
+      "exact_protection_hits": [],
+      "cut_pressure_hits": [
+        "generic_goodstuff",
+        "high_mv",
+        "low_synergy",
+        "off_plan"
+      ],
+      "replacement_hits": [
+        "generic_goodstuff",
+        "low_synergy",
+        "off_plan"
+      ],
+      "false_positive_hits": [],
+      "expected_protect": false,
+      "expected_cut_candidate": true,
+      "expected_replacement_need": true,
+      "status": "PASS",
+      "status_reasons": [],
+      "report_language": "Possible cut / replacement candidate: this looks more like a wrong-card-for-this-deck issue than a bad-card issue."
+    },
+    {
+      "sample_id": "spellslinger_wrong_shell_creature",
+      "strategy_id": "spellslinger",
+      "card_context": "Playable card but weak fit for an instant/sorcery density shell.",
+      "card_tags": [
+        "creature_only_payoff",
+        "low_spell_synergy",
+        "off_plan"
+      ],
+      "protected_from_cuts": false,
+      "possible_cut_candidate": true,
+      "replacement_need_flag": true,
+      "manual_review": false,
+      "protected_hits": [
+        "payoff",
+        "spell"
+      ],
+      "exact_protection_hits": [],
+      "cut_pressure_hits": [
+        "off_plan"
+      ],
+      "replacement_hits": [
+        "low",
+        "off_plan",
+        "spell"
+      ],
+      "false_positive_hits": [
+        "only"
+      ],
+      "expected_protect": false,
+      "expected_cut_candidate": true,
+      "expected_replacement_need": true,
+      "status": "PASS",
+      "status_reasons": [],
+      "report_language": "Possible cut / replacement candidate: this looks more like a wrong-card-for-this-deck issue than a bad-card issue."
+    },
+    {
+      "sample_id": "landfall_extra_land_drop",
+      "strategy_id": "landfall_lands_matter",
+      "card_context": "Supports land-entry triggers and lands-matter engine.",
+      "card_tags": [
+        "extra_land_drop",
+        "landfall",
+        "land_engine",
+        "strategy_enabler"
+      ],
+      "protected_from_cuts": true,
+      "possible_cut_candidate": false,
+      "replacement_need_flag": false,
+      "manual_review": true,
+      "protected_hits": [
+        "drop",
+        "engine",
+        "extra",
+        "extra_land_drop",
+        "land",
+        "landfall"
+      ],
+      "exact_protection_hits": [
+        "extra_land_drop"
+      ],
+      "cut_pressure_hits": [],
+      "replacement_hits": [
+        "extra",
+        "land",
+        "landfall"
+      ],
+      "false_positive_hits": [
+        "land",
+        "landfall"
+      ],
+      "expected_protect": true,
+      "expected_cut_candidate": false,
+      "expected_replacement_need": false,
+      "status": "PASS",
+      "status_reasons": [],
+      "report_language": "Protect this card from cuts: it may look replaceable by raw power, but it supports the strategy's core engine."
+    },
+    {
+      "sample_id": "voltron_commander_protection",
+      "strategy_id": "voltron",
+      "card_context": "Protects the commander and helps the Voltron plan connect.",
+      "card_tags": [
+        "commander_protection",
+        "protection",
+        "evasion",
+        "strategy_enabler"
+      ],
+      "protected_from_cuts": true,
+      "possible_cut_candidate": false,
+      "replacement_need_flag": false,
+      "manual_review": true,
+      "protected_hits": [
+        "commander",
+        "evasion",
+        "protection"
+      ],
+      "exact_protection_hits": [],
+      "cut_pressure_hits": [],
+      "replacement_hits": [
+        "commander",
+        "evasion",
+        "protection"
+      ],
+      "false_positive_hits": [
+        "commander",
+        "protection"
+      ],
+      "expected_protect": true,
+      "expected_cut_candidate": false,
+      "expected_replacement_need": false,
+      "status": "PASS",
+      "status_reasons": [],
+      "report_language": "Protect this card from cuts: it may look replaceable by raw power, but it supports the strategy's core engine."
+    }
+  ],
+  "integration_contract": {
+    "may_inform_cut_logic": true,
+    "may_inform_protection_logic": true,
+    "may_inform_replacement_logic": true,
+    "may_change_live_cut_logic_in_this_patch": false,
+    "may_change_live_protection_logic_in_this_patch": false,
+    "may_change_live_replacement_logic_in_this_patch": false,
+    "must_distinguish_bad_card_from_wrong_card": true,
+    "must_distinguish_low_power_from_low_synergy": true,
+    "must_protect_high_synergy_low_raw_power_cards": true,
+    "must_keep_legacy_fallback": true,
+    "next_integration_step": "v1.4.13 \u2014 Strategy Report Viewer / AI Handoff Integration"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.12 previews cut/protect/replacement integration but does not change live cut logic or choose cards.",
+    "next_safe_step": "v1.4.13 \u2014 Strategy Report Viewer / AI Handoff Integration"
+  }
+}

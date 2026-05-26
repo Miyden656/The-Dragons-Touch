@@ -1,5 +1,5 @@
-APP_PHASE = 'Modular Alpha / User-Dev Mode Import Cleanup Hotfix'
-APP_VERSION = 'v0.8.10.1-alpha'
+APP_PHASE = 'v1.4 Expanded Strategy Scoring'
+APP_VERSION = 'v1.4-expanded-strategy-scoring'
 """
 The Dragon's Touch - UI constants for v0.7 alpha hardening.
 
@@ -8,8 +8,8 @@ values only. It must not run backend logic, touch main.py, inspect decks, create
 outputs, or replace the guarded CLI bridge.
 """
 
-APP_VERSION = 'v0.8.10.1-alpha'
-APP_PHASE = 'Modular Alpha / User-Dev Mode Import Cleanup Hotfix'
+APP_VERSION = 'v1.4-expanded-strategy-scoring'
+APP_PHASE = 'v1.4 Expanded Strategy Scoring'
 BACKEND_STATUS = "Stable v0.6.8.5 workflow preserved — guarded UI bridge uses CLI/main.py as source of truth"
 LOCKED_BACKEND_VERSION = "v0.6.8.5"
 

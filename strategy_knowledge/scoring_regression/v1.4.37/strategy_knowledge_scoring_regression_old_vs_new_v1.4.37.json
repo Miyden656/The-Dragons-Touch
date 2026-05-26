@@ -1,0 +1,3488 @@
+{
+  "regression_version": "v1.4.37",
+  "regression_name": "Strategy Knowledge Scoring Regression / Old-vs-New Comparison",
+  "runtime_behavior_changed": false,
+  "regression_performed": true,
+  "active_scoring_profiles": 249,
+  "legacy_preview_profile_count": 5,
+  "legacy_preview_status": "deprecated_fallback_only",
+  "old_scoring_definition": "legacy five-profile preview set: Aristocrats, Landfall, Spellslinger, Tokens, Voltron",
+  "new_scoring_definition": "249-profile Strategy Knowledge index active scoring",
+  "main_py_changed": false,
+  "deck_results": [
+    {
+      "deck_name": "Witherbloom Creature-Affinity X-Spells Smoke Test",
+      "commander": "Witherbloom, the Balancer",
+      "expected_new_strength": "Should find more than generic Tokens/Spellslinger by surfacing X-spells, creature-count, go-wide, or spell payoff adjacent strategies if present.",
+      "active_scoring_profiles": 249,
+      "legacy_preview_profile_count": 5,
+      "legacy_preview_status": "deprecated_fallback_only",
+      "scoring_source": "strategy_knowledge/index/strategy_profile_index.latest.json",
+      "new_249_top_matches": [
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "layer": "02_mechanical_themes",
+          "score": 65.443,
+          "raw_score": 137,
+          "keyword_hits": [
+            "card",
+            "cheap",
+            "draw",
+            "finishers",
+            "generic",
+            "payoff",
+            "payoffs",
+            "spellslinger",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "spellslinger",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "layer": "02_mechanical_themes",
+          "score": 63.116,
+          "raw_score": 131,
+          "keyword_hits": [
+            "card",
+            "draw",
+            "finishers",
+            "generic",
+            "makers",
+            "payoff",
+            "payoffs",
+            "token",
+            "tokens",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "x_spells_big_spells",
+          "display_name": "X-Spells / Big Spells",
+          "layer": "02_mechanical_themes",
+          "score": 36.288,
+          "raw_score": 92,
+          "keyword_hits": [
+            "big",
+            "card",
+            "draw",
+            "payoff",
+            "payoffs",
+            "win",
+            "x-spells"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens",
+            "x-spells"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "go_wide_combat",
+          "display_name": "Go-Wide Combat",
+          "layer": "02_mechanical_themes",
+          "score": 35.752,
+          "raw_score": 91,
+          "keyword_hits": [
+            "card",
+            "draw",
+            "go-wide",
+            "payoff",
+            "payoffs",
+            "token",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "go-wide",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "layer": "02_mechanical_themes",
+          "score": 35.234,
+          "raw_score": 73,
+          "keyword_hits": [
+            "card",
+            "finishers",
+            "generic",
+            "payoff",
+            "payoffs",
+            "token",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "token_combat_go_wide_go_tall_hybrid",
+          "display_name": "Token Combat / Go-Wide-Go-Tall Hybrid",
+          "layer": "05_3_emergent_theme_rules",
+          "score": 33.51,
+          "raw_score": 85,
+          "keyword_hits": [
+            "card",
+            "draw",
+            "payoff",
+            "payoffs",
+            "token",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "go-wide",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids",
+          "display_name": "Samurai / Monk / Mouse / Otter Typal-Spellslinger or Combat Hybrids",
+          "layer": "04_typal_tribal_themes",
+          "score": 32.079,
+          "raw_score": 81,
+          "keyword_hits": [
+            "card",
+            "draw",
+            "payoff",
+            "payoffs",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "spellslinger",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "blood_tokens_madness_discard_value",
+          "display_name": "Blood Tokens / Madness / Discard Value",
+          "layer": "02_mechanical_themes",
+          "score": 32.013,
+          "raw_score": 81,
+          "keyword_hits": [
+            "card",
+            "draw",
+            "payoff",
+            "payoffs",
+            "token",
+            "tokens",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "map_tokens_explore",
+          "display_name": "Map Tokens / Explore",
+          "layer": "05_1_niche_theme_rules",
+          "score": 31.917,
+          "raw_score": 81,
+          "keyword_hits": [
+            "card",
+            "draw",
+            "payoff",
+            "payoffs",
+            "token",
+            "tokens",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "role_tokens",
+          "display_name": "Role Tokens",
+          "layer": "05_1_niche_theme_rules",
+          "score": 31.901,
+          "raw_score": 81,
+          "keyword_hits": [
+            "card",
+            "draw",
+            "payoff",
+            "payoffs",
+            "token",
+            "tokens",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "ramp_big_mana",
+          "display_name": "Ramp / Big Mana",
+          "layer": "01_macro_archetypes",
+          "score": 31.901,
+          "raw_score": 81,
+          "keyword_hits": [
+            "big",
+            "card",
+            "draw",
+            "payoff",
+            "payoffs",
+            "ramp",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "mutual_destruction_board_reset_politics",
+          "display_name": "Mutual Destruction / Board Reset Politics",
+          "layer": "03_strategic_board_politics",
+          "score": 31.602,
+          "raw_score": 80,
+          "keyword_hits": [
+            "board",
+            "card",
+            "draw",
+            "finishers",
+            "payoff",
+            "payoffs",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      ],
+      "legacy_5_visible_matches": [
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "layer": "02_mechanical_themes",
+          "score": 65.443,
+          "raw_score": 137,
+          "keyword_hits": [
+            "card",
+            "cheap",
+            "draw",
+            "finishers",
+            "generic",
+            "payoff",
+            "payoffs",
+            "spellslinger",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "spellslinger",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "layer": "02_mechanical_themes",
+          "score": 63.116,
+          "raw_score": 131,
+          "keyword_hits": [
+            "card",
+            "draw",
+            "finishers",
+            "generic",
+            "makers",
+            "payoff",
+            "payoffs",
+            "token",
+            "tokens",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "layer": "02_mechanical_themes",
+          "score": 35.234,
+          "raw_score": 73,
+          "keyword_hits": [
+            "card",
+            "finishers",
+            "generic",
+            "payoff",
+            "payoffs",
+            "token",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "layer": "02_mechanical_themes",
+          "score": 30.675,
+          "raw_score": 64,
+          "keyword_hits": [
+            "card",
+            "finishers",
+            "generic",
+            "payoffs",
+            "win"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "layer": "02_mechanical_themes",
+          "score": 30.3,
+          "raw_score": 63,
+          "keyword_hits": [
+            "card",
+            "generic",
+            "payoff",
+            "payoffs",
+            "ramp"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      ],
+      "legacy_5_visible_match_count": 5,
+      "regression_summary": {
+        "new_top_match_ids": [
+          "spellslinger",
+          "tokens",
+          "x_spells_big_spells",
+          "go_wide_combat",
+          "aristocrats",
+          "token_combat_go_wide_go_tall_hybrid",
+          "samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids",
+          "blood_tokens_madness_discard_value",
+          "map_tokens_explore",
+          "role_tokens",
+          "ramp_big_mana",
+          "mutual_destruction_board_reset_politics"
+        ],
+        "legacy_visible_ids": [
+          "aristocrats",
+          "landfall_lands_matter",
+          "spellslinger",
+          "tokens",
+          "voltron"
+        ],
+        "new_matches_not_possible_in_legacy_count": 9,
+        "new_matches_not_possible_in_legacy": [
+          {
+            "strategy_id": "x_spells_big_spells",
+            "display_name": "X-Spells / Big Spells",
+            "layer": "02_mechanical_themes",
+            "score": 36.288,
+            "raw_score": 92,
+            "keyword_hits": [
+              "big",
+              "card",
+              "draw",
+              "payoff",
+              "payoffs",
+              "win",
+              "x-spells"
+            ],
+            "role_hits": [
+              "ramp",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "draw",
+              "ramp",
+              "tokens",
+              "x-spells"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "go_wide_combat",
+            "display_name": "Go-Wide Combat",
+            "layer": "02_mechanical_themes",
+            "score": 35.752,
+            "raw_score": 91,
+            "keyword_hits": [
+              "card",
+              "draw",
+              "go-wide",
+              "payoff",
+              "payoffs",
+              "token",
+              "win"
+            ],
+            "role_hits": [
+              "ramp",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "draw",
+              "go-wide",
+              "ramp",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "token_combat_go_wide_go_tall_hybrid",
+            "display_name": "Token Combat / Go-Wide-Go-Tall Hybrid",
+            "layer": "05_3_emergent_theme_rules",
+            "score": 33.51,
+            "raw_score": 85,
+            "keyword_hits": [
+              "card",
+              "draw",
+              "payoff",
+              "payoffs",
+              "token",
+              "win"
+            ],
+            "role_hits": [
+              "ramp",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "draw",
+              "go-wide",
+              "ramp",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids",
+            "display_name": "Samurai / Monk / Mouse / Otter Typal-Spellslinger or Combat Hybrids",
+            "layer": "04_typal_tribal_themes",
+            "score": 32.079,
+            "raw_score": 81,
+            "keyword_hits": [
+              "card",
+              "draw",
+              "payoff",
+              "payoffs",
+              "win"
+            ],
+            "role_hits": [
+              "ramp",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "draw",
+              "ramp",
+              "spellslinger",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "blood_tokens_madness_discard_value",
+            "display_name": "Blood Tokens / Madness / Discard Value",
+            "layer": "02_mechanical_themes",
+            "score": 32.013,
+            "raw_score": 81,
+            "keyword_hits": [
+              "card",
+              "draw",
+              "payoff",
+              "payoffs",
+              "token",
+              "tokens",
+              "win"
+            ],
+            "role_hits": [
+              "ramp",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "draw",
+              "ramp",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "map_tokens_explore",
+            "display_name": "Map Tokens / Explore",
+            "layer": "05_1_niche_theme_rules",
+            "score": 31.917,
+            "raw_score": 81,
+            "keyword_hits": [
+              "card",
+              "draw",
+              "payoff",
+              "payoffs",
+              "token",
+              "tokens",
+              "win"
+            ],
+            "role_hits": [
+              "ramp",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "draw",
+              "ramp",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "role_tokens",
+            "display_name": "Role Tokens",
+            "layer": "05_1_niche_theme_rules",
+            "score": 31.901,
+            "raw_score": 81,
+            "keyword_hits": [
+              "card",
+              "draw",
+              "payoff",
+              "payoffs",
+              "token",
+              "tokens",
+              "win"
+            ],
+            "role_hits": [
+              "ramp",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "draw",
+              "ramp",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "ramp_big_mana",
+            "display_name": "Ramp / Big Mana",
+            "layer": "01_macro_archetypes",
+            "score": 31.901,
+            "raw_score": 81,
+            "keyword_hits": [
+              "big",
+              "card",
+              "draw",
+              "payoff",
+              "payoffs",
+              "ramp",
+              "win"
+            ],
+            "role_hits": [
+              "ramp",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "draw",
+              "ramp",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "mutual_destruction_board_reset_politics",
+            "display_name": "Mutual Destruction / Board Reset Politics",
+            "layer": "03_strategic_board_politics",
+            "score": 31.602,
+            "raw_score": 80,
+            "keyword_hits": [
+              "board",
+              "card",
+              "draw",
+              "finishers",
+              "payoff",
+              "payoffs",
+              "win"
+            ],
+            "role_hits": [
+              "ramp",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "draw",
+              "ramp",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          }
+        ],
+        "first_non_legacy_match": {
+          "strategy_id": "x_spells_big_spells",
+          "display_name": "X-Spells / Big Spells",
+          "layer": "02_mechanical_themes",
+          "score": 36.288,
+          "raw_score": 92,
+          "keyword_hits": [
+            "big",
+            "card",
+            "draw",
+            "payoff",
+            "payoffs",
+            "win",
+            "x-spells"
+          ],
+          "role_hits": [
+            "ramp",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "draw",
+            "ramp",
+            "tokens",
+            "x-spells"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      },
+      "new_finds_more_than_legacy": true,
+      "top_match_is_from_249_scoring": true
+    },
+    {
+      "deck_name": "Miirym Dragon Copy Smoke Test",
+      "commander": "Miirym, Sentinel Wyrm",
+      "expected_new_strength": "Should find typal/tribal, dragon, copy, blink, combat, or big creature themes beyond the old five preview profiles.",
+      "active_scoring_profiles": 249,
+      "legacy_preview_profile_count": 5,
+      "legacy_preview_status": "deprecated_fallback_only",
+      "scoring_source": "strategy_knowledge/index/strategy_profile_index.latest.json",
+      "new_249_top_matches": [
+        {
+          "strategy_id": "dragon_typal",
+          "display_name": "Dragon Typal",
+          "layer": "04_typal_tribal_themes",
+          "score": 50.018,
+          "raw_score": 127,
+          "keyword_hits": [
+            "dragon",
+            "protection",
+            "synergy",
+            "typal"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal",
+            "typal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "saboteur_combat_damage_triggers",
+          "display_name": "Saboteur / Combat Damage Triggers",
+          "layer": "02_mechanical_themes",
+          "score": 34.35,
+          "raw_score": 87,
+          "keyword_hits": [
+            "combat",
+            "dragon",
+            "protection",
+            "synergy",
+            "triggers"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal",
+            "typal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "blink_flicker",
+          "display_name": "Blink / Flicker",
+          "layer": "02_mechanical_themes",
+          "score": 34.264,
+          "raw_score": 87,
+          "keyword_hits": [
+            "blink",
+            "combat",
+            "dragon",
+            "protection",
+            "synergy"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "blink",
+            "combat",
+            "ramp",
+            "tribal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "shared_combat_incentive",
+          "display_name": "Shared Combat Incentive",
+          "layer": "03_strategic_board_politics",
+          "score": 33.921,
+          "raw_score": 86,
+          "keyword_hits": [
+            "combat",
+            "dragon",
+            "protection",
+            "synergy",
+            "typal"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal",
+            "typal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "forced_combat_goad",
+          "display_name": "Forced Combat / Goad",
+          "layer": "03_strategic_board_politics",
+          "score": 33.904,
+          "raw_score": 86,
+          "keyword_hits": [
+            "combat",
+            "dragon",
+            "protection",
+            "synergy",
+            "typal"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal",
+            "typal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "warrior_typal",
+          "display_name": "Warrior Typal",
+          "layer": "04_typal_tribal_themes",
+          "score": 33.854,
+          "raw_score": 86,
+          "keyword_hits": [
+            "combat",
+            "dragon",
+            "protection",
+            "synergy",
+            "typal"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal",
+            "typal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "extra_combat",
+          "display_name": "Extra Combat",
+          "layer": "02_mechanical_themes",
+          "score": 33.854,
+          "raw_score": 86,
+          "keyword_hits": [
+            "combat",
+            "dragon",
+            "protection",
+            "synergy",
+            "typal"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal",
+            "typal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "go_tall_combat",
+          "display_name": "Go-Tall Combat",
+          "layer": "02_mechanical_themes",
+          "score": 33.821,
+          "raw_score": 86,
+          "keyword_hits": [
+            "combat",
+            "dragon",
+            "protection",
+            "synergy",
+            "typal"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal",
+            "typal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids",
+          "display_name": "Samurai / Monk / Mouse / Otter Typal-Spellslinger or Combat Hybrids",
+          "layer": "04_typal_tribal_themes",
+          "score": 33.267,
+          "raw_score": 84,
+          "keyword_hits": [
+            "combat",
+            "dragon",
+            "protection",
+            "synergy",
+            "typal"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal",
+            "typal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "rat_nazgul_multiple_copy_typal",
+          "display_name": "Rat / Nazg\u00fbl / Multiple-Copy Typal",
+          "layer": "04_typal_tribal_themes",
+          "score": 32.771,
+          "raw_score": 83,
+          "keyword_hits": [
+            "dragon",
+            "protection",
+            "synergy",
+            "typal"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal",
+            "typal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "ramp_big_mana",
+          "display_name": "Ramp / Big Mana",
+          "layer": "01_macro_archetypes",
+          "score": 32.689,
+          "raw_score": 83,
+          "keyword_hits": [
+            "big",
+            "combat",
+            "dragon",
+            "protection",
+            "ramp",
+            "synergy"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "giant_minotaur_beast_berserker_typal",
+          "display_name": "Giant / Minotaur / Beast / Berserker Typal",
+          "layer": "04_typal_tribal_themes",
+          "score": 32.491,
+          "raw_score": 82,
+          "keyword_hits": [
+            "dragon",
+            "protection",
+            "synergy",
+            "typal"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal",
+            "typal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      ],
+      "legacy_5_visible_matches": [
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "layer": "02_mechanical_themes",
+          "score": 26.75,
+          "raw_score": 56,
+          "keyword_hits": [
+            "protection"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "layer": "02_mechanical_themes",
+          "score": 25.054,
+          "raw_score": 52,
+          "keyword_hits": [
+            "protection"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "layer": "02_mechanical_themes",
+          "score": 25.01,
+          "raw_score": 52,
+          "keyword_hits": [
+            "ramp"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "layer": "02_mechanical_themes",
+          "score": 24.924,
+          "raw_score": 52,
+          "keyword_hits": [
+            "protection"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "layer": "02_mechanical_themes",
+          "score": 23.167,
+          "raw_score": 48,
+          "keyword_hits": [],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      ],
+      "legacy_5_visible_match_count": 5,
+      "regression_summary": {
+        "new_top_match_ids": [
+          "dragon_typal",
+          "saboteur_combat_damage_triggers",
+          "blink_flicker",
+          "shared_combat_incentive",
+          "forced_combat_goad",
+          "warrior_typal",
+          "extra_combat",
+          "go_tall_combat",
+          "samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids",
+          "rat_nazgul_multiple_copy_typal",
+          "ramp_big_mana",
+          "giant_minotaur_beast_berserker_typal"
+        ],
+        "legacy_visible_ids": [
+          "aristocrats",
+          "landfall_lands_matter",
+          "spellslinger",
+          "tokens",
+          "voltron"
+        ],
+        "new_matches_not_possible_in_legacy_count": 12,
+        "new_matches_not_possible_in_legacy": [
+          {
+            "strategy_id": "dragon_typal",
+            "display_name": "Dragon Typal",
+            "layer": "04_typal_tribal_themes",
+            "score": 50.018,
+            "raw_score": 127,
+            "keyword_hits": [
+              "dragon",
+              "protection",
+              "synergy",
+              "typal"
+            ],
+            "role_hits": [
+              "combat",
+              "protection",
+              "ramp"
+            ],
+            "phrase_hits": [
+              "combat",
+              "ramp",
+              "tribal",
+              "typal"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "saboteur_combat_damage_triggers",
+            "display_name": "Saboteur / Combat Damage Triggers",
+            "layer": "02_mechanical_themes",
+            "score": 34.35,
+            "raw_score": 87,
+            "keyword_hits": [
+              "combat",
+              "dragon",
+              "protection",
+              "synergy",
+              "triggers"
+            ],
+            "role_hits": [
+              "combat",
+              "protection",
+              "ramp"
+            ],
+            "phrase_hits": [
+              "combat",
+              "ramp",
+              "tribal",
+              "typal"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "blink_flicker",
+            "display_name": "Blink / Flicker",
+            "layer": "02_mechanical_themes",
+            "score": 34.264,
+            "raw_score": 87,
+            "keyword_hits": [
+              "blink",
+              "combat",
+              "dragon",
+              "protection",
+              "synergy"
+            ],
+            "role_hits": [
+              "combat",
+              "protection",
+              "ramp"
+            ],
+            "phrase_hits": [
+              "blink",
+              "combat",
+              "ramp",
+              "tribal"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "shared_combat_incentive",
+            "display_name": "Shared Combat Incentive",
+            "layer": "03_strategic_board_politics",
+            "score": 33.921,
+            "raw_score": 86,
+            "keyword_hits": [
+              "combat",
+              "dragon",
+              "protection",
+              "synergy",
+              "typal"
+            ],
+            "role_hits": [
+              "combat",
+              "protection",
+              "ramp"
+            ],
+            "phrase_hits": [
+              "combat",
+              "ramp",
+              "tribal",
+              "typal"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "forced_combat_goad",
+            "display_name": "Forced Combat / Goad",
+            "layer": "03_strategic_board_politics",
+            "score": 33.904,
+            "raw_score": 86,
+            "keyword_hits": [
+              "combat",
+              "dragon",
+              "protection",
+              "synergy",
+              "typal"
+            ],
+            "role_hits": [
+              "combat",
+              "protection",
+              "ramp"
+            ],
+            "phrase_hits": [
+              "combat",
+              "ramp",
+              "tribal",
+              "typal"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "warrior_typal",
+            "display_name": "Warrior Typal",
+            "layer": "04_typal_tribal_themes",
+            "score": 33.854,
+            "raw_score": 86,
+            "keyword_hits": [
+              "combat",
+              "dragon",
+              "protection",
+              "synergy",
+              "typal"
+            ],
+            "role_hits": [
+              "combat",
+              "protection",
+              "ramp"
+            ],
+            "phrase_hits": [
+              "combat",
+              "ramp",
+              "tribal",
+              "typal"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "extra_combat",
+            "display_name": "Extra Combat",
+            "layer": "02_mechanical_themes",
+            "score": 33.854,
+            "raw_score": 86,
+            "keyword_hits": [
+              "combat",
+              "dragon",
+              "protection",
+              "synergy",
+              "typal"
+            ],
+            "role_hits": [
+              "combat",
+              "protection",
+              "ramp"
+            ],
+            "phrase_hits": [
+              "combat",
+              "ramp",
+              "tribal",
+              "typal"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "go_tall_combat",
+            "display_name": "Go-Tall Combat",
+            "layer": "02_mechanical_themes",
+            "score": 33.821,
+            "raw_score": 86,
+            "keyword_hits": [
+              "combat",
+              "dragon",
+              "protection",
+              "synergy",
+              "typal"
+            ],
+            "role_hits": [
+              "combat",
+              "protection",
+              "ramp"
+            ],
+            "phrase_hits": [
+              "combat",
+              "ramp",
+              "tribal",
+              "typal"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids",
+            "display_name": "Samurai / Monk / Mouse / Otter Typal-Spellslinger or Combat Hybrids",
+            "layer": "04_typal_tribal_themes",
+            "score": 33.267,
+            "raw_score": 84,
+            "keyword_hits": [
+              "combat",
+              "dragon",
+              "protection",
+              "synergy",
+              "typal"
+            ],
+            "role_hits": [
+              "combat",
+              "protection",
+              "ramp"
+            ],
+            "phrase_hits": [
+              "combat",
+              "ramp",
+              "tribal",
+              "typal"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "rat_nazgul_multiple_copy_typal",
+            "display_name": "Rat / Nazg\u00fbl / Multiple-Copy Typal",
+            "layer": "04_typal_tribal_themes",
+            "score": 32.771,
+            "raw_score": 83,
+            "keyword_hits": [
+              "dragon",
+              "protection",
+              "synergy",
+              "typal"
+            ],
+            "role_hits": [
+              "combat",
+              "protection",
+              "ramp"
+            ],
+            "phrase_hits": [
+              "combat",
+              "ramp",
+              "tribal",
+              "typal"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          }
+        ],
+        "first_non_legacy_match": {
+          "strategy_id": "dragon_typal",
+          "display_name": "Dragon Typal",
+          "layer": "04_typal_tribal_themes",
+          "score": 50.018,
+          "raw_score": 127,
+          "keyword_hits": [
+            "dragon",
+            "protection",
+            "synergy",
+            "typal"
+          ],
+          "role_hits": [
+            "combat",
+            "protection",
+            "ramp"
+          ],
+          "phrase_hits": [
+            "combat",
+            "ramp",
+            "tribal",
+            "typal"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      },
+      "new_finds_more_than_legacy": true,
+      "top_match_is_from_249_scoring": true
+    },
+    {
+      "deck_name": "Toggo Artifact Tokens / Landfall Smoke Test",
+      "commander": "Toggo, Goblin Weaponsmith",
+      "expected_new_strength": "Should connect landfall with artifacts, equipment, tokens, sacrifice, and utility token themes beyond only Landfall/Tokens.",
+      "active_scoring_profiles": 249,
+      "legacy_preview_profile_count": 5,
+      "legacy_preview_status": "deprecated_fallback_only",
+      "scoring_source": "strategy_knowledge/index/strategy_profile_index.latest.json",
+      "new_249_top_matches": [
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "layer": "02_mechanical_themes",
+          "score": 52.034,
+          "raw_score": 108,
+          "keyword_hits": [
+            "lands",
+            "token",
+            "tokens"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "treasure",
+          "display_name": "Treasure",
+          "layer": "02_mechanical_themes",
+          "score": 49.92,
+          "raw_score": 127,
+          "keyword_hits": [
+            "artifact",
+            "sacrifice",
+            "token",
+            "treasure"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens",
+            "treasure"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "equipment",
+          "display_name": "Equipment",
+          "layer": "02_mechanical_themes",
+          "score": 45.203,
+          "raw_score": 115,
+          "keyword_hits": [
+            "equipment"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "equipment",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "food_05_1_niche_theme_rules",
+          "display_name": "Food",
+          "layer": "05_1_niche_theme_rules",
+          "score": 43.61,
+          "raw_score": 111,
+          "keyword_hits": [
+            "artifact",
+            "food",
+            "sacrifice",
+            "token",
+            "value"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "food",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "food_02_mechanical_themes_micro_archetypes",
+          "display_name": "Food",
+          "layer": "02_mechanical_themes",
+          "score": 43.589,
+          "raw_score": 111,
+          "keyword_hits": [
+            "artifact",
+            "food",
+            "sacrifice",
+            "token",
+            "value"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "food",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "layer": "02_mechanical_themes",
+          "score": 34.629,
+          "raw_score": 72,
+          "keyword_hits": [
+            "landfall",
+            "lands"
+          ],
+          "role_hits": [
+            "artifacts",
+            "lands",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "landfall",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "artifact_treasure_combo_value",
+          "display_name": "Artifact/Treasure Combo-Value",
+          "layer": "05_3_emergent_theme_rules",
+          "score": 32.327,
+          "raw_score": 82,
+          "keyword_hits": [
+            "artifact",
+            "sacrifice",
+            "token",
+            "value"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens",
+            "treasure"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "layer": "02_mechanical_themes",
+          "score": 31.855,
+          "raw_score": 66,
+          "keyword_hits": [
+            "lands",
+            "outlets",
+            "sacrifice",
+            "token"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "layer": "02_mechanical_themes",
+          "score": 31.634,
+          "raw_score": 66,
+          "keyword_hits": [
+            "equipment",
+            "lands"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "equipment",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "commander_created_landfall",
+          "display_name": "Commander-Created Landfall",
+          "layer": "05_3_emergent_theme_rules",
+          "score": 31.052,
+          "raw_score": 78,
+          "keyword_hits": [
+            "landfall",
+            "lands"
+          ],
+          "role_hits": [
+            "artifacts",
+            "lands",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "landfall",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "treasure_tutor_chains",
+          "display_name": "Treasure Tutor Chains",
+          "layer": "05_3_emergent_theme_rules",
+          "score": 29.947,
+          "raw_score": 76,
+          "keyword_hits": [
+            "sacrifice",
+            "token",
+            "treasure"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens",
+            "treasure"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "blood_tokens_madness_discard_value",
+          "display_name": "Blood Tokens / Madness / Discard Value",
+          "layer": "02_mechanical_themes",
+          "score": 28.851,
+          "raw_score": 73,
+          "keyword_hits": [
+            "sacrifice",
+            "token",
+            "tokens",
+            "value"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      ],
+      "legacy_5_visible_matches": [
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "layer": "02_mechanical_themes",
+          "score": 52.034,
+          "raw_score": 108,
+          "keyword_hits": [
+            "lands",
+            "token",
+            "tokens"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "layer": "02_mechanical_themes",
+          "score": 34.629,
+          "raw_score": 72,
+          "keyword_hits": [
+            "landfall",
+            "lands"
+          ],
+          "role_hits": [
+            "artifacts",
+            "lands",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "landfall",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "layer": "02_mechanical_themes",
+          "score": 31.855,
+          "raw_score": 66,
+          "keyword_hits": [
+            "lands",
+            "outlets",
+            "sacrifice",
+            "token"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "layer": "02_mechanical_themes",
+          "score": 31.634,
+          "raw_score": 66,
+          "keyword_hits": [
+            "equipment",
+            "lands"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "equipment",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "layer": "02_mechanical_themes",
+          "score": 24.84,
+          "raw_score": 52,
+          "keyword_hits": [
+            "lands"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      ],
+      "legacy_5_visible_match_count": 5,
+      "regression_summary": {
+        "new_top_match_ids": [
+          "tokens",
+          "treasure",
+          "equipment",
+          "food_05_1_niche_theme_rules",
+          "food_02_mechanical_themes_micro_archetypes",
+          "landfall_lands_matter",
+          "artifact_treasure_combo_value",
+          "aristocrats",
+          "voltron",
+          "commander_created_landfall",
+          "treasure_tutor_chains",
+          "blood_tokens_madness_discard_value"
+        ],
+        "legacy_visible_ids": [
+          "aristocrats",
+          "landfall_lands_matter",
+          "spellslinger",
+          "tokens",
+          "voltron"
+        ],
+        "new_matches_not_possible_in_legacy_count": 8,
+        "new_matches_not_possible_in_legacy": [
+          {
+            "strategy_id": "treasure",
+            "display_name": "Treasure",
+            "layer": "02_mechanical_themes",
+            "score": 49.92,
+            "raw_score": 127,
+            "keyword_hits": [
+              "artifact",
+              "sacrifice",
+              "token",
+              "treasure"
+            ],
+            "role_hits": [
+              "artifacts",
+              "sacrifice",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "sacrifice",
+              "tokens",
+              "treasure"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "equipment",
+            "display_name": "Equipment",
+            "layer": "02_mechanical_themes",
+            "score": 45.203,
+            "raw_score": 115,
+            "keyword_hits": [
+              "equipment"
+            ],
+            "role_hits": [
+              "artifacts",
+              "sacrifice",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "equipment",
+              "sacrifice",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "food_05_1_niche_theme_rules",
+            "display_name": "Food",
+            "layer": "05_1_niche_theme_rules",
+            "score": 43.61,
+            "raw_score": 111,
+            "keyword_hits": [
+              "artifact",
+              "food",
+              "sacrifice",
+              "token",
+              "value"
+            ],
+            "role_hits": [
+              "artifacts",
+              "sacrifice",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "food",
+              "sacrifice",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "food_02_mechanical_themes_micro_archetypes",
+            "display_name": "Food",
+            "layer": "02_mechanical_themes",
+            "score": 43.589,
+            "raw_score": 111,
+            "keyword_hits": [
+              "artifact",
+              "food",
+              "sacrifice",
+              "token",
+              "value"
+            ],
+            "role_hits": [
+              "artifacts",
+              "sacrifice",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "food",
+              "sacrifice",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "artifact_treasure_combo_value",
+            "display_name": "Artifact/Treasure Combo-Value",
+            "layer": "05_3_emergent_theme_rules",
+            "score": 32.327,
+            "raw_score": 82,
+            "keyword_hits": [
+              "artifact",
+              "sacrifice",
+              "token",
+              "value"
+            ],
+            "role_hits": [
+              "artifacts",
+              "sacrifice",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "sacrifice",
+              "tokens",
+              "treasure"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "commander_created_landfall",
+            "display_name": "Commander-Created Landfall",
+            "layer": "05_3_emergent_theme_rules",
+            "score": 31.052,
+            "raw_score": 78,
+            "keyword_hits": [
+              "landfall",
+              "lands"
+            ],
+            "role_hits": [
+              "artifacts",
+              "lands",
+              "sacrifice",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "landfall",
+              "sacrifice",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "treasure_tutor_chains",
+            "display_name": "Treasure Tutor Chains",
+            "layer": "05_3_emergent_theme_rules",
+            "score": 29.947,
+            "raw_score": 76,
+            "keyword_hits": [
+              "sacrifice",
+              "token",
+              "treasure"
+            ],
+            "role_hits": [
+              "artifacts",
+              "sacrifice",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "sacrifice",
+              "tokens",
+              "treasure"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "blood_tokens_madness_discard_value",
+            "display_name": "Blood Tokens / Madness / Discard Value",
+            "layer": "02_mechanical_themes",
+            "score": 28.851,
+            "raw_score": 73,
+            "keyword_hits": [
+              "sacrifice",
+              "token",
+              "tokens",
+              "value"
+            ],
+            "role_hits": [
+              "artifacts",
+              "sacrifice",
+              "tokens"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "sacrifice",
+              "tokens"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          }
+        ],
+        "first_non_legacy_match": {
+          "strategy_id": "treasure",
+          "display_name": "Treasure",
+          "layer": "02_mechanical_themes",
+          "score": 49.92,
+          "raw_score": 127,
+          "keyword_hits": [
+            "artifact",
+            "sacrifice",
+            "token",
+            "treasure"
+          ],
+          "role_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "sacrifice",
+            "tokens",
+            "treasure"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      },
+      "new_finds_more_than_legacy": true,
+      "top_match_is_from_249_scoring": true
+    },
+    {
+      "deck_name": "Life Gain Drain Smoke Test",
+      "commander": "Generic Orzhov Lifegain Commander",
+      "expected_new_strength": "Should find lifegain and drain strategies that the old five-profile preview could not directly name.",
+      "active_scoring_profiles": 249,
+      "legacy_preview_profile_count": 5,
+      "legacy_preview_status": "deprecated_fallback_only",
+      "scoring_source": "strategy_knowledge/index/strategy_profile_index.latest.json",
+      "new_249_top_matches": [
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "layer": "02_mechanical_themes",
+          "score": 54.54,
+          "raw_score": 113,
+          "keyword_hits": [
+            "aristocrats",
+            "generic",
+            "payoff",
+            "plan",
+            "sacrifice",
+            "trigger"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "aristocrats",
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "lifegain",
+          "display_name": "Lifegain",
+          "layer": "02_mechanical_themes",
+          "score": 41.686,
+          "raw_score": 106,
+          "keyword_hits": [
+            "lifegain",
+            "may",
+            "payoff",
+            "plan",
+            "resource"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "life_total_exchange",
+          "display_name": "Life Total Exchange",
+          "layer": "05_2_fringe_theme_rules",
+          "score": 29.144,
+          "raw_score": 74,
+          "keyword_hits": [
+            "life",
+            "may",
+            "payoff",
+            "plan",
+            "resource",
+            "sacrifice",
+            "total"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "life_total_politics",
+          "display_name": "Life Total Politics",
+          "layer": "03_strategic_board_politics",
+          "score": 27.569,
+          "raw_score": 70,
+          "keyword_hits": [
+            "life",
+            "may",
+            "payoff",
+            "plan",
+            "resource",
+            "total"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "commander_defined_single_card_archetypes",
+          "display_name": "Commander-Defined Single-Card Archetypes",
+          "layer": "05_3_emergent_theme_rules",
+          "score": 24.298,
+          "raw_score": 61,
+          "keyword_hits": [
+            "may",
+            "payoff",
+            "plan",
+            "resource",
+            "sacrifice"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "commander_tax_advantage",
+          "display_name": "Commander Tax Advantage",
+          "layer": "05_3_emergent_theme_rules",
+          "score": 24.259,
+          "raw_score": 61,
+          "keyword_hits": [
+            "may",
+            "payoff",
+            "plan",
+            "resource",
+            "sacrifice"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "free_interaction_protection_package",
+          "display_name": "Free Interaction / Protection Package",
+          "layer": "05_3_emergent_theme_rules",
+          "score": 24.158,
+          "raw_score": 61,
+          "keyword_hits": [
+            "may",
+            "payoff",
+            "plan",
+            "resource",
+            "sacrifice"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "blood_tokens_madness_discard_value",
+          "display_name": "Blood Tokens / Madness / Discard Value",
+          "layer": "02_mechanical_themes",
+          "score": 24.109,
+          "raw_score": 61,
+          "keyword_hits": [
+            "may",
+            "payoff",
+            "plan",
+            "resource",
+            "sacrifice"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "face_down_morph_manifest_disguise_cloak",
+          "display_name": "Face-Down / Morph / Manifest / Disguise / Cloak",
+          "layer": "05_1_niche_theme_rules",
+          "score": 24.097,
+          "raw_score": 61,
+          "keyword_hits": [
+            "may",
+            "payoff",
+            "plan",
+            "resource",
+            "sacrifice"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "odd_even_mana_value_restrictions",
+          "display_name": "Odd / Even Mana Value Restrictions",
+          "layer": "05_2_fringe_theme_rules",
+          "score": 24.084,
+          "raw_score": 61,
+          "keyword_hits": [
+            "may",
+            "payoff",
+            "plan",
+            "resource",
+            "sacrifice"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "fast_mana_explosive_start_package",
+          "display_name": "Fast Mana / Explosive Start Package",
+          "layer": "05_3_emergent_theme_rules",
+          "score": 24.084,
+          "raw_score": 61,
+          "keyword_hits": [
+            "may",
+            "payoff",
+            "plan",
+            "resource",
+            "sacrifice"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "collection_aware_replacement_planning",
+          "display_name": "Collection-Aware Replacement Planning",
+          "layer": "05_3_emergent_theme_rules",
+          "score": 24.084,
+          "raw_score": 61,
+          "keyword_hits": [
+            "may",
+            "payoff",
+            "plan",
+            "resource",
+            "sacrifice"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      ],
+      "legacy_5_visible_matches": [
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "layer": "02_mechanical_themes",
+          "score": 54.54,
+          "raw_score": 113,
+          "keyword_hits": [
+            "aristocrats",
+            "generic",
+            "payoff",
+            "plan",
+            "sacrifice",
+            "trigger"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "aristocrats",
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "layer": "02_mechanical_themes",
+          "score": 22.163,
+          "raw_score": 46,
+          "keyword_hits": [
+            "generic",
+            "payoff",
+            "plan"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "layer": "02_mechanical_themes",
+          "score": 22.124,
+          "raw_score": 46,
+          "keyword_hits": [
+            "generic",
+            "payoff",
+            "plan"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "layer": "02_mechanical_themes",
+          "score": 21.974,
+          "raw_score": 46,
+          "keyword_hits": [
+            "generic",
+            "payoff",
+            "plan"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "layer": "02_mechanical_themes",
+          "score": 21.569,
+          "raw_score": 45,
+          "keyword_hits": [
+            "generic",
+            "plan",
+            "resource"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      ],
+      "legacy_5_visible_match_count": 5,
+      "regression_summary": {
+        "new_top_match_ids": [
+          "aristocrats",
+          "lifegain",
+          "life_total_exchange",
+          "life_total_politics",
+          "commander_defined_single_card_archetypes",
+          "commander_tax_advantage",
+          "free_interaction_protection_package",
+          "blood_tokens_madness_discard_value",
+          "face_down_morph_manifest_disguise_cloak",
+          "odd_even_mana_value_restrictions",
+          "fast_mana_explosive_start_package",
+          "collection_aware_replacement_planning"
+        ],
+        "legacy_visible_ids": [
+          "aristocrats",
+          "landfall_lands_matter",
+          "spellslinger",
+          "tokens",
+          "voltron"
+        ],
+        "new_matches_not_possible_in_legacy_count": 11,
+        "new_matches_not_possible_in_legacy": [
+          {
+            "strategy_id": "lifegain",
+            "display_name": "Lifegain",
+            "layer": "02_mechanical_themes",
+            "score": 41.686,
+            "raw_score": 106,
+            "keyword_hits": [
+              "lifegain",
+              "may",
+              "payoff",
+              "plan",
+              "resource"
+            ],
+            "role_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "phrase_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "life_total_exchange",
+            "display_name": "Life Total Exchange",
+            "layer": "05_2_fringe_theme_rules",
+            "score": 29.144,
+            "raw_score": 74,
+            "keyword_hits": [
+              "life",
+              "may",
+              "payoff",
+              "plan",
+              "resource",
+              "sacrifice",
+              "total"
+            ],
+            "role_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "phrase_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "life_total_politics",
+            "display_name": "Life Total Politics",
+            "layer": "03_strategic_board_politics",
+            "score": 27.569,
+            "raw_score": 70,
+            "keyword_hits": [
+              "life",
+              "may",
+              "payoff",
+              "plan",
+              "resource",
+              "total"
+            ],
+            "role_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "phrase_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "commander_defined_single_card_archetypes",
+            "display_name": "Commander-Defined Single-Card Archetypes",
+            "layer": "05_3_emergent_theme_rules",
+            "score": 24.298,
+            "raw_score": 61,
+            "keyword_hits": [
+              "may",
+              "payoff",
+              "plan",
+              "resource",
+              "sacrifice"
+            ],
+            "role_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "phrase_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "commander_tax_advantage",
+            "display_name": "Commander Tax Advantage",
+            "layer": "05_3_emergent_theme_rules",
+            "score": 24.259,
+            "raw_score": 61,
+            "keyword_hits": [
+              "may",
+              "payoff",
+              "plan",
+              "resource",
+              "sacrifice"
+            ],
+            "role_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "phrase_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "free_interaction_protection_package",
+            "display_name": "Free Interaction / Protection Package",
+            "layer": "05_3_emergent_theme_rules",
+            "score": 24.158,
+            "raw_score": 61,
+            "keyword_hits": [
+              "may",
+              "payoff",
+              "plan",
+              "resource",
+              "sacrifice"
+            ],
+            "role_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "phrase_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "blood_tokens_madness_discard_value",
+            "display_name": "Blood Tokens / Madness / Discard Value",
+            "layer": "02_mechanical_themes",
+            "score": 24.109,
+            "raw_score": 61,
+            "keyword_hits": [
+              "may",
+              "payoff",
+              "plan",
+              "resource",
+              "sacrifice"
+            ],
+            "role_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "phrase_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "face_down_morph_manifest_disguise_cloak",
+            "display_name": "Face-Down / Morph / Manifest / Disguise / Cloak",
+            "layer": "05_1_niche_theme_rules",
+            "score": 24.097,
+            "raw_score": 61,
+            "keyword_hits": [
+              "may",
+              "payoff",
+              "plan",
+              "resource",
+              "sacrifice"
+            ],
+            "role_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "phrase_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "odd_even_mana_value_restrictions",
+            "display_name": "Odd / Even Mana Value Restrictions",
+            "layer": "05_2_fringe_theme_rules",
+            "score": 24.084,
+            "raw_score": 61,
+            "keyword_hits": [
+              "may",
+              "payoff",
+              "plan",
+              "resource",
+              "sacrifice"
+            ],
+            "role_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "phrase_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "fast_mana_explosive_start_package",
+            "display_name": "Fast Mana / Explosive Start Package",
+            "layer": "05_3_emergent_theme_rules",
+            "score": 24.084,
+            "raw_score": 61,
+            "keyword_hits": [
+              "may",
+              "payoff",
+              "plan",
+              "resource",
+              "sacrifice"
+            ],
+            "role_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "phrase_hits": [
+              "lifegain",
+              "sacrifice"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          }
+        ],
+        "first_non_legacy_match": {
+          "strategy_id": "lifegain",
+          "display_name": "Lifegain",
+          "layer": "02_mechanical_themes",
+          "score": 41.686,
+          "raw_score": 106,
+          "keyword_hits": [
+            "lifegain",
+            "may",
+            "payoff",
+            "plan",
+            "resource"
+          ],
+          "role_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "phrase_hits": [
+            "lifegain",
+            "sacrifice"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      },
+      "new_finds_more_than_legacy": true,
+      "top_match_is_from_249_scoring": true
+    },
+    {
+      "deck_name": "Vehicle Artifact Combat Smoke Test",
+      "commander": "Generic Jeskai Vehicle Commander",
+      "expected_new_strength": "Should find Vehicles, Artifacts, Equipment, and combat-adjacent strategies impossible in the old five-profile preview.",
+      "active_scoring_profiles": 249,
+      "legacy_preview_profile_count": 5,
+      "legacy_preview_status": "deprecated_fallback_only",
+      "scoring_source": "strategy_knowledge/index/strategy_profile_index.latest.json",
+      "new_249_top_matches": [
+        {
+          "strategy_id": "equipment",
+          "display_name": "Equipment",
+          "layer": "02_mechanical_themes",
+          "score": 44.81,
+          "raw_score": 114,
+          "keyword_hits": [
+            "combat",
+            "enablers",
+            "equipment",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat",
+            "equipment"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "vehicles_05_1_niche_theme_rules",
+          "display_name": "Vehicles",
+          "layer": "05_1_niche_theme_rules",
+          "score": 38.091,
+          "raw_score": 97,
+          "keyword_hits": [
+            "artifact",
+            "enablers",
+            "payoff",
+            "support",
+            "vehicles"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat",
+            "vehicles"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "vehicles_02_mechanical_themes_micro_archetypes",
+          "display_name": "Vehicles",
+          "layer": "02_mechanical_themes",
+          "score": 38.072,
+          "raw_score": 97,
+          "keyword_hits": [
+            "artifact",
+            "enablers",
+            "payoff",
+            "support",
+            "vehicles"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat",
+            "vehicles"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "layer": "02_mechanical_themes",
+          "score": 27.8,
+          "raw_score": 58,
+          "keyword_hits": [
+            "enablers",
+            "equipment",
+            "generic",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat",
+            "equipment"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "layer": "02_mechanical_themes",
+          "score": 23.65,
+          "raw_score": 49,
+          "keyword_hits": [
+            "enablers",
+            "generic",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "layer": "02_mechanical_themes",
+          "score": 23.608,
+          "raw_score": 49,
+          "keyword_hits": [
+            "enablers",
+            "generic",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "layer": "02_mechanical_themes",
+          "score": 23.567,
+          "raw_score": 49,
+          "keyword_hits": [
+            "enablers",
+            "generic",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "layer": "02_mechanical_themes",
+          "score": 23.407,
+          "raw_score": 49,
+          "keyword_hits": [
+            "enablers",
+            "generic",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "construct_golem_thopter_artifact_typal",
+          "display_name": "Construct / Golem / Thopter Artifact Typal",
+          "layer": "04_typal_tribal_themes",
+          "score": 22.574,
+          "raw_score": 57,
+          "keyword_hits": [
+            "artifact",
+            "enablers",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "myr_artifact_creature_typal",
+          "display_name": "Myr / Artifact Creature Typal",
+          "layer": "04_typal_tribal_themes",
+          "score": 22.528,
+          "raw_score": 57,
+          "keyword_hits": [
+            "artifact",
+            "enablers",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "artifact_lock_null_rod_effects",
+          "display_name": "Artifact Lock / Null Rod Effects",
+          "layer": "05_2_fringe_theme_rules",
+          "score": 22.494,
+          "raw_score": 57,
+          "keyword_hits": [
+            "artifact",
+            "enablers",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "artifact_treasure_combo_value",
+          "display_name": "Artifact/Treasure Combo-Value",
+          "layer": "05_3_emergent_theme_rules",
+          "score": 22.471,
+          "raw_score": 57,
+          "keyword_hits": [
+            "artifact",
+            "enablers",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      ],
+      "legacy_5_visible_matches": [
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "layer": "02_mechanical_themes",
+          "score": 27.8,
+          "raw_score": 58,
+          "keyword_hits": [
+            "enablers",
+            "equipment",
+            "generic",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat",
+            "equipment"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "layer": "02_mechanical_themes",
+          "score": 23.65,
+          "raw_score": 49,
+          "keyword_hits": [
+            "enablers",
+            "generic",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "layer": "02_mechanical_themes",
+          "score": 23.608,
+          "raw_score": 49,
+          "keyword_hits": [
+            "enablers",
+            "generic",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "layer": "02_mechanical_themes",
+          "score": 23.567,
+          "raw_score": 49,
+          "keyword_hits": [
+            "enablers",
+            "generic",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "layer": "02_mechanical_themes",
+          "score": 23.407,
+          "raw_score": 49,
+          "keyword_hits": [
+            "enablers",
+            "generic",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      ],
+      "legacy_5_visible_match_count": 5,
+      "regression_summary": {
+        "new_top_match_ids": [
+          "equipment",
+          "vehicles_05_1_niche_theme_rules",
+          "vehicles_02_mechanical_themes_micro_archetypes",
+          "voltron",
+          "aristocrats",
+          "tokens",
+          "landfall_lands_matter",
+          "spellslinger",
+          "construct_golem_thopter_artifact_typal",
+          "myr_artifact_creature_typal",
+          "artifact_lock_null_rod_effects",
+          "artifact_treasure_combo_value"
+        ],
+        "legacy_visible_ids": [
+          "aristocrats",
+          "landfall_lands_matter",
+          "spellslinger",
+          "tokens",
+          "voltron"
+        ],
+        "new_matches_not_possible_in_legacy_count": 7,
+        "new_matches_not_possible_in_legacy": [
+          {
+            "strategy_id": "equipment",
+            "display_name": "Equipment",
+            "layer": "02_mechanical_themes",
+            "score": 44.81,
+            "raw_score": 114,
+            "keyword_hits": [
+              "combat",
+              "enablers",
+              "equipment",
+              "payoff",
+              "support"
+            ],
+            "role_hits": [
+              "artifacts",
+              "combat"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "combat",
+              "equipment"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "vehicles_05_1_niche_theme_rules",
+            "display_name": "Vehicles",
+            "layer": "05_1_niche_theme_rules",
+            "score": 38.091,
+            "raw_score": 97,
+            "keyword_hits": [
+              "artifact",
+              "enablers",
+              "payoff",
+              "support",
+              "vehicles"
+            ],
+            "role_hits": [
+              "artifacts",
+              "combat"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "combat",
+              "vehicles"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "vehicles_02_mechanical_themes_micro_archetypes",
+            "display_name": "Vehicles",
+            "layer": "02_mechanical_themes",
+            "score": 38.072,
+            "raw_score": 97,
+            "keyword_hits": [
+              "artifact",
+              "enablers",
+              "payoff",
+              "support",
+              "vehicles"
+            ],
+            "role_hits": [
+              "artifacts",
+              "combat"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "combat",
+              "vehicles"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "construct_golem_thopter_artifact_typal",
+            "display_name": "Construct / Golem / Thopter Artifact Typal",
+            "layer": "04_typal_tribal_themes",
+            "score": 22.574,
+            "raw_score": 57,
+            "keyword_hits": [
+              "artifact",
+              "enablers",
+              "payoff",
+              "support"
+            ],
+            "role_hits": [
+              "artifacts",
+              "combat"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "combat"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "myr_artifact_creature_typal",
+            "display_name": "Myr / Artifact Creature Typal",
+            "layer": "04_typal_tribal_themes",
+            "score": 22.528,
+            "raw_score": 57,
+            "keyword_hits": [
+              "artifact",
+              "enablers",
+              "payoff",
+              "support"
+            ],
+            "role_hits": [
+              "artifacts",
+              "combat"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "combat"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "artifact_lock_null_rod_effects",
+            "display_name": "Artifact Lock / Null Rod Effects",
+            "layer": "05_2_fringe_theme_rules",
+            "score": 22.494,
+            "raw_score": 57,
+            "keyword_hits": [
+              "artifact",
+              "enablers",
+              "payoff",
+              "support"
+            ],
+            "role_hits": [
+              "artifacts",
+              "combat"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "combat"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          },
+          {
+            "strategy_id": "artifact_treasure_combo_value",
+            "display_name": "Artifact/Treasure Combo-Value",
+            "layer": "05_3_emergent_theme_rules",
+            "score": 22.471,
+            "raw_score": 57,
+            "keyword_hits": [
+              "artifact",
+              "enablers",
+              "payoff",
+              "support"
+            ],
+            "role_hits": [
+              "artifacts",
+              "combat"
+            ],
+            "phrase_hits": [
+              "artifacts",
+              "combat"
+            ],
+            "source": "strategy_profile_index.latest.json"
+          }
+        ],
+        "first_non_legacy_match": {
+          "strategy_id": "equipment",
+          "display_name": "Equipment",
+          "layer": "02_mechanical_themes",
+          "score": 44.81,
+          "raw_score": 114,
+          "keyword_hits": [
+            "combat",
+            "enablers",
+            "equipment",
+            "payoff",
+            "support"
+          ],
+          "role_hits": [
+            "artifacts",
+            "combat"
+          ],
+          "phrase_hits": [
+            "artifacts",
+            "combat",
+            "equipment"
+          ],
+          "source": "strategy_profile_index.latest.json"
+        }
+      },
+      "new_finds_more_than_legacy": true,
+      "top_match_is_from_249_scoring": true
+    }
+  ],
+  "aggregate": {
+    "sample_deck_count": 5,
+    "all_decks_active_scoring_249": true,
+    "all_decks_legacy_preview_fallback_only": true,
+    "all_decks_have_new_matches_not_possible_in_legacy": true,
+    "all_decks_have_top_matches": true,
+    "total_new_matches_not_possible_in_legacy_top_12": 47
+  },
+  "gate_checks": {
+    "regression_performed": true,
+    "active_scoring_profiles_is_249_for_all_samples": true,
+    "legacy_preview_is_fallback_only_for_all_samples": true,
+    "new_scoring_finds_matches_not_possible_in_legacy_for_all_samples": true,
+    "top_matches_available_for_all_samples": true,
+    "total_new_matches_not_possible_in_legacy_positive": true,
+    "main_py_not_changed": true
+  },
+  "next_safe_step": "v1.4.38 \u2014 v1.4 Expanded Strategy Scoring Lock Candidate"
+}

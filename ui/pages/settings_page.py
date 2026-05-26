@@ -24,7 +24,7 @@ try:
     )
     from ui.styles.theme import ADVENTURERS_MAP, DRAGON_FORGE
     from ui.widgets import add_shadow, ReportCard, TexturedPanel
-    from ui.services.data_setup_service import get_data_setup_status, download_scryfall_cards, download_commander_spellbook_combo_bulk
+    from data.data_setup_service import get_data_setup_status, download_scryfall_cards, download_commander_spellbook_combo_bulk
 except ImportError:
     from PySide6.QtCore import Qt, QObject, QThread, Signal, Slot
     from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QApplication, QMessageBox
@@ -37,7 +37,7 @@ except ImportError:
     )
     from styles.theme import ADVENTURERS_MAP, DRAGON_FORGE
     from widgets import add_shadow, ReportCard, TexturedPanel
-    from services.data_setup_service import get_data_setup_status, download_scryfall_cards, download_commander_spellbook_combo_bulk
+    from data.data_setup_service import get_data_setup_status, download_scryfall_cards, download_commander_spellbook_combo_bulk
 
 
 def _row(label_text, widget, note_text=None):

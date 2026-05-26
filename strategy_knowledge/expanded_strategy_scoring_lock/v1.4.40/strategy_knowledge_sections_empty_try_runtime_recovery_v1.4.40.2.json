@@ -1,0 +1,44 @@
+{
+  "recovery_version": "v1.4.40.2",
+  "recovery_name": "Strategy Knowledge Sections Empty Try Block Runtime Recovery Hotfix",
+  "runtime_syntax_recovery_performed": true,
+  "target_file": "reports/strategy_knowledge_sections.py",
+  "repair": {
+    "exists": true,
+    "changed": false,
+    "insertions": 0,
+    "repaired_try_lines": []
+  },
+  "compile_results": {
+    "reports/strategy_knowledge_sections.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/prompt_builder.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "main.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    }
+  },
+  "main_py_changed": false,
+  "active_scoring_logic_changed": false,
+  "combo_awareness_logic_changed": false,
+  "legacy_fallback_preserved": true,
+  "gate_checks": {
+    "target_file_exists": true,
+    "empty_try_repair_inserted_or_not_needed": true,
+    "strategy_knowledge_sections_compiles": true,
+    "prompt_builder_compiles": true,
+    "main_py_compiles": true,
+    "main_py_not_changed": true,
+    "active_scoring_logic_not_changed": true,
+    "combo_awareness_logic_not_changed": true
+  },
+  "next_safe_step": "Re-run combo awareness startup command; if clean, proceed to v1.4.41 stable lock/handoff."
+}

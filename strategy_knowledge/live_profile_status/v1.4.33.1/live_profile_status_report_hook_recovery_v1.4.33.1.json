@@ -1,0 +1,35 @@
+{
+  "recovery_version": "v1.4.33.1",
+  "recovery_name": "Live Profile Status Report Hook Recovery Hotfix",
+  "runtime_behavior_changed": false,
+  "report_surface_changed": false,
+  "indexing_performed": false,
+  "scoring_wiring_performed": false,
+  "main_py_changed": false,
+  "strategy_knowledge_sections_patch": {
+    "exists": true,
+    "changed": false,
+    "changes": []
+  },
+  "strategy_live_bridge_patch": {
+    "exists": true,
+    "changed": false,
+    "changes": []
+  },
+  "status_payload": {
+    "error": "No module named 'reports'"
+  },
+  "live_strategy_profiles_available": null,
+  "active_scoring_preview_profiles": null,
+  "gate_checks": {
+    "status_module_available": false,
+    "live_strategy_profiles_available_is_249": false,
+    "active_scoring_preview_profiles_is_5": false,
+    "strategy_knowledge_sections_exists": true,
+    "strategy_live_bridge_exists": true,
+    "main_py_not_changed": true,
+    "indexing_not_performed": true,
+    "scoring_wiring_not_performed": true
+  },
+  "next_safe_step": "v1.4.34 \u2014 Strategy Knowledge Index Build / Searchable Profile Manifest"
+}

@@ -440,3 +440,62 @@ Prefer:
 - clear questions
 - warm explanation
 - philosophy-aligned recommendation language
+---
+
+# Implementation Status — v1.1.9
+
+As of **v1.1.9**, persona support is implemented through the philosophy persona registry.
+
+The implementation currently provides:
+
+- canonical guide/persona definitions
+- guide name resolution
+- masculine guide presentation
+- feminine guide presentation
+- either / deterministic paired guide presentation
+- no-named-guide behavior
+- report-context metadata for later report generation
+
+## Rules Object Boundary
+
+The selected philosophy or subtype remains the rules object.
+
+The guide persona remains presentation only.
+
+Correct:
+
+- User selects **Big Moment**
+- The rules object is **Big Moment**
+- The resolved guide may be **Michael** or **Michelle**
+
+Incorrect:
+
+- User selects **Michael**
+- The system infers rules from the name alone
+
+## Guide Resolution
+
+Guide resolution is handled by:
+
+- selected lens
+- parent philosophy
+- guide role
+- guide presentation preference
+- named-guide enabled/disabled behavior
+
+Persona names must not be used as rules identifiers.
+
+## Current Runtime Boundary
+
+As of v1.1.9, persona support **does not yet**:
+
+- change deck analysis
+- choose cards
+- choose cuts
+- score recommendations
+- override the philosophy rules object
+- override user constraints
+- modify existing reports automatically
+- modify UI behavior automatically
+
+Persona support currently exists to make later report and prompt output warmer, clearer, and more user-facing while preserving mechanical boundaries.

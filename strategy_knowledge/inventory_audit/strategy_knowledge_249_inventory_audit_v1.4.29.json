@@ -1,0 +1,3934 @@
+{
+  "audit_version": "v1.4.29",
+  "audit_name": "Strategy Knowledge 249-File Inventory / Import Readiness Audit",
+  "runtime_behavior_changed": false,
+  "import_performed": false,
+  "source_zip_imported_into_live_layers": false,
+  "live_strategy_profile_count": 5,
+  "external_importable_strategy_profile_count": 249,
+  "source_unique_strategy_slug_count": 244,
+  "expected_full_strategy_library_count": 249,
+  "already_live_profile_count": 5,
+  "missing_from_live_count": 239,
+  "missing_from_live_count_formula": "source_unique_strategy_slug_count - already_live_profile_count",
+  "source_duplicate_strategy_slug_count": 5,
+  "source_duplicate_strategy_slugs": {
+    "clues_investigate": [
+      "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/clues_investigate.md",
+      "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/clues_investigate.md"
+    ],
+    "exile_matters_cast_from_exile": [
+      "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/exile_matters_cast_from_exile.md",
+      "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/exile_matters_cast_from_exile.md"
+    ],
+    "food": [
+      "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/food.md",
+      "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/food.md"
+    ],
+    "mill": [
+      "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/mill.md",
+      "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/mill.md"
+    ],
+    "vehicles": [
+      "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/vehicles.md",
+      "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/vehicles.md"
+    ]
+  },
+  "already_live_slugs": [
+    "aristocrats",
+    "landfall_lands_matter",
+    "spellslinger",
+    "tokens",
+    "voltron"
+  ],
+  "missing_from_live_slugs": [
+    "adamant",
+    "adventures",
+    "aggro",
+    "aikido_judo",
+    "ally_typal",
+    "alternate_win_conditions",
+    "angel_typal",
+    "anti_combo_social_police",
+    "archenemy_villain_deck",
+    "artifact_lock_null_rod_effects",
+    "artifact_synergy",
+    "artifact_treasure_combo_value",
+    "assassin_typal",
+    "attack_elsewhere_incentive",
+    "attractions",
+    "auras",
+    "bat_rabbit_bloomburrow_style_small_typal",
+    "battle_tribal",
+    "battles_sieges",
+    "blink_flicker",
+    "blood",
+    "blood_tokens_madness_discard_value",
+    "bloodthirst",
+    "bounty_incentivized_combat",
+    "bracket_aware_stax_hatebear_packages",
+    "bracket_pressure_high_power_value",
+    "bribery_gift_based_politics",
+    "cascade",
+    "case_enchantments",
+    "cat_dog_typal",
+    "caves",
+    "chaos",
+    "clash",
+    "classes_as_primary_theme",
+    "cleric_typal",
+    "clues_investigate",
+    "coin_flipping",
+    "collection_aware_replacement_planning",
+    "color_hate",
+    "colorless_restriction_wastes_matters",
+    "combo",
+    "combo_adjacent_value",
+    "commander_created_landfall",
+    "commander_defined_single_card_archetypes",
+    "commander_recast_death_loops",
+    "commander_tax_advantage",
+    "compact_combo_but_not_full_combo_deck",
+    "companion_influenced_builds",
+    "constellation",
+    "construct_golem_thopter_artifact_typal",
+    "contraptions",
+    "control",
+    "copy_clones",
+    "curse_pillowfort",
+    "curse_politics",
+    "cycling",
+    "damage_reflection_stuffy_doll_effects",
+    "demon_typal",
+    "deserts",
+    "dice_rolling",
+    "dinosaur_typal",
+    "discover",
+    "do_not_touch_me_control",
+    "doctors_companion_time_counter_shells",
+    "donate_bad_gifts",
+    "dragon_typal",
+    "dragons_approach_spell_density_dragon_tutor",
+    "druid_typal",
+    "dungeons_venture",
+    "eldrazi_typal",
+    "elemental_typal",
+    "elf_typal",
+    "enchantress",
+    "end_the_turn",
+    "energy",
+    "engine_synergy_value",
+    "equipment",
+    "etb_lock_torpor_orb_effects",
+    "exile_matters_cast_from_exile",
+    "expend",
+    "extra_combat",
+    "extra_upkeeps",
+    "face_down_morph_manifest_disguise_cloak",
+    "faerie_typal",
+    "fairness_symmetrical_rules",
+    "fast_mana_explosive_start_package",
+    "fateseal_opponent_topdeck_control",
+    "fog_tribal",
+    "fog_turbo_fog_politics",
+    "food",
+    "forage",
+    "forced_blocking_combat_manipulation",
+    "forced_combat_goad",
+    "foretell",
+    "free_interaction_protection_package",
+    "game_changer_bracket_pressure_packages",
+    "gates",
+    "generically_good_but_wrong_shell",
+    "giant_minotaur_beast_berserker_typal",
+    "gift",
+    "go_tall_combat",
+    "go_wide_combat",
+    "goad",
+    "goad_control",
+    "goblin_typal",
+    "graveyard_lock",
+    "graveyard_matters",
+    "group_hug",
+    "group_slug",
+    "halfling_hobbit_typal",
+    "hare_apparent_rabbit_swarm",
+    "hatebears",
+    "hellbent",
+    "high_power_value_but_not_turbo_combo",
+    "high_synergy_low_raw_power_cards",
+    "human_typal",
+    "hydra_typal",
+    "incubate",
+    "infect",
+    "information_politics_hidden_threats",
+    "initiative_undercity",
+    "insect_squirrel_saproling_fungus_typal",
+    "keyword_typal",
+    "kingmaker_table_balancer",
+    "knight_typal",
+    "land_animation",
+    "legends_matter_historic",
+    "level_up",
+    "life_total_exchange",
+    "life_total_politics",
+    "lifedrain",
+    "lifegain",
+    "locus",
+    "madness",
+    "manifest_dread",
+    "map_tokens_explore",
+    "mass_land_denial",
+    "meld_packages",
+    "merfolk_typal",
+    "midrange_value",
+    "mill",
+    "monarch",
+    "monarch_politics",
+    "multiple_copy_exception_decks",
+    "mutate",
+    "mutual_benefit_with_hidden_asymmetry",
+    "mutual_destruction_board_reset_politics",
+    "myr_artifact_creature_typal",
+    "nazgul_wraith_ring_hybrid",
+    "negotiated_removal",
+    "ninja_typal",
+    "no_abilities_matters",
+    "nonbasic_land_hate",
+    "odd_even_mana_value_restrictions",
+    "offspring",
+    "orc_army_amass_typal",
+    "partner_background_pair_defined_decks",
+    "party_typal",
+    "persistent_petitioners_advisor_mill",
+    "phyrexian_typal",
+    "pillowfort",
+    "pirate_typal",
+    "plot_crime_outlaw_packages",
+    "plus_1_plus_1_counters",
+    "political_combo_deterrence",
+    "politics_deal_making",
+    "powerstones",
+    "proliferate",
+    "proliferate_poison",
+    "punisher_choice_punisher",
+    "ramp_big_mana",
+    "rat_nazgul_multiple_copy_typal",
+    "rattlesnake",
+    "reanimator",
+    "refined_deck_review_candidates",
+    "renown",
+    "resource_redistribution_donate_bad_gifts",
+    "revenge_retaliation",
+    "ring_temptation",
+    "rogue_typal",
+    "role_tokens",
+    "rooms_as_primary_theme",
+    "rooms_eerie",
+    "rule_zero_silver_border_acorn_themes",
+    "saboteur_combat_damage_triggers",
+    "sagas",
+    "samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids",
+    "sandbag_reactive_control_politics",
+    "scarecrow_changeling_all_typal",
+    "secret_combo_low_threat_combo",
+    "shadowborn_apostle_demon_tutor_engine",
+    "shared_combat_incentive",
+    "shared_enemy_table_alliance",
+    "shrines",
+    "sliver_typal",
+    "slow_alternate_win_conditions",
+    "snake_typal",
+    "snow",
+    "social_contract_rule_zero_decks",
+    "social_pressure_reputation_decks",
+    "soft_lock_politics",
+    "soldier_typal",
+    "spirit_typal",
+    "splice_arcane",
+    "stax_prison",
+    "stickers",
+    "storm",
+    "superfriends_planeswalkers",
+    "survival",
+    "suspend",
+    "table_police_rule_enforcer",
+    "tablewide_resource_acceleration",
+    "tempo",
+    "theft",
+    "theft_clone_politics",
+    "theme_flavor_first_decks",
+    "threat_redistribution",
+    "token_combat_go_wide_go_tall_hybrid",
+    "toolbox",
+    "topdeck_matters",
+    "toxic_corrupted",
+    "treasure",
+    "treasure_tutor_chains",
+    "treefolk_typal",
+    "turn_phase_manipulation",
+    "tutor_density_tutor_chain_pressure",
+    "tutor_hate",
+    "typal_mechanic_hybrids",
+    "untap_tap_matters",
+    "utility_lands_matter",
+    "vampire_typal",
+    "vanilla_matters",
+    "vehicles",
+    "voting_councils_dilemma",
+    "warrior_typal",
+    "wizard_typal",
+    "wolf_werewolf_typal",
+    "x_spells_big_spells",
+    "zombie_typal"
+  ],
+  "recommended_next_step": "v1.4.30 \u2014 Strategy Knowledge 249-File Import / Staging",
+  "gate_checks": {
+    "source_zip_exists": true,
+    "source_zip_has_249_importable_strategy_profiles": true,
+    "source_zip_folder_counts_match_expected": true,
+    "current_live_profile_count_detected": true,
+    "current_live_profile_count_is_5_sample_profiles": true,
+    "gap_detected_between_source_and_live": true,
+    "no_runtime_behavior_changed": true
+  },
+  "live_inventory": {
+    "live_layers_dir_exists": true,
+    "live_markdown_count_under_layers": 5,
+    "live_valid_strategy_profile_count": 5,
+    "live_invalid_or_nonprofile_markdown_count": 0,
+    "live_profiles": [
+      {
+        "path": "strategy_knowledge/layers/02_mechanical_themes/aristocrats.md",
+        "slug": "aristocrats",
+        "size_bytes": 75701,
+        "strategy_id": "aristocrats",
+        "display_name": "Aristocrats",
+        "layer": "02_mechanical_themes",
+        "has_required_profile_frontmatter": true
+      },
+      {
+        "path": "strategy_knowledge/layers/02_mechanical_themes/landfall_lands_matter.md",
+        "slug": "landfall_lands_matter",
+        "size_bytes": 76875,
+        "strategy_id": "landfall_lands_matter",
+        "display_name": "Landfall / Lands Matter",
+        "layer": "02_mechanical_themes",
+        "has_required_profile_frontmatter": true
+      },
+      {
+        "path": "strategy_knowledge/layers/02_mechanical_themes/spellslinger.md",
+        "slug": "spellslinger",
+        "size_bytes": 74119,
+        "strategy_id": "spellslinger",
+        "display_name": "Spellslinger",
+        "layer": "02_mechanical_themes",
+        "has_required_profile_frontmatter": true
+      },
+      {
+        "path": "strategy_knowledge/layers/02_mechanical_themes/tokens.md",
+        "slug": "tokens",
+        "size_bytes": 74439,
+        "strategy_id": "tokens",
+        "display_name": "Tokens",
+        "layer": "02_mechanical_themes",
+        "has_required_profile_frontmatter": true
+      },
+      {
+        "path": "strategy_knowledge/layers/02_mechanical_themes/voltron.md",
+        "slug": "voltron",
+        "size_bytes": 75777,
+        "strategy_id": "voltron",
+        "display_name": "Voltron",
+        "layer": "02_mechanical_themes",
+        "has_required_profile_frontmatter": true
+      }
+    ],
+    "live_invalid_or_nonprofile_markdown": [],
+    "live_profile_slugs": [
+      "aristocrats",
+      "landfall_lands_matter",
+      "spellslinger",
+      "tokens",
+      "voltron"
+    ]
+  },
+  "import_source_inventory": {
+    "source_zip_exists": true,
+    "source_zip_path": "strategy_knowledge\\import_sources\\the_dragons_touch_strategy_deep_dive_knowledge_base.zip",
+    "source_zip_size_bytes": 3102714,
+    "total_zip_entries": 269,
+    "total_markdown_files": 260,
+    "expected_strategy_profile_count": 249,
+    "importable_strategy_profile_count": 249,
+    "non_profile_markdown_count": 11,
+    "folder_markdown_counts": {
+      "00_manifest": 3,
+      "01_macro_archetypes_commander": 9,
+      "02_mechanical_themes_micro_archetypes": 37,
+      "03_strategic_board_politics": 42,
+      "04_typal_tribal_themes": 44,
+      "05_1_niche_theme_rules": 40,
+      "05_2_fringe_theme_rules": 40,
+      "05_3_emergent_theme_rules": 37,
+      "06_strategy_archetype_rules": 8
+    },
+    "expected_folder_checks": {
+      "01_macro_archetypes_commander": {
+        "expected": 9,
+        "actual": 9,
+        "passed": true
+      },
+      "02_mechanical_themes_micro_archetypes": {
+        "expected": 37,
+        "actual": 37,
+        "passed": true
+      },
+      "03_strategic_board_politics": {
+        "expected": 42,
+        "actual": 42,
+        "passed": true
+      },
+      "04_typal_tribal_themes": {
+        "expected": 44,
+        "actual": 44,
+        "passed": true
+      },
+      "05_1_niche_theme_rules": {
+        "expected": 40,
+        "actual": 40,
+        "passed": true
+      },
+      "05_2_fringe_theme_rules": {
+        "expected": 40,
+        "actual": 40,
+        "passed": true
+      },
+      "05_3_emergent_theme_rules": {
+        "expected": 37,
+        "actual": 37,
+        "passed": true
+      }
+    },
+    "strategy_records": [
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/01_macro_archetypes_commander/aggro.md",
+        "folder": "01_macro_archetypes_commander",
+        "slug": "aggro",
+        "size_bytes": 43304,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/01_macro_archetypes_commander/combo.md",
+        "folder": "01_macro_archetypes_commander",
+        "slug": "combo",
+        "size_bytes": 42744,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/01_macro_archetypes_commander/control.md",
+        "folder": "01_macro_archetypes_commander",
+        "slug": "control",
+        "size_bytes": 43444,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/01_macro_archetypes_commander/engine_synergy_value.md",
+        "folder": "01_macro_archetypes_commander",
+        "slug": "engine_synergy_value",
+        "size_bytes": 42291,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/01_macro_archetypes_commander/midrange_value.md",
+        "folder": "01_macro_archetypes_commander",
+        "slug": "midrange_value",
+        "size_bytes": 44084,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/01_macro_archetypes_commander/ramp_big_mana.md",
+        "folder": "01_macro_archetypes_commander",
+        "slug": "ramp_big_mana",
+        "size_bytes": 43926,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/01_macro_archetypes_commander/stax_prison.md",
+        "folder": "01_macro_archetypes_commander",
+        "slug": "stax_prison",
+        "size_bytes": 43298,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/01_macro_archetypes_commander/tempo.md",
+        "folder": "01_macro_archetypes_commander",
+        "slug": "tempo",
+        "size_bytes": 43221,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/01_macro_archetypes_commander/toolbox.md",
+        "folder": "01_macro_archetypes_commander",
+        "slug": "toolbox",
+        "size_bytes": 43369,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/alternate_win_conditions.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "alternate_win_conditions",
+        "size_bytes": 44024,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/aristocrats.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "aristocrats",
+        "size_bytes": 43244,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/artifact_synergy.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "artifact_synergy",
+        "size_bytes": 44134,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/auras.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "auras",
+        "size_bytes": 43438,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/blink_flicker.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "blink_flicker",
+        "size_bytes": 43904,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/blood_tokens_madness_discard_value.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "blood_tokens_madness_discard_value",
+        "size_bytes": 43278,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/bracket_pressure_high_power_value.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "bracket_pressure_high_power_value",
+        "size_bytes": 43305,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/clues_investigate.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "clues_investigate",
+        "size_bytes": 43679,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/copy_clones.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "copy_clones",
+        "size_bytes": 43742,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/enchantress.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "enchantress",
+        "size_bytes": 43731,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/equipment.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "equipment",
+        "size_bytes": 43756,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/exile_matters_cast_from_exile.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "exile_matters_cast_from_exile",
+        "size_bytes": 43934,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/extra_combat.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "extra_combat",
+        "size_bytes": 43449,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/food.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "food",
+        "size_bytes": 42653,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/go_tall_combat.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "go_tall_combat",
+        "size_bytes": 43491,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/go_wide_combat.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "go_wide_combat",
+        "size_bytes": 44569,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/graveyard_matters.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "graveyard_matters",
+        "size_bytes": 43263,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/hatebears.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "hatebears",
+        "size_bytes": 43541,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/landfall_lands_matter.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "landfall_lands_matter",
+        "size_bytes": 43754,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/legends_matter_historic.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "legends_matter_historic",
+        "size_bytes": 42452,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/lifedrain.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "lifedrain",
+        "size_bytes": 43504,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/lifegain.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "lifegain",
+        "size_bytes": 43458,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/mill.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "mill",
+        "size_bytes": 42302,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/plus_1_plus_1_counters.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "plus_1_plus_1_counters",
+        "size_bytes": 43866,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/proliferate.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "proliferate",
+        "size_bytes": 43214,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/reanimator.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "reanimator",
+        "size_bytes": 42742,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/saboteur_combat_damage_triggers.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "saboteur_combat_damage_triggers",
+        "size_bytes": 42238,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/spellslinger.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "spellslinger",
+        "size_bytes": 42672,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/storm.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "storm",
+        "size_bytes": 42123,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/superfriends_planeswalkers.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "superfriends_planeswalkers",
+        "size_bytes": 42661,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/theft.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "theft",
+        "size_bytes": 43227,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/tokens.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "tokens",
+        "size_bytes": 42553,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/treasure.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "treasure",
+        "size_bytes": 42993,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/untap_tap_matters.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "untap_tap_matters",
+        "size_bytes": 44196,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/vehicles.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "vehicles",
+        "size_bytes": 43515,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/voltron.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "voltron",
+        "size_bytes": 43349,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/x_spells_big_spells.md",
+        "folder": "02_mechanical_themes_micro_archetypes",
+        "slug": "x_spells_big_spells",
+        "size_bytes": 43256,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/aikido_judo.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "aikido_judo",
+        "size_bytes": 43254,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/anti_combo_social_police.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "anti_combo_social_police",
+        "size_bytes": 42491,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/archenemy_villain_deck.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "archenemy_villain_deck",
+        "size_bytes": 44026,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/attack_elsewhere_incentive.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "attack_elsewhere_incentive",
+        "size_bytes": 42609,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/bounty_incentivized_combat.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "bounty_incentivized_combat",
+        "size_bytes": 42994,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/bribery_gift_based_politics.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "bribery_gift_based_politics",
+        "size_bytes": 44401,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/chaos.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "chaos",
+        "size_bytes": 42651,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/curse_politics.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "curse_politics",
+        "size_bytes": 43521,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/do_not_touch_me_control.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "do_not_touch_me_control",
+        "size_bytes": 43943,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/fairness_symmetrical_rules.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "fairness_symmetrical_rules",
+        "size_bytes": 44238,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/fog_turbo_fog_politics.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "fog_turbo_fog_politics",
+        "size_bytes": 42498,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/forced_blocking_combat_manipulation.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "forced_blocking_combat_manipulation",
+        "size_bytes": 43583,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/forced_combat_goad.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "forced_combat_goad",
+        "size_bytes": 44123,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/goad_control.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "goad_control",
+        "size_bytes": 43821,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/group_hug.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "group_hug",
+        "size_bytes": 43045,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/group_slug.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "group_slug",
+        "size_bytes": 43015,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/information_politics_hidden_threats.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "information_politics_hidden_threats",
+        "size_bytes": 42349,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/kingmaker_table_balancer.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "kingmaker_table_balancer",
+        "size_bytes": 44129,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/life_total_politics.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "life_total_politics",
+        "size_bytes": 43589,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/monarch_politics.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "monarch_politics",
+        "size_bytes": 43586,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/mutual_benefit_with_hidden_asymmetry.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "mutual_benefit_with_hidden_asymmetry",
+        "size_bytes": 42353,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/mutual_destruction_board_reset_politics.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "mutual_destruction_board_reset_politics",
+        "size_bytes": 42622,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/negotiated_removal.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "negotiated_removal",
+        "size_bytes": 43560,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/pillowfort.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "pillowfort",
+        "size_bytes": 43042,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/political_combo_deterrence.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "political_combo_deterrence",
+        "size_bytes": 44194,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/politics_deal_making.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "politics_deal_making",
+        "size_bytes": 43825,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/punisher_choice_punisher.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "punisher_choice_punisher",
+        "size_bytes": 44199,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/rattlesnake.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "rattlesnake",
+        "size_bytes": 44421,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/resource_redistribution_donate_bad_gifts.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "resource_redistribution_donate_bad_gifts",
+        "size_bytes": 42835,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/revenge_retaliation.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "revenge_retaliation",
+        "size_bytes": 43786,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/sandbag_reactive_control_politics.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "sandbag_reactive_control_politics",
+        "size_bytes": 42212,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/secret_combo_low_threat_combo.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "secret_combo_low_threat_combo",
+        "size_bytes": 44520,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/shared_combat_incentive.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "shared_combat_incentive",
+        "size_bytes": 44288,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/shared_enemy_table_alliance.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "shared_enemy_table_alliance",
+        "size_bytes": 44327,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/social_contract_rule_zero_decks.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "social_contract_rule_zero_decks",
+        "size_bytes": 42178,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/social_pressure_reputation_decks.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "social_pressure_reputation_decks",
+        "size_bytes": 42251,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/soft_lock_politics.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "soft_lock_politics",
+        "size_bytes": 42061,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/table_police_rule_enforcer.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "table_police_rule_enforcer",
+        "size_bytes": 42879,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/tablewide_resource_acceleration.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "tablewide_resource_acceleration",
+        "size_bytes": 43094,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/theft_clone_politics.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "theft_clone_politics",
+        "size_bytes": 43898,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/threat_redistribution.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "threat_redistribution",
+        "size_bytes": 43798,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/03_strategic_board_politics/voting_councils_dilemma.md",
+        "folder": "03_strategic_board_politics",
+        "slug": "voting_councils_dilemma",
+        "size_bytes": 44288,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/ally_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "ally_typal",
+        "size_bytes": 43115,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/angel_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "angel_typal",
+        "size_bytes": 43185,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/assassin_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "assassin_typal",
+        "size_bytes": 43471,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/bat_rabbit_bloomburrow_style_small_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "bat_rabbit_bloomburrow_style_small_typal",
+        "size_bytes": 43084,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/cat_dog_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "cat_dog_typal",
+        "size_bytes": 43481,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/cleric_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "cleric_typal",
+        "size_bytes": 43278,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/construct_golem_thopter_artifact_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "construct_golem_thopter_artifact_typal",
+        "size_bytes": 42963,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/demon_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "demon_typal",
+        "size_bytes": 43243,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/dinosaur_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "dinosaur_typal",
+        "size_bytes": 43417,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/dragon_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "dragon_typal",
+        "size_bytes": 43327,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/druid_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "druid_typal",
+        "size_bytes": 43196,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/eldrazi_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "eldrazi_typal",
+        "size_bytes": 43405,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/elemental_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "elemental_typal",
+        "size_bytes": 43458,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/elf_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "elf_typal",
+        "size_bytes": 43064,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/faerie_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "faerie_typal",
+        "size_bytes": 43228,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/giant_minotaur_beast_berserker_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "giant_minotaur_beast_berserker_typal",
+        "size_bytes": 42804,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/goblin_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "goblin_typal",
+        "size_bytes": 43323,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/halfling_hobbit_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "halfling_hobbit_typal",
+        "size_bytes": 44038,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/human_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "human_typal",
+        "size_bytes": 43207,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/hydra_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "hydra_typal",
+        "size_bytes": 43192,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/insect_squirrel_saproling_fungus_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "insect_squirrel_saproling_fungus_typal",
+        "size_bytes": 42921,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/keyword_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "keyword_typal",
+        "size_bytes": 43323,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/knight_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "knight_typal",
+        "size_bytes": 43257,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/merfolk_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "merfolk_typal",
+        "size_bytes": 43355,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/myr_artifact_creature_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "myr_artifact_creature_typal",
+        "size_bytes": 42130,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/ninja_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "ninja_typal",
+        "size_bytes": 43217,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/orc_army_amass_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "orc_army_amass_typal",
+        "size_bytes": 44152,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/party_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "party_typal",
+        "size_bytes": 43230,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/phyrexian_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "phyrexian_typal",
+        "size_bytes": 43510,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/pirate_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "pirate_typal",
+        "size_bytes": 43264,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/rat_nazgul_multiple_copy_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "rat_nazgul_multiple_copy_typal",
+        "size_bytes": 42282,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/rogue_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "rogue_typal",
+        "size_bytes": 43239,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids",
+        "size_bytes": 42566,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/scarecrow_changeling_all_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "scarecrow_changeling_all_typal",
+        "size_bytes": 42276,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/sliver_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "sliver_typal",
+        "size_bytes": 43265,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/snake_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "snake_typal",
+        "size_bytes": 43156,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/soldier_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "soldier_typal",
+        "size_bytes": 43373,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/spirit_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "spirit_typal",
+        "size_bytes": 43312,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/treefolk_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "treefolk_typal",
+        "size_bytes": 43451,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/vampire_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "vampire_typal",
+        "size_bytes": 43363,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/warrior_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "warrior_typal",
+        "size_bytes": 43350,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/wizard_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "wizard_typal",
+        "size_bytes": 43308,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/wolf_werewolf_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "wolf_werewolf_typal",
+        "size_bytes": 43922,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/04_typal_tribal_themes/zombie_typal.md",
+        "folder": "04_typal_tribal_themes",
+        "slug": "zombie_typal",
+        "size_bytes": 43335,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/adventures.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "adventures",
+        "size_bytes": 42549,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/battles_sieges.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "battles_sieges",
+        "size_bytes": 43590,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/blood.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "blood",
+        "size_bytes": 42768,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/cascade.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "cascade",
+        "size_bytes": 42355,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/clues_investigate.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "clues_investigate",
+        "size_bytes": 43758,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/coin_flipping.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "coin_flipping",
+        "size_bytes": 43078,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/constellation.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "constellation",
+        "size_bytes": 43850,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/cycling.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "cycling",
+        "size_bytes": 42664,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/deserts.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "deserts",
+        "size_bytes": 42556,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/dice_rolling.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "dice_rolling",
+        "size_bytes": 42972,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/discover.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "discover",
+        "size_bytes": 42443,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/dungeons_venture.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "dungeons_venture",
+        "size_bytes": 43393,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/energy.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "energy",
+        "size_bytes": 42635,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/exile_matters_cast_from_exile.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "exile_matters_cast_from_exile",
+        "size_bytes": 44049,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/face_down_morph_manifest_disguise_cloak.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "face_down_morph_manifest_disguise_cloak",
+        "size_bytes": 42816,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/food.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "food",
+        "size_bytes": 42675,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/foretell.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "foretell",
+        "size_bytes": 42411,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/gates.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "gates",
+        "size_bytes": 42376,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/goad.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "goad",
+        "size_bytes": 43126,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/incubate.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "incubate",
+        "size_bytes": 44102,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/infect.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "infect",
+        "size_bytes": 43302,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/initiative_undercity.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "initiative_undercity",
+        "size_bytes": 43739,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/land_animation.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "land_animation",
+        "size_bytes": 43100,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/madness.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "madness",
+        "size_bytes": 42559,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/map_tokens_explore.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "map_tokens_explore",
+        "size_bytes": 43578,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/mill.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "mill",
+        "size_bytes": 42404,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/monarch.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "monarch",
+        "size_bytes": 42905,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/mutate.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "mutate",
+        "size_bytes": 42608,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/powerstones.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "powerstones",
+        "size_bytes": 43184,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/proliferate_poison.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "proliferate_poison",
+        "size_bytes": 43727,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/ring_temptation.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "ring_temptation",
+        "size_bytes": 43306,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/role_tokens.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "role_tokens",
+        "size_bytes": 42977,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/sagas.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "sagas",
+        "size_bytes": 43267,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/shrines.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "shrines",
+        "size_bytes": 43378,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/snow.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "snow",
+        "size_bytes": 42377,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/suspend.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "suspend",
+        "size_bytes": 42395,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/topdeck_matters.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "topdeck_matters",
+        "size_bytes": 43279,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/toxic_corrupted.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "toxic_corrupted",
+        "size_bytes": 44087,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/utility_lands_matter.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "utility_lands_matter",
+        "size_bytes": 43531,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/vehicles.md",
+        "folder": "05_1_niche_theme_rules",
+        "slug": "vehicles",
+        "size_bytes": 43566,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/adamant.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "adamant",
+        "size_bytes": 42639,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/artifact_lock_null_rod_effects.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "artifact_lock_null_rod_effects",
+        "size_bytes": 42238,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/attractions.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "attractions",
+        "size_bytes": 42978,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/battle_tribal.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "battle_tribal",
+        "size_bytes": 43347,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/bloodthirst.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "bloodthirst",
+        "size_bytes": 43176,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/case_enchantments.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "case_enchantments",
+        "size_bytes": 44136,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/caves.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "caves",
+        "size_bytes": 42381,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/clash.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "clash",
+        "size_bytes": 42511,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/classes_as_primary_theme.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "classes_as_primary_theme",
+        "size_bytes": 42465,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/color_hate.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "color_hate",
+        "size_bytes": 42869,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/colorless_restriction_wastes_matters.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "colorless_restriction_wastes_matters",
+        "size_bytes": 42193,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/companion_influenced_builds.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "companion_influenced_builds",
+        "size_bytes": 44083,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/contraptions.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "contraptions",
+        "size_bytes": 43876,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/curse_pillowfort.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "curse_pillowfort",
+        "size_bytes": 43563,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/damage_reflection_stuffy_doll_effects.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "damage_reflection_stuffy_doll_effects",
+        "size_bytes": 43455,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/donate_bad_gifts.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "donate_bad_gifts",
+        "size_bytes": 43391,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/end_the_turn.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "end_the_turn",
+        "size_bytes": 43109,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/etb_lock_torpor_orb_effects.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "etb_lock_torpor_orb_effects",
+        "size_bytes": 44394,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/extra_upkeeps.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "extra_upkeeps",
+        "size_bytes": 43071,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/fateseal_opponent_topdeck_control.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "fateseal_opponent_topdeck_control",
+        "size_bytes": 42077,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/fog_tribal.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "fog_tribal",
+        "size_bytes": 44362,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/graveyard_lock.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "graveyard_lock",
+        "size_bytes": 44270,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/hellbent.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "hellbent",
+        "size_bytes": 42659,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/level_up.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "level_up",
+        "size_bytes": 42729,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/life_total_exchange.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "life_total_exchange",
+        "size_bytes": 43514,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/locus.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "locus",
+        "size_bytes": 42404,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/mass_land_denial.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "mass_land_denial",
+        "size_bytes": 43175,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/meld_packages.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "meld_packages",
+        "size_bytes": 43035,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/no_abilities_matters.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "no_abilities_matters",
+        "size_bytes": 43557,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/nonbasic_land_hate.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "nonbasic_land_hate",
+        "size_bytes": 43351,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/odd_even_mana_value_restrictions.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "odd_even_mana_value_restrictions",
+        "size_bytes": 42025,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/renown.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "renown",
+        "size_bytes": 43247,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/rooms_as_primary_theme.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "rooms_as_primary_theme",
+        "size_bytes": 42260,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/rule_zero_silver_border_acorn_themes.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "rule_zero_silver_border_acorn_themes",
+        "size_bytes": 42397,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/splice_arcane.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "splice_arcane",
+        "size_bytes": 42842,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/stickers.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "stickers",
+        "size_bytes": 42701,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/theme_flavor_first_decks.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "theme_flavor_first_decks",
+        "size_bytes": 44071,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/turn_phase_manipulation.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "turn_phase_manipulation",
+        "size_bytes": 43870,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/tutor_hate.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "tutor_hate",
+        "size_bytes": 42833,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_2_fringe_theme_rules/vanilla_matters.md",
+        "folder": "05_2_fringe_theme_rules",
+        "slug": "vanilla_matters",
+        "size_bytes": 43197,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/artifact_treasure_combo_value.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "artifact_treasure_combo_value",
+        "size_bytes": 42852,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/bracket_aware_stax_hatebear_packages.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "bracket_aware_stax_hatebear_packages",
+        "size_bytes": 42478,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/collection_aware_replacement_planning.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "collection_aware_replacement_planning",
+        "size_bytes": 43366,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/combo_adjacent_value.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "combo_adjacent_value",
+        "size_bytes": 43766,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/commander_created_landfall.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "commander_created_landfall",
+        "size_bytes": 44130,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/commander_defined_single_card_archetypes.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "commander_defined_single_card_archetypes",
+        "size_bytes": 43591,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/commander_recast_death_loops.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "commander_recast_death_loops",
+        "size_bytes": 43985,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/commander_tax_advantage.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "commander_tax_advantage",
+        "size_bytes": 42355,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/compact_combo_but_not_full_combo_deck.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "compact_combo_but_not_full_combo_deck",
+        "size_bytes": 42373,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/doctors_companion_time_counter_shells.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "doctors_companion_time_counter_shells",
+        "size_bytes": 43595,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/dragons_approach_spell_density_dragon_tutor.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "dragons_approach_spell_density_dragon_tutor",
+        "size_bytes": 43217,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/expend.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "expend",
+        "size_bytes": 43693,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/fast_mana_explosive_start_package.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "fast_mana_explosive_start_package",
+        "size_bytes": 43173,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/forage.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "forage",
+        "size_bytes": 42439,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/free_interaction_protection_package.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "free_interaction_protection_package",
+        "size_bytes": 43217,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/game_changer_bracket_pressure_packages.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "game_changer_bracket_pressure_packages",
+        "size_bytes": 43472,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/generically_good_but_wrong_shell.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "generically_good_but_wrong_shell",
+        "size_bytes": 42271,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/gift.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "gift",
+        "size_bytes": 42570,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/hare_apparent_rabbit_swarm.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "hare_apparent_rabbit_swarm",
+        "size_bytes": 44432,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/high_power_value_but_not_turbo_combo.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "high_power_value_but_not_turbo_combo",
+        "size_bytes": 42358,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/high_synergy_low_raw_power_cards.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "high_synergy_low_raw_power_cards",
+        "size_bytes": 43033,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/manifest_dread.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "manifest_dread",
+        "size_bytes": 43034,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/multiple_copy_exception_decks.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "multiple_copy_exception_decks",
+        "size_bytes": 42758,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/nazgul_wraith_ring_hybrid.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "nazgul_wraith_ring_hybrid",
+        "size_bytes": 42603,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/offspring.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "offspring",
+        "size_bytes": 42792,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/partner_background_pair_defined_decks.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "partner_background_pair_defined_decks",
+        "size_bytes": 43414,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/persistent_petitioners_advisor_mill.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "persistent_petitioners_advisor_mill",
+        "size_bytes": 42112,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/plot_crime_outlaw_packages.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "plot_crime_outlaw_packages",
+        "size_bytes": 43906,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/refined_deck_review_candidates.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "refined_deck_review_candidates",
+        "size_bytes": 42810,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/rooms_eerie.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "rooms_eerie",
+        "size_bytes": 43864,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/shadowborn_apostle_demon_tutor_engine.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "shadowborn_apostle_demon_tutor_engine",
+        "size_bytes": 42620,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/slow_alternate_win_conditions.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "slow_alternate_win_conditions",
+        "size_bytes": 44366,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/survival.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "survival",
+        "size_bytes": 43866,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/token_combat_go_wide_go_tall_hybrid.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "token_combat_go_wide_go_tall_hybrid",
+        "size_bytes": 43543,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/treasure_tutor_chains.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "treasure_tutor_chains",
+        "size_bytes": 42265,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/tutor_density_tutor_chain_pressure.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "tutor_density_tutor_chain_pressure",
+        "size_bytes": 42319,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/05_3_emergent_theme_rules/typal_mechanic_hybrids.md",
+        "folder": "05_3_emergent_theme_rules",
+        "slug": "typal_mechanic_hybrids",
+        "size_bytes": 43935,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      }
+    ],
+    "strategy_slugs": [
+      "adamant",
+      "adventures",
+      "aggro",
+      "aikido_judo",
+      "ally_typal",
+      "alternate_win_conditions",
+      "angel_typal",
+      "anti_combo_social_police",
+      "archenemy_villain_deck",
+      "aristocrats",
+      "artifact_lock_null_rod_effects",
+      "artifact_synergy",
+      "artifact_treasure_combo_value",
+      "assassin_typal",
+      "attack_elsewhere_incentive",
+      "attractions",
+      "auras",
+      "bat_rabbit_bloomburrow_style_small_typal",
+      "battle_tribal",
+      "battles_sieges",
+      "blink_flicker",
+      "blood",
+      "blood_tokens_madness_discard_value",
+      "bloodthirst",
+      "bounty_incentivized_combat",
+      "bracket_aware_stax_hatebear_packages",
+      "bracket_pressure_high_power_value",
+      "bribery_gift_based_politics",
+      "cascade",
+      "case_enchantments",
+      "cat_dog_typal",
+      "caves",
+      "chaos",
+      "clash",
+      "classes_as_primary_theme",
+      "cleric_typal",
+      "clues_investigate",
+      "coin_flipping",
+      "collection_aware_replacement_planning",
+      "color_hate",
+      "colorless_restriction_wastes_matters",
+      "combo",
+      "combo_adjacent_value",
+      "commander_created_landfall",
+      "commander_defined_single_card_archetypes",
+      "commander_recast_death_loops",
+      "commander_tax_advantage",
+      "compact_combo_but_not_full_combo_deck",
+      "companion_influenced_builds",
+      "constellation",
+      "construct_golem_thopter_artifact_typal",
+      "contraptions",
+      "control",
+      "copy_clones",
+      "curse_pillowfort",
+      "curse_politics",
+      "cycling",
+      "damage_reflection_stuffy_doll_effects",
+      "demon_typal",
+      "deserts",
+      "dice_rolling",
+      "dinosaur_typal",
+      "discover",
+      "do_not_touch_me_control",
+      "doctors_companion_time_counter_shells",
+      "donate_bad_gifts",
+      "dragon_typal",
+      "dragons_approach_spell_density_dragon_tutor",
+      "druid_typal",
+      "dungeons_venture",
+      "eldrazi_typal",
+      "elemental_typal",
+      "elf_typal",
+      "enchantress",
+      "end_the_turn",
+      "energy",
+      "engine_synergy_value",
+      "equipment",
+      "etb_lock_torpor_orb_effects",
+      "exile_matters_cast_from_exile",
+      "expend",
+      "extra_combat",
+      "extra_upkeeps",
+      "face_down_morph_manifest_disguise_cloak",
+      "faerie_typal",
+      "fairness_symmetrical_rules",
+      "fast_mana_explosive_start_package",
+      "fateseal_opponent_topdeck_control",
+      "fog_tribal",
+      "fog_turbo_fog_politics",
+      "food",
+      "forage",
+      "forced_blocking_combat_manipulation",
+      "forced_combat_goad",
+      "foretell",
+      "free_interaction_protection_package",
+      "game_changer_bracket_pressure_packages",
+      "gates",
+      "generically_good_but_wrong_shell",
+      "giant_minotaur_beast_berserker_typal",
+      "gift",
+      "go_tall_combat",
+      "go_wide_combat",
+      "goad",
+      "goad_control",
+      "goblin_typal",
+      "graveyard_lock",
+      "graveyard_matters",
+      "group_hug",
+      "group_slug",
+      "halfling_hobbit_typal",
+      "hare_apparent_rabbit_swarm",
+      "hatebears",
+      "hellbent",
+      "high_power_value_but_not_turbo_combo",
+      "high_synergy_low_raw_power_cards",
+      "human_typal",
+      "hydra_typal",
+      "incubate",
+      "infect",
+      "information_politics_hidden_threats",
+      "initiative_undercity",
+      "insect_squirrel_saproling_fungus_typal",
+      "keyword_typal",
+      "kingmaker_table_balancer",
+      "knight_typal",
+      "land_animation",
+      "landfall_lands_matter",
+      "legends_matter_historic",
+      "level_up",
+      "life_total_exchange",
+      "life_total_politics",
+      "lifedrain",
+      "lifegain",
+      "locus",
+      "madness",
+      "manifest_dread",
+      "map_tokens_explore",
+      "mass_land_denial",
+      "meld_packages",
+      "merfolk_typal",
+      "midrange_value",
+      "mill",
+      "monarch",
+      "monarch_politics",
+      "multiple_copy_exception_decks",
+      "mutate",
+      "mutual_benefit_with_hidden_asymmetry",
+      "mutual_destruction_board_reset_politics",
+      "myr_artifact_creature_typal",
+      "nazgul_wraith_ring_hybrid",
+      "negotiated_removal",
+      "ninja_typal",
+      "no_abilities_matters",
+      "nonbasic_land_hate",
+      "odd_even_mana_value_restrictions",
+      "offspring",
+      "orc_army_amass_typal",
+      "partner_background_pair_defined_decks",
+      "party_typal",
+      "persistent_petitioners_advisor_mill",
+      "phyrexian_typal",
+      "pillowfort",
+      "pirate_typal",
+      "plot_crime_outlaw_packages",
+      "plus_1_plus_1_counters",
+      "political_combo_deterrence",
+      "politics_deal_making",
+      "powerstones",
+      "proliferate",
+      "proliferate_poison",
+      "punisher_choice_punisher",
+      "ramp_big_mana",
+      "rat_nazgul_multiple_copy_typal",
+      "rattlesnake",
+      "reanimator",
+      "refined_deck_review_candidates",
+      "renown",
+      "resource_redistribution_donate_bad_gifts",
+      "revenge_retaliation",
+      "ring_temptation",
+      "rogue_typal",
+      "role_tokens",
+      "rooms_as_primary_theme",
+      "rooms_eerie",
+      "rule_zero_silver_border_acorn_themes",
+      "saboteur_combat_damage_triggers",
+      "sagas",
+      "samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids",
+      "sandbag_reactive_control_politics",
+      "scarecrow_changeling_all_typal",
+      "secret_combo_low_threat_combo",
+      "shadowborn_apostle_demon_tutor_engine",
+      "shared_combat_incentive",
+      "shared_enemy_table_alliance",
+      "shrines",
+      "sliver_typal",
+      "slow_alternate_win_conditions",
+      "snake_typal",
+      "snow",
+      "social_contract_rule_zero_decks",
+      "social_pressure_reputation_decks",
+      "soft_lock_politics",
+      "soldier_typal",
+      "spellslinger",
+      "spirit_typal",
+      "splice_arcane",
+      "stax_prison",
+      "stickers",
+      "storm",
+      "superfriends_planeswalkers",
+      "survival",
+      "suspend",
+      "table_police_rule_enforcer",
+      "tablewide_resource_acceleration",
+      "tempo",
+      "theft",
+      "theft_clone_politics",
+      "theme_flavor_first_decks",
+      "threat_redistribution",
+      "token_combat_go_wide_go_tall_hybrid",
+      "tokens",
+      "toolbox",
+      "topdeck_matters",
+      "toxic_corrupted",
+      "treasure",
+      "treasure_tutor_chains",
+      "treefolk_typal",
+      "turn_phase_manipulation",
+      "tutor_density_tutor_chain_pressure",
+      "tutor_hate",
+      "typal_mechanic_hybrids",
+      "untap_tap_matters",
+      "utility_lands_matter",
+      "vampire_typal",
+      "vanilla_matters",
+      "vehicles",
+      "voltron",
+      "voting_councils_dilemma",
+      "warrior_typal",
+      "wizard_typal",
+      "wolf_werewolf_typal",
+      "x_spells_big_spells",
+      "zombie_typal"
+    ],
+    "unique_strategy_slug_count": 244,
+    "duplicate_strategy_slugs": {
+      "clues_investigate": [
+        "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/clues_investigate.md",
+        "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/clues_investigate.md"
+      ],
+      "exile_matters_cast_from_exile": [
+        "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/exile_matters_cast_from_exile.md",
+        "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/exile_matters_cast_from_exile.md"
+      ],
+      "food": [
+        "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/food.md",
+        "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/food.md"
+      ],
+      "mill": [
+        "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/mill.md",
+        "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/mill.md"
+      ],
+      "vehicles": [
+        "strategy_deep_dive_knowledge_base/02_mechanical_themes_micro_archetypes/vehicles.md",
+        "strategy_deep_dive_knowledge_base/05_1_niche_theme_rules/vehicles.md"
+      ]
+    },
+    "duplicate_strategy_slug_count": 5,
+    "non_profile_markdown": [
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/00_manifest/file_size_audit.md",
+        "folder": "00_manifest",
+        "slug": "file_size_audit",
+        "size_bytes": 21247,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/00_manifest/generation_report.md",
+        "folder": "00_manifest",
+        "slug": "generation_report",
+        "size_bytes": 995,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/00_manifest/strategy_manifest.md",
+        "folder": "00_manifest",
+        "slug": "strategy_manifest",
+        "size_bytes": 32172,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/06_strategy_archetype_rules/section_1_macro_archetypes_commander.md",
+        "folder": "06_strategy_archetype_rules",
+        "slug": "section_1_macro_archetypes_commander",
+        "size_bytes": 18166,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/06_strategy_archetype_rules/section_2_mechanical_themes_micro_archetypes.md",
+        "folder": "06_strategy_archetype_rules",
+        "slug": "section_2_mechanical_themes_micro_archetypes",
+        "size_bytes": 34631,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/06_strategy_archetype_rules/section_3_strategic_board_politics.md",
+        "folder": "06_strategy_archetype_rules",
+        "slug": "section_3_strategic_board_politics",
+        "size_bytes": 69395,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/06_strategy_archetype_rules/section_4_typal_tribal_themes_rules.md",
+        "folder": "06_strategy_archetype_rules",
+        "slug": "section_4_typal_tribal_themes_rules",
+        "size_bytes": 87873,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/06_strategy_archetype_rules/section_5_1_niche_theme_rules.md",
+        "folder": "06_strategy_archetype_rules",
+        "slug": "section_5_1_niche_theme_rules",
+        "size_bytes": 77982,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/06_strategy_archetype_rules/section_5_2_fringe_theme_rules.md",
+        "folder": "06_strategy_archetype_rules",
+        "slug": "section_5_2_fringe_theme_rules",
+        "size_bytes": 75660,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/06_strategy_archetype_rules/section_5_3_emergent_theme_rules.md",
+        "folder": "06_strategy_archetype_rules",
+        "slug": "section_5_3_emergent_theme_rules",
+        "size_bytes": 81856,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      },
+      {
+        "zip_path": "strategy_deep_dive_knowledge_base/06_strategy_archetype_rules/strategy_archetype_rules.md",
+        "folder": "06_strategy_archetype_rules",
+        "slug": "strategy_archetype_rules",
+        "size_bytes": 44300,
+        "strategy_id": "",
+        "display_name": "",
+        "has_frontmatter": false,
+        "has_strategy_id": false,
+        "has_display_name": false
+      }
+    ],
+    "size_warnings": [],
+    "strategy_files_under_40kb": 0,
+    "strategy_files_at_or_above_40kb": 249
+  },
+  "loader_clues": {
+    "loader_clue_count": 55,
+    "loader_clues": [
+      {
+        "path": "reports/exact_card_candidate_preview.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/final_deck_export_integration.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/final_inclusion_lock.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/finished_mana_base_generation.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/full_100_card_draft_preview.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/land_deck_write_integration.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/land_insertion_preview.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/mana_base_planning.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/old_strategy_deprecation.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/prompt_builder.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/report_builder.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/strategy_knowledge_sections.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "Strategy Brain",
+          "strategy_profiles",
+          "strategy_profile",
+          "Strategy profiles available"
+        ]
+      },
+      {
+        "path": "reports/strategy_live_bridge.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/strategy_role_count_generation.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/strategy_shell_planning.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "reports/strategy_v1_4_regression_lock_candidate.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "Strategy Brain"
+        ]
+      },
+      {
+        "path": "reports/strategy_v1_4_stable_lock_handoff.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.13_strategy_report_viewer_ai_handoff_integration.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "Strategy Brain",
+          "strategy_profiles",
+          "strategy_profile",
+          "Strategy profiles available"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.21.1_main_pipeline_bridge_indent_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.21_strategy_knowledge_main_pipeline_opt_in_live_bridge.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.27.1_regression_smoke_test_timeout_progress_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.27.2_regression_artifact_presence_heavy_smoke_gate_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "Strategy Brain"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.27.3_regression_artifact_presence_flexible_version_gate_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.29.1_inventory_unique_slug_duplicate_strategy_clarification_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "strategy_profile"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.29_strategy_knowledge_249_inventory_import_readiness_audit.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "load_strategy",
+          "Strategy Brain",
+          "strategy_profiles",
+          "strategy_profile",
+          "loaded profiles",
+          "Strategy profiles available"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.4_strategy_legacy_mapping_preservation_audit.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.6.1_voltron_shadow_compare_expectation_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.6_strategy_recognition_shadow_compare.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "load_strategy",
+          "Strategy Brain"
+        ]
+      },
+      {
+        "path": "tools/apply_v1.4.8_strategy_brain_default_candidate.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "Strategy Brain"
+        ]
+      },
+      {
+        "path": "tools/audit_strategy_knowledge_249_import_readiness.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "load_strategy",
+          "Strategy Brain",
+          "strategy_profiles",
+          "strategy_profile",
+          "loaded profiles",
+          "Strategy profiles available"
+        ]
+      },
+      {
+        "path": "tools/audit_strategy_legacy_mapping.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/audit_strategy_live_replacement_map.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "Strategy Brain"
+        ]
+      },
+      {
+        "path": "tools/load_strategy_knowledge_preview.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "load_strategy"
+        ]
+      },
+      {
+        "path": "tools/plan_strategy_batch_import.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/shadow_compare_strategy_recognition.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "Strategy Brain"
+        ]
+      },
+      {
+        "path": "tools/strategy_brain_bridge_preview.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "Strategy Brain"
+        ]
+      },
+      {
+        "path": "tools/strategy_brain_default_candidate.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "Strategy Brain"
+        ]
+      },
+      {
+        "path": "tools/strategy_brain_runtime_selector.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "Strategy Brain"
+        ]
+      },
+      {
+        "path": "tools/strategy_cut_protect_replacement.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "strategy_profile"
+        ]
+      },
+      {
+        "path": "tools/strategy_report_viewer_ai_handoff_integration.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/strategy_role_bucket_mapping.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "strategy_profiles",
+          "strategy_profile"
+        ]
+      },
+      {
+        "path": "tools/strategy_scoring_integration_preview.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/validate_strategy_knowledge_base.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.13_strategy_report_viewer_ai_handoff_integration.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "Strategy Brain"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.21.1_main_pipeline_bridge_indent_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.21_strategy_knowledge_main_pipeline_opt_in_live_bridge.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.27.1_regression_smoke_test_timeout_progress_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.27.2_regression_artifact_presence_heavy_smoke_gate_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.27.3_regression_artifact_presence_flexible_version_gate_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.29.1_inventory_unique_slug_duplicate_strategy_clarification_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "strategy_profile"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.29_strategy_knowledge_249_inventory_import_readiness_audit.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "strategy_profile"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.4_strategy_legacy_mapping_preservation_audit.py",
+        "matched_markers": [
+          "strategy_knowledge"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.6.1_voltron_shadow_compare_expectation_hotfix.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "load_strategy"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.6_strategy_recognition_shadow_compare.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "load_strategy",
+          "Strategy Brain"
+        ]
+      },
+      {
+        "path": "tools/verify_v1.4.8_strategy_brain_default_candidate.py",
+        "matched_markers": [
+          "strategy_knowledge",
+          "load_strategy",
+          "Strategy Brain"
+        ]
+      }
+    ]
+  },
+  "report_wording_recommendation": {
+    "player_facing_now": "Strategy Knowledge is active with 5 live strategy profiles. The 249-file expanded strategy library is available as an import source but has not yet been imported into live layers.",
+    "debug_now": "Live strategy profiles: 5. External importable strategy profiles: 249. Missing live profiles from external source: 244.",
+    "after_import": "Only claim 249 live profiles after they are copied into live layers, validated, indexed, and loader-counted."
+  }
+}

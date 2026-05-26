@@ -1,0 +1,224 @@
+{
+  "schema_version": "1.0",
+  "mapping_version": "v1.4.4",
+  "status": "preservation_audit_contract",
+  "purpose": "Preserve the existing The Dragon's Touch strategy thought process before the strategy knowledge base replaces it.",
+  "runtime_behavior_changed": false,
+  "active_runtime_replacement": false,
+  "replacement_allowed_before_shadow_compare": false,
+  "must_not_remove_legacy_strategy_logic_yet": true,
+  "core_preservation_rule": "Do not lose useful behavior from the current strategy system while migrating to strategy_knowledge.",
+  "legacy_system_components_to_preserve": {
+    "strategy_recognition": [
+      "primary strategy inference",
+      "secondary strategy inference",
+      "commander intent recognition",
+      "archetype identification",
+      "theme/package recognition",
+      "strategy confidence language",
+      "off-plan detection"
+    ],
+    "strategy_gates": [
+      "density checks",
+      "commander support checks",
+      "false-positive prevention",
+      "package minimum checks",
+      "partner/commander-created package exceptions",
+      "strategy conflict checks"
+    ],
+    "role_logic": [
+      "ramp/mana development expectations",
+      "card draw/card advantage expectations",
+      "targeted removal expectations",
+      "board wipe expectations",
+      "protection expectations",
+      "recursion expectations",
+      "strategy enabler detection",
+      "strategy payoff detection",
+      "finisher/win condition detection",
+      "mana base support"
+    ],
+    "cut_logic": [
+      "possible cut versus recommended cut distinction",
+      "cut confidence low/medium/high",
+      "bad card versus wrong card distinction",
+      "low power versus low synergy distinction",
+      "generically good but off-plan detection",
+      "replaceable but playable detection",
+      "bracket pressure cuts",
+      "manual review candidates"
+    ],
+    "protection_logic": [
+      "weak-alone but strong-in-context protection",
+      "high-synergy low-raw-power protection",
+      "commander-critical support protection",
+      "core engine protection",
+      "sacrifice outlet protection",
+      "recursion engine protection",
+      "landfall commander package protection",
+      "tribal density / typal payoff manual review protection"
+    ],
+    "replacement_logic": [
+      "replacement category suggestions",
+      "collection-first replacement preference",
+      "outside-collection upgrade permission boundary",
+      "exact replacement only when appropriate",
+      "avoid replacements that fight the deck plan"
+    ],
+    "build_from_collection_logic": [
+      "B build_start_summary route",
+      "C owned_cards_by_role route",
+      "D rough_shell route",
+      "E full_100_card_draft route",
+      "basic lands assumed available",
+      "nonbasic lands collection-first unless upgrades allowed",
+      "no final deck generation before allowed"
+    ],
+    "report_language": [
+      "clear caveats that possible cuts are not guaranteed cuts",
+      "context-aware language around low-power cards",
+      "plain-English strategy explanation",
+      "human-readable role mapping",
+      "AI handoff prompt usefulness"
+    ]
+  },
+  "known_strategy_lessons_to_preserve": [
+    {
+      "lesson_id": "v0_4_context_matters",
+      "source_version": "v0.4",
+      "lesson": "A card can look weak by generic standards but belong because it supports the deck's actual engine.",
+      "new_strategy_knowledge_destination": [
+        "Cards That Look Weak But Belong",
+        "Cards To Protect From Cuts",
+        "Cut Logic Guidance"
+      ]
+    },
+    {
+      "lesson_id": "v0_4_2_cut_pressure_for_legal_decks",
+      "source_version": "v0.4.2",
+      "lesson": "A legal 100-card deck can still have optional optimization cuts; required cuts and optional cuts must stay separate.",
+      "new_strategy_knowledge_destination": [
+        "Cut Logic Guidance",
+        "Recommended Report Language"
+      ]
+    },
+    {
+      "lesson_id": "v0_5_careful_cuts",
+      "source_version": "v0.5",
+      "lesson": "Separate possible cuts from recommended cuts and label cut confidence.",
+      "new_strategy_knowledge_destination": [
+        "Cut Logic Guidance",
+        "Recommended Report Language"
+      ]
+    },
+    {
+      "lesson_id": "v0_5_3_landfall_commander_exception",
+      "source_version": "v0.5.3",
+      "lesson": "Commander-created landfall or land-entry artifact-token packages must be recognized even when raw landfall density appears low.",
+      "new_strategy_knowledge_destination": [
+        "Commander Traits That Support This Strategy",
+        "Common Traps / False Positives",
+        "Cards To Protect From Cuts"
+      ]
+    },
+    {
+      "lesson_id": "v0_8_ai_handoff_clarity",
+      "source_version": "v0.8",
+      "lesson": "Strategy output must improve AI handoff prompt quality, not just produce human-readable flavor.",
+      "new_strategy_knowledge_destination": [
+        "Recommended Report Language",
+        "AI Parsing Tags / Keywords",
+        "Integration Notes for The Dragon's Touch"
+      ]
+    },
+    {
+      "lesson_id": "v1_3_basic_land_policy",
+      "source_version": "v1.3",
+      "lesson": "Basic lands are assumed available; nonbasic lands remain collection-first unless outside upgrades are allowed.",
+      "new_strategy_knowledge_destination": [
+        "Mana Base / Basic Land Notes",
+        "Nonbasic Land Notes",
+        "Build From Collection Guidance"
+      ]
+    },
+    {
+      "lesson_id": "v1_3_generation_boundary",
+      "source_version": "v1.3",
+      "lesson": "Build From Collection scaffolding must not accidentally perform exact card selection, final deck inclusion, mana-base generation, or full deck generation before those features are intentionally unlocked.",
+      "new_strategy_knowledge_destination": [
+        "Integration Notes for The Dragon's Touch",
+        "Full 100-Card Draft Guidance"
+      ]
+    }
+  ],
+  "new_knowledge_base_mapping_targets": {
+    "strategy_recognition": [
+      "strategy_id",
+      "primary_aliases",
+      "core_signal_tags",
+      "commander_signal_tags",
+      "false_positive_tags"
+    ],
+    "role_mapping": [
+      "primary_role_buckets",
+      "secondary_role_buckets",
+      "strategy_specific_roles",
+      "Owned-Card Role Classification Rules"
+    ],
+    "cut_logic": [
+      "Cut Logic Guidance",
+      "Cards To Protect From Cuts",
+      "cut_protection_tags",
+      "false_positive_tags"
+    ],
+    "replacement_logic": [
+      "Replacement Logic Guidance",
+      "replacement_priority_tags"
+    ],
+    "build_from_collection": [
+      "Build From Collection Guidance",
+      "Rough Shell Guidance",
+      "Full 100-Card Draft Guidance",
+      "basic_land_policy",
+      "nonbasic_land_policy"
+    ],
+    "report_language": [
+      "Recommended Report Language",
+      "AI Parsing Tags / Keywords",
+      "Integration Notes for The Dragon's Touch"
+    ]
+  },
+  "replacement_gate": {
+    "minimum_required_before_replacement": [
+      "legacy audit scan generated",
+      "legacy strategy concepts mapped",
+      "strategy knowledge loader preview exists",
+      "shadow compare exists",
+      "old and new strategy outputs compared on representative decks",
+      "no major regression documented",
+      "opt-in bridge tested",
+      "legacy fallback remains available"
+    ],
+    "hard_blockers": [
+      "missing legacy audit",
+      "missing shadow compare",
+      "new system cannot explain protected low-power synergy cards",
+      "new system cannot distinguish wrong-card-for-deck from bad-card",
+      "new system cannot preserve v1.3 Build From Collection boundaries"
+    ]
+  },
+  "must_preserve_from_existing_system": [
+    "current strategy scoring behavior",
+    "current strategy gates",
+    "current commander intent recognition patterns",
+    "current role bucket assumptions",
+    "current cut/protect heuristics",
+    "current replacement categories",
+    "current report wording that has proven useful",
+    "current Build From Collection B-E routing",
+    "current v1.3 generation boundaries",
+    "current strategy lessons from v0.4 through v1.3"
+  ],
+  "marker_hotfix_version": "v1.4.4.1",
+  "marker_hotfix_note": "Added explicit preservation marker list required by v1.4.4 verifier."
+}

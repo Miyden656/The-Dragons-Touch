@@ -80,7 +80,7 @@ That checklist walks through extraction, installation, launch, data setup, deck 
 If anything fails, open:
 
 ```text
-docs\first_run_troubleshooting_v0.12.2.md
+docs\user_docs\first_run_troubleshooting_v0.12.2.md
 ```
 
 The troubleshooting guide covers:

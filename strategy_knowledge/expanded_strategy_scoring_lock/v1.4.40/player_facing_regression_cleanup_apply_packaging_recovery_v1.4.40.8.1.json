@@ -1,0 +1,267 @@
+{
+  "correction_version": "v1.4.40.8",
+  "recovery_version": "v1.4.40.8.1",
+  "correction_name": "Player-Facing Regression / Stable Lock Status Cleanup",
+  "presentation_cleanup_performed": true,
+  "section_patch": {
+    "exists": true,
+    "changed": false,
+    "changes": [],
+    "sanitizer_present": true,
+    "lock_candidate_fail_literal_present": false,
+    "superseded_status_present": true
+  },
+  "player_facing_correction_module_patch": {
+    "exists": true,
+    "changed": false,
+    "changes": [],
+    "sanitizer_present": true,
+    "sanitizer_wired": true
+  },
+  "literal_source_patch_results": [
+    {
+      "path": "reports/__init__.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/active_scoring_report_generator_integration.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/batch_aggregate.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/batch_output_strategy_status_polish.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/debug_sections.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/exact_card_candidate_preview.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/expanded_strategy_scoring_lock_candidate.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/final_deck_export_integration.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/final_inclusion_lock.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/finished_mana_base_generation.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/full_100_card_draft_preview.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/land_deck_write_integration.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/land_insertion_preview.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/mana_base_planning.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/old_strategy_deprecation.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/player_facing_version_strategy_status_correction.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/prompt_builder.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/report_builder.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/strategy_knowledge_active_scoring.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/strategy_knowledge_index_manifest.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/strategy_knowledge_live_profile_status.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/strategy_knowledge_report_batch_integration_proof.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/strategy_knowledge_scoring_regression.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/strategy_knowledge_sections.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": true
+    },
+    {
+      "path": "reports/strategy_live_bridge.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": true
+    },
+    {
+      "path": "reports/strategy_role_count_generation.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/strategy_shell_planning.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/strategy_v1_4_regression_lock_candidate.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": false
+    },
+    {
+      "path": "reports/strategy_v1_4_stable_lock_handoff.py",
+      "changed": false,
+      "lock_candidate_fail_literal_present_after": false,
+      "stable_lock_pass_literal_present_after": true
+    }
+  ],
+  "compile_results": {
+    "reports/strategy_knowledge_sections.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/player_facing_version_strategy_status_correction.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/strategy_v1_4_regression_lock_candidate.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/strategy_v1_4_stable_lock_handoff.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/report_builder.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/batch_aggregate.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/batch_output_strategy_status_polish.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "main.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    }
+  },
+  "smoke_text": "## v1.4 Full Regression / Lock Candidate\n\nStatus: **SUPERSEDED_BY_STABLE_LOCK**\n\n### Regression Checks\n- Module compile passed: True\n- Artifact presence passed: True\n- Tool smoke tests passed: Superseded by later stable-lock pass\n- Final chain passed: True\n\n## v1.4 Stable Lock / Handoff Package\n\nStatus: **STABLE_LOCK_PASS**\n",
+  "batch_aggregate_changed": false,
+  "main_py_changed": false,
+  "active_scoring_logic_changed": false,
+  "combo_awareness_logic_changed": false,
+  "raw_debug_artifacts_deleted": false,
+  "legacy_fallback_preserved": true,
+  "gate_checks": {
+    "strategy_sections_exists": true,
+    "strategy_sections_sanitizer_present": true,
+    "player_facing_correction_module_sanitizer_present": true,
+    "smoke_lacks_lock_candidate_fail": true,
+    "smoke_has_superseded_status": true,
+    "smoke_keeps_stable_lock_pass": true,
+    "smoke_mentions_stable_lock_authority": true,
+    "strategy_knowledge_sections_compiles": true,
+    "player_facing_correction_module_compiles": true,
+    "report_builder_compiles": true,
+    "batch_aggregate_compiles": true,
+    "main_py_compiles": true,
+    "batch_aggregate_not_changed": true,
+    "main_py_not_changed": true,
+    "active_scoring_logic_not_changed": true,
+    "combo_awareness_logic_not_changed": true,
+    "raw_debug_artifacts_not_deleted": true,
+    "legacy_fallback_preserved": true
+  },
+  "next_safe_step": "Run the same 21-deck small batch smoke and confirm batch_deck_reports.md no longer contains LOCK_CANDIDATE_FAIL while still showing STABLE_LOCK_PASS and Active scoring profiles: 249."
+}

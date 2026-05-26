@@ -39,6 +39,10 @@ v0.6.8.2 polish:
 
 v0.6.8.3 boundary cleanup (carried into v0.6.8.4 regression pass):
 - Keep prompt wording aligned with final user-facing boundaries without changing prompt workflow behavior.
+
+v1.1.17.3 direct cleanup:
+- Suppress legacy v0.6.5.x prompt philosophy sections when the new v1.1 Philosophy / Persona Guidance block renders.
+- Keep legacy philosophy prompt sections only as a fallback if the v1.1 handoff block cannot render.
 """
 
 from __future__ import annotations
@@ -47,6 +51,7 @@ from pathlib import Path
 from typing import Any
 
 from app_io.output_writer import get_unique_output_path, write_text_file
+from reports.strategy_knowledge_sections import build_strategy_knowledge_prompt_block  # v1.4.13 Strategy Knowledge AI handoff
 from analysis.deck_building_philosophies import (
     render_philosophy_prompt_questions,
     render_philosophy_prompt_showcase_block,
@@ -455,7 +460,7 @@ def _script_context_block(context: dict[str, Any]) -> list[str]:
         f"- Deck size status: {cut_pressure.status}",
         f"- Current deck size: {cut_pressure.deck_card_count}",
         f"- Required cuts: {cut_pressure.required_cuts}",
-        f"- Optional cut target: {runtime_config.cut_depth_config.get('optional_cut_target', 0)}",
+        (f"- Optional cut target setting: {runtime_config.cut_depth_config.get('optional_cut_target', 0)} (paused while deck is under 100; addition-first review is active)" if cut_pressure.deck_card_count < 100 else f"- Optional cut target: {runtime_config.cut_depth_config.get('optional_cut_target', 0)}"),
         f"- Collection mode: {getattr(runtime_config, 'collection_mode', 'none')}",
         f"- Intended bracket from UI/runtime: {getattr(runtime_config, 'intended_bracket', 'Not provided')}",
         f"- Budget note from UI/runtime: {getattr(runtime_config, 'budget_note', 'Not provided')}",
@@ -526,6 +531,11 @@ def _cut_down_sections(context: dict[str, Any], worksheet: bool = False) -> str:
     cut_pressure = context["cut_pressure"]
 
     prefix = "Answer all sections below in one reply. Short answers, numbers, and N/A are fine." if worksheet else "Ask only Section 1 first. After the pilot answers, summarize Section 1 briefly and then ask Section 2. Continue one section at a time."
+    cut_review_optional_text = (
+        f"optional review paused while under 100; requested optional target: {getattr(cut_pressure, 'optional_cut_target', 'see report')}"
+        if getattr(cut_pressure, "deck_card_count", 0) < 100
+        else f"optional target: {getattr(cut_pressure, 'optional_cut_target', 'see report')}"
+    )
 
     return f"""
 ## Cut-Down / Tuning Guided Flow
@@ -592,7 +602,7 @@ If nothing applies, **No**, **N/A**, or **None** can cover this whole section.
 {TABLE_EXPERIENCE_OPTIONS}
 
 ### Section 6 — Cut Philosophy
-1. Is the cut review from the deck report correct? The report says: **{cut_pressure.status}; required cuts: {cut_pressure.required_cuts}; optional target: {getattr(cut_pressure, 'optional_cut_target', 'see report')}**.
+1. Is the cut review from the deck report correct? The report says: **{cut_pressure.status}; required cuts: {cut_pressure.required_cuts}; {cut_review_optional_text}**.
 Optional: enter a specific number of cuts you want reviewed. N/A or no answer means the report's range is fine.
 
 2. Are we making required cuts, optional upgrades, or both?
@@ -785,6 +795,115 @@ Do not include cards already in the deck unless the card is a legal duplicate ex
 """.strip()
 
 
+
+# -----------------------------
+# v1.1.17 live philosophy handoff helpers
+# -----------------------------
+
+def _v1117_canonical_lens_from_legacy_context(context: dict[str, Any]) -> str:
+    """Resolve the v1.1 philosophy lens from existing v0.x runtime/context data."""
+    philosophy_context = context.get("philosophy_context") or {}
+    runtime_config = context.get("runtime_config")
+
+    # Prefer the already-rendered legacy label because it is user-facing/canonical.
+    if isinstance(philosophy_context, dict):
+        label = philosophy_context.get("label")
+        if label:
+            return str(label)
+
+        key = philosophy_context.get("key")
+        legacy_key_map = {
+            "balanced_unknown": "Balanced / Unknown",
+            "timmy_tammy": "Timmy / Tammy",
+            "johnny_jenny": "Johnny / Jenny",
+            "spike": "Spike",
+            "big_moment": "Big Moment",
+            "big_creature_stompy": "Big Creature / Stompy",
+            "theme_vibe": "Theme / Vibe",
+            "pet_card": "Pet Card",
+            "let_me_do_my_thing": "Let Me Do My Thing",
+            "battlecruiser": "Battlecruiser",
+            "engine_builder": "Engine Builder",
+            "commander_exploiter": "Commander Exploiter",
+            "weird_card_rescuer": "Weird Card Rescuer",
+            "theme_mechanic_inventor": "Theme Mechanic Inventor",
+            "self_imposed_constraint_builder": "Self-Imposed Constraint Builder",
+            "combo_builder": "Combo Builder",
+            "consistency_maximizer": "Consistency Maximizer",
+            "efficiency_optimizer": "Efficiency Optimizer",
+            "curve_and_mana_discipline": "Curve and Mana Discipline",
+            "competitive_closer": "Competitive Closer",
+            "power_level_calibrator": "Power-Level Calibrator",
+            "interaction_controller": "Interaction Controller",
+        }
+        if key in legacy_key_map:
+            return legacy_key_map[key]
+
+    runtime_key = getattr(runtime_config, "philosophy_key", None)
+    if runtime_key:
+        return {
+            "balanced_unknown": "Balanced / Unknown",
+            "timmy_tammy": "Timmy / Tammy",
+            "johnny_jenny": "Johnny / Jenny",
+            "spike": "Spike",
+        }.get(str(runtime_key), str(runtime_key))
+
+    return "Balanced / Unknown"
+
+
+def _v1117_guide_presentation_from_runtime(context: dict[str, Any]) -> str:
+    """Map the existing guide preference values into the v1.1 guide presentation enum."""
+    runtime_config = context.get("runtime_config")
+    raw = str(getattr(runtime_config, "guide_preference", "") or "").strip().lower()
+
+    if raw in {"none", "no_named_guide", "no named guide", "off", "false"}:
+        return "no_named_guide"
+    if raw in {"masculine", "feminine", "either"}:
+        return raw
+    if raw in {"random", ""}:
+        return "either"
+    return raw
+
+
+def _v1117_live_philosophy_handoff_block(context: dict[str, Any]) -> str:
+    """Build the v1.1 Philosophy / Persona Guidance block for live prompt output.
+
+    This is prompt-text wiring only. It does not change deck analysis, cut scoring,
+    replacement scoring, card selection, report generation, or UI behavior.
+    """
+    try:
+        from philosophy.prompt_injection import build_philosophy_handoff_block
+    except Exception:
+        return ""
+
+    runtime_config = context.get("runtime_config")
+    philosophy_context = context.get("philosophy_context") or {}
+
+    config = {
+        "philosophy_lens": _v1117_canonical_lens_from_legacy_context(context),
+        "guide_presentation": _v1117_guide_presentation_from_runtime(context),
+        "budget_note": getattr(runtime_config, "budget_note", None),
+        "intended_bracket": getattr(runtime_config, "intended_bracket", None),
+        "combo_tolerance": "Combo awareness enabled" if getattr(runtime_config, "combo_awareness_enabled", False) else None,
+    }
+
+    if isinstance(philosophy_context, dict):
+        # Carry the existing concise philosophy summary as pilot/context notes.
+        summary = philosophy_context.get("lens_summary") or philosophy_context.get("rules_summary")
+        if summary:
+            config["pilot_notes"] = str(summary)
+
+    try:
+        block = build_philosophy_handoff_block(config)
+    except Exception:
+        return ""
+
+    if "# Philosophy / Persona Guidance" not in block:
+        return ""
+
+    return block.rstrip()
+
+
 # -----------------------------
 # Public builder
 # -----------------------------
@@ -801,12 +920,28 @@ def build_user_guided_prompt(context: dict[str, Any]) -> str:
         "You are an experienced Magic: The Gathering Commander deck builder helping the deck's pilot complete a guided review using The Dragon's Touch report.",
         "",
     ]
+
+    v1117_philosophy_handoff = _v1117_live_philosophy_handoff_block(context)
+    if v1117_philosophy_handoff:
+        lines.extend([v1117_philosophy_handoff, "", "---", ""])
+
     lines.extend(_script_context_block(context))
     lines.extend(_collection_prompt_context_block(context))
     lines.extend(["", *_global_prompt_rules(context)])
 
+    # v1.4.13 Strategy Knowledge AI Handoff integration.
+    # Prompt context only: does not authorize automatic deck edits or final inclusions.
+    strategy_knowledge_prompt_block = build_strategy_knowledge_prompt_block(context)
+    if strategy_knowledge_prompt_block:
+        lines.extend(["", strategy_knowledge_prompt_block.rstrip()])
+
+    # v1.1.17.3 PROMPT PHILOSOPHY DE-DUPLICATION
+    # The v1.1 Philosophy / Persona Guidance block now carries the live philosophy
+    # handoff context. Suppress the older v0.6.5.x prompt philosophy blocks when
+    # the v1.1 block successfully renders, but keep them as a safe fallback if the
+    # v1.1 helper ever fails or returns an empty block.
     philosophy_context = context.get("philosophy_context")
-    if philosophy_context:
+    if philosophy_context and not v1117_philosophy_handoff:
         philosophy_text = render_philosophy_prompt_questions(philosophy_context).rstrip()
         if philosophy_text.startswith("### Philosophy Guide Context"):
             philosophy_text = philosophy_text.replace("### Philosophy Guide Context", "## Philosophy Guide Context", 1)
@@ -821,7 +956,8 @@ def build_user_guided_prompt(context: dict[str, Any]) -> str:
     else:
         lines.extend(["", _cut_down_sections(context, worksheet=worksheet)])
 
-    return "\n".join(lines).rstrip() + "\n"
+    from reports.player_facing_status_cleanup import clean_player_facing_prompt_text
+    return clean_player_facing_prompt_text("\n".join(lines)).rstrip() + "\n"
 
 
 def write_user_guided_prompt(deck_folder: Path, deck_name: str, context: dict[str, Any]) -> Path:

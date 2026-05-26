@@ -40,3 +40,19 @@ __all__ = [
 from .main_hook import write_optional_combo_awareness_artifacts
 
 __all__.append("write_optional_combo_awareness_artifacts")
+
+# v1.5.13 Combo Awareness core service boundary exports
+try:
+    from .service_boundary import (
+        ComboAwarenessRequest,
+        ComboAwarenessService,
+        ComboAwarenessStatus,
+        service_health,
+    )
+except Exception:
+    # Keep package import tolerant for existing combo-awareness paths.
+    ComboAwarenessRequest = None
+    ComboAwarenessService = None
+    ComboAwarenessStatus = None
+    service_health = None
+

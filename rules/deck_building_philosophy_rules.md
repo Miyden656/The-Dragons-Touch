@@ -1144,3 +1144,61 @@ If no philosophy is selected:
 
 No specific philosophy was selected, so this report avoids strong assumptions and reviews the deck through a balanced exploratory lens.
 ```
+---
+
+# Implementation Status — v1.1.9
+
+As of **v1.1.9**, the philosophy system has moved from design-only guidance into a safe, modular support layer.
+
+The active implementation layer currently provides:
+
+- `philosophy_profile.py` — structured user philosophy profile data
+- `philosophy_registry.py` — canonical philosophy and subtype registry
+- `persona_registry.py` — user-facing guide/persona registry
+- `runtime_config_mapping.py` — safe runtime/config-to-profile mapping
+- `report_section.py` — reusable `## Philosophy Guide` report section formatting
+- `cut_language.py` — philosophy-aware cut-pressure language helpers
+- `protected_language.py` — philosophy-aware protected-card language helpers
+- `replacement_language.py` — philosophy-aware replacement-direction language helpers
+- `report_integration_preview.py` — preview-only report integration helpers
+
+## Current Runtime Boundary
+
+As of v1.1.9, the philosophy layer **does not yet**:
+
+- change cut scoring
+- choose cut candidates
+- change deck analysis
+- change strategy detection
+- change replacement candidate selection
+- recommend exact replacement cards
+- modify generated reports automatically
+- modify UI behavior automatically
+- override commander legality
+- override color identity
+- override deck size rules
+- override user-declared constraints
+- override bracket, budget, table-power, or combo-tolerance settings
+
+## Current Intended Use
+
+The implemented philosophy layer is currently safe to use for:
+
+- validating philosophy/profile data
+- resolving guide/persona presentation
+- producing a philosophy guide report section
+- producing preview-only philosophy-aware report language
+- generating cut-pressure phrasing
+- generating protected-card phrasing
+- generating replacement-direction phrasing
+
+The implementation is intentionally staged so philosophy can be integrated into actual reports before it influences cut or replacement behavior.
+
+## Integration Rule
+
+Until a later patch explicitly wires philosophy into active analysis behavior, these markdown rules remain the design authority and the Python philosophy modules remain support utilities.
+
+The philosophy layer should continue to obey the core rule:
+
+> Strategy tells The Dragon’s Touch what the deck is trying to do.  
+> Philosophy tells The Dragon’s Touch how the pilot wants that deck to be judged, protected, challenged, and guided.

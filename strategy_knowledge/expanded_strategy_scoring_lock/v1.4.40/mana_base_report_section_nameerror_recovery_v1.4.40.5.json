@@ -1,0 +1,81 @@
+{
+  "recovery_version": "v1.4.40.5",
+  "recovery_name": "Mana Base Report Section NameError Recovery Hotfix",
+  "runtime_nameerror_recovery_performed": true,
+  "target_file": "reports/strategy_knowledge_sections.py",
+  "missing_symbol": "build_mana_base_report_section",
+  "helper_result": {
+    "exists": true,
+    "changed": false,
+    "helper_present": true,
+    "prompt_helper_present": true,
+    "viewer_helper_present": true
+  },
+  "compile_results": {
+    "reports/strategy_knowledge_sections.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/prompt_builder.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/strategy_live_bridge.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "main.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    }
+  },
+  "smoke_test": {
+    "project_root_on_syspath": true,
+    "imported": true,
+    "report_helper_callable": true,
+    "prompt_helper_callable": true,
+    "viewer_helper_callable": true,
+    "report_text_has_mana_base": true,
+    "report_text_has_249": true,
+    "prompt_text_has_mana_base": true,
+    "prompt_text_has_249": true,
+    "viewer_payload_is_dict": true,
+    "viewer_payload_status": "recovered_v1.4.40.5",
+    "viewer_generation_executed": false,
+    "error": ""
+  },
+  "main_py_changed": false,
+  "active_scoring_logic_changed": false,
+  "mana_base_generation_logic_changed": false,
+  "combo_awareness_logic_changed": false,
+  "legacy_fallback_preserved": true,
+  "gate_checks": {
+    "project_root_on_syspath": true,
+    "target_file_exists": true,
+    "mana_base_report_helper_present": true,
+    "mana_base_prompt_helper_present": true,
+    "mana_base_viewer_helper_present": true,
+    "strategy_knowledge_sections_compiles": true,
+    "prompt_builder_compiles": true,
+    "strategy_live_bridge_compiles": true,
+    "main_py_compiles": true,
+    "report_helper_callable": true,
+    "report_helper_outputs_mana_base_status": true,
+    "report_helper_outputs_249_status": true,
+    "prompt_helper_callable": true,
+    "prompt_helper_outputs_mana_base_status": true,
+    "prompt_helper_outputs_249_status": true,
+    "viewer_helper_callable": true,
+    "viewer_helper_returns_dict": true,
+    "viewer_helper_does_not_execute_generation": true,
+    "main_py_not_changed": true,
+    "active_scoring_logic_not_changed": true,
+    "mana_base_generation_logic_not_changed": true,
+    "combo_awareness_logic_not_changed": true
+  },
+  "next_safe_step": "Re-run the batch test. If another missing helper appears, repair that symbol next."
+}

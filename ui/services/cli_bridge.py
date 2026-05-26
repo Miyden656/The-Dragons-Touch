@@ -303,4 +303,3 @@ def combo_awareness_enabled(state) -> bool:
 def combo_artifact_input_value(state) -> str:
     # v0.10.6.2: Always request both combo-aware outputs/artifacts.
     return "both"
-

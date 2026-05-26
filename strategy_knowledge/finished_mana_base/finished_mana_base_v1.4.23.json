@@ -1,0 +1,273 @@
+{
+  "finished_mana_base_generation_version": "v1.4.23",
+  "integration_mode": "finished_mana_base_generation_integration",
+  "finished_mana_base_generation_enabled": true,
+  "finished_mana_base_generation_mode": "artifact_only_no_deck_write",
+  "runtime_behavior_changed": true,
+  "main_py_changed": false,
+  "requires_live_bridge_opt_in": true,
+  "opt_in_env_var": "TDT_STRATEGY_KNOWLEDGE_LIVE_BRIDGE",
+  "legacy_pipeline_still_available": true,
+  "active_runtime_replacement": false,
+  "final_inclusion_lock_enabled": true,
+  "final_deck_export_enabled": false,
+  "land_deck_write_enabled": false,
+  "old_strategy_system_removed": false,
+  "basic_lands_assumed_available": true,
+  "nonbasic_lands_collection_first": true,
+  "gate_checks": {
+    "final_inclusion_lock_available": true,
+    "final_lock_blocks_export": true,
+    "mana_base_planning_available": true,
+    "land_insertion_preview_available": true
+  },
+  "checked_strategy_count": 5,
+  "finished_mana_bases": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "finished_mana_base_mode": "artifact_generation_only",
+      "target_land_slots": 37,
+      "generated_land_entry_count": 37,
+      "basic_land_count": 18,
+      "nonbasic_review_slot_count": 19,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "finished_mana_base_entries": [
+        {
+          "card_name": "Swamp",
+          "count": 9,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Plains",
+          "count": 4,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Basic Land Placeholder",
+          "count": 5,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Owned Nonbasic Land Review Slot",
+          "count": 19,
+          "source": "collection_first_nonbasic_slot",
+          "final_mana_base_status": "generated_artifact_slot_not_deck_write",
+          "note": "Fill from owned nonbasic lands first; outside upgrades only if user allows them."
+        }
+      ],
+      "mana_base_boundaries": {
+        "finished_mana_base_generation_enabled": true,
+        "finished_mana_base_generation_mode": "artifact_only_no_deck_write",
+        "land_deck_write_enabled": false,
+        "final_deck_export_enabled": false,
+        "old_strategy_system_removed": false
+      }
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "finished_mana_base_mode": "artifact_generation_only",
+      "target_land_slots": 39,
+      "generated_land_entry_count": 39,
+      "basic_land_count": 19,
+      "nonbasic_review_slot_count": 20,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "finished_mana_base_entries": [
+        {
+          "card_name": "Forest",
+          "count": 9,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Island",
+          "count": 4,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Basic Land Placeholder",
+          "count": 6,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Owned Nonbasic Land Review Slot",
+          "count": 20,
+          "source": "collection_first_nonbasic_slot",
+          "final_mana_base_status": "generated_artifact_slot_not_deck_write",
+          "note": "Fill from owned nonbasic lands first; outside upgrades only if user allows them."
+        }
+      ],
+      "mana_base_boundaries": {
+        "finished_mana_base_generation_enabled": true,
+        "finished_mana_base_generation_mode": "artifact_only_no_deck_write",
+        "land_deck_write_enabled": false,
+        "final_deck_export_enabled": false,
+        "old_strategy_system_removed": false
+      }
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "finished_mana_base_mode": "artifact_generation_only",
+      "target_land_slots": 36,
+      "generated_land_entry_count": 36,
+      "basic_land_count": 18,
+      "nonbasic_review_slot_count": 18,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "finished_mana_base_entries": [
+        {
+          "card_name": "Island",
+          "count": 9,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Mountain",
+          "count": 4,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Basic Land Placeholder",
+          "count": 5,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Owned Nonbasic Land Review Slot",
+          "count": 18,
+          "source": "collection_first_nonbasic_slot",
+          "final_mana_base_status": "generated_artifact_slot_not_deck_write",
+          "note": "Fill from owned nonbasic lands first; outside upgrades only if user allows them."
+        }
+      ],
+      "mana_base_boundaries": {
+        "finished_mana_base_generation_enabled": true,
+        "finished_mana_base_generation_mode": "artifact_only_no_deck_write",
+        "land_deck_write_enabled": false,
+        "final_deck_export_enabled": false,
+        "old_strategy_system_removed": false
+      }
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "finished_mana_base_mode": "artifact_generation_only",
+      "target_land_slots": 37,
+      "generated_land_entry_count": 37,
+      "basic_land_count": 18,
+      "nonbasic_review_slot_count": 19,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "finished_mana_base_entries": [
+        {
+          "card_name": "Forest",
+          "count": 6,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Plains",
+          "count": 6,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Basic Land Placeholder",
+          "count": 6,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Owned Nonbasic Land Review Slot",
+          "count": 19,
+          "source": "collection_first_nonbasic_slot",
+          "final_mana_base_status": "generated_artifact_slot_not_deck_write",
+          "note": "Fill from owned nonbasic lands first; outside upgrades only if user allows them."
+        }
+      ],
+      "mana_base_boundaries": {
+        "finished_mana_base_generation_enabled": true,
+        "finished_mana_base_generation_mode": "artifact_only_no_deck_write",
+        "land_deck_write_enabled": false,
+        "final_deck_export_enabled": false,
+        "old_strategy_system_removed": false
+      }
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "finished_mana_base_mode": "artifact_generation_only",
+      "target_land_slots": 36,
+      "generated_land_entry_count": 36,
+      "basic_land_count": 18,
+      "nonbasic_review_slot_count": 18,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "finished_mana_base_entries": [
+        {
+          "card_name": "Plains",
+          "count": 9,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Mountain",
+          "count": 4,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Basic Land Placeholder",
+          "count": 5,
+          "source": "assumed_available_basic_land",
+          "final_mana_base_status": "generated_artifact_entry"
+        },
+        {
+          "card_name": "Owned Nonbasic Land Review Slot",
+          "count": 18,
+          "source": "collection_first_nonbasic_slot",
+          "final_mana_base_status": "generated_artifact_slot_not_deck_write",
+          "note": "Fill from owned nonbasic lands first; outside upgrades only if user allows them."
+        }
+      ],
+      "mana_base_boundaries": {
+        "finished_mana_base_generation_enabled": true,
+        "finished_mana_base_generation_mode": "artifact_only_no_deck_write",
+        "land_deck_write_enabled": false,
+        "final_deck_export_enabled": false,
+        "old_strategy_system_removed": false
+      }
+    }
+  ],
+  "integration_contract": {
+    "may_generate_finished_mana_base": true,
+    "may_write_lands_into_deck": false,
+    "may_export_final_deck": false,
+    "may_remove_old_strategy_system": false,
+    "must_require_explicit_opt_in": true,
+    "must_generate_mana_base_as_artifact_before_deck_write": true,
+    "must_assume_basic_lands_available": true,
+    "must_keep_nonbasic_lands_collection_first_unless_upgrades_allowed": true,
+    "next_integration_step": "v1.4.24 \u2014 Land Deck-Write Integration"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.23 enables opt-in finished mana-base artifacts only. It does not write lands into a deck, export a final deck, or remove the old strategy system.",
+    "next_safe_step": "v1.4.24 \u2014 Land Deck-Write Integration"
+  }
+}

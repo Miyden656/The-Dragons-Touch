@@ -1,0 +1,226 @@
+{
+  "final_deck_export_version": "v1.4.25",
+  "integration_mode": "final_deck_export_integration",
+  "final_deck_export_enabled": true,
+  "final_deck_export_mode": "opt_in_artifact_export_only",
+  "runtime_behavior_changed": true,
+  "main_py_changed": false,
+  "requires_live_bridge_opt_in": true,
+  "opt_in_env_var": "TDT_STRATEGY_KNOWLEDGE_LIVE_BRIDGE",
+  "legacy_pipeline_still_available": true,
+  "active_runtime_replacement": false,
+  "final_inclusion_lock_enabled": true,
+  "finished_mana_base_generation_enabled": true,
+  "land_deck_write_enabled": true,
+  "old_strategy_system_removed": false,
+  "basic_lands_assumed_available": true,
+  "nonbasic_lands_collection_first": true,
+  "gate_checks": {
+    "final_inclusion_lock_available": true,
+    "land_deck_write_available": true,
+    "land_write_blocks_old_system_removal": true,
+    "basic_land_policy_available": true
+  },
+  "checked_strategy_count": 5,
+  "final_deck_exports": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "final_deck_export_mode": "opt_in_strategy_knowledge_export_artifact",
+      "export_format": "plain_text_decklist_lines",
+      "locked_nonland_card_count": 10,
+      "land_entry_total_count": 37,
+      "export_line_count": 14,
+      "decklist_lines": [
+        "1 Blood Artist",
+        "1 Viscera Seer",
+        "1 Impact Tremors",
+        "1 Young Pyromancer",
+        "1 Swiftfoot Boots",
+        "1 Solve the Equation",
+        "1 Secure the Wastes",
+        "1 All That Glitters",
+        "1 Evolving Wilds",
+        "1 Cultivate",
+        "9 Swamp",
+        "4 Plains",
+        "5 Basic Land Placeholder",
+        "19 Owned Nonbasic Land Review Slot"
+      ],
+      "export_warnings": [
+        "This is a Strategy Knowledge export artifact.",
+        "Old strategy system removal is not enabled in v1.4.25.",
+        "Review exported decklist before treating it as a player-ready deck."
+      ],
+      "final_export_boundaries": {
+        "final_deck_export_enabled": true,
+        "final_deck_export_mode": "artifact_export_only",
+        "old_strategy_system_removed": false,
+        "legacy_pipeline_still_available": true,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "final_deck_export_mode": "opt_in_strategy_knowledge_export_artifact",
+      "export_format": "plain_text_decklist_lines",
+      "locked_nonland_card_count": 10,
+      "land_entry_total_count": 39,
+      "export_line_count": 14,
+      "decklist_lines": [
+        "1 Evolving Wilds",
+        "1 Cultivate",
+        "1 Young Pyromancer",
+        "1 Impact Tremors",
+        "1 Solve the Equation",
+        "1 Blood Artist",
+        "1 All That Glitters",
+        "1 Secure the Wastes",
+        "1 Viscera Seer",
+        "1 Swiftfoot Boots",
+        "9 Forest",
+        "4 Island",
+        "6 Basic Land Placeholder",
+        "20 Owned Nonbasic Land Review Slot"
+      ],
+      "export_warnings": [
+        "This is a Strategy Knowledge export artifact.",
+        "Old strategy system removal is not enabled in v1.4.25.",
+        "Review exported decklist before treating it as a player-ready deck."
+      ],
+      "final_export_boundaries": {
+        "final_deck_export_enabled": true,
+        "final_deck_export_mode": "artifact_export_only",
+        "old_strategy_system_removed": false,
+        "legacy_pipeline_still_available": true,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "final_deck_export_mode": "opt_in_strategy_knowledge_export_artifact",
+      "export_format": "plain_text_decklist_lines",
+      "locked_nonland_card_count": 10,
+      "land_entry_total_count": 36,
+      "export_line_count": 14,
+      "decklist_lines": [
+        "1 Young Pyromancer",
+        "1 Solve the Equation",
+        "1 Swiftfoot Boots",
+        "1 Impact Tremors",
+        "1 Blood Artist",
+        "1 All That Glitters",
+        "1 Viscera Seer",
+        "1 Secure the Wastes",
+        "1 Evolving Wilds",
+        "1 Cultivate",
+        "9 Island",
+        "4 Mountain",
+        "5 Basic Land Placeholder",
+        "18 Owned Nonbasic Land Review Slot"
+      ],
+      "export_warnings": [
+        "This is a Strategy Knowledge export artifact.",
+        "Old strategy system removal is not enabled in v1.4.25.",
+        "Review exported decklist before treating it as a player-ready deck."
+      ],
+      "final_export_boundaries": {
+        "final_deck_export_enabled": true,
+        "final_deck_export_mode": "artifact_export_only",
+        "old_strategy_system_removed": false,
+        "legacy_pipeline_still_available": true,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "final_deck_export_mode": "opt_in_strategy_knowledge_export_artifact",
+      "export_format": "plain_text_decklist_lines",
+      "locked_nonland_card_count": 10,
+      "land_entry_total_count": 37,
+      "export_line_count": 14,
+      "decklist_lines": [
+        "1 Impact Tremors",
+        "1 Secure the Wastes",
+        "1 Young Pyromancer",
+        "1 Swiftfoot Boots",
+        "1 Solve the Equation",
+        "1 Blood Artist",
+        "1 All That Glitters",
+        "1 Viscera Seer",
+        "1 Evolving Wilds",
+        "1 Cultivate",
+        "6 Forest",
+        "6 Plains",
+        "6 Basic Land Placeholder",
+        "19 Owned Nonbasic Land Review Slot"
+      ],
+      "export_warnings": [
+        "This is a Strategy Knowledge export artifact.",
+        "Old strategy system removal is not enabled in v1.4.25.",
+        "Review exported decklist before treating it as a player-ready deck."
+      ],
+      "final_export_boundaries": {
+        "final_deck_export_enabled": true,
+        "final_deck_export_mode": "artifact_export_only",
+        "old_strategy_system_removed": false,
+        "legacy_pipeline_still_available": true,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "final_deck_export_mode": "opt_in_strategy_knowledge_export_artifact",
+      "export_format": "plain_text_decklist_lines",
+      "locked_nonland_card_count": 10,
+      "land_entry_total_count": 36,
+      "export_line_count": 14,
+      "decklist_lines": [
+        "1 All That Glitters",
+        "1 Swiftfoot Boots",
+        "1 Solve the Equation",
+        "1 Young Pyromancer",
+        "1 Impact Tremors",
+        "1 Blood Artist",
+        "1 Viscera Seer",
+        "1 Secure the Wastes",
+        "1 Evolving Wilds",
+        "1 Cultivate",
+        "9 Plains",
+        "4 Mountain",
+        "5 Basic Land Placeholder",
+        "18 Owned Nonbasic Land Review Slot"
+      ],
+      "export_warnings": [
+        "This is a Strategy Knowledge export artifact.",
+        "Old strategy system removal is not enabled in v1.4.25.",
+        "Review exported decklist before treating it as a player-ready deck."
+      ],
+      "final_export_boundaries": {
+        "final_deck_export_enabled": true,
+        "final_deck_export_mode": "artifact_export_only",
+        "old_strategy_system_removed": false,
+        "legacy_pipeline_still_available": true,
+        "main_py_changed": false
+      }
+    }
+  ],
+  "integration_contract": {
+    "may_export_final_deck_artifact": true,
+    "may_remove_old_strategy_system": false,
+    "must_require_explicit_opt_in": true,
+    "must_keep_legacy_pipeline_available": true,
+    "must_assume_basic_lands_available": true,
+    "must_keep_nonbasic_lands_collection_first_unless_upgrades_allowed": true,
+    "next_integration_step": "v1.4.26 \u2014 Old Strategy System Deprecation / Fallback Cleanup"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.25 enables opt-in final deck export artifacts only. Old strategy system removal remains disabled until v1.4.26.",
+    "next_safe_step": "v1.4.26 \u2014 Old Strategy System Deprecation / Fallback Cleanup"
+  }
+}

@@ -2,7 +2,7 @@
 r"""
 v0.11.4.2-dev — Data Setup CLI Tool.
 
-This is a developer/tester CLI wrapper around ui.services.data_setup_service.
+This is a developer/tester CLI wrapper around data.data_setup_service.
 
 Examples:
 
@@ -25,7 +25,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 
-from ui.services.data_setup_service import (  # noqa: E402
+from data.data_setup_service import (  # noqa: E402
     combo_index_build_commands,
     download_commander_spellbook_combo_bulk,
     download_scryfall_cards,

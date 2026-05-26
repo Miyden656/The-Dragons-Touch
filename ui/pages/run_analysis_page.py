@@ -48,10 +48,7 @@ except ImportError:  # Allows direct local execution from inside the ui/ folder.
 
 def _get_run_analysis_data_setup_status():
     """Load runtime data setup status without adding hard page-level imports."""
-    try:
-        from ui.services.data_setup_service import get_data_setup_status
-    except ImportError:
-        from services.data_setup_service import get_data_setup_status
+    from data.data_setup_service import get_data_setup_status
 
     return get_data_setup_status()
 

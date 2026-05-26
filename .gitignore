@@ -87,3 +87,7 @@ exe tests/
 
 # dist
 dist/
+
+tool/
+
+docs/

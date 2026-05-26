@@ -1,0 +1,84 @@
+{
+  "candidate_version": "v1.4.8",
+  "candidate_mode": "default_candidate_with_legacy_fallback",
+  "runtime_default_changed": false,
+  "active_runtime_replacement": false,
+  "strategy_knowledge_default_candidate": true,
+  "strategy_knowledge_default_active": false,
+  "legacy_fallback_required": true,
+  "legacy_fallback_available": true,
+  "strategy_scoring_changed": false,
+  "deck_generation_enabled": false,
+  "exact_card_selection_enabled": false,
+  "final_deck_inclusion_enabled": false,
+  "role_count_generation_enabled": false,
+  "mana_base_generation_enabled": false,
+  "land_insertion_enabled": false,
+  "shell_generation_enabled": false,
+  "full_100_card_draft_generation_enabled": false,
+  "gate_checks": {
+    "strategy_quality_audit_passed": true,
+    "loader_preview_passed": true,
+    "shadow_compare_passed": true,
+    "opt_in_bridge_passed": true,
+    "legacy_preservation_present": true,
+    "generation_boundaries_preserved": true
+  },
+  "checked_strategy_count": 5,
+  "candidate_strategies": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "default_candidate_eligible": true,
+      "reason": "Loaded, validated, shadow-compared, and available through opt-in bridge preview.",
+      "legacy_fallback_required": true,
+      "runtime_replacement_allowed_now": false
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "default_candidate_eligible": true,
+      "reason": "Loaded, validated, shadow-compared, and available through opt-in bridge preview.",
+      "legacy_fallback_required": true,
+      "runtime_replacement_allowed_now": false
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "default_candidate_eligible": true,
+      "reason": "Loaded, validated, shadow-compared, and available through opt-in bridge preview.",
+      "legacy_fallback_required": true,
+      "runtime_replacement_allowed_now": false
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "default_candidate_eligible": true,
+      "reason": "Loaded, validated, shadow-compared, and available through opt-in bridge preview.",
+      "legacy_fallback_required": true,
+      "runtime_replacement_allowed_now": false
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "default_candidate_eligible": true,
+      "reason": "Loaded, validated, shadow-compared, and available through opt-in bridge preview.",
+      "legacy_fallback_required": true,
+      "runtime_replacement_allowed_now": false
+    }
+  ],
+  "default_candidate_contract": {
+    "can_be_considered_for_default_in_next_lock_step": true,
+    "may_replace_current_strategy_system_now": false,
+    "must_keep_legacy_fallback": true,
+    "must_not_remove_legacy_strategy_logic": true,
+    "must_not_change_main_py": true,
+    "must_not_change_report_viewer": true,
+    "must_not_enable_deck_generation": true
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.8 only marks the Strategy Knowledge brain as a default candidate. Actual primary/lock behavior waits for v1.4.9.",
+    "next_safe_step": "v1.4.9 \u2014 Strategy Brain Lock"
+  }
+}

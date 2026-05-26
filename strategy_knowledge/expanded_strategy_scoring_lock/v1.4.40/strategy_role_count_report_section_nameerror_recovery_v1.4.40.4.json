@@ -1,0 +1,69 @@
+{
+  "recovery_version": "v1.4.40.4",
+  "recovery_name": "Strategy Role Count Report Section NameError Recovery Hotfix",
+  "runtime_nameerror_recovery_performed": true,
+  "target_file": "reports/strategy_knowledge_sections.py",
+  "missing_symbol": "build_strategy_role_count_report_section",
+  "patch_result": {
+    "exists": true,
+    "changed": false,
+    "function_present": true,
+    "prompt_block_present": true,
+    "viewer_summary_present": true
+  },
+  "compile_results": {
+    "reports/strategy_knowledge_sections.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/prompt_builder.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/strategy_live_bridge.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "main.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    }
+  },
+  "smoke_test": {
+    "imported": false,
+    "report_helper_callable": false,
+    "prompt_helper_callable": false,
+    "viewer_helper_callable": false,
+    "report_text_has_249": false,
+    "report_text_has_strategy_status": false,
+    "prompt_text_has_249": false,
+    "viewer_payload_status": "",
+    "error": "No module named 'reports'"
+  },
+  "main_py_changed": false,
+  "active_scoring_logic_changed": false,
+  "combo_awareness_logic_changed": false,
+  "legacy_fallback_preserved": true,
+  "gate_checks": {
+    "target_file_exists": true,
+    "role_count_report_helper_present": true,
+    "role_count_prompt_helper_present": true,
+    "role_count_viewer_helper_present": true,
+    "strategy_knowledge_sections_compiles": true,
+    "prompt_builder_compiles": true,
+    "strategy_live_bridge_compiles": true,
+    "main_py_compiles": true,
+    "report_helper_callable": false,
+    "report_helper_outputs_249_status": false,
+    "prompt_helper_callable": false,
+    "viewer_helper_callable": false,
+    "main_py_not_changed": true,
+    "active_scoring_logic_not_changed": true,
+    "combo_awareness_logic_not_changed": true
+  },
+  "next_safe_step": "Re-run the batch test. If another missing helper appears, repair that symbol next."
+}

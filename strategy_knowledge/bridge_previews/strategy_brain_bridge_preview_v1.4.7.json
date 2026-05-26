@@ -1,0 +1,431 @@
+{
+  "bridge_version": "v1.4.7",
+  "bridge_mode": "opt_in_preview_only",
+  "default_strategy_system": "legacy_current_strategy_system",
+  "opt_in_strategy_system": "strategy_knowledge_preview",
+  "bridge_enabled_for_preview": true,
+  "runtime_default_changed": false,
+  "active_runtime_replacement": false,
+  "legacy_fallback_required": true,
+  "strategy_scoring_changed": false,
+  "deck_generation_enabled": false,
+  "exact_card_selection_enabled": false,
+  "final_deck_inclusion_enabled": false,
+  "role_count_generation_enabled": false,
+  "mana_base_generation_enabled": false,
+  "land_insertion_enabled": false,
+  "shell_generation_enabled": false,
+  "full_100_card_draft_generation_enabled": false,
+  "source_checks": {
+    "loader_preview_version": "v1.4.5",
+    "loader_mode": "read_only_preview",
+    "loader_loaded_strategy_count": 5,
+    "loader_errored_strategy_count": 0,
+    "shadow_compare_version": "v1.4.6",
+    "shadow_failed_strategy_count": 0,
+    "shadow_replacement_allowed": false,
+    "legacy_mapping_version": "v1.4.4",
+    "legacy_removal_blocked": true
+  },
+  "opt_in_contract": {
+    "user_or_developer_must_explicitly_choose_strategy_knowledge_preview": true,
+    "default_runs_continue_using_legacy_strategy_system": true,
+    "legacy_fallback_must_remain_available": true,
+    "strategy_knowledge_can_supply_context_only": true,
+    "strategy_knowledge_must_not_override_legacy_logic_in_v1_4_7": true
+  },
+  "preview_strategies": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "layer": "02_mechanical_themes",
+      "category_profile": "sacrifice_death_trigger_engine",
+      "primary_aliases": [
+        "aristocrats",
+        "sacrifice value",
+        "death trigger value",
+        "blood artist deck"
+      ],
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "recursion",
+        "finishers_win_conditions"
+      ],
+      "secondary_role_buckets": [
+        "card_draw_card_advantage",
+        "targeted_removal",
+        "protection"
+      ],
+      "strategy_specific_roles": [
+        "free_sacrifice_outlets",
+        "repeatable_sacrifice_outlets",
+        "death_trigger_payoffs",
+        "token_fodder",
+        "creature_recursion",
+        "drain_finishers"
+      ],
+      "core_signal_tags": [
+        "sacrifice_outlet",
+        "death_trigger_payoff",
+        "token_fodder",
+        "graveyard_recursion",
+        "blood_artist_effect"
+      ],
+      "commander_signal_tags": [
+        "sacrifice_outlet_in_command_zone",
+        "death_trigger_payoff_in_command_zone",
+        "token_fodder_engine_in_command_zone"
+      ],
+      "cut_protection_tags": [
+        "free_sacrifice_outlet",
+        "repeatable_token_fodder",
+        "low_mv_death_payoff",
+        "recursion_engine"
+      ],
+      "false_positive_tags": [
+        "single_sacrifice_card",
+        "incidental_treasure_sacrifice",
+        "one_death_trigger_without_support"
+      ],
+      "replacement_priority_tags": [
+        "more_sacrifice_outlets",
+        "more_death_payoffs",
+        "more_recursive_fodder",
+        "more_drain_finishers"
+      ],
+      "build_from_collection_priority": "high",
+      "basic_land_policy": "assume_available",
+      "nonbasic_land_policy": "collection_first_unless_upgrades_allowed",
+      "core_game_plan_preview": "For Aristocrats, this section should be interpreted through the functional profile `sacrifice_death_trigger_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key metad",
+      "cut_logic_preview": "For Aristocrats, this section should be interpreted through the functional profile `sacrifice_death_trigger_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key metad",
+      "replacement_logic_preview": "For Aristocrats, this section should be interpreted through the functional profile `sacrifice_death_trigger_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key metad",
+      "integration_notes_preview": "for The Dragon\u2019s Touch For Aristocrats, this section should be interpreted through the functional profile `sacrifice_death_trigger_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in m",
+      "bridge_usage": {
+        "can_inform_report_language": true,
+        "can_inform_ai_handoff_prompt": true,
+        "can_inform_future_role_mapping": true,
+        "can_replace_current_strategy_logic": false,
+        "can_override_legacy_strategy_system": false,
+        "can_generate_deck": false,
+        "can_select_exact_cards": false,
+        "can_make_final_deck_inclusion_decisions": false
+      }
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "layer": "02_mechanical_themes",
+      "category_profile": "land_drop_and_land_recursion_engine",
+      "primary_aliases": [
+        "landfall",
+        "lands matter",
+        "land engine",
+        "extra land drops"
+      ],
+      "primary_role_buckets": [
+        "ramp_mana_development",
+        "strategy_enablers",
+        "strategy_payoffs",
+        "mana_base_support"
+      ],
+      "secondary_role_buckets": [
+        "card_draw_card_advantage",
+        "recursion",
+        "finishers_win_conditions"
+      ],
+      "strategy_specific_roles": [
+        "extra_land_drops",
+        "landfall_payoffs",
+        "land_recursion",
+        "fetch_lands_and_land_tutors",
+        "land_token_payoffs",
+        "big_mana_finishers"
+      ],
+      "core_signal_tags": [
+        "landfall_trigger",
+        "extra_land_drop",
+        "land_recursion",
+        "lands_in_graveyard_matter",
+        "land_entering_payoff"
+      ],
+      "commander_signal_tags": [
+        "landfall_payoff_in_command_zone",
+        "extra_land_drop_commander",
+        "land_token_engine_in_command_zone",
+        "commander_created_landfall"
+      ],
+      "cut_protection_tags": [
+        "extra_land_drop_engine",
+        "repeatable_landfall_payoff",
+        "land_recursion_engine",
+        "commander_created_landfall_support"
+      ],
+      "false_positive_tags": [
+        "normal_ramp_package_only",
+        "single_landfall_card",
+        "high_land_count_without_payoffs"
+      ],
+      "replacement_priority_tags": [
+        "more_extra_land_drops",
+        "more_landfall_payoffs",
+        "more_land_recursion",
+        "more_land_based_card_advantage"
+      ],
+      "build_from_collection_priority": "high",
+      "basic_land_policy": "assume_available",
+      "nonbasic_land_policy": "collection_first_unless_upgrades_allowed",
+      "core_game_plan_preview": "For Landfall / Lands Matter, this section should be interpreted through the functional profile `land_drop_and_land_recursion_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual ",
+      "cut_logic_preview": "For Landfall / Lands Matter, this section should be interpreted through the functional profile `land_drop_and_land_recursion_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual ",
+      "replacement_logic_preview": "For Landfall / Lands Matter, this section should be interpreted through the functional profile `land_drop_and_land_recursion_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual ",
+      "integration_notes_preview": "for The Dragon\u2019s Touch For Landfall / Lands Matter, this section should be interpreted through the functional profile `land_drop_and_land_recursion_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful",
+      "bridge_usage": {
+        "can_inform_report_language": true,
+        "can_inform_ai_handoff_prompt": true,
+        "can_inform_future_role_mapping": true,
+        "can_replace_current_strategy_logic": false,
+        "can_override_legacy_strategy_system": false,
+        "can_generate_deck": false,
+        "can_select_exact_cards": false,
+        "can_make_final_deck_inclusion_decisions": false
+      }
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "layer": "02_mechanical_themes",
+      "category_profile": "instant_sorcery_velocity_engine",
+      "primary_aliases": [
+        "spellslinger",
+        "instants and sorceries",
+        "spell payoff deck",
+        "cantrip engine"
+      ],
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "card_draw_card_advantage",
+        "finishers_win_conditions"
+      ],
+      "secondary_role_buckets": [
+        "targeted_removal",
+        "protection",
+        "ramp_mana_development"
+      ],
+      "strategy_specific_roles": [
+        "cheap_cantrips",
+        "spell_payoffs",
+        "cost_reducers",
+        "copy_effects",
+        "graveyard_spell_recursion",
+        "spell_based_finishers"
+      ],
+      "core_signal_tags": [
+        "instant_sorcery_density",
+        "magecraft_trigger",
+        "prowess_trigger",
+        "spell_copy_effect",
+        "cost_reduction_for_spells"
+      ],
+      "commander_signal_tags": [
+        "spell_payoff_in_command_zone",
+        "instant_sorcery_cost_reducer_in_command_zone",
+        "spell_copy_commander"
+      ],
+      "cut_protection_tags": [
+        "cheap_cantrip",
+        "repeatable_spell_payoff",
+        "cost_reducer",
+        "spell_recursion_engine"
+      ],
+      "false_positive_tags": [
+        "few_good_spells_only",
+        "removal_suite_without_payoffs",
+        "single_magecraft_card_without_density"
+      ],
+      "replacement_priority_tags": [
+        "more_low_mv_spells",
+        "more_spell_payoffs",
+        "more_velocity_draw",
+        "more_spell_based_finishers"
+      ],
+      "build_from_collection_priority": "high",
+      "basic_land_policy": "assume_available",
+      "nonbasic_land_policy": "collection_first_unless_upgrades_allowed",
+      "core_game_plan_preview": "For Spellslinger, this section should be interpreted through the functional profile `instant_sorcery_velocity_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key met",
+      "cut_logic_preview": "For Spellslinger, this section should be interpreted through the functional profile `instant_sorcery_velocity_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key met",
+      "replacement_logic_preview": "For Spellslinger, this section should be interpreted through the functional profile `instant_sorcery_velocity_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key met",
+      "integration_notes_preview": "for The Dragon\u2019s Touch For Spellslinger, this section should be interpreted through the functional profile `instant_sorcery_velocity_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in",
+      "bridge_usage": {
+        "can_inform_report_language": true,
+        "can_inform_ai_handoff_prompt": true,
+        "can_inform_future_role_mapping": true,
+        "can_replace_current_strategy_logic": false,
+        "can_override_legacy_strategy_system": false,
+        "can_generate_deck": false,
+        "can_select_exact_cards": false,
+        "can_make_final_deck_inclusion_decisions": false
+      }
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "layer": "02_mechanical_themes",
+      "category_profile": "token_material_engine",
+      "primary_aliases": [
+        "tokens",
+        "go-wide",
+        "creature tokens",
+        "token swarm"
+      ],
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "finishers_win_conditions",
+        "card_draw_card_advantage"
+      ],
+      "secondary_role_buckets": [
+        "ramp_mana_development",
+        "protection",
+        "targeted_removal"
+      ],
+      "strategy_specific_roles": [
+        "repeatable_token_makers",
+        "burst_token_makers",
+        "anthem_payoffs",
+        "token_draw_payoffs",
+        "token_finishers",
+        "fodder_converters"
+      ],
+      "core_signal_tags": [
+        "token_maker",
+        "go_wide_payoff",
+        "anthem_effect",
+        "creature_count_payoff",
+        "convoke_or_affinity_support"
+      ],
+      "commander_signal_tags": [
+        "token_maker_in_command_zone",
+        "token_payoff_in_command_zone",
+        "creature_count_scaler_in_command_zone"
+      ],
+      "cut_protection_tags": [
+        "repeatable_token_engine",
+        "low_mv_token_payoff",
+        "anthem_finisher",
+        "skullclamp_style_draw_engine"
+      ],
+      "false_positive_tags": [
+        "one_shot_token_card",
+        "incidental_treasure_tokens",
+        "single_populate_card_without_density"
+      ],
+      "replacement_priority_tags": [
+        "more_repeatable_token_makers",
+        "more_payoffs_for_wide_boards",
+        "more_board_protection",
+        "more_card_draw_from_creatures"
+      ],
+      "build_from_collection_priority": "high",
+      "basic_land_policy": "assume_available",
+      "nonbasic_land_policy": "collection_first_unless_upgrades_allowed",
+      "core_game_plan_preview": "For Tokens, this section should be interpreted through the functional profile `token_material_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key metadata anchors fo",
+      "cut_logic_preview": "For Tokens, this section should be interpreted through the functional profile `token_material_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key metadata anchors fo",
+      "replacement_logic_preview": "For Tokens, this section should be interpreted through the functional profile `token_material_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key metadata anchors fo",
+      "integration_notes_preview": "for The Dragon\u2019s Touch For Tokens, this section should be interpreted through the functional profile `token_material_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. ",
+      "bridge_usage": {
+        "can_inform_report_language": true,
+        "can_inform_ai_handoff_prompt": true,
+        "can_inform_future_role_mapping": true,
+        "can_replace_current_strategy_logic": false,
+        "can_override_legacy_strategy_system": false,
+        "can_generate_deck": false,
+        "can_select_exact_cards": false,
+        "can_make_final_deck_inclusion_decisions": false
+      }
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "layer": "02_mechanical_themes",
+      "category_profile": "commander_damage_suit_up_engine",
+      "primary_aliases": [
+        "voltron",
+        "commander damage",
+        "suit up",
+        "auras and equipment"
+      ],
+      "primary_role_buckets": [
+        "protection",
+        "strategy_enablers",
+        "strategy_payoffs",
+        "finishers_win_conditions"
+      ],
+      "secondary_role_buckets": [
+        "ramp_mana_development",
+        "card_draw_card_advantage",
+        "targeted_removal"
+      ],
+      "strategy_specific_roles": [
+        "evasion_granting_cards",
+        "protection_spells",
+        "equipment_or_aura_payoffs",
+        "commander_damage_scalers",
+        "combat_card_draw",
+        "recovery_after_removal"
+      ],
+      "core_signal_tags": [
+        "commander_damage_plan",
+        "equipment_density",
+        "aura_density",
+        "evasion_granting_effect",
+        "protect_the_commander_effect"
+      ],
+      "commander_signal_tags": [
+        "combat_scaling_commander",
+        "evasive_commander",
+        "keyword_soup_commander",
+        "equipment_or_aura_commander"
+      ],
+      "cut_protection_tags": [
+        "cheap_protection_spell",
+        "repeatable_evasion",
+        "efficient_equipment",
+        "commander_damage_payoff"
+      ],
+      "false_positive_tags": [
+        "one_equipment_card",
+        "large_commander_without_support",
+        "combat_creature_without_protection"
+      ],
+      "replacement_priority_tags": [
+        "more_commander_protection",
+        "more_evasion",
+        "more_card_advantage_attached_to_combat",
+        "lower_curve_suit_up_pieces"
+      ],
+      "build_from_collection_priority": "high",
+      "basic_land_policy": "assume_available",
+      "nonbasic_land_policy": "collection_first_unless_upgrades_allowed",
+      "core_game_plan_preview": "For Voltron, this section should be interpreted through the functional profile `commander_damage_suit_up_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key metadata",
+      "cut_logic_preview": "For Voltron, this section should be interpreted through the functional profile `commander_damage_suit_up_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key metadata",
+      "replacement_logic_preview": "For Voltron, this section should be interpreted through the functional profile `commander_damage_suit_up_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manual review. Key metadata",
+      "integration_notes_preview": "for The Dragon\u2019s Touch For Voltron, this section should be interpreted through the functional profile `commander_damage_suit_up_engine` rather than generic card strength. The assistant should use commander text, owned-card density, role buckets, and the declared signal tags to decide whether a card supports the plan, merely looks powerful, or belongs in manu",
+      "bridge_usage": {
+        "can_inform_report_language": true,
+        "can_inform_ai_handoff_prompt": true,
+        "can_inform_future_role_mapping": true,
+        "can_replace_current_strategy_logic": false,
+        "can_override_legacy_strategy_system": false,
+        "can_generate_deck": false,
+        "can_select_exact_cards": false,
+        "can_make_final_deck_inclusion_decisions": false
+      }
+    }
+  ],
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.7 is opt-in preview only. Default replacement is blocked until default-candidate checks pass.",
+    "next_safe_step": "v1.4.8 \u2014 Strategy Brain Default Candidate"
+  }
+}

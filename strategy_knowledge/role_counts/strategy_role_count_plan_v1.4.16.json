@@ -1,0 +1,434 @@
+{
+  "role_count_generation_version": "v1.4.16",
+  "integration_mode": "strategy_based_role_count_generation",
+  "strategy_role_count_generation_enabled": true,
+  "role_count_generation_enabled": true,
+  "role_count_generation_mode": "target_bands_only",
+  "runtime_behavior_changed": true,
+  "report_output_changed": true,
+  "prompt_output_changed": true,
+  "report_viewer_changed": true,
+  "main_py_changed": false,
+  "legacy_fallback_required": true,
+  "active_runtime_replacement": false,
+  "exact_card_selection_enabled": true,
+  "exact_card_selection_mode": "preview_candidates_only",
+  "final_deck_inclusion_enabled": false,
+  "deck_generation_enabled": false,
+  "mana_base_generation_enabled": false,
+  "land_insertion_enabled": false,
+  "shell_generation_enabled": true,
+  "full_100_card_draft_generation_enabled": false,
+  "gate_checks": {
+    "runtime_contract_available": true,
+    "strategy_knowledge_selected_with_fallback": true,
+    "scoring_preview_available": true,
+    "role_mapping_available": true,
+    "cut_protect_available": true,
+    "report_handoff_available": true,
+    "shell_planning_available": true,
+    "candidate_preview_available": true
+  },
+  "checked_strategy_count": 5,
+  "role_count_plans": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "role_count_mode": "strategy_based_target_bands",
+      "role_count_status": "generated_target_bands_not_final_deck_counts",
+      "collection_first": true,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "candidate_count_available": 10,
+      "target_role_bands": {
+        "ramp_mana_development": {
+          "min": 8,
+          "target": 10,
+          "max": 12
+        },
+        "card_draw_card_advantage": {
+          "min": 8,
+          "target": 10,
+          "max": 12
+        },
+        "targeted_removal": {
+          "min": 5,
+          "target": 7,
+          "max": 9
+        },
+        "board_wipes": {
+          "min": 2,
+          "target": 3,
+          "max": 4
+        },
+        "strategy_enablers": {
+          "min": 10,
+          "target": 13,
+          "max": 16
+        },
+        "strategy_payoffs": {
+          "min": 8,
+          "target": 10,
+          "max": 12
+        },
+        "recursion": {
+          "min": 5,
+          "target": 7,
+          "max": 9
+        },
+        "finishers_win_conditions": {
+          "min": 3,
+          "target": 4,
+          "max": 6
+        },
+        "protection": {
+          "min": 3,
+          "target": 4,
+          "max": 6
+        },
+        "lands": {
+          "min": 35,
+          "target": 37,
+          "max": 38
+        }
+      },
+      "role_count_guidance": [
+        "Use target bands to evaluate balance, not to force exact final counts.",
+        "Treat overlapping cards as satisfying more than one role during review.",
+        "Do not cut protected synergy pieces only because one broad role appears over target.",
+        "Use commander intent, bracket, and philosophy to adjust bands in future patches.",
+        "Lands are represented as a planning target only; mana-base generation and land insertion remain disabled."
+      ],
+      "role_count_boundaries": {
+        "role_count_generation_enabled": true,
+        "role_count_generation_mode": "target_bands_only",
+        "exact_card_selection_enabled": true,
+        "exact_card_selection_mode": "preview_candidates_only",
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "role_count_mode": "strategy_based_target_bands",
+      "role_count_status": "generated_target_bands_not_final_deck_counts",
+      "collection_first": true,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "candidate_count_available": 10,
+      "target_role_bands": {
+        "ramp_mana_development": {
+          "min": 10,
+          "target": 13,
+          "max": 16
+        },
+        "card_draw_card_advantage": {
+          "min": 7,
+          "target": 9,
+          "max": 11
+        },
+        "targeted_removal": {
+          "min": 4,
+          "target": 6,
+          "max": 8
+        },
+        "board_wipes": {
+          "min": 1,
+          "target": 2,
+          "max": 4
+        },
+        "strategy_enablers": {
+          "min": 8,
+          "target": 11,
+          "max": 14
+        },
+        "strategy_payoffs": {
+          "min": 8,
+          "target": 10,
+          "max": 12
+        },
+        "mana_base_support": {
+          "min": 8,
+          "target": 11,
+          "max": 14
+        },
+        "finishers_win_conditions": {
+          "min": 3,
+          "target": 4,
+          "max": 6
+        },
+        "lands": {
+          "min": 37,
+          "target": 39,
+          "max": 42
+        }
+      },
+      "role_count_guidance": [
+        "Use target bands to evaluate balance, not to force exact final counts.",
+        "Treat overlapping cards as satisfying more than one role during review.",
+        "Do not cut protected synergy pieces only because one broad role appears over target.",
+        "Use commander intent, bracket, and philosophy to adjust bands in future patches.",
+        "Lands are represented as a planning target only; mana-base generation and land insertion remain disabled."
+      ],
+      "role_count_boundaries": {
+        "role_count_generation_enabled": true,
+        "role_count_generation_mode": "target_bands_only",
+        "exact_card_selection_enabled": true,
+        "exact_card_selection_mode": "preview_candidates_only",
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "role_count_mode": "strategy_based_target_bands",
+      "role_count_status": "generated_target_bands_not_final_deck_counts",
+      "collection_first": true,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "candidate_count_available": 10,
+      "target_role_bands": {
+        "ramp_mana_development": {
+          "min": 7,
+          "target": 9,
+          "max": 11
+        },
+        "card_draw_card_advantage": {
+          "min": 10,
+          "target": 13,
+          "max": 16
+        },
+        "targeted_removal": {
+          "min": 5,
+          "target": 7,
+          "max": 9
+        },
+        "board_wipes": {
+          "min": 1,
+          "target": 2,
+          "max": 4
+        },
+        "strategy_enablers": {
+          "min": 10,
+          "target": 13,
+          "max": 16
+        },
+        "strategy_payoffs": {
+          "min": 8,
+          "target": 10,
+          "max": 12
+        },
+        "finishers_win_conditions": {
+          "min": 3,
+          "target": 4,
+          "max": 6
+        },
+        "protection": {
+          "min": 2,
+          "target": 4,
+          "max": 6
+        },
+        "lands": {
+          "min": 34,
+          "target": 36,
+          "max": 37
+        }
+      },
+      "role_count_guidance": [
+        "Use target bands to evaluate balance, not to force exact final counts.",
+        "Treat overlapping cards as satisfying more than one role during review.",
+        "Do not cut protected synergy pieces only because one broad role appears over target.",
+        "Use commander intent, bracket, and philosophy to adjust bands in future patches.",
+        "Lands are represented as a planning target only; mana-base generation and land insertion remain disabled."
+      ],
+      "role_count_boundaries": {
+        "role_count_generation_enabled": true,
+        "role_count_generation_mode": "target_bands_only",
+        "exact_card_selection_enabled": true,
+        "exact_card_selection_mode": "preview_candidates_only",
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "role_count_mode": "strategy_based_target_bands",
+      "role_count_status": "generated_target_bands_not_final_deck_counts",
+      "collection_first": true,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "candidate_count_available": 10,
+      "target_role_bands": {
+        "ramp_mana_development": {
+          "min": 8,
+          "target": 10,
+          "max": 12
+        },
+        "card_draw_card_advantage": {
+          "min": 8,
+          "target": 10,
+          "max": 12
+        },
+        "targeted_removal": {
+          "min": 5,
+          "target": 7,
+          "max": 9
+        },
+        "board_wipes": {
+          "min": 2,
+          "target": 3,
+          "max": 4
+        },
+        "strategy_enablers": {
+          "min": 10,
+          "target": 13,
+          "max": 16
+        },
+        "strategy_payoffs": {
+          "min": 8,
+          "target": 10,
+          "max": 12
+        },
+        "finishers_win_conditions": {
+          "min": 3,
+          "target": 5,
+          "max": 6
+        },
+        "protection": {
+          "min": 3,
+          "target": 5,
+          "max": 6
+        },
+        "lands": {
+          "min": 35,
+          "target": 37,
+          "max": 38
+        }
+      },
+      "role_count_guidance": [
+        "Use target bands to evaluate balance, not to force exact final counts.",
+        "Treat overlapping cards as satisfying more than one role during review.",
+        "Do not cut protected synergy pieces only because one broad role appears over target.",
+        "Use commander intent, bracket, and philosophy to adjust bands in future patches.",
+        "Lands are represented as a planning target only; mana-base generation and land insertion remain disabled."
+      ],
+      "role_count_boundaries": {
+        "role_count_generation_enabled": true,
+        "role_count_generation_mode": "target_bands_only",
+        "exact_card_selection_enabled": true,
+        "exact_card_selection_mode": "preview_candidates_only",
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "role_count_mode": "strategy_based_target_bands",
+      "role_count_status": "generated_target_bands_not_final_deck_counts",
+      "collection_first": true,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "candidate_count_available": 10,
+      "target_role_bands": {
+        "ramp_mana_development": {
+          "min": 7,
+          "target": 9,
+          "max": 11
+        },
+        "card_draw_card_advantage": {
+          "min": 7,
+          "target": 9,
+          "max": 11
+        },
+        "targeted_removal": {
+          "min": 5,
+          "target": 7,
+          "max": 9
+        },
+        "board_wipes": {
+          "min": 1,
+          "target": 2,
+          "max": 3
+        },
+        "strategy_enablers": {
+          "min": 10,
+          "target": 13,
+          "max": 16
+        },
+        "strategy_payoffs": {
+          "min": 5,
+          "target": 7,
+          "max": 9
+        },
+        "finishers_win_conditions": {
+          "min": 2,
+          "target": 3,
+          "max": 5
+        },
+        "protection": {
+          "min": 8,
+          "target": 11,
+          "max": 14
+        },
+        "lands": {
+          "min": 34,
+          "target": 36,
+          "max": 38
+        }
+      },
+      "role_count_guidance": [
+        "Use target bands to evaluate balance, not to force exact final counts.",
+        "Treat overlapping cards as satisfying more than one role during review.",
+        "Do not cut protected synergy pieces only because one broad role appears over target.",
+        "Use commander intent, bracket, and philosophy to adjust bands in future patches.",
+        "Lands are represented as a planning target only; mana-base generation and land insertion remain disabled."
+      ],
+      "role_count_boundaries": {
+        "role_count_generation_enabled": true,
+        "role_count_generation_mode": "target_bands_only",
+        "exact_card_selection_enabled": true,
+        "exact_card_selection_mode": "preview_candidates_only",
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    }
+  ],
+  "integration_contract": {
+    "may_generate_strategy_based_role_count_target_bands": true,
+    "may_generate_final_role_counts": false,
+    "may_select_final_deck_cards": false,
+    "may_make_final_deck_inclusion_decisions": false,
+    "may_generate_full_deck": false,
+    "may_generate_mana_base": false,
+    "may_insert_lands": false,
+    "must_label_counts_as_target_bands": true,
+    "must_keep_collection_first": true,
+    "must_assume_basic_lands_available": true,
+    "must_keep_nonbasic_lands_collection_first_unless_upgrades_allowed": true,
+    "next_integration_step": "v1.4.17 \u2014 Mana Base Planning"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.16 generates strategy-based role target bands only. It does not make final deck inclusions, generate a mana base, insert lands, or create a full deck.",
+    "next_safe_step": "v1.4.17 \u2014 Mana Base Planning"
+  }
+}

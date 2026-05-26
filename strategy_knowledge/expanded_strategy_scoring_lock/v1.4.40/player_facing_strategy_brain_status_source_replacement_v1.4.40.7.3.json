@@ -1,0 +1,93 @@
+{
+  "correction_version": "v1.4.40.7.3",
+  "correction_name": "Player-Facing Strategy Brain Status Source Replacement",
+  "source_replacement_performed": true,
+  "target_file": "reports/strategy_knowledge_sections.py",
+  "patch_result": {
+    "exists": true,
+    "changed": true,
+    "changes": [
+      "added_active_status_payload_to_report_section",
+      "added_active_status_payload_to_viewer_summary"
+    ],
+    "helper_present": true,
+    "report_section_has_active_249": true,
+    "report_section_has_old_strategy_profiles_line": false,
+    "report_section_has_old_scoring_preview_line": false,
+    "viewer_has_active_249": true,
+    "viewer_has_old_strategy_profiles_line": false,
+    "viewer_has_old_scoring_preview_line": false
+  },
+  "compile_results": {
+    "reports/strategy_knowledge_sections.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/report_builder.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/batch_aggregate.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/batch_output_strategy_status_polish.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/player_facing_version_strategy_status_correction.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/strategy_knowledge_active_scoring.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "reports/strategy_live_bridge.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    },
+    "main.py": {
+      "exists": true,
+      "compiled": true,
+      "error": ""
+    }
+  },
+  "smoke_text": "## Strategy Knowledge Integration\n\nStrategy Knowledge is active as report and AI-handoff context for this run.\n\n### Strategy Brain Status\n- Selected strategy system: expanded_strategy_scoring_with_legacy_fallback\n- Strategy Knowledge: Active\n- Active scoring profiles: 249\n- Scoring source: `strategy_knowledge/index/strategy_profile_index.latest.json`\n- Legacy five-profile preview: fallback/debug only\n- Legacy fallback available: Yes \u2014 rollback/debug only",
+  "batch_aggregate_changed": false,
+  "main_py_changed": false,
+  "active_scoring_logic_changed": false,
+  "combo_awareness_logic_changed": false,
+  "legacy_fallback_preserved": true,
+  "gate_checks": {
+    "target_file_exists": true,
+    "active_status_helper_present": true,
+    "report_section_has_active_249": true,
+    "report_section_old_strategy_profiles_removed": true,
+    "report_section_old_scoring_preview_removed": true,
+    "viewer_has_active_249": true,
+    "viewer_old_strategy_profiles_removed": true,
+    "viewer_old_scoring_preview_removed": true,
+    "smoke_has_active_249": true,
+    "smoke_lacks_old_five_profile_line": true,
+    "smoke_lacks_old_preview_match_line": true,
+    "strategy_knowledge_sections_compiles": true,
+    "report_builder_compiles": true,
+    "batch_aggregate_compiles": true,
+    "active_scoring_compiles": true,
+    "main_py_compiles": true,
+    "batch_aggregate_not_changed": true,
+    "main_py_not_changed": true,
+    "active_scoring_logic_not_changed": true,
+    "combo_awareness_logic_not_changed": true,
+    "legacy_fallback_preserved": true
+  },
+  "next_safe_step": "Run the same 21-deck small batch smoke and confirm batch_deck_reports.md no longer contains old five-profile Strategy Brain Status language."
+}

@@ -1,0 +1,56 @@
+{
+  "v1_4_stable_lock_version": "v1.4.28",
+  "integration_mode": "v1_4_stable_lock_handoff_package",
+  "v1_4_stable_lock_ready": true,
+  "v1_4_stable_status": "STABLE_LOCK_PASS",
+  "based_on_regression_version": "v1.4.27",
+  "based_on_lock_candidate_status": "LOCK_CANDIDATE_PASS",
+  "strategy_knowledge_preferred_path_enabled": true,
+  "final_deck_export_enabled": true,
+  "old_strategy_system_deprecated": true,
+  "old_strategy_system_removed": false,
+  "legacy_pipeline_still_available": true,
+  "rollback_supported": true,
+  "main_py_changed_by_this_patch": false,
+  "stable_lock_checks": {
+    "regression_artifact_available": true,
+    "lock_candidate_passed": true,
+    "module_compile_passed": true,
+    "artifact_presence_passed": true,
+    "tool_smoke_tests_passed": true,
+    "final_chain_passed": true,
+    "strategy_knowledge_preferred": true,
+    "final_deck_export_enabled": true,
+    "old_strategy_deprecated_not_removed": true,
+    "legacy_fallback_available": true,
+    "rollback_supported": true,
+    "policy_blocks_old_file_deletion": true,
+    "policy_blocks_fallback_disable": true,
+    "policy_keeps_rollback": true,
+    "replacement_gate_allowed": true
+  },
+  "stable_lock_policy": {
+    "may_mark_v1_4_stable": true,
+    "may_begin_v1_5_or_next_version": true,
+    "may_delete_old_strategy_files": false,
+    "may_disable_legacy_fallback": false,
+    "must_keep_rollback_available": true,
+    "must_keep_old_strategy_system_as_deprecated_fallback": true,
+    "must_document_strategy_knowledge_as_preferred_path": true,
+    "recommended_next_project_step": "Begin next planned version only after saving a clean v1.4 stable backup."
+  },
+  "handoff_summary": {
+    "locked_version": "v1.4",
+    "locked_version_name": "Strategy Deep Dive / Strategy Knowledge Live Replacement",
+    "status": "PASS / STABLE LOCK",
+    "preferred_path": "Strategy Knowledge live bridge + final deck export artifacts",
+    "deprecated_path": "Old strategy system retained as fallback/rollback path",
+    "next_patch_name": "v1.4.29 or next-version planning, if needed"
+  },
+  "replacement_gate": {
+    "replacement_allowed": true,
+    "replacement_status": "v1_4_stable_strategy_knowledge_preferred_old_system_deprecated_fallback_preserved",
+    "reason": "v1.4.28 locks the Strategy Knowledge replacement chain as stable while preserving deprecated fallback and rollback.",
+    "next_safe_step": "Save clean v1.4 stable backup, then begin the next planned version."
+  }
+}

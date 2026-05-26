@@ -1,0 +1,277 @@
+{
+  "mana_base_planning_version": "v1.4.17",
+  "integration_mode": "mana_base_planning",
+  "mana_base_planning_enabled": true,
+  "mana_base_planning_mode": "planning_guidance_only",
+  "runtime_behavior_changed": true,
+  "report_output_changed": true,
+  "prompt_output_changed": true,
+  "report_viewer_changed": true,
+  "main_py_changed": false,
+  "legacy_fallback_required": true,
+  "active_runtime_replacement": false,
+  "exact_card_selection_enabled": true,
+  "exact_card_selection_mode": "preview_candidates_only",
+  "role_count_generation_enabled": true,
+  "role_count_generation_mode": "target_bands_only",
+  "shell_generation_enabled": true,
+  "shell_generation_mode": "rough_strategy_shell_planning_only",
+  "mana_base_generation_enabled": false,
+  "land_insertion_enabled": false,
+  "final_deck_inclusion_enabled": false,
+  "deck_generation_enabled": false,
+  "full_100_card_draft_generation_enabled": false,
+  "basic_lands_assumed_available": true,
+  "nonbasic_lands_collection_first": true,
+  "gate_checks": {
+    "runtime_contract_available": true,
+    "strategy_knowledge_selected_with_fallback": true,
+    "scoring_preview_available": true,
+    "role_mapping_available": true,
+    "cut_protect_available": true,
+    "report_handoff_available": true,
+    "shell_planning_available": true,
+    "candidate_preview_available": true,
+    "role_count_generation_available": true
+  },
+  "checked_strategy_count": 5,
+  "mana_base_plans": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "mana_base_plan_mode": "planning_guidance_only",
+      "recommended_land_band": {
+        "min": 35,
+        "target": 37,
+        "max": 38
+      },
+      "role_count_land_band": {
+        "min": 35,
+        "target": 37,
+        "max": 38
+      },
+      "basic_lands_assumed_available": true,
+      "basic_land_policy": "Assume needed basics are available; use them to stabilize colors after owned nonbasic review.",
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "nonbasic_priorities": [
+        "untapped duals/fixing lands from collection",
+        "sacrifice-friendly utility lands if already owned",
+        "graveyard/recursion utility lands only if color consistency remains stable"
+      ],
+      "land_target_adjustment": "normal",
+      "mana_notes": [
+        "Do not overload colorless utility lands if early sacrifice outlets and payoffs have colored costs.",
+        "Prefer early untapped sources for engine setup."
+      ],
+      "planning_guidance": [
+        "Use this as a mana-base plan, not a final land list.",
+        "Basic lands are assumed available and do not need to be counted from the collection.",
+        "Nonbasic lands remain collection-first unless outside upgrades are explicitly allowed.",
+        "Do not insert lands in this stage.",
+        "Do not generate a finished mana base in this stage."
+      ],
+      "mana_base_boundaries": {
+        "mana_base_planning_enabled": true,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "mana_base_plan_mode": "planning_guidance_only",
+      "recommended_land_band": {
+        "min": 37,
+        "target": 39,
+        "max": 42
+      },
+      "role_count_land_band": {
+        "min": 37,
+        "target": 39,
+        "max": 42
+      },
+      "basic_lands_assumed_available": true,
+      "basic_land_policy": "Assume needed basics are available; basics are especially important because many landfall enablers search for basic lands.",
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "nonbasic_priorities": [
+        "owned fetch-style lands and evolving/wilds effects",
+        "lands that enter and sacrifice or recur",
+        "utility lands that produce landfall value without damaging color consistency"
+      ],
+      "land_target_adjustment": "higher_land_density",
+      "mana_notes": [
+        "Higher land count is normal for landfall and should not be treated as a problem by itself.",
+        "Nonbasic lands are valuable, but basics remain important for search effects."
+      ],
+      "planning_guidance": [
+        "Use this as a mana-base plan, not a final land list.",
+        "Basic lands are assumed available and do not need to be counted from the collection.",
+        "Nonbasic lands remain collection-first unless outside upgrades are explicitly allowed.",
+        "Do not insert lands in this stage.",
+        "Do not generate a finished mana base in this stage."
+      ],
+      "mana_base_boundaries": {
+        "mana_base_planning_enabled": true,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "mana_base_plan_mode": "planning_guidance_only",
+      "recommended_land_band": {
+        "min": 34,
+        "target": 36,
+        "max": 37
+      },
+      "role_count_land_band": {
+        "min": 34,
+        "target": 36,
+        "max": 37
+      },
+      "basic_lands_assumed_available": true,
+      "basic_land_policy": "Assume needed basics are available; use basics to keep colors stable after owned spell-support lands.",
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "nonbasic_priorities": [
+        "owned untapped fixing lands",
+        "spell-support lands only if color consistency remains strong",
+        "utility lands that copy/rebuy spells only when not slowing early interaction"
+      ],
+      "land_target_adjustment": "slightly_lower_if_curve_low",
+      "mana_notes": [
+        "Spellslinger decks need reliable colored mana for cheap interaction and draw.",
+        "Tapped lands are more punishing when the deck wants to double-spell early."
+      ],
+      "planning_guidance": [
+        "Use this as a mana-base plan, not a final land list.",
+        "Basic lands are assumed available and do not need to be counted from the collection.",
+        "Nonbasic lands remain collection-first unless outside upgrades are explicitly allowed.",
+        "Do not insert lands in this stage.",
+        "Do not generate a finished mana base in this stage."
+      ],
+      "mana_base_boundaries": {
+        "mana_base_planning_enabled": true,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "mana_base_plan_mode": "planning_guidance_only",
+      "recommended_land_band": {
+        "min": 35,
+        "target": 37,
+        "max": 38
+      },
+      "role_count_land_band": {
+        "min": 35,
+        "target": 37,
+        "max": 38
+      },
+      "basic_lands_assumed_available": true,
+      "basic_land_policy": "Assume needed basics are available; use basics to support stable early token production.",
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "nonbasic_priorities": [
+        "owned fixing lands that enter untapped early",
+        "utility lands that produce tokens only if they do not weaken color access",
+        "go-wide support lands if already owned and on-plan"
+      ],
+      "land_target_adjustment": "normal",
+      "mana_notes": [
+        "Token decks often need early colored mana to start building board presence.",
+        "Avoid too many tapped lands if the strategy needs to curve out."
+      ],
+      "planning_guidance": [
+        "Use this as a mana-base plan, not a final land list.",
+        "Basic lands are assumed available and do not need to be counted from the collection.",
+        "Nonbasic lands remain collection-first unless outside upgrades are explicitly allowed.",
+        "Do not insert lands in this stage.",
+        "Do not generate a finished mana base in this stage."
+      ],
+      "mana_base_boundaries": {
+        "mana_base_planning_enabled": true,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "mana_base_plan_mode": "planning_guidance_only",
+      "recommended_land_band": {
+        "min": 34,
+        "target": 36,
+        "max": 38
+      },
+      "role_count_land_band": {
+        "min": 34,
+        "target": 36,
+        "max": 38
+      },
+      "basic_lands_assumed_available": true,
+      "basic_land_policy": "Assume needed basics are available; use basics to support reliable commander casting.",
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "nonbasic_priorities": [
+        "owned untapped fixing lands",
+        "utility lands that protect or give evasion only if colors remain stable",
+        "equipment-support lands if already owned and not too slow"
+      ],
+      "land_target_adjustment": "normal_to_slightly_lower_if_curve_low",
+      "mana_notes": [
+        "Voltron decks need reliable early commander mana.",
+        "Too many tapped or colorless utility lands can delay the commander and weaken the plan."
+      ],
+      "planning_guidance": [
+        "Use this as a mana-base plan, not a final land list.",
+        "Basic lands are assumed available and do not need to be counted from the collection.",
+        "Nonbasic lands remain collection-first unless outside upgrades are explicitly allowed.",
+        "Do not insert lands in this stage.",
+        "Do not generate a finished mana base in this stage."
+      ],
+      "mana_base_boundaries": {
+        "mana_base_planning_enabled": true,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    }
+  ],
+  "integration_contract": {
+    "may_generate_mana_base_planning_guidance": true,
+    "may_generate_finished_mana_base": false,
+    "may_insert_lands": false,
+    "may_select_final_deck_cards": false,
+    "may_make_final_deck_inclusion_decisions": false,
+    "may_generate_full_deck": false,
+    "must_assume_basic_lands_available": true,
+    "must_keep_nonbasic_lands_collection_first_unless_upgrades_allowed": true,
+    "must_label_output_as_planning_guidance": true,
+    "next_integration_step": "v1.4.18 \u2014 Land Insertion Preview"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.17 enables mana-base planning guidance only. It does not generate a finished mana base, insert lands, or create a deck.",
+    "next_safe_step": "v1.4.18 \u2014 Land Insertion Preview"
+  }
+}

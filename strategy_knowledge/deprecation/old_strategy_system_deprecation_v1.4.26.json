@@ -1,0 +1,55 @@
+{
+  "old_strategy_deprecation_version": "v1.4.26",
+  "integration_mode": "old_strategy_system_deprecation_fallback_cleanup",
+  "strategy_knowledge_preferred_path_enabled": true,
+  "old_strategy_system_deprecated": true,
+  "old_strategy_system_removed": false,
+  "legacy_pipeline_still_available": true,
+  "legacy_pipeline_status": "deprecated_fallback_only",
+  "fallback_cleanup_mode": "preserve_rollback_do_not_delete",
+  "runtime_behavior_changed": true,
+  "main_py_changed": false,
+  "requires_live_bridge_opt_in": true,
+  "opt_in_env_var": "TDT_STRATEGY_KNOWLEDGE_LIVE_BRIDGE",
+  "active_runtime_replacement": true,
+  "final_deck_export_enabled": true,
+  "final_deck_export_mode": "opt_in_artifact_export_only",
+  "checked_strategy_export_count": 5,
+  "gate_checks": {
+    "final_deck_export_available": true,
+    "final_export_kept_legacy_available": true,
+    "live_bridge_available": true,
+    "legacy_not_removed_before_this_patch": true
+  },
+  "deprecation_policy": {
+    "preferred_strategy_path": "Strategy Knowledge live bridge + final deck export artifacts",
+    "old_strategy_path_status": "deprecated fallback",
+    "delete_old_strategy_files": false,
+    "disable_legacy_fallback": false,
+    "rollback_supported": true,
+    "reason": "v1.4.26 makes Strategy Knowledge the preferred path but keeps the old system available for safe rollback until the v1.4 lock candidate passes regression."
+  },
+  "fallback_rules": [
+    "Use Strategy Knowledge export artifacts when the live bridge is explicitly enabled.",
+    "Keep the old strategy system available as fallback until v1.4 lock/regression passes.",
+    "Do not delete old strategy files in this patch.",
+    "Do not remove legacy fallback in this patch.",
+    "Do not alter main.py in this patch."
+  ],
+  "integration_contract": {
+    "may_mark_old_strategy_system_deprecated": true,
+    "may_prefer_strategy_knowledge_export_path": true,
+    "may_remove_old_strategy_system": false,
+    "may_delete_legacy_strategy_files": false,
+    "may_disable_legacy_fallback": false,
+    "must_keep_rollback_available": true,
+    "must_require_explicit_opt_in_for_strategy_knowledge_live_bridge": true,
+    "next_integration_step": "v1.4.27 \u2014 Full Regression / v1.4 Lock Candidate"
+  },
+  "replacement_gate": {
+    "replacement_allowed": true,
+    "replacement_status": "strategy_knowledge_preferred_old_system_deprecated_but_not_deleted",
+    "reason": "Strategy Knowledge is now the preferred opt-in export path. The old strategy system remains as deprecated fallback until full regression confirms safe lock.",
+    "next_safe_step": "v1.4.27 \u2014 Full Regression / v1.4 Lock Candidate"
+  }
+}

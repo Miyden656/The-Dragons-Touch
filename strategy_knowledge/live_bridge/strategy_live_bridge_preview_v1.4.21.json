@@ -1,0 +1,77 @@
+{
+  "live_bridge_version": "v1.4.21",
+  "integration_mode": "strategy_knowledge_main_pipeline_opt_in_live_bridge",
+  "opt_in_env_var": "TDT_STRATEGY_KNOWLEDGE_LIVE_BRIDGE",
+  "opt_in_enabled_for_current_process": false,
+  "main_py_changed": true,
+  "runtime_behavior_changed": true,
+  "live_bridge_enabled": true,
+  "live_bridge_mode": "opt_in_report_artifact_bridge",
+  "strategy_knowledge_replaces_live_strategy_context": "opt_in_bridge_only",
+  "legacy_pipeline_still_available": true,
+  "legacy_fallback_required": true,
+  "active_runtime_replacement": false,
+  "final_deck_export_enabled": false,
+  "final_inclusion_lock_enabled": false,
+  "finished_mana_base_generation_enabled": false,
+  "land_deck_write_enabled": false,
+  "deck_generation_enabled": true,
+  "deck_generation_mode": "preview_draft_only",
+  "full_100_card_draft_generation_enabled": true,
+  "full_100_card_draft_generation_mode": "preview_only_no_final_deck_export",
+  "gate_checks": {
+    "live_replacement_map_available": true,
+    "ready_for_v1_4_21": true,
+    "full_draft_preview_available": true,
+    "full_draft_preview_only": true
+  },
+  "context_summary": {
+    "commander_name": "Unknown",
+    "safe_commander_name": "unknown_commander",
+    "deck_card_count": null,
+    "commander_names": [],
+    "legacy_strategy_label": "Unknown",
+    "runtime_output_mode": null
+  },
+  "source_artifacts": {
+    "live_replacement_map": "C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\live_replacement\\strategy_live_replacement_map_v1.4.20.json",
+    "full_draft_preview": "C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\full_draft_preview\\full_100_card_draft_preview_v1.4.19.json"
+  },
+  "live_bridge_outputs": {
+    "per_deck_markdown_artifact": true,
+    "per_deck_json_artifact": true,
+    "normal_report_append": false,
+    "final_deck_export": false
+  },
+  "replacement_contract": {
+    "may_run_from_main_py_when_opted_in": true,
+    "may_write_live_bridge_artifacts": true,
+    "may_replace_final_deck_export": false,
+    "may_lock_final_inclusions": false,
+    "may_generate_finished_mana_base": false,
+    "may_write_lands_into_deck": false,
+    "must_keep_legacy_pipeline_available": true,
+    "must_require_explicit_opt_in": true
+  },
+  "integration_contract": {
+    "may_bridge_main_pipeline_opt_in": true,
+    "may_replace_final_deck_export": false,
+    "may_lock_final_inclusions": false,
+    "may_generate_finished_mana_base": false,
+    "may_write_lands_into_deck": false,
+    "must_require_explicit_opt_in": true
+  },
+  "replacement_gate": {
+    "replacement_allowed": true,
+    "replacement_status": "strategy_knowledge_preferred_old_system_deprecated_but_not_deleted",
+    "reason": "v1.4.26 makes Strategy Knowledge the preferred path while preserving deprecated fallback for rollback."
+  },
+  "warnings": [
+    "v1.4.23 finished mana-base artifact failed: name 'output_dir' is not defined",
+    "v1.4.24 land deck-write artifact failed: name 'output_dir' is not defined",
+    "v1.4.27 regression artifact failed: name 'output_dir' is not defined"
+  ],
+  "strategy_knowledge_preferred_path_enabled": true,
+  "old_strategy_system_deprecated": true,
+  "old_strategy_system_removed": false
+}

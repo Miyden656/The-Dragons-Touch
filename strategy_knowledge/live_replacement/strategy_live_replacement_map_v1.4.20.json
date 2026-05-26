@@ -1,0 +1,157 @@
+{
+  "live_replacement_map_version": "v1.4.20",
+  "purpose": "Map the required replacement path from Strategy Knowledge previews into the old live Build From Collection system.",
+  "runtime_behavior_changed": false,
+  "main_py_changed": false,
+  "deck_generation_changed": false,
+  "final_deck_export_changed": false,
+  "final_inclusion_lock_changed": false,
+  "finished_mana_base_generation_changed": false,
+  "land_deck_write_changed": false,
+  "files_checked": {
+    "main_py": true,
+    "selected_report_executor": true,
+    "full_100_model": true,
+    "full_100_writer": true,
+    "strategy_selection": true,
+    "strategy_role_mapping": true,
+    "strategy_knowledge_sections": true,
+    "full_draft_preview": true,
+    "mana_base_planning": true,
+    "land_insertion_preview": true,
+    "report_viewer": true
+  },
+  "current_state": {
+    "v1_4_19_passed": true,
+    "main_py_has_strategy_knowledge_live_bridge": false,
+    "main_py_imports_full_draft_preview": false,
+    "selected_executor_still_uses_old_e_model": true,
+    "selected_executor_still_claims_no_deck_generation": true,
+    "full_100_output_still_scaffold": true,
+    "full_100_writer_writes_artifacts": true,
+    "strategy_knowledge_report_surfaces_exist": true,
+    "report_viewer_full_draft_lane_exists": true
+  },
+  "replacement_boundaries": [
+    {
+      "boundary": "main.py",
+      "current_status": "unchanged; normal analysis entrypoint does not route to Strategy Knowledge live deck construction",
+      "target_files": [
+        "main.py"
+      ],
+      "target_functions": [
+        "build_analysis_context",
+        "process_single_deck",
+        "main"
+      ],
+      "next_patch": "v1.4.21 \u2014 Strategy Knowledge Main Pipeline Opt-In Live Bridge",
+      "required_change": "Add an explicit, guarded runtime route that can call Strategy Knowledge build outputs without breaking normal deck review."
+    },
+    {
+      "boundary": "final_deck_export",
+      "current_status": "disabled; v1.4.19 only writes preview artifacts",
+      "target_files": [
+        "build_from_collection/output_selected_report_executor.py",
+        "build_from_collection/full_100_card_draft_report_writer.py",
+        "reports/full_100_card_draft_preview.py"
+      ],
+      "target_functions": [
+        "execute_build_from_collection_selected_report",
+        "write_full_100_card_draft_output",
+        "write_full_100_card_draft_preview"
+      ],
+      "next_patch": "v1.4.25 \u2014 Final Deck Export Integration",
+      "required_change": "Create final deck export artifacts only after final inclusion and land write gates are satisfied."
+    },
+    {
+      "boundary": "final_inclusion_lock",
+      "current_status": "disabled; exact cards are candidates only and full draft is preview-only",
+      "target_files": [
+        "reports/exact_card_candidate_preview.py",
+        "reports/full_100_card_draft_preview.py",
+        "build_from_collection/full_100_card_draft_output.py"
+      ],
+      "target_functions": [
+        "build_exact_card_candidate_payload",
+        "build_full_100_card_draft_preview_payload",
+        "create_full_100_card_draft_output_model"
+      ],
+      "next_patch": "v1.4.22 \u2014 Final Inclusion Lock Integration",
+      "required_change": "Promote review-only candidates into explicitly locked inclusions with clear source, role, and protection/cut rationale."
+    },
+    {
+      "boundary": "finished_mana_base_generation",
+      "current_status": "disabled; mana base exists only as planning guidance",
+      "target_files": [
+        "reports/mana_base_planning.py",
+        "reports/land_insertion_preview.py",
+        "build_from_collection/full_100_card_draft_output.py"
+      ],
+      "target_functions": [
+        "build_mana_base_planning_payload",
+        "build_land_insertion_preview_payload",
+        "create_full_100_card_draft_output_model"
+      ],
+      "next_patch": "v1.4.23 \u2014 Finished Mana Base Generation Integration",
+      "required_change": "Convert mana planning bands into a finished land package while preserving basic-land availability and collection-first nonbasic rules."
+    },
+    {
+      "boundary": "land_deck_write",
+      "current_status": "disabled; v1.4.18 previews slots but does not write lands into a deck",
+      "target_files": [
+        "reports/land_insertion_preview.py",
+        "reports/full_100_card_draft_preview.py",
+        "build_from_collection/full_100_card_draft_report_writer.py"
+      ],
+      "target_functions": [
+        "build_land_insertion_preview_payload",
+        "build_full_100_card_draft_preview_payload",
+        "write_full_100_card_draft_output"
+      ],
+      "next_patch": "v1.4.24 \u2014 Land Deck-Write Integration",
+      "required_change": "Write land choices into the draft payload only after finished mana-base generation is available."
+    }
+  ],
+  "old_system_targets": [
+    {
+      "file": "build_from_collection/strategy_selection.py",
+      "role": "Old commander text heuristic strategy inference / override preview.",
+      "replacement": "Strategy Knowledge recognition and Strategy Brain runtime selector should become the default source, while user override remains."
+    },
+    {
+      "file": "build_from_collection/strategy_role_mapping.py",
+      "role": "Old strategy-to-role bucket mapping.",
+      "replacement": "Strategy Knowledge role profiles and role-count target bands should become the live source."
+    },
+    {
+      "file": "build_from_collection/owned_role_classification.py",
+      "role": "Old preview-only owned card role classifier.",
+      "replacement": "Strategy Knowledge exact-card candidates, cut/protect/replacement signals, and role-count bands should drive live classification."
+    },
+    {
+      "file": "build_from_collection/full_100_card_draft_output.py",
+      "role": "Old full 100-card draft scaffold/model with no true generation.",
+      "replacement": "Strategy Knowledge full draft payload should become the source for real draft output."
+    },
+    {
+      "file": "build_from_collection/output_selected_report_executor.py",
+      "role": "Current B-E report route executor; E still routes to old full draft model/writer.",
+      "replacement": "Depth E should route to Strategy Knowledge live full draft construction once final inclusion and land write gates pass."
+    }
+  ],
+  "replacement_sequence": [
+    "v1.4.21 \u2014 Strategy Knowledge Main Pipeline Opt-In Live Bridge",
+    "v1.4.22 \u2014 Final Inclusion Lock Integration",
+    "v1.4.23 \u2014 Finished Mana Base Generation Integration",
+    "v1.4.24 \u2014 Land Deck-Write Integration",
+    "v1.4.25 \u2014 Final Deck Export Integration",
+    "v1.4.26 \u2014 Old Strategy System Deprecation / Fallback Cleanup",
+    "v1.4.27 \u2014 Full Regression / v1.4 Lock Candidate"
+  ],
+  "readiness": {
+    "safe_to_replace_blindly": false,
+    "reason": "The current project has separate preview artifacts and old live Build From Collection scaffold paths. main.py and depth E output routing must be bridged deliberately.",
+    "ready_for_v1_4_21": true
+  },
+  "next_safe_step": "v1.4.21 \u2014 Strategy Knowledge Main Pipeline Opt-In Live Bridge"
+}

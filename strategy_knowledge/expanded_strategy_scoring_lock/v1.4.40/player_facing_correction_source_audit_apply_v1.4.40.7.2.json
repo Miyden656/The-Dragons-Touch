@@ -1,0 +1,23 @@
+{
+  "version": "v1.4.40.7.2",
+  "payload_results": [
+    {
+      "rel": "reports/player_facing_version_strategy_status_correction.py",
+      "copied": true,
+      "dst_exists": true,
+      "contains_main": true,
+      "size": 20094
+    },
+    {
+      "rel": "tools/player_facing_version_strategy_status_correction.py",
+      "copied": true,
+      "dst_exists": true,
+      "contains_main": false,
+      "size": 337
+    }
+  ],
+  "module_contains_main_after_copy": true,
+  "module_import_main_callable": true,
+  "correction_tool_returncode": 0,
+  "correction_artifact_exists": true
+}

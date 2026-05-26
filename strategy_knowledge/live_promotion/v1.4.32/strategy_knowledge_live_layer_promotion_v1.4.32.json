@@ -1,0 +1,1588 @@
+{
+  "live_promotion_version": "v1.4.32",
+  "promotion_name": "Strategy Knowledge Live Layer Promotion / No-Overwrite Import",
+  "runtime_behavior_changed": true,
+  "live_layers_modified": true,
+  "promotion_performed": true,
+  "overwrite_existing_live_profiles": false,
+  "indexing_performed": false,
+  "scoring_wiring_performed": false,
+  "report_behavior_changed": false,
+  "main_py_changed": false,
+  "source_promotion_plan": "strategy_knowledge/promotion_plan/v1.4.31/strategy_knowledge_staged_import_promotion_plan_v1.4.31.json",
+  "live_profile_count_before": 5,
+  "copied_to_live_count": 244,
+  "skipped_existing_live_path_count": 0,
+  "skipped_not_ready_count": 5,
+  "copy_error_count": 0,
+  "live_profile_count_after": 5,
+  "expected_live_profile_count_after": 249,
+  "copied_records": [
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/01_macro_archetypes/aggro.md",
+      "target": "strategy_knowledge/layers/01_macro_archetypes/aggro.md",
+      "source_slug": "aggro",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/01_macro_archetypes/combo.md",
+      "target": "strategy_knowledge/layers/01_macro_archetypes/combo.md",
+      "source_slug": "combo",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/01_macro_archetypes/control.md",
+      "target": "strategy_knowledge/layers/01_macro_archetypes/control.md",
+      "source_slug": "control",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/01_macro_archetypes/engine_synergy_value.md",
+      "target": "strategy_knowledge/layers/01_macro_archetypes/engine_synergy_value.md",
+      "source_slug": "engine_synergy_value",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/01_macro_archetypes/midrange_value.md",
+      "target": "strategy_knowledge/layers/01_macro_archetypes/midrange_value.md",
+      "source_slug": "midrange_value",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/01_macro_archetypes/ramp_big_mana.md",
+      "target": "strategy_knowledge/layers/01_macro_archetypes/ramp_big_mana.md",
+      "source_slug": "ramp_big_mana",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/01_macro_archetypes/stax_prison.md",
+      "target": "strategy_knowledge/layers/01_macro_archetypes/stax_prison.md",
+      "source_slug": "stax_prison",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/01_macro_archetypes/tempo.md",
+      "target": "strategy_knowledge/layers/01_macro_archetypes/tempo.md",
+      "source_slug": "tempo",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/01_macro_archetypes/toolbox.md",
+      "target": "strategy_knowledge/layers/01_macro_archetypes/toolbox.md",
+      "source_slug": "toolbox",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/alternate_win_conditions.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/alternate_win_conditions.md",
+      "source_slug": "alternate_win_conditions",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/artifact_synergy.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/artifact_synergy.md",
+      "source_slug": "artifact_synergy",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/auras.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/auras.md",
+      "source_slug": "auras",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/blink_flicker.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/blink_flicker.md",
+      "source_slug": "blink_flicker",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/blood_tokens_madness_discard_value.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/blood_tokens_madness_discard_value.md",
+      "source_slug": "blood_tokens_madness_discard_value",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/bracket_pressure_high_power_value.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/bracket_pressure_high_power_value.md",
+      "source_slug": "bracket_pressure_high_power_value",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/clues_investigate__02_mechanical_themes_micro_archetypes.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/clues_investigate__02_mechanical_themes_micro_archetypes.md",
+      "source_slug": "clues_investigate",
+      "requires_collision_review": true
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/copy_clones.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/copy_clones.md",
+      "source_slug": "copy_clones",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/enchantress.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/enchantress.md",
+      "source_slug": "enchantress",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/equipment.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/equipment.md",
+      "source_slug": "equipment",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/exile_matters_cast_from_exile__02_mechanical_themes_micro_archetypes.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/exile_matters_cast_from_exile__02_mechanical_themes_micro_archetypes.md",
+      "source_slug": "exile_matters_cast_from_exile",
+      "requires_collision_review": true
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/extra_combat.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/extra_combat.md",
+      "source_slug": "extra_combat",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/food__02_mechanical_themes_micro_archetypes.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/food__02_mechanical_themes_micro_archetypes.md",
+      "source_slug": "food",
+      "requires_collision_review": true
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/go_tall_combat.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/go_tall_combat.md",
+      "source_slug": "go_tall_combat",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/go_wide_combat.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/go_wide_combat.md",
+      "source_slug": "go_wide_combat",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/graveyard_matters.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/graveyard_matters.md",
+      "source_slug": "graveyard_matters",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/hatebears.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/hatebears.md",
+      "source_slug": "hatebears",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/legends_matter_historic.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/legends_matter_historic.md",
+      "source_slug": "legends_matter_historic",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/lifedrain.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/lifedrain.md",
+      "source_slug": "lifedrain",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/lifegain.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/lifegain.md",
+      "source_slug": "lifegain",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/mill__02_mechanical_themes_micro_archetypes.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/mill__02_mechanical_themes_micro_archetypes.md",
+      "source_slug": "mill",
+      "requires_collision_review": true
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/plus_1_plus_1_counters.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/plus_1_plus_1_counters.md",
+      "source_slug": "plus_1_plus_1_counters",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/proliferate.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/proliferate.md",
+      "source_slug": "proliferate",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/reanimator.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/reanimator.md",
+      "source_slug": "reanimator",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/saboteur_combat_damage_triggers.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/saboteur_combat_damage_triggers.md",
+      "source_slug": "saboteur_combat_damage_triggers",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/storm.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/storm.md",
+      "source_slug": "storm",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/superfriends_planeswalkers.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/superfriends_planeswalkers.md",
+      "source_slug": "superfriends_planeswalkers",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/theft.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/theft.md",
+      "source_slug": "theft",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/treasure.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/treasure.md",
+      "source_slug": "treasure",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/untap_tap_matters.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/untap_tap_matters.md",
+      "source_slug": "untap_tap_matters",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/vehicles__02_mechanical_themes_micro_archetypes.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/vehicles__02_mechanical_themes_micro_archetypes.md",
+      "source_slug": "vehicles",
+      "requires_collision_review": true
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/x_spells_big_spells.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/x_spells_big_spells.md",
+      "source_slug": "x_spells_big_spells",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/aikido_judo.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/aikido_judo.md",
+      "source_slug": "aikido_judo",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/anti_combo_social_police.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/anti_combo_social_police.md",
+      "source_slug": "anti_combo_social_police",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/archenemy_villain_deck.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/archenemy_villain_deck.md",
+      "source_slug": "archenemy_villain_deck",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/attack_elsewhere_incentive.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/attack_elsewhere_incentive.md",
+      "source_slug": "attack_elsewhere_incentive",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/bounty_incentivized_combat.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/bounty_incentivized_combat.md",
+      "source_slug": "bounty_incentivized_combat",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/bribery_gift_based_politics.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/bribery_gift_based_politics.md",
+      "source_slug": "bribery_gift_based_politics",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/chaos.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/chaos.md",
+      "source_slug": "chaos",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/curse_politics.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/curse_politics.md",
+      "source_slug": "curse_politics",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/do_not_touch_me_control.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/do_not_touch_me_control.md",
+      "source_slug": "do_not_touch_me_control",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/fairness_symmetrical_rules.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/fairness_symmetrical_rules.md",
+      "source_slug": "fairness_symmetrical_rules",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/fog_turbo_fog_politics.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/fog_turbo_fog_politics.md",
+      "source_slug": "fog_turbo_fog_politics",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/forced_blocking_combat_manipulation.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/forced_blocking_combat_manipulation.md",
+      "source_slug": "forced_blocking_combat_manipulation",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/forced_combat_goad.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/forced_combat_goad.md",
+      "source_slug": "forced_combat_goad",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/goad_control.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/goad_control.md",
+      "source_slug": "goad_control",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/group_hug.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/group_hug.md",
+      "source_slug": "group_hug",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/group_slug.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/group_slug.md",
+      "source_slug": "group_slug",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/information_politics_hidden_threats.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/information_politics_hidden_threats.md",
+      "source_slug": "information_politics_hidden_threats",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/kingmaker_table_balancer.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/kingmaker_table_balancer.md",
+      "source_slug": "kingmaker_table_balancer",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/life_total_politics.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/life_total_politics.md",
+      "source_slug": "life_total_politics",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/monarch_politics.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/monarch_politics.md",
+      "source_slug": "monarch_politics",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/mutual_benefit_with_hidden_asymmetry.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/mutual_benefit_with_hidden_asymmetry.md",
+      "source_slug": "mutual_benefit_with_hidden_asymmetry",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/mutual_destruction_board_reset_politics.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/mutual_destruction_board_reset_politics.md",
+      "source_slug": "mutual_destruction_board_reset_politics",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/negotiated_removal.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/negotiated_removal.md",
+      "source_slug": "negotiated_removal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/pillowfort.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/pillowfort.md",
+      "source_slug": "pillowfort",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/political_combo_deterrence.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/political_combo_deterrence.md",
+      "source_slug": "political_combo_deterrence",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/politics_deal_making.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/politics_deal_making.md",
+      "source_slug": "politics_deal_making",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/punisher_choice_punisher.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/punisher_choice_punisher.md",
+      "source_slug": "punisher_choice_punisher",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/rattlesnake.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/rattlesnake.md",
+      "source_slug": "rattlesnake",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/resource_redistribution_donate_bad_gifts.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/resource_redistribution_donate_bad_gifts.md",
+      "source_slug": "resource_redistribution_donate_bad_gifts",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/revenge_retaliation.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/revenge_retaliation.md",
+      "source_slug": "revenge_retaliation",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/sandbag_reactive_control_politics.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/sandbag_reactive_control_politics.md",
+      "source_slug": "sandbag_reactive_control_politics",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/secret_combo_low_threat_combo.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/secret_combo_low_threat_combo.md",
+      "source_slug": "secret_combo_low_threat_combo",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/shared_combat_incentive.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/shared_combat_incentive.md",
+      "source_slug": "shared_combat_incentive",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/shared_enemy_table_alliance.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/shared_enemy_table_alliance.md",
+      "source_slug": "shared_enemy_table_alliance",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/social_contract_rule_zero_decks.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/social_contract_rule_zero_decks.md",
+      "source_slug": "social_contract_rule_zero_decks",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/social_pressure_reputation_decks.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/social_pressure_reputation_decks.md",
+      "source_slug": "social_pressure_reputation_decks",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/soft_lock_politics.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/soft_lock_politics.md",
+      "source_slug": "soft_lock_politics",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/table_police_rule_enforcer.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/table_police_rule_enforcer.md",
+      "source_slug": "table_police_rule_enforcer",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/tablewide_resource_acceleration.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/tablewide_resource_acceleration.md",
+      "source_slug": "tablewide_resource_acceleration",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/theft_clone_politics.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/theft_clone_politics.md",
+      "source_slug": "theft_clone_politics",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/threat_redistribution.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/threat_redistribution.md",
+      "source_slug": "threat_redistribution",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/03_strategic_board_politics/voting_councils_dilemma.md",
+      "target": "strategy_knowledge/layers/03_strategic_board_politics/voting_councils_dilemma.md",
+      "source_slug": "voting_councils_dilemma",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/ally_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/ally_typal.md",
+      "source_slug": "ally_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/angel_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/angel_typal.md",
+      "source_slug": "angel_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/assassin_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/assassin_typal.md",
+      "source_slug": "assassin_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/bat_rabbit_bloomburrow_style_small_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/bat_rabbit_bloomburrow_style_small_typal.md",
+      "source_slug": "bat_rabbit_bloomburrow_style_small_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/cat_dog_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/cat_dog_typal.md",
+      "source_slug": "cat_dog_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/cleric_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/cleric_typal.md",
+      "source_slug": "cleric_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/construct_golem_thopter_artifact_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/construct_golem_thopter_artifact_typal.md",
+      "source_slug": "construct_golem_thopter_artifact_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/demon_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/demon_typal.md",
+      "source_slug": "demon_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/dinosaur_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/dinosaur_typal.md",
+      "source_slug": "dinosaur_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/dragon_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/dragon_typal.md",
+      "source_slug": "dragon_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/druid_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/druid_typal.md",
+      "source_slug": "druid_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/eldrazi_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/eldrazi_typal.md",
+      "source_slug": "eldrazi_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/elemental_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/elemental_typal.md",
+      "source_slug": "elemental_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/elf_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/elf_typal.md",
+      "source_slug": "elf_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/faerie_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/faerie_typal.md",
+      "source_slug": "faerie_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/giant_minotaur_beast_berserker_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/giant_minotaur_beast_berserker_typal.md",
+      "source_slug": "giant_minotaur_beast_berserker_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/goblin_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/goblin_typal.md",
+      "source_slug": "goblin_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/halfling_hobbit_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/halfling_hobbit_typal.md",
+      "source_slug": "halfling_hobbit_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/human_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/human_typal.md",
+      "source_slug": "human_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/hydra_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/hydra_typal.md",
+      "source_slug": "hydra_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/insect_squirrel_saproling_fungus_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/insect_squirrel_saproling_fungus_typal.md",
+      "source_slug": "insect_squirrel_saproling_fungus_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/keyword_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/keyword_typal.md",
+      "source_slug": "keyword_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/knight_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/knight_typal.md",
+      "source_slug": "knight_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/merfolk_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/merfolk_typal.md",
+      "source_slug": "merfolk_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/myr_artifact_creature_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/myr_artifact_creature_typal.md",
+      "source_slug": "myr_artifact_creature_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/ninja_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/ninja_typal.md",
+      "source_slug": "ninja_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/orc_army_amass_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/orc_army_amass_typal.md",
+      "source_slug": "orc_army_amass_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/party_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/party_typal.md",
+      "source_slug": "party_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/phyrexian_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/phyrexian_typal.md",
+      "source_slug": "phyrexian_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/pirate_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/pirate_typal.md",
+      "source_slug": "pirate_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/rat_nazgul_multiple_copy_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/rat_nazgul_multiple_copy_typal.md",
+      "source_slug": "rat_nazgul_multiple_copy_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/rogue_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/rogue_typal.md",
+      "source_slug": "rogue_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids.md",
+      "source_slug": "samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/scarecrow_changeling_all_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/scarecrow_changeling_all_typal.md",
+      "source_slug": "scarecrow_changeling_all_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/sliver_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/sliver_typal.md",
+      "source_slug": "sliver_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/snake_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/snake_typal.md",
+      "source_slug": "snake_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/soldier_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/soldier_typal.md",
+      "source_slug": "soldier_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/spirit_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/spirit_typal.md",
+      "source_slug": "spirit_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/treefolk_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/treefolk_typal.md",
+      "source_slug": "treefolk_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/vampire_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/vampire_typal.md",
+      "source_slug": "vampire_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/warrior_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/warrior_typal.md",
+      "source_slug": "warrior_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/wizard_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/wizard_typal.md",
+      "source_slug": "wizard_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/wolf_werewolf_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/wolf_werewolf_typal.md",
+      "source_slug": "wolf_werewolf_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/04_typal_tribal_themes/zombie_typal.md",
+      "target": "strategy_knowledge/layers/04_typal_tribal_themes/zombie_typal.md",
+      "source_slug": "zombie_typal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/adventures.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/adventures.md",
+      "source_slug": "adventures",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/battles_sieges.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/battles_sieges.md",
+      "source_slug": "battles_sieges",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/blood.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/blood.md",
+      "source_slug": "blood",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/cascade.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/cascade.md",
+      "source_slug": "cascade",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/clues_investigate__05_1_niche_theme_rules.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/clues_investigate__05_1_niche_theme_rules.md",
+      "source_slug": "clues_investigate",
+      "requires_collision_review": true
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/coin_flipping.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/coin_flipping.md",
+      "source_slug": "coin_flipping",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/constellation.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/constellation.md",
+      "source_slug": "constellation",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/cycling.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/cycling.md",
+      "source_slug": "cycling",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/deserts.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/deserts.md",
+      "source_slug": "deserts",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/dice_rolling.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/dice_rolling.md",
+      "source_slug": "dice_rolling",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/discover.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/discover.md",
+      "source_slug": "discover",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/dungeons_venture.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/dungeons_venture.md",
+      "source_slug": "dungeons_venture",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/energy.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/energy.md",
+      "source_slug": "energy",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/exile_matters_cast_from_exile__05_1_niche_theme_rules.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/exile_matters_cast_from_exile__05_1_niche_theme_rules.md",
+      "source_slug": "exile_matters_cast_from_exile",
+      "requires_collision_review": true
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/face_down_morph_manifest_disguise_cloak.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/face_down_morph_manifest_disguise_cloak.md",
+      "source_slug": "face_down_morph_manifest_disguise_cloak",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/food__05_1_niche_theme_rules.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/food__05_1_niche_theme_rules.md",
+      "source_slug": "food",
+      "requires_collision_review": true
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/foretell.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/foretell.md",
+      "source_slug": "foretell",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/gates.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/gates.md",
+      "source_slug": "gates",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/goad.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/goad.md",
+      "source_slug": "goad",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/incubate.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/incubate.md",
+      "source_slug": "incubate",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/infect.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/infect.md",
+      "source_slug": "infect",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/initiative_undercity.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/initiative_undercity.md",
+      "source_slug": "initiative_undercity",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/land_animation.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/land_animation.md",
+      "source_slug": "land_animation",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/madness.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/madness.md",
+      "source_slug": "madness",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/map_tokens_explore.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/map_tokens_explore.md",
+      "source_slug": "map_tokens_explore",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/mill__05_1_niche_theme_rules.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/mill__05_1_niche_theme_rules.md",
+      "source_slug": "mill",
+      "requires_collision_review": true
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/monarch.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/monarch.md",
+      "source_slug": "monarch",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/mutate.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/mutate.md",
+      "source_slug": "mutate",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/powerstones.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/powerstones.md",
+      "source_slug": "powerstones",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/proliferate_poison.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/proliferate_poison.md",
+      "source_slug": "proliferate_poison",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/ring_temptation.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/ring_temptation.md",
+      "source_slug": "ring_temptation",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/role_tokens.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/role_tokens.md",
+      "source_slug": "role_tokens",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/sagas.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/sagas.md",
+      "source_slug": "sagas",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/shrines.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/shrines.md",
+      "source_slug": "shrines",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/snow.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/snow.md",
+      "source_slug": "snow",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/suspend.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/suspend.md",
+      "source_slug": "suspend",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/topdeck_matters.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/topdeck_matters.md",
+      "source_slug": "topdeck_matters",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/toxic_corrupted.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/toxic_corrupted.md",
+      "source_slug": "toxic_corrupted",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/utility_lands_matter.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/utility_lands_matter.md",
+      "source_slug": "utility_lands_matter",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_1_niche_theme_rules/vehicles__05_1_niche_theme_rules.md",
+      "target": "strategy_knowledge/layers/05_1_niche_theme_rules/vehicles__05_1_niche_theme_rules.md",
+      "source_slug": "vehicles",
+      "requires_collision_review": true
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/adamant.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/adamant.md",
+      "source_slug": "adamant",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/artifact_lock_null_rod_effects.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/artifact_lock_null_rod_effects.md",
+      "source_slug": "artifact_lock_null_rod_effects",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/attractions.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/attractions.md",
+      "source_slug": "attractions",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/battle_tribal.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/battle_tribal.md",
+      "source_slug": "battle_tribal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/bloodthirst.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/bloodthirst.md",
+      "source_slug": "bloodthirst",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/case_enchantments.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/case_enchantments.md",
+      "source_slug": "case_enchantments",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/caves.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/caves.md",
+      "source_slug": "caves",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/clash.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/clash.md",
+      "source_slug": "clash",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/classes_as_primary_theme.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/classes_as_primary_theme.md",
+      "source_slug": "classes_as_primary_theme",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/color_hate.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/color_hate.md",
+      "source_slug": "color_hate",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/colorless_restriction_wastes_matters.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/colorless_restriction_wastes_matters.md",
+      "source_slug": "colorless_restriction_wastes_matters",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/companion_influenced_builds.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/companion_influenced_builds.md",
+      "source_slug": "companion_influenced_builds",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/contraptions.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/contraptions.md",
+      "source_slug": "contraptions",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/curse_pillowfort.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/curse_pillowfort.md",
+      "source_slug": "curse_pillowfort",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/damage_reflection_stuffy_doll_effects.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/damage_reflection_stuffy_doll_effects.md",
+      "source_slug": "damage_reflection_stuffy_doll_effects",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/donate_bad_gifts.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/donate_bad_gifts.md",
+      "source_slug": "donate_bad_gifts",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/end_the_turn.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/end_the_turn.md",
+      "source_slug": "end_the_turn",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/etb_lock_torpor_orb_effects.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/etb_lock_torpor_orb_effects.md",
+      "source_slug": "etb_lock_torpor_orb_effects",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/extra_upkeeps.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/extra_upkeeps.md",
+      "source_slug": "extra_upkeeps",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/fateseal_opponent_topdeck_control.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/fateseal_opponent_topdeck_control.md",
+      "source_slug": "fateseal_opponent_topdeck_control",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/fog_tribal.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/fog_tribal.md",
+      "source_slug": "fog_tribal",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/graveyard_lock.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/graveyard_lock.md",
+      "source_slug": "graveyard_lock",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/hellbent.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/hellbent.md",
+      "source_slug": "hellbent",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/level_up.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/level_up.md",
+      "source_slug": "level_up",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/life_total_exchange.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/life_total_exchange.md",
+      "source_slug": "life_total_exchange",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/locus.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/locus.md",
+      "source_slug": "locus",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/mass_land_denial.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/mass_land_denial.md",
+      "source_slug": "mass_land_denial",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/meld_packages.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/meld_packages.md",
+      "source_slug": "meld_packages",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/no_abilities_matters.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/no_abilities_matters.md",
+      "source_slug": "no_abilities_matters",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/nonbasic_land_hate.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/nonbasic_land_hate.md",
+      "source_slug": "nonbasic_land_hate",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/odd_even_mana_value_restrictions.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/odd_even_mana_value_restrictions.md",
+      "source_slug": "odd_even_mana_value_restrictions",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/renown.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/renown.md",
+      "source_slug": "renown",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/rooms_as_primary_theme.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/rooms_as_primary_theme.md",
+      "source_slug": "rooms_as_primary_theme",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/rule_zero_silver_border_acorn_themes.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/rule_zero_silver_border_acorn_themes.md",
+      "source_slug": "rule_zero_silver_border_acorn_themes",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/splice_arcane.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/splice_arcane.md",
+      "source_slug": "splice_arcane",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/stickers.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/stickers.md",
+      "source_slug": "stickers",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/theme_flavor_first_decks.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/theme_flavor_first_decks.md",
+      "source_slug": "theme_flavor_first_decks",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/turn_phase_manipulation.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/turn_phase_manipulation.md",
+      "source_slug": "turn_phase_manipulation",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/tutor_hate.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/tutor_hate.md",
+      "source_slug": "tutor_hate",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_2_fringe_theme_rules/vanilla_matters.md",
+      "target": "strategy_knowledge/layers/05_2_fringe_theme_rules/vanilla_matters.md",
+      "source_slug": "vanilla_matters",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/artifact_treasure_combo_value.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/artifact_treasure_combo_value.md",
+      "source_slug": "artifact_treasure_combo_value",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/bracket_aware_stax_hatebear_packages.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/bracket_aware_stax_hatebear_packages.md",
+      "source_slug": "bracket_aware_stax_hatebear_packages",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/collection_aware_replacement_planning.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/collection_aware_replacement_planning.md",
+      "source_slug": "collection_aware_replacement_planning",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/combo_adjacent_value.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/combo_adjacent_value.md",
+      "source_slug": "combo_adjacent_value",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/commander_created_landfall.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/commander_created_landfall.md",
+      "source_slug": "commander_created_landfall",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/commander_defined_single_card_archetypes.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/commander_defined_single_card_archetypes.md",
+      "source_slug": "commander_defined_single_card_archetypes",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/commander_recast_death_loops.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/commander_recast_death_loops.md",
+      "source_slug": "commander_recast_death_loops",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/commander_tax_advantage.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/commander_tax_advantage.md",
+      "source_slug": "commander_tax_advantage",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/compact_combo_but_not_full_combo_deck.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/compact_combo_but_not_full_combo_deck.md",
+      "source_slug": "compact_combo_but_not_full_combo_deck",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/doctors_companion_time_counter_shells.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/doctors_companion_time_counter_shells.md",
+      "source_slug": "doctors_companion_time_counter_shells",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/dragons_approach_spell_density_dragon_tutor.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/dragons_approach_spell_density_dragon_tutor.md",
+      "source_slug": "dragons_approach_spell_density_dragon_tutor",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/expend.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/expend.md",
+      "source_slug": "expend",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/fast_mana_explosive_start_package.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/fast_mana_explosive_start_package.md",
+      "source_slug": "fast_mana_explosive_start_package",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/forage.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/forage.md",
+      "source_slug": "forage",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/free_interaction_protection_package.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/free_interaction_protection_package.md",
+      "source_slug": "free_interaction_protection_package",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/game_changer_bracket_pressure_packages.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/game_changer_bracket_pressure_packages.md",
+      "source_slug": "game_changer_bracket_pressure_packages",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/generically_good_but_wrong_shell.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/generically_good_but_wrong_shell.md",
+      "source_slug": "generically_good_but_wrong_shell",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/gift.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/gift.md",
+      "source_slug": "gift",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/hare_apparent_rabbit_swarm.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/hare_apparent_rabbit_swarm.md",
+      "source_slug": "hare_apparent_rabbit_swarm",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/high_power_value_but_not_turbo_combo.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/high_power_value_but_not_turbo_combo.md",
+      "source_slug": "high_power_value_but_not_turbo_combo",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/high_synergy_low_raw_power_cards.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/high_synergy_low_raw_power_cards.md",
+      "source_slug": "high_synergy_low_raw_power_cards",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/manifest_dread.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/manifest_dread.md",
+      "source_slug": "manifest_dread",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/multiple_copy_exception_decks.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/multiple_copy_exception_decks.md",
+      "source_slug": "multiple_copy_exception_decks",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/nazgul_wraith_ring_hybrid.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/nazgul_wraith_ring_hybrid.md",
+      "source_slug": "nazgul_wraith_ring_hybrid",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/offspring.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/offspring.md",
+      "source_slug": "offspring",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/partner_background_pair_defined_decks.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/partner_background_pair_defined_decks.md",
+      "source_slug": "partner_background_pair_defined_decks",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/persistent_petitioners_advisor_mill.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/persistent_petitioners_advisor_mill.md",
+      "source_slug": "persistent_petitioners_advisor_mill",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/plot_crime_outlaw_packages.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/plot_crime_outlaw_packages.md",
+      "source_slug": "plot_crime_outlaw_packages",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/refined_deck_review_candidates.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/refined_deck_review_candidates.md",
+      "source_slug": "refined_deck_review_candidates",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/rooms_eerie.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/rooms_eerie.md",
+      "source_slug": "rooms_eerie",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/shadowborn_apostle_demon_tutor_engine.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/shadowborn_apostle_demon_tutor_engine.md",
+      "source_slug": "shadowborn_apostle_demon_tutor_engine",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/slow_alternate_win_conditions.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/slow_alternate_win_conditions.md",
+      "source_slug": "slow_alternate_win_conditions",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/survival.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/survival.md",
+      "source_slug": "survival",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/token_combat_go_wide_go_tall_hybrid.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/token_combat_go_wide_go_tall_hybrid.md",
+      "source_slug": "token_combat_go_wide_go_tall_hybrid",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/treasure_tutor_chains.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/treasure_tutor_chains.md",
+      "source_slug": "treasure_tutor_chains",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/tutor_density_tutor_chain_pressure.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/tutor_density_tutor_chain_pressure.md",
+      "source_slug": "tutor_density_tutor_chain_pressure",
+      "requires_collision_review": false
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/05_3_emergent_theme_rules/typal_mechanic_hybrids.md",
+      "target": "strategy_knowledge/layers/05_3_emergent_theme_rules/typal_mechanic_hybrids.md",
+      "source_slug": "typal_mechanic_hybrids",
+      "requires_collision_review": false
+    }
+  ],
+  "skipped_existing_live_path_records": [],
+  "skipped_not_ready_records": [
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/aristocrats.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/aristocrats.md",
+      "reason": "promotion_ready_false",
+      "review_flags": [
+        "target_live_path_exists_do_not_overwrite",
+        "missing_or_incomplete_profile_frontmatter"
+      ]
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/landfall_lands_matter.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/landfall_lands_matter.md",
+      "reason": "promotion_ready_false",
+      "review_flags": [
+        "target_live_path_exists_do_not_overwrite",
+        "missing_or_incomplete_profile_frontmatter"
+      ]
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/spellslinger.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/spellslinger.md",
+      "reason": "promotion_ready_false",
+      "review_flags": [
+        "target_live_path_exists_do_not_overwrite",
+        "missing_or_incomplete_profile_frontmatter"
+      ]
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/tokens.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/tokens.md",
+      "reason": "promotion_ready_false",
+      "review_flags": [
+        "target_live_path_exists_do_not_overwrite",
+        "missing_or_incomplete_profile_frontmatter"
+      ]
+    },
+    {
+      "source": "strategy_knowledge/import_staging/v1.4.30/layers/02_mechanical_themes/voltron.md",
+      "target": "strategy_knowledge/layers/02_mechanical_themes/voltron.md",
+      "reason": "promotion_ready_false",
+      "review_flags": [
+        "target_live_path_exists_do_not_overwrite",
+        "missing_or_incomplete_profile_frontmatter"
+      ]
+    }
+  ],
+  "copy_errors": [],
+  "live_profile_records_after": [
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/aristocrats.md",
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "size_bytes": 75701
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/landfall_lands_matter.md",
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "size_bytes": 76875
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/spellslinger.md",
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "size_bytes": 74119
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/tokens.md",
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "size_bytes": 74439
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/voltron.md",
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "size_bytes": 75777
+    }
+  ],
+  "promotion_policy": {
+    "no_overwrite": true,
+    "existing_live_profiles_preserved": true,
+    "existing_five_sample_profiles_preserved": true,
+    "duplicate_slug_files_preserved_by_layer_aware_filename": true,
+    "next_safe_step": "v1.4.33 \u2014 Strategy Knowledge Live Profile Count / Loader Report Correction"
+  },
+  "gate_checks": {
+    "promotion_plan_exists": true,
+    "live_count_before_was_5": true,
+    "copied_244_promotion_ready_profiles": true,
+    "skipped_5_existing_live_conflicts": false,
+    "no_not_ready_records_skipped": false,
+    "no_copy_errors": true,
+    "live_count_after_is_249": false,
+    "live_count_after_matches_expected": false,
+    "no_overwrite_policy_enforced": true,
+    "indexing_not_performed": true,
+    "scoring_wiring_not_performed": true,
+    "main_py_not_changed": true
+  }
+}

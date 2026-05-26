@@ -1,0 +1,111 @@
+{
+  "lock_version": "v1.4.40",
+  "recovery_version": "v1.4.40.1",
+  "lock_name": "Expanded Strategy Scoring Lock Candidate",
+  "lock_candidate_status": "LOCK_CANDIDATE_PASS",
+  "ready_for_stable_lock": true,
+  "expanded_strategy_scoring_locked": true,
+  "runtime_behavior_changed": false,
+  "active_scoring_profiles": 249,
+  "indexed_profiles": 249,
+  "legacy_preview_status": "deprecated_fallback_only",
+  "legacy_preview_profile_count": 5,
+  "report_batch_integration_proven": true,
+  "scoring_regression_new_matches": 47,
+  "report_generator_integration_active": true,
+  "batch_output_polished": true,
+  "main_py_changed": false,
+  "legacy_fallback_preserved": true,
+  "advisory_tool_summary": {
+    "tools_checked": 6,
+    "tools_exited_cleanly": 3,
+    "tools_with_nonzero_exit": [
+      "tools/prove_strategy_knowledge_report_batch_integration.py",
+      "tools/integrate_active_scoring_into_report_generator.py",
+      "tools/polish_batch_output_strategy_status.py"
+    ],
+    "all_lock_tools_exited_cleanly_advisory": false,
+    "policy": "advisory_only_in_v1.4.40.1; lock status is based on artifact and functional gates"
+  },
+  "tool_results": [
+    {
+      "tool": "tools/build_strategy_knowledge_index_manifest.py",
+      "exists": true,
+      "returncode": 0,
+      "stdout_tail": "v1.4.34 - Strategy Knowledge Index Build / Searchable Profile Manifest\n==============================================================================\nIndexed profiles: 249\nUnique strategy IDs: 249\nDuplicate strategy IDs: 0\nIndex written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\index\\v1.4.34\\strategy_profile_index_v1.4.34.json\nLatest index written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\index\\strategy_profile_index.latest.json\nSummary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\index\\v1.4.34\\STRATEGY_PROFILE_INDEX_SUMMARY_v1.4.34.md\nStatus: PASS\nNext safe step: v1.4.35 \u2014 Strategy Knowledge Active Scoring Expansion\n",
+      "stderr_tail": "",
+      "passed": true
+    },
+    {
+      "tool": "tools/strategy_knowledge_active_scoring_expansion.py",
+      "exists": true,
+      "returncode": 0,
+      "stdout_tail": "v1.4.35 - Strategy Knowledge Active Scoring Expansion\n==============================================================================\nActive scoring profiles: 249\nScoring source: strategy_knowledge/index/strategy_profile_index.latest.json\nLegacy preview status: deprecated_fallback_only\nTop matches available: True\nArtifact written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\active_scoring\\v1.4.35\\strategy_knowledge_active_scoring_expansion_v1.4.35.json\nSummary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\active_scoring\\v1.4.35\\STRATEGY_KNOWLEDGE_ACTIVE_SCORING_EXPANSION_v1.4.35.md\nStatus: PASS\nNext safe step: v1.4.36 \u2014 Report / Batch Integration Proof\n",
+      "stderr_tail": "",
+      "passed": true
+    },
+    {
+      "tool": "tools/prove_strategy_knowledge_report_batch_integration.py",
+      "exists": true,
+      "returncode": 1,
+      "stdout_tail": "v1.4.36 - Report / Batch Integration Proof\n==============================================================================\nActive scoring profiles: 249\nLegacy preview status: deprecated_fallback_only\nSample deck count: 3\nReport/batch integration proven: True\nArtifact written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\report_batch_integration_proof\\v1.4.36\\strategy_knowledge_report_batch_integration_proof_v1.4.36.json\nSummary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\report_batch_integration_proof\\v1.4.36\\STRATEGY_KNOWLEDGE_REPORT_BATCH_INTEGRATION_PROOF_v1.4.36.md\nStatus: FAIL\n",
+      "stderr_tail": "",
+      "passed": false
+    },
+    {
+      "tool": "tools/compare_strategy_scoring_old_vs_new.py",
+      "exists": true,
+      "returncode": 0,
+      "stdout_tail": "v1.4.37 - Strategy Knowledge Scoring Regression / Old-vs-New Comparison\n==============================================================================\nActive scoring profiles: 249\nLegacy preview profile count: 5\nLegacy preview status: deprecated_fallback_only\nSample deck count: 5\nTotal new matches not possible in legacy top 12: 47\nArtifact written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\scoring_regression\\v1.4.37\\strategy_knowledge_scoring_regression_old_vs_new_v1.4.37.json\nSummary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\scoring_regression\\v1.4.37\\STRATEGY_KNOWLEDGE_SCORING_REGRESSION_OLD_VS_NEW_v1.4.37.md\nStatus: PASS\nNext safe step: v1.4.38 \u2014 v1.4 Expanded Strategy Scoring Lock Candidate\n",
+      "stderr_tail": "",
+      "passed": true
+    },
+    {
+      "tool": "tools/integrate_active_scoring_into_report_generator.py",
+      "exists": true,
+      "returncode": 1,
+      "stdout_tail": "v1.4.38.2 - Active Scoring Report Generator Clean Module Replacement Hotfix\n==============================================================================\nActive scoring profiles: 249\nLegacy preview status: deprecated_fallback_only\nTop matches available: True\nReport smoke surfaces 249: True\nArtifact written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\report_generator_integration\\v1.4.38\\active_scoring_report_generator_integration_v1.4.38.json\nSummary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\report_generator_integration\\v1.4.38\\ACTIVE_SCORING_REPORT_GENERATOR_INTEGRATION_v1.4.38.md\nStatus: FAIL\n",
+      "stderr_tail": "",
+      "passed": false
+    },
+    {
+      "tool": "tools/polish_batch_output_strategy_status.py",
+      "exists": true,
+      "returncode": 1,
+      "stdout_tail": "v1.4.39 - Batch Output Cleanup / Player-Facing Strategy Status Polish\n==============================================================================\nActive scoring profiles: 249\nLegacy preview status: deprecated_fallback_only\nPatched files: 0\nPlayer status has 249: True\nBatch status has 249: True\nArtifact written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\batch_output_polish\\v1.4.39\\batch_output_cleanup_player_facing_strategy_status_polish_v1.4.39.json\nSummary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\batch_output_polish\\v1.4.39\\BATCH_OUTPUT_CLEANUP_PLAYER_FACING_STRATEGY_STATUS_POLISH_v1.4.39.md\nStatus: FAIL\n",
+      "stderr_tail": "",
+      "passed": false
+    }
+  ],
+  "gate_checks": {
+    "live_index_exists": true,
+    "indexed_profile_count_is_249": true,
+    "unique_strategy_id_count_is_249": true,
+    "active_scoring_artifact_exists": true,
+    "active_scoring_profiles_is_249": true,
+    "active_scoring_legacy_preview_is_fallback_only": true,
+    "direct_scoring_profiles_is_249": true,
+    "direct_scoring_top_matches_available": true,
+    "report_batch_proof_exists": true,
+    "report_batch_proof_passed": true,
+    "report_batch_proof_active_249": true,
+    "scoring_regression_exists": true,
+    "scoring_regression_performed": true,
+    "scoring_regression_found_new_matches": true,
+    "report_generator_integration_exists": true,
+    "report_generator_integration_active_249": true,
+    "report_generator_integration_smoke_surfaces_249": true,
+    "batch_output_polish_exists": true,
+    "batch_output_polish_active_249": true,
+    "batch_output_polish_player_status_249": true,
+    "batch_output_polish_batch_status_249": true,
+    "strategy_sections_has_v1_4_39_helper": true,
+    "strategy_sections_lacks_raw_old_five_profile_line": true,
+    "strategy_live_bridge_has_v1_4_39_helper": true,
+    "main_py_exists": true,
+    "main_py_compiles": true,
+    "main_py_not_changed_by_lock_candidate": true,
+    "legacy_fallback_preserved": true
+  },
+  "next_safe_step": "v1.4.41 \u2014 v1.4 Expanded Strategy Scoring Stable Lock / Handoff Package"
+}

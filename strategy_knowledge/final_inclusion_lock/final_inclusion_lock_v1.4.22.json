@@ -1,0 +1,485 @@
+{
+  "final_inclusion_lock_version": "v1.4.22",
+  "integration_mode": "final_inclusion_lock_integration",
+  "final_inclusion_lock_enabled": true,
+  "final_inclusion_lock_mode": "opt_in_live_bridge_artifact_lock",
+  "runtime_behavior_changed": true,
+  "main_py_changed": false,
+  "requires_live_bridge_opt_in": true,
+  "opt_in_env_var": "TDT_STRATEGY_KNOWLEDGE_LIVE_BRIDGE",
+  "legacy_pipeline_still_available": true,
+  "active_runtime_replacement": false,
+  "final_deck_export_enabled": false,
+  "finished_mana_base_generation_enabled": false,
+  "land_deck_write_enabled": false,
+  "old_strategy_system_removed": false,
+  "gate_checks": {
+    "live_bridge_available": true,
+    "live_bridge_contract_ready": true,
+    "full_draft_preview_available": true,
+    "full_draft_preview_only": true
+  },
+  "checked_strategy_count": 5,
+  "lock_candidates": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "final_inclusion_lock_mode": "opt_in_live_bridge_lock_artifact",
+      "total_preview_slots": 100,
+      "commander_slots": 1,
+      "nonland_main_deck_slots": 62,
+      "land_slots": 37,
+      "locked_candidate_count": 10,
+      "unfilled_nonland_role_slots": 52,
+      "locked_card_candidates": [
+        {
+          "card_name": "Blood Artist",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Viscera Seer",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Impact Tremors",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Young Pyromancer",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Swiftfoot Boots",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Solve the Equation",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Secure the Wastes",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "All That Glitters",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Evolving Wilds",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Cultivate",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        }
+      ],
+      "land_slot_reservation": {
+        "target_land_slots": 37,
+        "preview_basic_land_floor": 18,
+        "preview_nonbasic_review_slots": 19,
+        "basic_lands_assumed_available": true,
+        "nonbasic_lands_collection_first": true,
+        "lock_status": "land_slots_reserved_not_written"
+      },
+      "final_inclusion_boundaries": {
+        "final_inclusion_lock_enabled": true,
+        "final_inclusion_lock_mode": "artifact_lock_only",
+        "final_deck_export_enabled": false,
+        "finished_mana_base_generation_enabled": false,
+        "land_deck_write_enabled": false,
+        "old_strategy_system_removed": false
+      }
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "final_inclusion_lock_mode": "opt_in_live_bridge_lock_artifact",
+      "total_preview_slots": 100,
+      "commander_slots": 1,
+      "nonland_main_deck_slots": 60,
+      "land_slots": 39,
+      "locked_candidate_count": 10,
+      "unfilled_nonland_role_slots": 50,
+      "locked_card_candidates": [
+        {
+          "card_name": "Evolving Wilds",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Cultivate",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Young Pyromancer",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Impact Tremors",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Solve the Equation",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Blood Artist",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "All That Glitters",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Secure the Wastes",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Viscera Seer",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Swiftfoot Boots",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        }
+      ],
+      "land_slot_reservation": {
+        "target_land_slots": 39,
+        "preview_basic_land_floor": 19,
+        "preview_nonbasic_review_slots": 20,
+        "basic_lands_assumed_available": true,
+        "nonbasic_lands_collection_first": true,
+        "lock_status": "land_slots_reserved_not_written"
+      },
+      "final_inclusion_boundaries": {
+        "final_inclusion_lock_enabled": true,
+        "final_inclusion_lock_mode": "artifact_lock_only",
+        "final_deck_export_enabled": false,
+        "finished_mana_base_generation_enabled": false,
+        "land_deck_write_enabled": false,
+        "old_strategy_system_removed": false
+      }
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "final_inclusion_lock_mode": "opt_in_live_bridge_lock_artifact",
+      "total_preview_slots": 100,
+      "commander_slots": 1,
+      "nonland_main_deck_slots": 63,
+      "land_slots": 36,
+      "locked_candidate_count": 10,
+      "unfilled_nonland_role_slots": 53,
+      "locked_card_candidates": [
+        {
+          "card_name": "Young Pyromancer",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Solve the Equation",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Swiftfoot Boots",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Impact Tremors",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Blood Artist",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "All That Glitters",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Viscera Seer",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Secure the Wastes",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Evolving Wilds",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Cultivate",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        }
+      ],
+      "land_slot_reservation": {
+        "target_land_slots": 36,
+        "preview_basic_land_floor": 18,
+        "preview_nonbasic_review_slots": 18,
+        "basic_lands_assumed_available": true,
+        "nonbasic_lands_collection_first": true,
+        "lock_status": "land_slots_reserved_not_written"
+      },
+      "final_inclusion_boundaries": {
+        "final_inclusion_lock_enabled": true,
+        "final_inclusion_lock_mode": "artifact_lock_only",
+        "final_deck_export_enabled": false,
+        "finished_mana_base_generation_enabled": false,
+        "land_deck_write_enabled": false,
+        "old_strategy_system_removed": false
+      }
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "final_inclusion_lock_mode": "opt_in_live_bridge_lock_artifact",
+      "total_preview_slots": 100,
+      "commander_slots": 1,
+      "nonland_main_deck_slots": 62,
+      "land_slots": 37,
+      "locked_candidate_count": 10,
+      "unfilled_nonland_role_slots": 52,
+      "locked_card_candidates": [
+        {
+          "card_name": "Impact Tremors",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Secure the Wastes",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Young Pyromancer",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Swiftfoot Boots",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Solve the Equation",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Blood Artist",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "All That Glitters",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Viscera Seer",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Evolving Wilds",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Cultivate",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        }
+      ],
+      "land_slot_reservation": {
+        "target_land_slots": 37,
+        "preview_basic_land_floor": 18,
+        "preview_nonbasic_review_slots": 19,
+        "basic_lands_assumed_available": true,
+        "nonbasic_lands_collection_first": true,
+        "lock_status": "land_slots_reserved_not_written"
+      },
+      "final_inclusion_boundaries": {
+        "final_inclusion_lock_enabled": true,
+        "final_inclusion_lock_mode": "artifact_lock_only",
+        "final_deck_export_enabled": false,
+        "finished_mana_base_generation_enabled": false,
+        "land_deck_write_enabled": false,
+        "old_strategy_system_removed": false
+      }
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "final_inclusion_lock_mode": "opt_in_live_bridge_lock_artifact",
+      "total_preview_slots": 100,
+      "commander_slots": 1,
+      "nonland_main_deck_slots": 63,
+      "land_slots": 36,
+      "locked_candidate_count": 10,
+      "unfilled_nonland_role_slots": 53,
+      "locked_card_candidates": [
+        {
+          "card_name": "All That Glitters",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Swiftfoot Boots",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Solve the Equation",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Young Pyromancer",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Impact Tremors",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Blood Artist",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Viscera Seer",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Secure the Wastes",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Evolving Wilds",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        },
+        {
+          "card_name": "Cultivate",
+          "lock_status": "locked_for_preview_final_inclusion",
+          "lock_reason": "Included from Strategy Knowledge candidate preview for this strategy.",
+          "final_export_status": "not_exported_yet"
+        }
+      ],
+      "land_slot_reservation": {
+        "target_land_slots": 36,
+        "preview_basic_land_floor": 18,
+        "preview_nonbasic_review_slots": 18,
+        "basic_lands_assumed_available": true,
+        "nonbasic_lands_collection_first": true,
+        "lock_status": "land_slots_reserved_not_written"
+      },
+      "final_inclusion_boundaries": {
+        "final_inclusion_lock_enabled": true,
+        "final_inclusion_lock_mode": "artifact_lock_only",
+        "final_deck_export_enabled": false,
+        "finished_mana_base_generation_enabled": false,
+        "land_deck_write_enabled": false,
+        "old_strategy_system_removed": false
+      }
+    }
+  ],
+  "integration_contract": {
+    "may_lock_final_inclusions": true,
+    "may_export_final_deck": false,
+    "may_generate_finished_mana_base": false,
+    "may_write_lands_into_deck": false,
+    "may_remove_old_strategy_system": false,
+    "must_require_explicit_opt_in": true,
+    "must_write_lock_as_artifact_before_final_export": true,
+    "next_integration_step": "v1.4.23 \u2014 Finished Mana Base Generation Integration"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.22 enables opt-in final-inclusion lock artifacts only. It does not export a final deck, generate a finished mana base, write lands into a deck, or remove the old strategy system.",
+    "next_safe_step": "v1.4.23 \u2014 Finished Mana Base Generation Integration"
+  }
+}

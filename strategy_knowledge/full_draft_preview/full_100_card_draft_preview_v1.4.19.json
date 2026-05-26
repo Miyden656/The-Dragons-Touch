@@ -1,0 +1,360 @@
+{
+  "full_100_card_draft_preview_version": "v1.4.19",
+  "integration_mode": "full_100_card_draft_preview",
+  "full_100_card_draft_preview_enabled": true,
+  "full_100_card_draft_generation_enabled": true,
+  "full_100_card_draft_generation_mode": "preview_only_no_final_deck_export",
+  "deck_generation_enabled": true,
+  "deck_generation_mode": "preview_draft_only",
+  "runtime_behavior_changed": true,
+  "report_output_changed": true,
+  "prompt_output_changed": true,
+  "report_viewer_changed": true,
+  "main_py_changed": false,
+  "legacy_fallback_required": true,
+  "active_runtime_replacement": false,
+  "exact_card_selection_enabled": true,
+  "exact_card_selection_mode": "preview_candidates_only",
+  "role_count_generation_enabled": true,
+  "role_count_generation_mode": "target_bands_only",
+  "shell_generation_enabled": true,
+  "shell_generation_mode": "rough_strategy_shell_planning_only",
+  "mana_base_planning_enabled": true,
+  "mana_base_generation_enabled": false,
+  "land_insertion_enabled": true,
+  "land_insertion_mode": "preview_only_no_deck_write",
+  "final_land_list_generation_enabled": false,
+  "final_deck_inclusion_enabled": false,
+  "final_deck_export_enabled": false,
+  "basic_lands_assumed_available": true,
+  "nonbasic_lands_collection_first": true,
+  "gate_checks": {
+    "runtime_contract_available": true,
+    "strategy_knowledge_selected_with_fallback": true,
+    "scoring_preview_available": true,
+    "role_mapping_available": true,
+    "cut_protect_available": true,
+    "report_handoff_available": true,
+    "shell_planning_available": true,
+    "candidate_preview_available": true,
+    "role_count_generation_available": true,
+    "mana_base_planning_available": true,
+    "land_insertion_preview_available": true
+  },
+  "checked_strategy_count": 5,
+  "draft_previews": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "draft_preview_mode": "full_100_card_preview_only",
+      "total_preview_slots": 100,
+      "commander_slots": 1,
+      "main_deck_slots": 99,
+      "nonland_main_deck_slots": 62,
+      "land_slots": 37,
+      "candidate_slots_previewed": 10,
+      "unfilled_nonland_role_slots_preview": 52,
+      "candidate_cards_review_only": [
+        "Blood Artist",
+        "Viscera Seer",
+        "Impact Tremors",
+        "Young Pyromancer",
+        "Swiftfoot Boots",
+        "Solve the Equation",
+        "Secure the Wastes",
+        "All That Glitters",
+        "Evolving Wilds",
+        "Cultivate"
+      ],
+      "target_role_summary": {
+        "ramp_mana_development": 10,
+        "card_draw_card_advantage": 10,
+        "targeted_removal": 7,
+        "board_wipes": 3,
+        "strategy_enablers": 13,
+        "strategy_payoffs": 10,
+        "recursion": 7,
+        "finishers_win_conditions": 4,
+        "protection": 4
+      },
+      "land_slot_summary": {
+        "target_land_slots": 37,
+        "preview_basic_land_floor": 18,
+        "preview_nonbasic_review_slots": 19,
+        "basic_lands_assumed_available": true,
+        "nonbasic_lands_collection_first": true
+      },
+      "draft_guidance": [
+        "This is a full 100-card draft preview structure, not a final deck list.",
+        "Candidate cards remain review-only until final inclusion is enabled.",
+        "Land slots are previewed but not written into a final deck.",
+        "Basic lands are assumed available.",
+        "Nonbasic lands remain collection-first unless outside upgrades are allowed.",
+        "Use role targets as planning bands, not rigid final counts."
+      ],
+      "full_draft_boundaries": {
+        "full_100_card_draft_preview_enabled": true,
+        "full_100_card_draft_generation_enabled": true,
+        "full_100_card_draft_generation_mode": "preview_only_no_final_deck_export",
+        "final_deck_export_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "finished_mana_base_generation_enabled": false,
+        "land_insertion_deck_write_enabled": false,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "draft_preview_mode": "full_100_card_preview_only",
+      "total_preview_slots": 100,
+      "commander_slots": 1,
+      "main_deck_slots": 99,
+      "nonland_main_deck_slots": 60,
+      "land_slots": 39,
+      "candidate_slots_previewed": 10,
+      "unfilled_nonland_role_slots_preview": 50,
+      "candidate_cards_review_only": [
+        "Evolving Wilds",
+        "Cultivate",
+        "Young Pyromancer",
+        "Impact Tremors",
+        "Solve the Equation",
+        "Blood Artist",
+        "All That Glitters",
+        "Secure the Wastes",
+        "Viscera Seer",
+        "Swiftfoot Boots"
+      ],
+      "target_role_summary": {
+        "ramp_mana_development": 13,
+        "card_draw_card_advantage": 9,
+        "targeted_removal": 6,
+        "board_wipes": 2,
+        "strategy_enablers": 11,
+        "strategy_payoffs": 10,
+        "mana_base_support": 11,
+        "finishers_win_conditions": 4
+      },
+      "land_slot_summary": {
+        "target_land_slots": 39,
+        "preview_basic_land_floor": 19,
+        "preview_nonbasic_review_slots": 20,
+        "basic_lands_assumed_available": true,
+        "nonbasic_lands_collection_first": true
+      },
+      "draft_guidance": [
+        "This is a full 100-card draft preview structure, not a final deck list.",
+        "Candidate cards remain review-only until final inclusion is enabled.",
+        "Land slots are previewed but not written into a final deck.",
+        "Basic lands are assumed available.",
+        "Nonbasic lands remain collection-first unless outside upgrades are allowed.",
+        "Use role targets as planning bands, not rigid final counts."
+      ],
+      "full_draft_boundaries": {
+        "full_100_card_draft_preview_enabled": true,
+        "full_100_card_draft_generation_enabled": true,
+        "full_100_card_draft_generation_mode": "preview_only_no_final_deck_export",
+        "final_deck_export_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "finished_mana_base_generation_enabled": false,
+        "land_insertion_deck_write_enabled": false,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "draft_preview_mode": "full_100_card_preview_only",
+      "total_preview_slots": 100,
+      "commander_slots": 1,
+      "main_deck_slots": 99,
+      "nonland_main_deck_slots": 63,
+      "land_slots": 36,
+      "candidate_slots_previewed": 10,
+      "unfilled_nonland_role_slots_preview": 53,
+      "candidate_cards_review_only": [
+        "Young Pyromancer",
+        "Solve the Equation",
+        "Swiftfoot Boots",
+        "Impact Tremors",
+        "Blood Artist",
+        "All That Glitters",
+        "Viscera Seer",
+        "Secure the Wastes",
+        "Evolving Wilds",
+        "Cultivate"
+      ],
+      "target_role_summary": {
+        "ramp_mana_development": 9,
+        "card_draw_card_advantage": 13,
+        "targeted_removal": 7,
+        "board_wipes": 2,
+        "strategy_enablers": 13,
+        "strategy_payoffs": 10,
+        "finishers_win_conditions": 4,
+        "protection": 4
+      },
+      "land_slot_summary": {
+        "target_land_slots": 36,
+        "preview_basic_land_floor": 18,
+        "preview_nonbasic_review_slots": 18,
+        "basic_lands_assumed_available": true,
+        "nonbasic_lands_collection_first": true
+      },
+      "draft_guidance": [
+        "This is a full 100-card draft preview structure, not a final deck list.",
+        "Candidate cards remain review-only until final inclusion is enabled.",
+        "Land slots are previewed but not written into a final deck.",
+        "Basic lands are assumed available.",
+        "Nonbasic lands remain collection-first unless outside upgrades are allowed.",
+        "Use role targets as planning bands, not rigid final counts."
+      ],
+      "full_draft_boundaries": {
+        "full_100_card_draft_preview_enabled": true,
+        "full_100_card_draft_generation_enabled": true,
+        "full_100_card_draft_generation_mode": "preview_only_no_final_deck_export",
+        "final_deck_export_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "finished_mana_base_generation_enabled": false,
+        "land_insertion_deck_write_enabled": false,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "draft_preview_mode": "full_100_card_preview_only",
+      "total_preview_slots": 100,
+      "commander_slots": 1,
+      "main_deck_slots": 99,
+      "nonland_main_deck_slots": 62,
+      "land_slots": 37,
+      "candidate_slots_previewed": 10,
+      "unfilled_nonland_role_slots_preview": 52,
+      "candidate_cards_review_only": [
+        "Impact Tremors",
+        "Secure the Wastes",
+        "Young Pyromancer",
+        "Swiftfoot Boots",
+        "Solve the Equation",
+        "Blood Artist",
+        "All That Glitters",
+        "Viscera Seer",
+        "Evolving Wilds",
+        "Cultivate"
+      ],
+      "target_role_summary": {
+        "ramp_mana_development": 10,
+        "card_draw_card_advantage": 10,
+        "targeted_removal": 7,
+        "board_wipes": 3,
+        "strategy_enablers": 13,
+        "strategy_payoffs": 10,
+        "finishers_win_conditions": 5,
+        "protection": 5
+      },
+      "land_slot_summary": {
+        "target_land_slots": 37,
+        "preview_basic_land_floor": 18,
+        "preview_nonbasic_review_slots": 19,
+        "basic_lands_assumed_available": true,
+        "nonbasic_lands_collection_first": true
+      },
+      "draft_guidance": [
+        "This is a full 100-card draft preview structure, not a final deck list.",
+        "Candidate cards remain review-only until final inclusion is enabled.",
+        "Land slots are previewed but not written into a final deck.",
+        "Basic lands are assumed available.",
+        "Nonbasic lands remain collection-first unless outside upgrades are allowed.",
+        "Use role targets as planning bands, not rigid final counts."
+      ],
+      "full_draft_boundaries": {
+        "full_100_card_draft_preview_enabled": true,
+        "full_100_card_draft_generation_enabled": true,
+        "full_100_card_draft_generation_mode": "preview_only_no_final_deck_export",
+        "final_deck_export_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "finished_mana_base_generation_enabled": false,
+        "land_insertion_deck_write_enabled": false,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "draft_preview_mode": "full_100_card_preview_only",
+      "total_preview_slots": 100,
+      "commander_slots": 1,
+      "main_deck_slots": 99,
+      "nonland_main_deck_slots": 63,
+      "land_slots": 36,
+      "candidate_slots_previewed": 10,
+      "unfilled_nonland_role_slots_preview": 53,
+      "candidate_cards_review_only": [
+        "All That Glitters",
+        "Swiftfoot Boots",
+        "Solve the Equation",
+        "Young Pyromancer",
+        "Impact Tremors",
+        "Blood Artist",
+        "Viscera Seer",
+        "Secure the Wastes",
+        "Evolving Wilds",
+        "Cultivate"
+      ],
+      "target_role_summary": {
+        "ramp_mana_development": 9,
+        "card_draw_card_advantage": 9,
+        "targeted_removal": 7,
+        "board_wipes": 2,
+        "strategy_enablers": 13,
+        "strategy_payoffs": 7,
+        "finishers_win_conditions": 3,
+        "protection": 11
+      },
+      "land_slot_summary": {
+        "target_land_slots": 36,
+        "preview_basic_land_floor": 18,
+        "preview_nonbasic_review_slots": 18,
+        "basic_lands_assumed_available": true,
+        "nonbasic_lands_collection_first": true
+      },
+      "draft_guidance": [
+        "This is a full 100-card draft preview structure, not a final deck list.",
+        "Candidate cards remain review-only until final inclusion is enabled.",
+        "Land slots are previewed but not written into a final deck.",
+        "Basic lands are assumed available.",
+        "Nonbasic lands remain collection-first unless outside upgrades are allowed.",
+        "Use role targets as planning bands, not rigid final counts."
+      ],
+      "full_draft_boundaries": {
+        "full_100_card_draft_preview_enabled": true,
+        "full_100_card_draft_generation_enabled": true,
+        "full_100_card_draft_generation_mode": "preview_only_no_final_deck_export",
+        "final_deck_export_enabled": false,
+        "final_deck_inclusion_enabled": false,
+        "finished_mana_base_generation_enabled": false,
+        "land_insertion_deck_write_enabled": false,
+        "main_py_changed": false
+      }
+    }
+  ],
+  "integration_contract": {
+    "may_generate_full_100_card_draft_preview": true,
+    "may_export_final_deck": false,
+    "may_lock_final_deck_inclusions": false,
+    "may_generate_finished_mana_base": false,
+    "may_write_lands_into_deck": false,
+    "must_label_output_as_preview_only": true,
+    "must_keep_collection_first": true,
+    "must_assume_basic_lands_available": true,
+    "must_keep_nonbasic_lands_collection_first_unless_upgrades_allowed": true,
+    "next_integration_step": "v1.4.20 \u2014 Final Draft Review / Lock Candidate"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.19 creates a full 100-slot draft preview only. It does not export a final deck or lock card inclusions.",
+    "next_safe_step": "v1.4.20 \u2014 Final Draft Review / Lock Candidate"
+  }
+}

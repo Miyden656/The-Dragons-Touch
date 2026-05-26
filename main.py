@@ -53,11 +53,12 @@ from reports.batch_aggregate import BatchAggregateWriter
 from reports.debug_sections import DebugSectionPaths, write_debug_sections
 from reports.prompt_builder import write_user_guided_prompt
 from reports.report_builder import write_normal_report
+from reports.strategy_bridge.strategy_live_bridge import write_strategy_knowledge_live_bridge_artifacts  # v1.4.21 Strategy Knowledge opt-in live bridge
 from combo_awareness.main_hook import write_optional_combo_awareness_artifacts
-from ui.services.app_paths import ensure_runtime_folders, get_runtime_paths, runtime_data_status
+from app_io.project_paths import ensure_runtime_folders, get_runtime_paths, runtime_data_status
 
 
-VERSION_LABEL = "v0.8.10.1-alpha — Combo Awareness Reporting String Hotfix"
+VERSION_LABEL = "The Dragon's Touch v1.4 Expanded Strategy Scoring — Report schema v1.4"
 
 # v0.11.3-dev: central runtime paths for source mode and PyInstaller EXE mode.
 _RUNTIME_PATHS = ensure_runtime_folders()
@@ -177,7 +178,19 @@ def process_single_deck(
 
     if not scryfall_lookup:
         written_paths.append(write_parser_only_checkpoint(folders.normal, parsed_deck))
+        # v1.4.21 Strategy Knowledge Main Pipeline Opt-In Live Bridge.
+        # This is opt-in via TDT_STRATEGY_KNOWLEDGE_LIVE_BRIDGE and writes bridge artifacts only.
+        # It does not export a final deck, lock final inclusions, generate a finished mana base, or write lands into a deck.
+        written_paths.extend(
+        write_strategy_knowledge_live_bridge_artifacts(
+        normal_folder=folders.normal,
+        safe_commander_name=parsed_deck.safe_commander_name,
+        context=context,
+        )
+        )
+
         assert_output_routing(written_paths, folders.normal, folders.debug)
+
         return written_paths
 
     context = build_analysis_context(parsed_deck, runtime_config, scryfall_lookup, collection_summary)
@@ -205,7 +218,7 @@ def process_single_deck(
         written_paths.extend(section_paths)
         written_paths.append(merge_debug_reports(folders.debug, parsed_deck.safe_commander_name, section_paths))
 
-    # v0.8.10.1-alpha: combo awareness remains optional and off by default.
+    # v1.4-expanded-strategy-scoring: combo awareness remains optional and off by default.
     # When the user explicitly selects a report-section mode, write the separate
     # combo artifact and append the same concise, user-facing section to the
     # normal deck report when one exists. Breakdown-only mode stays dev-facing.

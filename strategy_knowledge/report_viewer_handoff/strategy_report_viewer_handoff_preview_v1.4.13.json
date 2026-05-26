@@ -1,0 +1,169 @@
+{
+  "integration_version": "v1.4.13",
+  "integration_mode": "strategy_report_viewer_ai_handoff_integration",
+  "report_viewer_strategy_section_enabled": true,
+  "ai_handoff_strategy_context_enabled": true,
+  "normal_report_strategy_section_enabled": true,
+  "user_prompt_strategy_context_enabled": true,
+  "runtime_behavior_changed": true,
+  "report_output_changed": true,
+  "prompt_output_changed": true,
+  "report_viewer_changed": true,
+  "main_py_changed": false,
+  "legacy_fallback_required": true,
+  "active_runtime_replacement": false,
+  "deck_generation_enabled": false,
+  "exact_card_selection_enabled": false,
+  "final_deck_inclusion_enabled": false,
+  "role_count_generation_enabled": false,
+  "mana_base_generation_enabled": false,
+  "land_insertion_enabled": false,
+  "shell_generation_enabled": false,
+  "full_100_card_draft_generation_enabled": false,
+  "gate_checks": {
+    "runtime_contract_available": true,
+    "strategy_knowledge_selected_with_fallback": true,
+    "scoring_preview_available": true,
+    "role_mapping_available": true,
+    "cut_protect_available": true
+  },
+  "selected_strategy_system": "strategy_knowledge_default_with_legacy_fallback",
+  "checked_strategy_count": 5,
+  "scoring_scenario_matches": 5,
+  "scoring_scenario_count": 5,
+  "protected_sample_count": 4,
+  "possible_cut_sample_count": 2,
+  "replacement_need_sample_count": 2,
+  "strategy_profiles": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "recursion",
+        "finishers_win_conditions"
+      ],
+      "secondary_role_buckets": [
+        "card_draw_card_advantage",
+        "targeted_removal",
+        "protection"
+      ],
+      "strategy_specific_roles": [
+        "free_sacrifice_outlets",
+        "repeatable_sacrifice_outlets",
+        "death_trigger_payoffs",
+        "token_fodder",
+        "creature_recursion",
+        "drain_finishers"
+      ]
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "primary_role_buckets": [
+        "ramp_mana_development",
+        "strategy_enablers",
+        "strategy_payoffs",
+        "mana_base_support"
+      ],
+      "secondary_role_buckets": [
+        "card_draw_card_advantage",
+        "recursion",
+        "finishers_win_conditions"
+      ],
+      "strategy_specific_roles": [
+        "extra_land_drops",
+        "landfall_payoffs",
+        "land_recursion",
+        "fetch_lands_and_land_tutors",
+        "land_token_payoffs",
+        "big_mana_finishers"
+      ]
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "card_draw_card_advantage",
+        "finishers_win_conditions"
+      ],
+      "secondary_role_buckets": [
+        "targeted_removal",
+        "protection",
+        "ramp_mana_development"
+      ],
+      "strategy_specific_roles": [
+        "cheap_cantrips",
+        "spell_payoffs",
+        "cost_reducers",
+        "copy_effects",
+        "graveyard_spell_recursion",
+        "spell_based_finishers"
+      ]
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "finishers_win_conditions",
+        "card_draw_card_advantage"
+      ],
+      "secondary_role_buckets": [
+        "ramp_mana_development",
+        "protection",
+        "targeted_removal"
+      ],
+      "strategy_specific_roles": [
+        "repeatable_token_makers",
+        "burst_token_makers",
+        "anthem_payoffs",
+        "token_draw_payoffs",
+        "token_finishers",
+        "fodder_converters"
+      ]
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "primary_role_buckets": [
+        "protection",
+        "strategy_enablers",
+        "strategy_payoffs",
+        "finishers_win_conditions"
+      ],
+      "secondary_role_buckets": [
+        "ramp_mana_development",
+        "card_draw_card_advantage",
+        "targeted_removal"
+      ],
+      "strategy_specific_roles": [
+        "evasion_granting_cards",
+        "protection_spells",
+        "equipment_or_aura_payoffs",
+        "commander_damage_scalers",
+        "combat_card_draw",
+        "recovery_after_removal"
+      ]
+    }
+  ],
+  "handoff_rules": [
+    "Use Strategy Knowledge as context for strategy recognition, role mapping, cuts, protection, replacement guidance, and report wording.",
+    "Do not treat Strategy Knowledge as permission to generate a final deck list.",
+    "Do not treat possible cuts as mandatory cuts.",
+    "Separate bad card from wrong card for this deck.",
+    "Separate low power from low synergy.",
+    "Protect high-synergy low-raw-power cards when they support the commander's plan.",
+    "Keep collection-first behavior unless the user allows outside upgrades.",
+    "Assume basic lands are available; keep nonbasic lands collection-first unless outside upgrades are allowed."
+  ],
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.13 surfaces Strategy Knowledge in reports, AI handoff, and Report Viewer, but does not enable deck generation or final card selection.",
+    "next_safe_step": "v1.4.14 \u2014 Build From Collection Strategy Shell Planning"
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "shadow_compare_version": "v1.4.6",
+  "mode": "read_only_shadow_compare",
+  "runtime_behavior_changed": false,
+  "active_runtime_replacement": false,
+  "strategy_scoring_changed": false,
+  "deck_generation_enabled": false,
+  "legacy_fallback_required": true,
+  "loader_preview_version": "v1.4.5",
+  "checked_strategy_count": 5,
+  "passed_strategy_count": 5,
+  "failed_strategy_count": 0,
+  "warning_count": 0,
+  "comparisons": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "shadow_status": "PASS",
+      "warnings": [],
+      "errors": [],
+      "signal_results": {
+        "sacrifice": true,
+        "death": true,
+        "recursion": true
+      },
+      "role_results": {
+        "strategy_enablers": true,
+        "strategy_payoffs": true,
+        "recursion": true,
+        "finishers_win_conditions": true
+      },
+      "preservation_results": {
+        "cut_logic": true,
+        "protection_logic": true,
+        "replacement_logic": true
+      },
+      "runtime_action_taken": "none",
+      "replacement_enabled": false
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "shadow_status": "PASS",
+      "warnings": [],
+      "errors": [],
+      "signal_results": {
+        "land": true,
+        "landfall": true
+      },
+      "role_results": {
+        "ramp_mana_development": true,
+        "strategy_enablers": true,
+        "strategy_payoffs": true,
+        "mana_base_support": true
+      },
+      "preservation_results": {
+        "strategy_gates": true,
+        "protection_logic": true,
+        "build_from_collection_logic": true
+      },
+      "runtime_action_taken": "none",
+      "replacement_enabled": false
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "shadow_status": "PASS",
+      "warnings": [],
+      "errors": [],
+      "signal_results": {
+        "spell": true,
+        "instant": true,
+        "sorcery": true
+      },
+      "role_results": {
+        "strategy_enablers": true,
+        "strategy_payoffs": true,
+        "card_draw_card_advantage": true
+      },
+      "preservation_results": {
+        "strategy_recognition": true,
+        "role_logic": true,
+        "replacement_logic": true
+      },
+      "runtime_action_taken": "none",
+      "replacement_enabled": false
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "shadow_status": "PASS",
+      "warnings": [],
+      "errors": [],
+      "signal_results": {
+        "token": true
+      },
+      "role_results": {
+        "strategy_enablers": true,
+        "strategy_payoffs": true,
+        "finishers_win_conditions": true
+      },
+      "preservation_results": {
+        "role_logic": true,
+        "cut_logic": true,
+        "replacement_logic": true
+      },
+      "runtime_action_taken": "none",
+      "replacement_enabled": false
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "shadow_status": "PASS",
+      "warnings": [],
+      "errors": [],
+      "signal_results": {
+        "commander": true,
+        "protection": true
+      },
+      "role_results": {
+        "protection": true,
+        "strategy_enablers": true,
+        "strategy_payoffs": true,
+        "finishers_win_conditions": true
+      },
+      "preservation_results": {
+        "strategy_recognition": true,
+        "protection_logic": true,
+        "cut_logic": true
+      },
+      "runtime_action_taken": "none",
+      "replacement_enabled": false
+    }
+  ],
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.6 is comparison-only. Replacement is blocked until opt-in bridge and default-candidate checks pass.",
+    "next_safe_step": "v1.4.7 \u2014 Strategy Brain Bridge / Opt-In Preview"
+  }
+}

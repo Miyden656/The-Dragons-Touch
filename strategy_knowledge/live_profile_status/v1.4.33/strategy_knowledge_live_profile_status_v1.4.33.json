@@ -1,0 +1,1806 @@
+{
+  "status_version": "v1.4.33",
+  "status_name": "Strategy Knowledge Live Profile Count / Loader Report Correction",
+  "runtime_behavior_changed": false,
+  "live_layers_modified": false,
+  "indexing_performed": false,
+  "scoring_wiring_performed": false,
+  "report_wording_corrected": true,
+  "main_py_changed": false,
+  "live_strategy_profile_count": 249,
+  "live_strategy_profiles_available": 249,
+  "live_strategy_profile_layers": {
+    "01_macro_archetypes": 9,
+    "02_mechanical_themes": 37,
+    "03_strategic_board_politics": 42,
+    "04_typal_tribal_themes": 44,
+    "05_1_niche_theme_rules": 40,
+    "05_2_fringe_theme_rules": 40,
+    "05_3_emergent_theme_rules": 37
+  },
+  "duplicate_live_strategy_id_count": 0,
+  "duplicate_live_strategy_ids": [],
+  "active_scoring_preview_profile_count": 5,
+  "active_scoring_preview_profiles": [
+    "Aristocrats",
+    "Landfall",
+    "Spellslinger",
+    "Tokens",
+    "Voltron"
+  ],
+  "active_scoring_preview_scope": "legacy_preview_profile_set_not_full_live_library",
+  "status_language": {
+    "player_facing": "Strategy Knowledge library active: 249 live profiles available. Active scoring preview remains limited to the five legacy preview profiles until a later indexing/scoring patch.",
+    "debug": "Live Strategy Knowledge profiles: 249. Active scoring preview profiles: 5. This means the full library is available on disk, but scoring/indexing is not yet fully expanded.",
+    "do_not_say": "Strategy profiles available: 5",
+    "replacement_phrase": "Active scoring preview profiles: 5; live Strategy Knowledge profiles available: 249"
+  },
+  "live_profile_records": [
+    {
+      "path": "strategy_knowledge/layers/01_macro_archetypes/aggro.md",
+      "strategy_id": "aggro",
+      "display_name": "Aggro",
+      "layer": "01_macro_archetypes",
+      "size_bytes": 44038
+    },
+    {
+      "path": "strategy_knowledge/layers/01_macro_archetypes/combo.md",
+      "strategy_id": "combo",
+      "display_name": "Combo",
+      "layer": "01_macro_archetypes",
+      "size_bytes": 43478
+    },
+    {
+      "path": "strategy_knowledge/layers/01_macro_archetypes/control.md",
+      "strategy_id": "control",
+      "display_name": "Control",
+      "layer": "01_macro_archetypes",
+      "size_bytes": 44182
+    },
+    {
+      "path": "strategy_knowledge/layers/01_macro_archetypes/engine_synergy_value.md",
+      "strategy_id": "engine_synergy_value",
+      "display_name": "Engine / Synergy Value",
+      "layer": "01_macro_archetypes",
+      "size_bytes": 43019
+    },
+    {
+      "path": "strategy_knowledge/layers/01_macro_archetypes/midrange_value.md",
+      "strategy_id": "midrange_value",
+      "display_name": "Midrange / Value",
+      "layer": "01_macro_archetypes",
+      "size_bytes": 44838
+    },
+    {
+      "path": "strategy_knowledge/layers/01_macro_archetypes/ramp_big_mana.md",
+      "strategy_id": "ramp_big_mana",
+      "display_name": "Ramp / Big Mana",
+      "layer": "01_macro_archetypes",
+      "size_bytes": 44678
+    },
+    {
+      "path": "strategy_knowledge/layers/01_macro_archetypes/stax_prison.md",
+      "strategy_id": "stax_prison",
+      "display_name": "Stax / Prison",
+      "layer": "01_macro_archetypes",
+      "size_bytes": 44046
+    },
+    {
+      "path": "strategy_knowledge/layers/01_macro_archetypes/tempo.md",
+      "strategy_id": "tempo",
+      "display_name": "Tempo",
+      "layer": "01_macro_archetypes",
+      "size_bytes": 43955
+    },
+    {
+      "path": "strategy_knowledge/layers/01_macro_archetypes/toolbox.md",
+      "strategy_id": "toolbox",
+      "display_name": "Toolbox",
+      "layer": "01_macro_archetypes",
+      "size_bytes": 44107
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/alternate_win_conditions.md",
+      "strategy_id": "alternate_win_conditions",
+      "display_name": "Alternate Win Conditions",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44797
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/aristocrats.md",
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 75701
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/artifact_synergy.md",
+      "strategy_id": "artifact_synergy",
+      "display_name": "Artifact Synergy",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44891
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/auras.md",
+      "strategy_id": "auras",
+      "display_name": "Auras",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44183
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/blink_flicker.md",
+      "strategy_id": "blink_flicker",
+      "display_name": "Blink / Flicker",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44657
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/blood_tokens_madness_discard_value.md",
+      "strategy_id": "blood_tokens_madness_discard_value",
+      "display_name": "Blood Tokens / Madness / Discard Value",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44057
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/bracket_pressure_high_power_value.md",
+      "strategy_id": "bracket_pressure_high_power_value",
+      "display_name": "Bracket-Pressure / High-Power Value",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44060
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/clues_investigate__02_mechanical_themes_micro_archetypes.md",
+      "strategy_id": "clues_investigate_02_mechanical_themes_micro_archetypes",
+      "display_name": "Clues / Investigate",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44486
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/copy_clones.md",
+      "strategy_id": "copy_clones",
+      "display_name": "Copy / Clones",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44491
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/enchantress.md",
+      "strategy_id": "enchantress",
+      "display_name": "Enchantress",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44478
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/equipment.md",
+      "strategy_id": "equipment",
+      "display_name": "Equipment",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44509
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/exile_matters_cast_from_exile__02_mechanical_themes_micro_archetypes.md",
+      "strategy_id": "exile_matters_cast_from_exile_02_mechanical_themes_micro_archetypes",
+      "display_name": "Exile Matters / Cast From Exile",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44754
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/extra_combat.md",
+      "strategy_id": "extra_combat",
+      "display_name": "Extra Combat",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44212
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/food__02_mechanical_themes_micro_archetypes.md",
+      "strategy_id": "food_02_mechanical_themes_micro_archetypes",
+      "display_name": "Food",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 43432
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/go_tall_combat.md",
+      "strategy_id": "go_tall_combat",
+      "display_name": "Go-Tall Combat",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44258
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/go_wide_combat.md",
+      "strategy_id": "go_wide_combat",
+      "display_name": "Go-Wide Combat",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 45361
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/graveyard_matters.md",
+      "strategy_id": "graveyard_matters",
+      "display_name": "Graveyard Matters",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44019
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/hatebears.md",
+      "strategy_id": "hatebears",
+      "display_name": "Hatebears",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44284
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/landfall_lands_matter.md",
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 76875
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/legends_matter_historic.md",
+      "strategy_id": "legends_matter_historic",
+      "display_name": "Legends Matter / Historic",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 43187
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/lifedrain.md",
+      "strategy_id": "lifedrain",
+      "display_name": "Lifedrain",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44247
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/lifegain.md",
+      "strategy_id": "lifegain",
+      "display_name": "Lifegain",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44199
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/mill__02_mechanical_themes_micro_archetypes.md",
+      "strategy_id": "mill_02_mechanical_themes_micro_archetypes",
+      "display_name": "Mill",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 43070
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/plus_1_plus_1_counters.md",
+      "strategy_id": "plus_1_plus_1_counters",
+      "display_name": "+1/+1 Counters",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44627
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/proliferate.md",
+      "strategy_id": "proliferate",
+      "display_name": "Proliferate",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 43966
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/reanimator.md",
+      "strategy_id": "reanimator",
+      "display_name": "Reanimator",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 43484
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/saboteur_combat_damage_triggers.md",
+      "strategy_id": "saboteur_combat_damage_triggers",
+      "display_name": "Saboteur / Combat Damage Triggers",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 42994
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/spellslinger.md",
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 74119
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/storm.md",
+      "strategy_id": "storm",
+      "display_name": "Storm",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 42855
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/superfriends_planeswalkers.md",
+      "strategy_id": "superfriends_planeswalkers",
+      "display_name": "Superfriends / Planeswalkers",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 43402
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/theft.md",
+      "strategy_id": "theft",
+      "display_name": "Theft",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 43962
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/tokens.md",
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 74439
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/treasure.md",
+      "strategy_id": "treasure",
+      "display_name": "Treasure",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 43742
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/untap_tap_matters.md",
+      "strategy_id": "untap_tap_matters",
+      "display_name": "Untap / Tap Matters",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44957
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/vehicles__02_mechanical_themes_micro_archetypes.md",
+      "strategy_id": "vehicles_02_mechanical_themes_micro_archetypes",
+      "display_name": "Vehicles",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44294
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/voltron.md",
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 75777
+    },
+    {
+      "path": "strategy_knowledge/layers/02_mechanical_themes/x_spells_big_spells.md",
+      "strategy_id": "x_spells_big_spells",
+      "display_name": "X-Spells / Big Spells",
+      "layer": "02_mechanical_themes",
+      "size_bytes": 44018
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/aikido_judo.md",
+      "strategy_id": "aikido_judo",
+      "display_name": "Aikido / Judo",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44015
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/anti_combo_social_police.md",
+      "strategy_id": "anti_combo_social_police",
+      "display_name": "Anti-Combo Social Police",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43257
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/archenemy_villain_deck.md",
+      "strategy_id": "archenemy_villain_deck",
+      "display_name": "Archenemy / Villain Deck",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44809
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/attack_elsewhere_incentive.md",
+      "strategy_id": "attack_elsewhere_incentive",
+      "display_name": "Attack Elsewhere Incentive",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43355
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/bounty_incentivized_combat.md",
+      "strategy_id": "bounty_incentivized_combat",
+      "display_name": "Bounty / Incentivized Combat",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43771
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/bribery_gift_based_politics.md",
+      "strategy_id": "bribery_gift_based_politics",
+      "display_name": "Bribery / Gift-Based Politics",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 45194
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/chaos.md",
+      "strategy_id": "chaos",
+      "display_name": "Chaos",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43398
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/curse_politics.md",
+      "strategy_id": "curse_politics",
+      "display_name": "Curse Politics",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44295
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/do_not_touch_me_control.md",
+      "strategy_id": "do_not_touch_me_control",
+      "display_name": "Do Not Touch Me Control",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44726
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/fairness_symmetrical_rules.md",
+      "strategy_id": "fairness_symmetrical_rules",
+      "display_name": "Fairness / Symmetrical Rules",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 45029
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/fog_turbo_fog_politics.md",
+      "strategy_id": "fog_turbo_fog_politics",
+      "display_name": "Fog / Turbo-Fog Politics",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43262
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/forced_blocking_combat_manipulation.md",
+      "strategy_id": "forced_blocking_combat_manipulation",
+      "display_name": "Forced Blocking / Combat Manipulation",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44377
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/forced_combat_goad.md",
+      "strategy_id": "forced_combat_goad",
+      "display_name": "Forced Combat / Goad",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44907
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/goad_control.md",
+      "strategy_id": "goad_control",
+      "display_name": "Goad-Control",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44577
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/group_hug.md",
+      "strategy_id": "group_hug",
+      "display_name": "Group Hug",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43800
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/group_slug.md",
+      "strategy_id": "group_slug",
+      "display_name": "Group Slug",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43772
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/information_politics_hidden_threats.md",
+      "strategy_id": "information_politics_hidden_threats",
+      "display_name": "Information Politics / Hidden Threats",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43112
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/kingmaker_table_balancer.md",
+      "strategy_id": "kingmaker_table_balancer",
+      "display_name": "Kingmaker / Table-Balancer",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44916
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/life_total_politics.md",
+      "strategy_id": "life_total_politics",
+      "display_name": "Life Total Politics",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44364
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/monarch_politics.md",
+      "strategy_id": "monarch_politics",
+      "display_name": "Monarch Politics",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44364
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/mutual_benefit_with_hidden_asymmetry.md",
+      "strategy_id": "mutual_benefit_with_hidden_asymmetry",
+      "display_name": "Mutual Benefit With Hidden Asymmetry",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43116
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/mutual_destruction_board_reset_politics.md",
+      "strategy_id": "mutual_destruction_board_reset_politics",
+      "display_name": "Mutual Destruction / Board Reset Politics",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43393
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/negotiated_removal.md",
+      "strategy_id": "negotiated_removal",
+      "display_name": "Negotiated Removal",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44333
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/pillowfort.md",
+      "strategy_id": "pillowfort",
+      "display_name": "Pillowfort",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43799
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/political_combo_deterrence.md",
+      "strategy_id": "political_combo_deterrence",
+      "display_name": "Political Combo Deterrence",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44978
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/politics_deal_making.md",
+      "strategy_id": "politics_deal_making",
+      "display_name": "Politics / Deal-Making",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44604
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/punisher_choice_punisher.md",
+      "strategy_id": "punisher_choice_punisher",
+      "display_name": "Punisher / Choice Punisher",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44986
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/rattlesnake.md",
+      "strategy_id": "rattlesnake",
+      "display_name": "Rattlesnake",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 45212
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/resource_redistribution_donate_bad_gifts.md",
+      "strategy_id": "resource_redistribution_donate_bad_gifts",
+      "display_name": "Resource Redistribution / Donate / Bad Gifts",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43610
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/revenge_retaliation.md",
+      "strategy_id": "revenge_retaliation",
+      "display_name": "Revenge / Retaliation",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44563
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/sandbag_reactive_control_politics.md",
+      "strategy_id": "sandbag_reactive_control_politics",
+      "display_name": "Sandbag / Reactive Control Politics",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 42971
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/secret_combo_low_threat_combo.md",
+      "strategy_id": "secret_combo_low_threat_combo",
+      "display_name": "Secret Combo / Low-Threat Combo",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 45312
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/shared_combat_incentive.md",
+      "strategy_id": "shared_combat_incentive",
+      "display_name": "Shared Combat Incentive",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 45080
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/shared_enemy_table_alliance.md",
+      "strategy_id": "shared_enemy_table_alliance",
+      "display_name": "Shared Enemy / Table Alliance",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 45120
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/social_contract_rule_zero_decks.md",
+      "strategy_id": "social_contract_rule_zero_decks",
+      "display_name": "Social Contract / Rule Zero Decks",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 42933
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/social_pressure_reputation_decks.md",
+      "strategy_id": "social_pressure_reputation_decks",
+      "display_name": "Social Pressure / Reputation Decks",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43008
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/soft_lock_politics.md",
+      "strategy_id": "soft_lock_politics",
+      "display_name": "Soft Lock Politics",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 42815
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/table_police_rule_enforcer.md",
+      "strategy_id": "table_police_rule_enforcer",
+      "display_name": "Table Police / Rule Enforcer",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43652
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/tablewide_resource_acceleration.md",
+      "strategy_id": "tablewide_resource_acceleration",
+      "display_name": "Tablewide Resource Acceleration",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 43875
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/theft_clone_politics.md",
+      "strategy_id": "theft_clone_politics",
+      "display_name": "Theft / Clone Politics",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44677
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/threat_redistribution.md",
+      "strategy_id": "threat_redistribution",
+      "display_name": "Threat Redistribution",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 44577
+    },
+    {
+      "path": "strategy_knowledge/layers/03_strategic_board_politics/voting_councils_dilemma.md",
+      "strategy_id": "voting_councils_dilemma",
+      "display_name": "Voting / Council\u2019s Dilemma",
+      "layer": "03_strategic_board_politics",
+      "size_bytes": 45076
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/ally_typal.md",
+      "strategy_id": "ally_typal",
+      "display_name": "Ally Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43867
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/angel_typal.md",
+      "strategy_id": "angel_typal",
+      "display_name": "Angel Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43939
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/assassin_typal.md",
+      "strategy_id": "assassin_typal",
+      "display_name": "Assassin Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44231
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/bat_rabbit_bloomburrow_style_small_typal.md",
+      "strategy_id": "bat_rabbit_bloomburrow_style_small_typal",
+      "display_name": "Bat / Rabbit / Bloomburrow-Style Small Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43854
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/cat_dog_typal.md",
+      "strategy_id": "cat_dog_typal",
+      "display_name": "Cat / Dog Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44241
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/cleric_typal.md",
+      "strategy_id": "cleric_typal",
+      "display_name": "Cleric Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44034
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/construct_golem_thopter_artifact_typal.md",
+      "strategy_id": "construct_golem_thopter_artifact_typal",
+      "display_name": "Construct / Golem / Thopter Artifact Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43737
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/demon_typal.md",
+      "strategy_id": "demon_typal",
+      "display_name": "Demon Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43997
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/dinosaur_typal.md",
+      "strategy_id": "dinosaur_typal",
+      "display_name": "Dinosaur Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44177
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/dragon_typal.md",
+      "strategy_id": "dragon_typal",
+      "display_name": "Dragon Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44083
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/druid_typal.md",
+      "strategy_id": "druid_typal",
+      "display_name": "Druid Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43950
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/eldrazi_typal.md",
+      "strategy_id": "eldrazi_typal",
+      "display_name": "Eldrazi Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44163
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/elemental_typal.md",
+      "strategy_id": "elemental_typal",
+      "display_name": "Elemental Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44220
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/elf_typal.md",
+      "strategy_id": "elf_typal",
+      "display_name": "Elf Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43814
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/faerie_typal.md",
+      "strategy_id": "faerie_typal",
+      "display_name": "Faerie Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43984
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/giant_minotaur_beast_berserker_typal.md",
+      "strategy_id": "giant_minotaur_beast_berserker_typal",
+      "display_name": "Giant / Minotaur / Beast / Berserker Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43568
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/goblin_typal.md",
+      "strategy_id": "goblin_typal",
+      "display_name": "Goblin Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44079
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/halfling_hobbit_typal.md",
+      "strategy_id": "halfling_hobbit_typal",
+      "display_name": "Halfling / Hobbit Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44814
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/human_typal.md",
+      "strategy_id": "human_typal",
+      "display_name": "Human Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43961
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/hydra_typal.md",
+      "strategy_id": "hydra_typal",
+      "display_name": "Hydra Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43946
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/insect_squirrel_saproling_fungus_typal.md",
+      "strategy_id": "insect_squirrel_saproling_fungus_typal",
+      "display_name": "Insect / Squirrel / Saproling / Fungus Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43689
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/keyword_typal.md",
+      "strategy_id": "keyword_typal",
+      "display_name": "Keyword Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44081
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/knight_typal.md",
+      "strategy_id": "knight_typal",
+      "display_name": "Knight Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44013
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/merfolk_typal.md",
+      "strategy_id": "merfolk_typal",
+      "display_name": "Merfolk Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44113
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/myr_artifact_creature_typal.md",
+      "strategy_id": "myr_artifact_creature_typal",
+      "display_name": "Myr / Artifact Creature Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 42880
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/ninja_typal.md",
+      "strategy_id": "ninja_typal",
+      "display_name": "Ninja Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43971
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/orc_army_amass_typal.md",
+      "strategy_id": "orc_army_amass_typal",
+      "display_name": "Orc / Army / Amass Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44928
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/party_typal.md",
+      "strategy_id": "party_typal",
+      "display_name": "Party Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43984
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/phyrexian_typal.md",
+      "strategy_id": "phyrexian_typal",
+      "display_name": "Phyrexian Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44272
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/pirate_typal.md",
+      "strategy_id": "pirate_typal",
+      "display_name": "Pirate Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44020
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/rat_nazgul_multiple_copy_typal.md",
+      "strategy_id": "rat_nazgul_multiple_copy_typal",
+      "display_name": "Rat / Nazg\u00fbl / Multiple-Copy Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43033
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/rogue_typal.md",
+      "strategy_id": "rogue_typal",
+      "display_name": "Rogue Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43993
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids.md",
+      "strategy_id": "samurai_monk_mouse_otter_typal_spellslinger_or_combat_hybrids",
+      "display_name": "Samurai / Monk / Mouse / Otter Typal-Spellslinger or Combat Hybrids",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43358
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/scarecrow_changeling_all_typal.md",
+      "strategy_id": "scarecrow_changeling_all_typal",
+      "display_name": "Scarecrow / Changeling / All-Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43026
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/sliver_typal.md",
+      "strategy_id": "sliver_typal",
+      "display_name": "Sliver Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44021
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/snake_typal.md",
+      "strategy_id": "snake_typal",
+      "display_name": "Snake Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 43910
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/soldier_typal.md",
+      "strategy_id": "soldier_typal",
+      "display_name": "Soldier Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44131
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/spirit_typal.md",
+      "strategy_id": "spirit_typal",
+      "display_name": "Spirit Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44068
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/treefolk_typal.md",
+      "strategy_id": "treefolk_typal",
+      "display_name": "Treefolk Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44211
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/vampire_typal.md",
+      "strategy_id": "vampire_typal",
+      "display_name": "Vampire Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44121
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/warrior_typal.md",
+      "strategy_id": "warrior_typal",
+      "display_name": "Warrior Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44108
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/wizard_typal.md",
+      "strategy_id": "wizard_typal",
+      "display_name": "Wizard Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44064
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/wolf_werewolf_typal.md",
+      "strategy_id": "wolf_werewolf_typal",
+      "display_name": "Wolf / Werewolf Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44694
+    },
+    {
+      "path": "strategy_knowledge/layers/04_typal_tribal_themes/zombie_typal.md",
+      "strategy_id": "zombie_typal",
+      "display_name": "Zombie Typal",
+      "layer": "04_typal_tribal_themes",
+      "size_bytes": 44091
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/adventures.md",
+      "strategy_id": "adventures",
+      "display_name": "Adventures",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43293
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/battles_sieges.md",
+      "strategy_id": "battles_sieges",
+      "display_name": "Battles / Sieges",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44352
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/blood.md",
+      "strategy_id": "blood",
+      "display_name": "Blood",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43513
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/cascade.md",
+      "strategy_id": "cascade",
+      "display_name": "Cascade",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43093
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/clues_investigate__05_1_niche_theme_rules.md",
+      "strategy_id": "clues_investigate_05_1_niche_theme_rules",
+      "display_name": "Clues / Investigate",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44552
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/coin_flipping.md",
+      "strategy_id": "coin_flipping",
+      "display_name": "Coin Flipping",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43830
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/constellation.md",
+      "strategy_id": "constellation",
+      "display_name": "Constellation",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44603
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/cycling.md",
+      "strategy_id": "cycling",
+      "display_name": "Cycling",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43404
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/deserts.md",
+      "strategy_id": "deserts",
+      "display_name": "Deserts",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43294
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/dice_rolling.md",
+      "strategy_id": "dice_rolling",
+      "display_name": "Dice Rolling",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43722
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/discover.md",
+      "strategy_id": "discover",
+      "display_name": "Discover",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43183
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/dungeons_venture.md",
+      "strategy_id": "dungeons_venture",
+      "display_name": "Dungeons / Venture",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44153
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/energy.md",
+      "strategy_id": "energy",
+      "display_name": "Energy",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43373
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/exile_matters_cast_from_exile__05_1_niche_theme_rules.md",
+      "strategy_id": "exile_matters_cast_from_exile_05_1_niche_theme_rules",
+      "display_name": "Exile Matters / Cast from Exile",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44856
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/face_down_morph_manifest_disguise_cloak.md",
+      "strategy_id": "face_down_morph_manifest_disguise_cloak",
+      "display_name": "Face-Down / Morph / Manifest / Disguise / Cloak",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43583
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/food__05_1_niche_theme_rules.md",
+      "strategy_id": "food_05_1_niche_theme_rules",
+      "display_name": "Food",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43441
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/foretell.md",
+      "strategy_id": "foretell",
+      "display_name": "Foretell",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43151
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/gates.md",
+      "strategy_id": "gates",
+      "display_name": "Gates",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43110
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/goad.md",
+      "strategy_id": "goad",
+      "display_name": "Goad",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43861
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/incubate.md",
+      "strategy_id": "incubate",
+      "display_name": "Incubate",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44880
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/infect.md",
+      "strategy_id": "infect",
+      "display_name": "Infect",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44041
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/initiative_undercity.md",
+      "strategy_id": "initiative_undercity",
+      "display_name": "Initiative / Undercity",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44507
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/land_animation.md",
+      "strategy_id": "land_animation",
+      "display_name": "Land Animation",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43852
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/madness.md",
+      "strategy_id": "madness",
+      "display_name": "Madness",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43297
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/map_tokens_explore.md",
+      "strategy_id": "map_tokens_explore",
+      "display_name": "Map Tokens / Explore",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44342
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/mill__05_1_niche_theme_rules.md",
+      "strategy_id": "mill_05_1_niche_theme_rules",
+      "display_name": "Mill",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43159
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/monarch.md",
+      "strategy_id": "monarch",
+      "display_name": "Monarch",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43660
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/mutate.md",
+      "strategy_id": "mutate",
+      "display_name": "Mutate",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43346
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/powerstones.md",
+      "strategy_id": "powerstones",
+      "display_name": "Powerstones",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43941
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/proliferate_poison.md",
+      "strategy_id": "proliferate_poison",
+      "display_name": "Proliferate Poison",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44495
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/ring_temptation.md",
+      "strategy_id": "ring_temptation",
+      "display_name": "Ring Temptation",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44062
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/role_tokens.md",
+      "strategy_id": "role_tokens",
+      "display_name": "Role Tokens",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43725
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/sagas.md",
+      "strategy_id": "sagas",
+      "display_name": "Sagas",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44004
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/shrines.md",
+      "strategy_id": "shrines",
+      "display_name": "Shrines",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44119
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/snow.md",
+      "strategy_id": "snow",
+      "display_name": "Snow",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43109
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/suspend.md",
+      "strategy_id": "suspend",
+      "display_name": "Suspend",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 43133
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/topdeck_matters.md",
+      "strategy_id": "topdeck_matters",
+      "display_name": "Topdeck Matters",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44035
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/toxic_corrupted.md",
+      "strategy_id": "toxic_corrupted",
+      "display_name": "Toxic / Corrupted",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44846
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/utility_lands_matter.md",
+      "strategy_id": "utility_lands_matter",
+      "display_name": "Utility Lands Matter",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44295
+    },
+    {
+      "path": "strategy_knowledge/layers/05_1_niche_theme_rules/vehicles__05_1_niche_theme_rules.md",
+      "strategy_id": "vehicles_05_1_niche_theme_rules",
+      "display_name": "Vehicles",
+      "layer": "05_1_niche_theme_rules",
+      "size_bytes": 44332
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/adamant.md",
+      "strategy_id": "adamant",
+      "display_name": "Adamant",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43380
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/artifact_lock_null_rod_effects.md",
+      "strategy_id": "artifact_lock_null_rod_effects",
+      "display_name": "Artifact Lock / Null Rod Effects",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 42991
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/attractions.md",
+      "strategy_id": "attractions",
+      "display_name": "Attractions",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43727
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/battle_tribal.md",
+      "strategy_id": "battle_tribal",
+      "display_name": "Battle Tribal",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44106
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/bloodthirst.md",
+      "strategy_id": "bloodthirst",
+      "display_name": "Bloodthirst",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43938
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/case_enchantments.md",
+      "strategy_id": "case_enchantments",
+      "display_name": "Case Enchantments",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44898
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/caves.md",
+      "strategy_id": "caves",
+      "display_name": "Caves",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43116
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/clash.md",
+      "strategy_id": "clash",
+      "display_name": "Clash",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43248
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/classes_as_primary_theme.md",
+      "strategy_id": "classes_as_primary_theme",
+      "display_name": "Classes as Primary Theme",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43203
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/color_hate.md",
+      "strategy_id": "color_hate",
+      "display_name": "Color Hate",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43616
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/colorless_restriction_wastes_matters.md",
+      "strategy_id": "colorless_restriction_wastes_matters",
+      "display_name": "Colorless Restriction / Wastes Matters",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 42947
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/companion_influenced_builds.md",
+      "strategy_id": "companion_influenced_builds",
+      "display_name": "Companion-Influenced Builds",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44864
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/contraptions.md",
+      "strategy_id": "contraptions",
+      "display_name": "Contraptions",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44628
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/curse_pillowfort.md",
+      "strategy_id": "curse_pillowfort",
+      "display_name": "Curse Pillowfort",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44337
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/damage_reflection_stuffy_doll_effects.md",
+      "strategy_id": "damage_reflection_stuffy_doll_effects",
+      "display_name": "Damage Reflection / Stuffy Doll Effects",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44221
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/donate_bad_gifts.md",
+      "strategy_id": "donate_bad_gifts",
+      "display_name": "Donate Bad Gifts",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44156
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/end_the_turn.md",
+      "strategy_id": "end_the_turn",
+      "display_name": "End the Turn",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43860
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/etb_lock_torpor_orb_effects.md",
+      "strategy_id": "etb_lock_torpor_orb_effects",
+      "display_name": "ETB Lock / Torpor Orb Effects",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 45178
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/extra_upkeeps.md",
+      "strategy_id": "extra_upkeeps",
+      "display_name": "Extra Upkeeps",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43824
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/fateseal_opponent_topdeck_control.md",
+      "strategy_id": "fateseal_opponent_topdeck_control",
+      "display_name": "Fateseal / Opponent Topdeck Control",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 42827
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/fog_tribal.md",
+      "strategy_id": "fog_tribal",
+      "display_name": "Fog Tribal",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 45147
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/graveyard_lock.md",
+      "strategy_id": "graveyard_lock",
+      "display_name": "Graveyard Lock",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 45054
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/hellbent.md",
+      "strategy_id": "hellbent",
+      "display_name": "Hellbent",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43402
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/level_up.md",
+      "strategy_id": "level_up",
+      "display_name": "Level Up",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43472
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/life_total_exchange.md",
+      "strategy_id": "life_total_exchange",
+      "display_name": "Life Total Exchange",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44279
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/locus.md",
+      "strategy_id": "locus",
+      "display_name": "Locus",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43139
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/mass_land_denial.md",
+      "strategy_id": "mass_land_denial",
+      "display_name": "Mass Land Denial",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43932
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/meld_packages.md",
+      "strategy_id": "meld_packages",
+      "display_name": "Meld Packages",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43788
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/no_abilities_matters.md",
+      "strategy_id": "no_abilities_matters",
+      "display_name": "No-Abilities Matters",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44324
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/nonbasic_land_hate.md",
+      "strategy_id": "nonbasic_land_hate",
+      "display_name": "Nonbasic Land Hate",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44112
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/odd_even_mana_value_restrictions.md",
+      "strategy_id": "odd_even_mana_value_restrictions",
+      "display_name": "Odd / Even Mana Value Restrictions",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 42773
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/renown.md",
+      "strategy_id": "renown",
+      "display_name": "Renown",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43987
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/rooms_as_primary_theme.md",
+      "strategy_id": "rooms_as_primary_theme",
+      "display_name": "Rooms as Primary Theme",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 42994
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/rule_zero_silver_border_acorn_themes.md",
+      "strategy_id": "rule_zero_silver_border_acorn_themes",
+      "display_name": "Rule Zero / Silver-Border / Acorn Themes",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43155
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/splice_arcane.md",
+      "strategy_id": "splice_arcane",
+      "display_name": "Splice / Arcane",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43595
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/stickers.md",
+      "strategy_id": "stickers",
+      "display_name": "Stickers",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43444
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/theme_flavor_first_decks.md",
+      "strategy_id": "theme_flavor_first_decks",
+      "display_name": "Theme / Flavor-First Decks",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44848
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/turn_phase_manipulation.md",
+      "strategy_id": "turn_phase_manipulation",
+      "display_name": "Turn / Phase Manipulation",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 44645
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/tutor_hate.md",
+      "strategy_id": "tutor_hate",
+      "display_name": "Tutor Hate",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43580
+    },
+    {
+      "path": "strategy_knowledge/layers/05_2_fringe_theme_rules/vanilla_matters.md",
+      "strategy_id": "vanilla_matters",
+      "display_name": "Vanilla Matters",
+      "layer": "05_2_fringe_theme_rules",
+      "size_bytes": 43954
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/artifact_treasure_combo_value.md",
+      "strategy_id": "artifact_treasure_combo_value",
+      "display_name": "Artifact/Treasure Combo-Value",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43625
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/bracket_aware_stax_hatebear_packages.md",
+      "strategy_id": "bracket_aware_stax_hatebear_packages",
+      "display_name": "Bracket-Aware Stax / Hatebear Packages",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43237
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/collection_aware_replacement_planning.md",
+      "strategy_id": "collection_aware_replacement_planning",
+      "display_name": "Collection-Aware Replacement Planning",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44151
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/combo_adjacent_value.md",
+      "strategy_id": "combo_adjacent_value",
+      "display_name": "Combo-Adjacent Value",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44536
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/commander_created_landfall.md",
+      "strategy_id": "commander_created_landfall",
+      "display_name": "Commander-Created Landfall",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44909
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/commander_defined_single_card_archetypes.md",
+      "strategy_id": "commander_defined_single_card_archetypes",
+      "display_name": "Commander-Defined Single-Card Archetypes",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44382
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/commander_recast_death_loops.md",
+      "strategy_id": "commander_recast_death_loops",
+      "display_name": "Commander Recast / Death Loops",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44770
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/commander_tax_advantage.md",
+      "strategy_id": "commander_tax_advantage",
+      "display_name": "Commander Tax Advantage",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43112
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/compact_combo_but_not_full_combo_deck.md",
+      "strategy_id": "compact_combo_but_not_full_combo_deck",
+      "display_name": "Compact Combo but Not Full Combo Deck",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43132
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/doctors_companion_time_counter_shells.md",
+      "strategy_id": "doctors_companion_time_counter_shells",
+      "display_name": "Doctor\u2019s Companion / Time Counter Shells",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44385
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/dragons_approach_spell_density_dragon_tutor.md",
+      "strategy_id": "dragons_approach_spell_density_dragon_tutor",
+      "display_name": "Dragon\u2019s Approach / Spell-Density Dragon Tutor",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43997
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/expend.md",
+      "strategy_id": "expend",
+      "display_name": "Expend",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44465
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/fast_mana_explosive_start_package.md",
+      "strategy_id": "fast_mana_explosive_start_package",
+      "display_name": "Fast Mana / Explosive Start Package",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43952
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/forage.md",
+      "strategy_id": "forage",
+      "display_name": "Forage",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43178
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/free_interaction_protection_package.md",
+      "strategy_id": "free_interaction_protection_package",
+      "display_name": "Free Interaction / Protection Package",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44000
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/game_changer_bracket_pressure_packages.md",
+      "strategy_id": "game_changer_bracket_pressure_packages",
+      "display_name": "Game Changer / Bracket Pressure Packages",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44261
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/generically_good_but_wrong_shell.md",
+      "strategy_id": "generically_good_but_wrong_shell",
+      "display_name": "Generically Good but Wrong Shell",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43024
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/gift.md",
+      "strategy_id": "gift",
+      "display_name": "Gift",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43313
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/hare_apparent_rabbit_swarm.md",
+      "strategy_id": "hare_apparent_rabbit_swarm",
+      "display_name": "Hare Apparent / Rabbit Swarm",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 45221
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/high_power_value_but_not_turbo_combo.md",
+      "strategy_id": "high_power_value_but_not_turbo_combo",
+      "display_name": "High-Power Value but Not Turbo Combo",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43115
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/high_synergy_low_raw_power_cards.md",
+      "strategy_id": "high_synergy_low_raw_power_cards",
+      "display_name": "High-Synergy Low-Raw-Power Cards",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43808
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/manifest_dread.md",
+      "strategy_id": "manifest_dread",
+      "display_name": "Manifest Dread",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43789
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/multiple_copy_exception_decks.md",
+      "strategy_id": "multiple_copy_exception_decks",
+      "display_name": "Multiple-Copy Exception Decks",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43527
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/nazgul_wraith_ring_hybrid.md",
+      "strategy_id": "nazgul_wraith_ring_hybrid",
+      "display_name": "Nazg\u00fbl / Wraith Ring Hybrid",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43367
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/offspring.md",
+      "strategy_id": "offspring",
+      "display_name": "Offspring",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43539
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/partner_background_pair_defined_decks.md",
+      "strategy_id": "partner_background_pair_defined_decks",
+      "display_name": "Partner / Background Pair-Defined Decks",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44201
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/persistent_petitioners_advisor_mill.md",
+      "strategy_id": "persistent_petitioners_advisor_mill",
+      "display_name": "Persistent Petitioners / Advisor Mill",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 42866
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/plot_crime_outlaw_packages.md",
+      "strategy_id": "plot_crime_outlaw_packages",
+      "display_name": "Plot / Crime / Outlaw Packages",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44689
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/refined_deck_review_candidates.md",
+      "strategy_id": "refined_deck_review_candidates",
+      "display_name": "Refined Deck Review Candidates",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43581
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/rooms_eerie.md",
+      "strategy_id": "rooms_eerie",
+      "display_name": "Rooms / Eerie",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44618
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/shadowborn_apostle_demon_tutor_engine.md",
+      "strategy_id": "shadowborn_apostle_demon_tutor_engine",
+      "display_name": "Shadowborn Apostle / Demon Tutor Engine",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43385
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/slow_alternate_win_conditions.md",
+      "strategy_id": "slow_alternate_win_conditions",
+      "display_name": "Slow Alternate Win Conditions",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 45154
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/survival.md",
+      "strategy_id": "survival",
+      "display_name": "Survival",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44642
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/token_combat_go_wide_go_tall_hybrid.md",
+      "strategy_id": "token_combat_go_wide_go_tall_hybrid",
+      "display_name": "Token Combat / Go-Wide-Go-Tall Hybrid",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44334
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/treasure_tutor_chains.md",
+      "strategy_id": "treasure_tutor_chains",
+      "display_name": "Treasure Tutor Chains",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43022
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/tutor_density_tutor_chain_pressure.md",
+      "strategy_id": "tutor_density_tutor_chain_pressure",
+      "display_name": "Tutor Density / Tutor Chain Pressure",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 43074
+    },
+    {
+      "path": "strategy_knowledge/layers/05_3_emergent_theme_rules/typal_mechanic_hybrids.md",
+      "strategy_id": "typal_mechanic_hybrids",
+      "display_name": "Typal-Mechanic Hybrids",
+      "layer": "05_3_emergent_theme_rules",
+      "size_bytes": 44714
+    }
+  ],
+  "scoring_preview_summary": {
+    "scoring_preview_path": "strategy_knowledge/scoring_previews/strategy_scoring_integration_preview_v1.4.10.json",
+    "scoring_preview_artifact_exists": true,
+    "active_scoring_preview_profile_count": 5,
+    "active_scoring_preview_profiles": [
+      "Aristocrats",
+      "Landfall",
+      "Spellslinger",
+      "Tokens",
+      "Voltron"
+    ],
+    "scoring_preview_scope": "legacy_preview_profile_set_not_full_live_library"
+  },
+  "gate_checks": {
+    "live_layers_exist": true,
+    "live_strategy_profile_count_is_249": true,
+    "active_scoring_preview_profile_count_is_5": true,
+    "indexing_not_performed": true,
+    "scoring_wiring_not_performed": true,
+    "live_layers_not_modified": true,
+    "main_py_not_changed": true
+  },
+  "next_safe_step": "v1.4.34 \u2014 Strategy Knowledge Index Build / Searchable Profile Manifest"
+}

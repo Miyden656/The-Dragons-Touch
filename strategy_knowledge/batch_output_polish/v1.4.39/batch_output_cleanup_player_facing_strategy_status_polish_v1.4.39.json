@@ -1,0 +1,52 @@
+{
+  "polish_version": "v1.4.39",
+  "polish_name": "Batch Output Cleanup / Player-Facing Strategy Status Polish",
+  "runtime_behavior_changed": true,
+  "player_facing_strategy_status_polished": true,
+  "batch_output_cleanup_guidance_installed": true,
+  "active_scoring_profiles": 249,
+  "legacy_preview_profile_count": 5,
+  "legacy_preview_status": "deprecated_fallback_only",
+  "scoring_source": "strategy_knowledge/index/strategy_profile_index.latest.json",
+  "top_matches_available": true,
+  "source_patch": {
+    "candidate_file_count": 6,
+    "patched_file_count": 0,
+    "patched_files": [],
+    "unchanged_files": [
+      "reports/strategy_knowledge_sections.py",
+      "reports/strategy_live_bridge.py",
+      "reports/active_scoring_report_generator_integration.py",
+      "reports/batch_output_strategy_status_polish.py",
+      "reports/strategy_knowledge_live_profile_status.py",
+      "reports/strategy_knowledge_report_batch_integration_proof.py"
+    ]
+  },
+  "player_status_block": "## Strategy Knowledge Status\n\n- Strategy Knowledge: Active\n- Active scoring profiles: 249\n- Scoring source: `strategy_knowledge/index/strategy_profile_index.latest.json`\n- Use: strategy recognition, cut/protect/replacement guidance, and AI handoff context.\n- Legacy five-profile preview: fallback only\n\n### Top Strategy Matches\n- **Spellslinger** (`spellslinger`), score 67.832 \u2014 hits: artifacts, combat, lifegain, recursion, sacrifice\n- **Tokens** (`tokens`), score 64.079 \u2014 hits: artifacts, combat, lifegain, recursion, sacrifice\n- **Equipment** (`equipment`), score 57.388 \u2014 hits: artifacts, combat, equipment, lifegain, recursion\n- **Lifegain** (`lifegain`), score 53.877 \u2014 hits: artifacts, combat, lifegain, recursion, sacrifice\n- **Landfall / Lands Matter** (`landfall_lands_matter`), score 48.577 \u2014 hits: artifacts, combat, landfall, lifegain, recursion",
+  "batch_global_status_block": "## Batch Strategy Knowledge Status\n\n- Strategy Knowledge: Active\n- Active scoring profiles: 249\n- Scoring source: `strategy_knowledge/index/strategy_profile_index.latest.json`\n- Legacy five-profile preview: fallback only\n- Batch behavior: show this global status once, then show deck-specific top strategy matches per deck.",
+  "sanitized_sample": "## Strategy Knowledge Integration\n- Active scoring profiles: 249\n- Legacy preview matches: 5 / 5 fallback profiles\n### Legacy Fallback Strategy Role Profiles\n- Aristocrats\n- Landfall\n- Spellslinger\n- Tokens\n- Voltron",
+  "player_status_has_249": true,
+  "player_status_marks_fallback": true,
+  "batch_status_has_249": true,
+  "batch_status_marks_fallback": true,
+  "sanitized_sample_removed_old_five_line": false,
+  "sanitized_sample_replaced_loaded_profiles_heading": false,
+  "strategy_sections_has_v1_4_39_helpers": true,
+  "strategy_live_bridge_has_v1_4_39_helper": true,
+  "main_py_changed": false,
+  "gate_checks": {
+    "active_scoring_profiles_is_249": true,
+    "legacy_preview_profile_count_is_5": true,
+    "legacy_preview_is_fallback_only": true,
+    "top_matches_available": true,
+    "player_status_surfaces_249": true,
+    "player_status_marks_legacy_fallback": true,
+    "batch_status_surfaces_249": true,
+    "batch_status_marks_legacy_fallback": true,
+    "sanitizer_removes_old_five_profile_line": false,
+    "sanitizer_relabels_loaded_role_profiles": false,
+    "strategy_sections_helpers_present": true,
+    "strategy_live_bridge_helper_present": true,
+    "main_py_not_changed": true
+  }
+}

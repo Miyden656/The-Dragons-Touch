@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "planner_version": "v1.4.3",
+  "status": "planning_only",
+  "purpose": "Prepare safe batch import of full Strategy Deep Dive knowledge base without replacing runtime strategy behavior yet.",
+  "active_runtime_replacement": false,
+  "runtime_behavior_changed": false,
+  "current_locked_dependency": "v1.4.2 \u2014 Strategy Knowledge Base Sample File Import / Verifier Test Set",
+  "expected_source_locations": [
+    "strategy_knowledge/_source_import_candidate/",
+    "strategy_knowledge/_source_import_candidate.zip",
+    "external manual copy from generated strategy deep-dive ZIP"
+  ],
+  "import_policy": {
+    "do_not_import_all_at_once_without_audit": true,
+    "batch_size_target": 10,
+    "batch_size_maximum_before_runtime_bridge": 25,
+    "require_schema_validation": true,
+    "require_section_validation": true,
+    "require_index_validation": true,
+    "require_quality_audit": true,
+    "require_manual_warning_review": true,
+    "allow_pass_with_warnings_before_runtime_bridge": true,
+    "allow_failed_files_into_active_index": false
+  },
+  "replacement_path": [
+    {
+      "version": "v1.4.3",
+      "name": "Batch Import Preparation / Import Planner",
+      "role": "Create import plan and permanent batch planning tool.",
+      "runtime_replacement": false
+    },
+    {
+      "version": "v1.4.4",
+      "name": "Strategy Knowledge Legacy Mapping / Preservation Audit",
+      "role": "Map current strategy logic, terms, gates, and learned behavior into the new knowledge-base vocabulary so nothing is lost.",
+      "runtime_replacement": false
+    },
+    {
+      "version": "v1.4.5",
+      "name": "Strategy Knowledge Loader Preview",
+      "role": "Load validated strategy metadata/prose in read-only preview mode.",
+      "runtime_replacement": false
+    },
+    {
+      "version": "v1.4.6",
+      "name": "Strategy Recognition Shadow Compare",
+      "role": "Run current strategy system and new knowledge base side-by-side, compare outputs, and report differences.",
+      "runtime_replacement": false
+    },
+    {
+      "version": "v1.4.7",
+      "name": "Strategy Brain Bridge / Opt-In Preview",
+      "role": "Allow optional use of the strategy knowledge base for report guidance while preserving old strategy fallback.",
+      "runtime_replacement": "opt_in_only"
+    },
+    {
+      "version": "v1.4.8",
+      "name": "Strategy Brain Default Candidate",
+      "role": "Make new strategy knowledge the default only if shadow comparison passes and legacy fallback remains available.",
+      "runtime_replacement": "default_candidate_with_fallback"
+    },
+    {
+      "version": "v1.4.9",
+      "name": "Strategy Brain Lock",
+      "role": "Retire old strategy thought process as primary logic only after preservation audit, parity checks, and fallbacks pass.",
+      "runtime_replacement": "primary_with_legacy_fallback"
+    }
+  ],
+  "must_preserve_from_existing_system": [
+    "current strategy scoring behavior",
+    "current strategy gates",
+    "current commander intent recognition patterns",
+    "current role bucket assumptions",
+    "current cut/protect heuristics",
+    "current replacement categories",
+    "current report wording that has proven useful",
+    "current Build From Collection B-E routing",
+    "current v1.3 generation boundaries",
+    "current strategy lessons from v0.4 through v1.3"
+  ],
+  "pre_runtime_bridge_gate": [
+    "All active strategy files pass tools/validate_strategy_knowledge_base.py",
+    "Legacy strategy concepts are mapped to strategy_knowledge terms",
+    "At least 5 sample files remain PASS",
+    "Batch import audit has zero failed files",
+    "Warnings are reviewed and documented",
+    "Shadow compare shows no major regression against current strategy logic",
+    "Old strategy fallback remains available"
+  ],
+  "notes": [
+    "The new knowledge base is intended to replace the current strategy thought process, but replacement must be staged.",
+    "The current system should not be removed until the preservation audit and shadow comparison prove that the new system keeps everything useful learned during earlier development.",
+    "The strategy prose should inform scoring, classification, cuts, protection, replacements, and report guidance, but should not directly command deck generation."
+  ]
+}

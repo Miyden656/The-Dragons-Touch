@@ -1,0 +1,61 @@
+{
+  "planner_version": "v1.4.3",
+  "status": "PASS",
+  "runtime_replacement_active": false,
+  "runtime_behavior_changed": false,
+  "candidate_files_found": 5,
+  "candidate_files": [
+    {
+      "path": "strategy_knowledge\\layers\\02_mechanical_themes\\aristocrats.md",
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "frontmatter_layer": "02_mechanical_themes",
+      "guessed_layer": "02_mechanical_themes",
+      "size_kb": 73.93,
+      "has_frontmatter": true,
+      "recommended_action": "validate_active"
+    },
+    {
+      "path": "strategy_knowledge\\layers\\02_mechanical_themes\\landfall_lands_matter.md",
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "frontmatter_layer": "02_mechanical_themes",
+      "guessed_layer": "02_mechanical_themes",
+      "size_kb": 75.07,
+      "has_frontmatter": true,
+      "recommended_action": "validate_active"
+    },
+    {
+      "path": "strategy_knowledge\\layers\\02_mechanical_themes\\spellslinger.md",
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "frontmatter_layer": "02_mechanical_themes",
+      "guessed_layer": "02_mechanical_themes",
+      "size_kb": 72.38,
+      "has_frontmatter": true,
+      "recommended_action": "validate_active"
+    },
+    {
+      "path": "strategy_knowledge\\layers\\02_mechanical_themes\\tokens.md",
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "frontmatter_layer": "02_mechanical_themes",
+      "guessed_layer": "02_mechanical_themes",
+      "size_kb": 72.69,
+      "has_frontmatter": true,
+      "recommended_action": "validate_active"
+    },
+    {
+      "path": "strategy_knowledge\\layers\\02_mechanical_themes\\voltron.md",
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "frontmatter_layer": "02_mechanical_themes",
+      "guessed_layer": "02_mechanical_themes",
+      "size_kb": 74.0,
+      "has_frontmatter": true,
+      "recommended_action": "validate_active"
+    }
+  ],
+  "issues": [],
+  "next_safe_step": "v1.4.4 \u2014 Strategy Knowledge Legacy Mapping / Preservation Audit"
+}

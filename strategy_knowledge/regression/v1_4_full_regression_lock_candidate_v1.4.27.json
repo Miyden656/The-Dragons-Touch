@@ -1,0 +1,694 @@
+{
+  "v1_4_regression_version": "v1.4.27",
+  "integration_mode": "full_regression_v1_4_lock_candidate",
+  "v1_4_lock_candidate_ready": true,
+  "v1_4_lock_status": "LOCK_CANDIDATE_PASS",
+  "strategy_knowledge_preferred_path_enabled": true,
+  "old_strategy_system_deprecated": true,
+  "old_strategy_system_removed": false,
+  "legacy_pipeline_still_available": true,
+  "rollback_supported": true,
+  "main_py_changed_by_this_patch": false,
+  "final_deck_export_enabled": true,
+  "final_deck_export_mode": "opt_in_artifact_export_only",
+  "regression_checks": {
+    "module_compile_passed": true,
+    "artifact_presence_passed": true,
+    "tool_smoke_tests_passed": true,
+    "final_chain_passed": true
+  },
+  "compile_results": [
+    {
+      "path": "main.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "reports/strategy_knowledge_sections.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "reports/strategy_live_bridge.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "reports/final_deck_export_integration.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "reports/land_deck_write_integration.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "reports/finished_mana_base_generation.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "reports/final_inclusion_lock.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "reports/old_strategy_deprecation.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "ui/pages/report_viewer_page.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "tools/strategy_knowledge_live_bridge.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "tools/final_deck_export_integration.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "tools/land_deck_write_integration.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "tools/finished_mana_base_generation_integration.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "tools/final_inclusion_lock_integration.py",
+      "status": "compiled",
+      "passed": true
+    },
+    {
+      "path": "tools/old_strategy_system_deprecation_fallback_cleanup.py",
+      "status": "compiled",
+      "passed": true
+    }
+  ],
+  "artifact_results": [
+    {
+      "label": "v1.4.0 schema",
+      "path": "strategy_knowledge/schema/STRATEGY_FILE_TEMPLATE_v1.4.0.md",
+      "matched_path": "docs\\patch_history\\README_PATCH_v1.4.0_strategy_schema_lock.txt",
+      "checked_paths": [
+        "strategy_knowledge/schema/STRATEGY_FILE_TEMPLATE_v1.4.0.md",
+        "strategy_knowledge/schema/STRATEGY_FILE_FRONTMATTER_SCHEMA_v1.4.0.md",
+        "strategy_knowledge/schema/strategy_file_frontmatter_schema_v1.4.0.json",
+        "strategy_knowledge/README_STRATEGY_KNOWLEDGE_v1.4.0.md",
+        "docs/project_reference/strategy_knowledge/STRATEGY_KNOWLEDGE_SCHEMA_v1.4.0.md",
+        "docs/project_reference/strategy_knowledge/STRATEGY_KNOWLEDGE_BASE_SCHEMA_v1.4.0.md",
+        "docs/project_reference/strategy_knowledge/STRATEGY_KNOWLEDGE_STRUCTURE_v1.4.0.md",
+        "docs\\patch_history\\README_PATCH_v1.4.0_strategy_schema_lock.txt"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.1 verifier",
+      "path": "tools/validate_strategy_knowledge_base.py",
+      "matched_path": "tools/validate_strategy_knowledge_base.py",
+      "checked_paths": [
+        "tools/validate_strategy_knowledge_base.py"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.9 runtime contract",
+      "path": "strategy_knowledge/runtime/strategy_brain_runtime_contract_v1.4.9.json",
+      "matched_path": "strategy_knowledge/runtime/strategy_brain_runtime_contract_v1.4.9.json",
+      "checked_paths": [
+        "strategy_knowledge/runtime/strategy_brain_runtime_contract_v1.4.9.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.10 scoring preview",
+      "path": "strategy_knowledge/scoring_previews/strategy_scoring_integration_preview_v1.4.10.json",
+      "matched_path": "strategy_knowledge/scoring_previews/strategy_scoring_integration_preview_v1.4.10.json",
+      "checked_paths": [
+        "strategy_knowledge/scoring_previews/strategy_scoring_integration_preview_v1.4.10.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.11 role mapping",
+      "path": "strategy_knowledge/role_mapping/strategy_role_bucket_mapping_v1.4.11.json",
+      "matched_path": "strategy_knowledge/role_mapping/strategy_role_bucket_mapping_v1.4.11.json",
+      "checked_paths": [
+        "strategy_knowledge/role_mapping/strategy_role_bucket_mapping_v1.4.11.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.12 cut protect replacement",
+      "path": "strategy_knowledge/cut_protect_replacement/strategy_cut_protect_replacement_v1.4.12.json",
+      "matched_path": "strategy_knowledge/cut_protect_replacement/strategy_cut_protect_replacement_v1.4.12.json",
+      "checked_paths": [
+        "strategy_knowledge/cut_protect_replacement/strategy_cut_protect_replacement_v1.4.12.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.13 report handoff",
+      "path": "strategy_knowledge/report_viewer_handoff/strategy_report_viewer_handoff_preview_v1.4.13.json",
+      "matched_path": "strategy_knowledge/report_viewer_handoff/strategy_report_viewer_handoff_preview_v1.4.13.json",
+      "checked_paths": [
+        "strategy_knowledge/report_viewer_handoff/strategy_report_viewer_handoff_preview_v1.4.13.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.14 shell planning",
+      "path": "strategy_knowledge/shell_planning/strategy_shell_plan_v1.4.14.json",
+      "matched_path": "strategy_knowledge/shell_planning/strategy_shell_plan_v1.4.14.json",
+      "checked_paths": [
+        "strategy_knowledge/shell_planning/strategy_shell_plan_v1.4.14.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.15 exact candidates",
+      "path": "strategy_knowledge/card_candidates/exact_card_candidate_preview_v1.4.15.json",
+      "matched_path": "strategy_knowledge/card_candidates/exact_card_candidate_preview_v1.4.15.json",
+      "checked_paths": [
+        "strategy_knowledge/card_candidates/exact_card_candidate_preview_v1.4.15.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.16 role counts",
+      "path": "strategy_knowledge/role_counts/strategy_role_count_plan_v1.4.16.json",
+      "matched_path": "strategy_knowledge/role_counts/strategy_role_count_plan_v1.4.16.json",
+      "checked_paths": [
+        "strategy_knowledge/role_counts/strategy_role_count_plan_v1.4.16.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.17 mana planning",
+      "path": "strategy_knowledge/mana_base/mana_base_plan_v1.4.17.json",
+      "matched_path": "strategy_knowledge/mana_base/mana_base_plan_v1.4.17.json",
+      "checked_paths": [
+        "strategy_knowledge/mana_base/mana_base_plan_v1.4.17.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.18 land insertion",
+      "path": "strategy_knowledge/land_insertion/land_insertion_preview_v1.4.18.json",
+      "matched_path": "strategy_knowledge/land_insertion/land_insertion_preview_v1.4.18.json",
+      "checked_paths": [
+        "strategy_knowledge/land_insertion/land_insertion_preview_v1.4.18.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.19 full draft preview",
+      "path": "strategy_knowledge/full_draft_preview/full_100_card_draft_preview_v1.4.19.json",
+      "matched_path": "strategy_knowledge/full_draft_preview/full_100_card_draft_preview_v1.4.19.json",
+      "checked_paths": [
+        "strategy_knowledge/full_draft_preview/full_100_card_draft_preview_v1.4.19.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.20 live replacement map",
+      "path": "strategy_knowledge/live_replacement/strategy_live_replacement_map_v1.4.20.json",
+      "matched_path": "strategy_knowledge/live_replacement/strategy_live_replacement_map_v1.4.20.json",
+      "checked_paths": [
+        "strategy_knowledge/live_replacement/strategy_live_replacement_map_v1.4.20.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.21 live bridge",
+      "path": "strategy_knowledge/live_bridge/strategy_live_bridge_preview_v1.4.21.json",
+      "matched_path": "strategy_knowledge/live_bridge/strategy_live_bridge_preview_v1.4.21.json",
+      "checked_paths": [
+        "strategy_knowledge/live_bridge/strategy_live_bridge_preview_v1.4.21.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.22 final inclusion lock",
+      "path": "strategy_knowledge/final_inclusion_lock/final_inclusion_lock_v1.4.22.json",
+      "matched_path": "strategy_knowledge/final_inclusion_lock/final_inclusion_lock_v1.4.22.json",
+      "checked_paths": [
+        "strategy_knowledge/final_inclusion_lock/final_inclusion_lock_v1.4.22.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.23 finished mana base",
+      "path": "strategy_knowledge/finished_mana_base/finished_mana_base_v1.4.23.json",
+      "matched_path": "strategy_knowledge/finished_mana_base/finished_mana_base_v1.4.23.json",
+      "checked_paths": [
+        "strategy_knowledge/finished_mana_base/finished_mana_base_v1.4.23.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.24 land deck write",
+      "path": "strategy_knowledge/land_deck_write/land_deck_write_v1.4.24.json",
+      "matched_path": "strategy_knowledge/land_deck_write/land_deck_write_v1.4.24.json",
+      "checked_paths": [
+        "strategy_knowledge/land_deck_write/land_deck_write_v1.4.24.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.25 final deck export",
+      "path": "strategy_knowledge/final_deck_export/final_deck_export_v1.4.25.json",
+      "matched_path": "strategy_knowledge/final_deck_export/final_deck_export_v1.4.25.json",
+      "checked_paths": [
+        "strategy_knowledge/final_deck_export/final_deck_export_v1.4.25.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    },
+    {
+      "label": "v1.4.26 old system deprecation",
+      "path": "strategy_knowledge/deprecation/old_strategy_system_deprecation_v1.4.26.json",
+      "matched_path": "strategy_knowledge/deprecation/old_strategy_system_deprecation_v1.4.26.json",
+      "checked_paths": [
+        "strategy_knowledge/deprecation/old_strategy_system_deprecation_v1.4.26.json"
+      ],
+      "exists": true,
+      "passed": true,
+      "check_mode": "primary_or_known_alternate_or_version_token_or_semantic_schema"
+    }
+  ],
+  "tool_smoke_results": [
+    {
+      "label": "strategy knowledge validator",
+      "path": "tools/validate_strategy_knowledge_base.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "==============================================================================",
+        "Status: PASS",
+        "Strategy files checked: 5",
+        "Passed files: 5",
+        "Warning files: 0",
+        "Failed files: 0",
+        "Audit written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\strategy_quality_audit.json",
+        "No issues found."
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "strategy brain runtime selector",
+      "path": "tools/strategy_brain_runtime_selector.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Selected strategy system: strategy_knowledge_default_with_legacy_fallback",
+        "Strategy Knowledge selected as default strategy brain: True",
+        "Legacy fallback required: True",
+        "Active runtime replacement: False",
+        "Contract written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\runtime\\strategy_brain_runtime_contract_v1.4.9.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\runtime\\STRATEGY_BRAIN_RUNTIME_CONTRACT_SUMMARY_v1.4.9.md",
+        "Status: PASS",
+        "Next safe step: v1.4.10 \u2014 Strategy Scoring Integration Preview"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "strategy scoring integration preview",
+      "path": "tools/strategy_scoring_integration_preview.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Preview mode: strategy_scoring_integration_preview",
+        "Checked strategies: 5",
+        "Scenario matches: 5 / 5",
+        "Live strategy scoring changed: False",
+        "Preview written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\scoring_previews\\strategy_scoring_integration_preview_v1.4.10.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\scoring_previews\\STRATEGY_SCORING_INTEGRATION_PREVIEW_SUMMARY_v1.4.10.md",
+        "Status: PASS",
+        "Next safe step: v1.4.11 \u2014 Strategy Role Bucket Mapping Integration"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "strategy role bucket mapping",
+      "path": "tools/strategy_role_bucket_mapping.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Strategy profiles: 5",
+        "Sample mappings: 6",
+        "Sample mapping warnings: 0",
+        "Live role-count generation changed: False",
+        "Mapping written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\role_mapping\\strategy_role_bucket_mapping_v1.4.11.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\role_mapping\\STRATEGY_ROLE_BUCKET_MAPPING_SUMMARY_v1.4.11.md",
+        "Status: PASS",
+        "Next safe step: v1.4.12 \u2014 Strategy Cut / Protect / Replacement Integration"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "strategy cut/protect/replacement",
+      "path": "tools/strategy_cut_protect_replacement.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Protected samples: 4",
+        "Possible cut samples: 2",
+        "Replacement need samples: 2",
+        "Live cut logic changed: False",
+        "Report written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\cut_protect_replacement\\strategy_cut_protect_replacement_v1.4.12.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\cut_protect_replacement\\STRATEGY_CUT_PROTECT_REPLACEMENT_SUMMARY_v1.4.12.md",
+        "Status: PASS",
+        "Next safe step: v1.4.13 \u2014 Strategy Report Viewer / AI Handoff Integration"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "Build From Collection shell planning",
+      "path": "tools/build_from_collection_strategy_shell_planning.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Shell generation mode: rough_strategy_shell_planning_only",
+        "Shell plans available: 5",
+        "Exact card selection enabled: False",
+        "Final deck inclusion enabled: False",
+        "Plan written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\shell_planning\\strategy_shell_plan_v1.4.14.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\shell_planning\\STRATEGY_SHELL_PLAN_SUMMARY_v1.4.14.md",
+        "Status: PASS",
+        "Next safe step: v1.4.15 \u2014 Exact Card Candidate Selection Preview"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "exact card candidate preview",
+      "path": "tools/exact_card_candidate_selection_preview.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Candidate sets available: 5",
+        "Total candidates nominated: 50",
+        "Final deck inclusion enabled: False",
+        "Deck generation enabled: False",
+        "Preview written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\card_candidates\\exact_card_candidate_preview_v1.4.15.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\card_candidates\\EXACT_CARD_CANDIDATE_PREVIEW_SUMMARY_v1.4.15.md",
+        "Status: PASS",
+        "Next safe step: v1.4.16 \u2014 Strategy-Based Role Count Generation"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "strategy role count generation",
+      "path": "tools/strategy_based_role_count_generation.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Role count plans available: 5",
+        "Final deck inclusion enabled: False",
+        "Deck generation enabled: False",
+        "Mana-base generation enabled: False",
+        "Plan written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\role_counts\\strategy_role_count_plan_v1.4.16.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\role_counts\\STRATEGY_ROLE_COUNT_PLAN_SUMMARY_v1.4.16.md",
+        "Status: PASS",
+        "Next safe step: v1.4.17 \u2014 Mana Base Planning"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "mana base planning",
+      "path": "tools/mana_base_planning.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Mana plans available: 5",
+        "Mana-base generation enabled: False",
+        "Land insertion enabled: False",
+        "Final deck inclusion enabled: False",
+        "Plan written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\mana_base\\mana_base_plan_v1.4.17.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\mana_base\\MANA_BASE_PLAN_SUMMARY_v1.4.17.md",
+        "Status: PASS",
+        "Next safe step: v1.4.18 \u2014 Land Insertion Preview"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "land insertion preview",
+      "path": "tools/land_insertion_preview.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Land insertion previews available: 5",
+        "Mana-base generation enabled: False",
+        "Final land list generation enabled: False",
+        "Final deck inclusion enabled: False",
+        "Preview written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\land_insertion\\land_insertion_preview_v1.4.18.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\land_insertion\\LAND_INSERTION_PREVIEW_SUMMARY_v1.4.18.md",
+        "Status: PASS",
+        "Next safe step: v1.4.19 \u2014 Full 100-Card Draft Preview"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "full 100-card draft preview",
+      "path": "tools/full_100_card_draft_preview.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Draft previews available: 5",
+        "Deck generation mode: preview_draft_only",
+        "Final deck export enabled: False",
+        "Final deck inclusion enabled: False",
+        "Preview written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\full_draft_preview\\full_100_card_draft_preview_v1.4.19.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\full_draft_preview\\FULL_100_CARD_DRAFT_PREVIEW_SUMMARY_v1.4.19.md",
+        "Status: PASS",
+        "Next safe step: v1.4.20 \u2014 Final Draft Review / Lock Candidate"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "strategy knowledge live bridge",
+      "path": "tools/strategy_knowledge_live_bridge.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Final deck export enabled: False",
+        "Final inclusion lock enabled: False",
+        "Finished mana-base generation enabled: False",
+        "Land deck-write enabled: False",
+        "Preview written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\live_bridge\\strategy_live_bridge_preview_v1.4.21.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\live_bridge\\STRATEGY_LIVE_BRIDGE_SUMMARY_v1.4.21.md",
+        "Status: PASS",
+        "Next safe step: v1.4.22 \u2014 Final Inclusion Lock Integration"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "final inclusion lock",
+      "path": "tools/final_inclusion_lock_integration.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Final deck export enabled: False",
+        "Finished mana-base generation enabled: False",
+        "Land deck-write enabled: False",
+        "Lock candidates available: 5",
+        "Preview written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\final_inclusion_lock\\final_inclusion_lock_v1.4.22.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\final_inclusion_lock\\FINAL_INCLUSION_LOCK_SUMMARY_v1.4.22.md",
+        "Status: PASS",
+        "Next safe step: v1.4.23 \u2014 Finished Mana Base Generation Integration"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "finished mana base generation",
+      "path": "tools/finished_mana_base_generation_integration.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Finished mana-base generation mode: artifact_only_no_deck_write",
+        "Land deck-write enabled: False",
+        "Final deck export enabled: False",
+        "Finished mana bases available: 5",
+        "Preview written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\finished_mana_base\\finished_mana_base_v1.4.23.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\finished_mana_base\\FINISHED_MANA_BASE_SUMMARY_v1.4.23.md",
+        "Status: PASS",
+        "Next safe step: v1.4.24 \u2014 Land Deck-Write Integration"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "land deck-write",
+      "path": "tools/land_deck_write_integration.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Land deck-write mode: opt_in_artifact_only_no_final_deck_export",
+        "Final deck export enabled: False",
+        "Old strategy system removed: False",
+        "Land deck-write entries available: 5",
+        "Preview written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\land_deck_write\\land_deck_write_v1.4.24.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\land_deck_write\\LAND_DECK_WRITE_SUMMARY_v1.4.24.md",
+        "Status: PASS",
+        "Next safe step: v1.4.25 \u2014 Final Deck Export Integration"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "final deck export",
+      "path": "tools/final_deck_export_integration.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Final deck export enabled: True",
+        "Final deck export mode: opt_in_artifact_export_only",
+        "Old strategy system removed: False",
+        "Final deck exports available: 5",
+        "Preview written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\final_deck_export\\final_deck_export_v1.4.25.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\final_deck_export\\FINAL_DECK_EXPORT_SUMMARY_v1.4.25.md",
+        "Status: PASS",
+        "Next safe step: v1.4.26 \u2014 Old Strategy System Deprecation / Fallback Cleanup"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "old strategy deprecation",
+      "path": "tools/old_strategy_system_deprecation_fallback_cleanup.py",
+      "status": "pass",
+      "passed": true,
+      "returncode": 0,
+      "timeout_seconds": 90,
+      "stdout_tail": [
+        "Strategy Knowledge preferred path enabled: True",
+        "Old strategy system deprecated: True",
+        "Old strategy system removed: False",
+        "Legacy pipeline status: deprecated_fallback_only",
+        "Artifact written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\deprecation\\old_strategy_system_deprecation_v1.4.26.json",
+        "Summary written: C:\\Users\\Bruce\\Desktop\\The Dragon's Touch (Modular Alpha)\\strategy_knowledge\\deprecation\\OLD_STRATEGY_SYSTEM_DEPRECATION_SUMMARY_v1.4.26.md",
+        "Status: PASS",
+        "Next safe step: v1.4.27 \u2014 Full Regression / v1.4 Lock Candidate"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "label": "strategy report viewer / AI handoff",
+      "path": "tools/strategy_report_viewer_ai_handoff_integration.py",
+      "status": "marker_artifact_gate",
+      "passed": true,
+      "matched_artifact": "strategy_knowledge/report_viewer_handoff/strategy_report_viewer_handoff_preview_v1.4.13.json",
+      "checked_artifacts": [
+        "strategy_knowledge/report_viewer_handoff/strategy_report_viewer_handoff_preview_v1.4.13.json"
+      ],
+      "reason": "Heavy subprocess smoke replaced by marker/artifact gate in v1.4.27.2."
+    }
+  ],
+  "missing_optional_tools": [],
+  "final_chain_validation": {
+    "checks": {
+      "runtime_contract_available": true,
+      "live_bridge_available": true,
+      "final_export_enabled": true,
+      "final_export_opt_in_artifact": true,
+      "old_system_deprecated_not_removed": true,
+      "legacy_pipeline_still_available": true,
+      "rollback_supported": true,
+      "export_count_minimum": true
+    },
+    "passed": true,
+    "final_export_count": 5,
+    "legacy_pipeline_status": "deprecated_fallback_only",
+    "old_strategy_system_removed": false,
+    "active_runtime_replacement": true
+  },
+  "lock_candidate_policy": {
+    "may_mark_v1_4_lock_candidate": true,
+    "may_delete_old_strategy_files": false,
+    "may_disable_legacy_fallback": false,
+    "must_keep_rollback_available": true,
+    "must_keep_strategy_knowledge_opt_in_live_bridge": true,
+    "next_integration_step": "v1.4.28 \u2014 v1.4 Stable Lock / Handoff Package"
+  },
+  "replacement_gate": {
+    "replacement_allowed": true,
+    "replacement_status": "strategy_knowledge_preferred_old_system_deprecated_rollback_preserved",
+    "reason": "Full v1.4 regression validates Strategy Knowledge as the preferred export path while preserving deprecated fallback and rollback.",
+    "next_safe_step": "v1.4.28 \u2014 v1.4 Stable Lock / Handoff Package"
+  }
+}

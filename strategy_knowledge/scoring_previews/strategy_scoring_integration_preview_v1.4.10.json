@@ -1,0 +1,798 @@
+{
+  "scoring_preview_version": "v1.4.10",
+  "preview_mode": "strategy_scoring_integration_preview",
+  "runtime_behavior_changed": false,
+  "strategy_scoring_integration_preview_enabled": true,
+  "strategy_scoring_runtime_changed": false,
+  "legacy_fallback_required": true,
+  "active_runtime_replacement": false,
+  "deck_generation_enabled": false,
+  "exact_card_selection_enabled": false,
+  "final_deck_inclusion_enabled": false,
+  "role_count_generation_enabled": false,
+  "mana_base_generation_enabled": false,
+  "land_insertion_enabled": false,
+  "shell_generation_enabled": false,
+  "full_100_card_draft_generation_enabled": false,
+  "main_py_changed": false,
+  "report_viewer_changed": false,
+  "gate_checks": {
+    "runtime_contract_selected_strategy_knowledge": true,
+    "loader_preview_available": true,
+    "shadow_compare_passed": true,
+    "legacy_preservation_available": true
+  },
+  "checked_strategy_count": 5,
+  "scenario_count": 5,
+  "scenario_match_count": 5,
+  "scenario_results": [
+    {
+      "scenario_id": "aristocrats_death_trigger_engine",
+      "description": "Sacrifice, death triggers, recursion, token fodder, and drain payoff language.",
+      "expected_primary": "aristocrats",
+      "predicted_primary": "aristocrats",
+      "prediction_matches_expected": true,
+      "top_score": 62,
+      "ranked_scores": [
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "score": 62,
+          "alias_hits": [
+            "aristocrats",
+            "artist",
+            "blood",
+            "death",
+            "sacrifice"
+          ],
+          "signal_hits": [
+            "artist",
+            "blood",
+            "death",
+            "recursion",
+            "sacrifice",
+            "token"
+          ],
+          "commander_signal_hits": [
+            "command",
+            "death",
+            "death_trigger_payoff_in_command_zone",
+            "in",
+            "outlet",
+            "payoff",
+            "sacrifice",
+            "sacrifice_outlet_in_command_zone",
+            "trigger",
+            "zone"
+          ],
+          "role_hits": [
+            "recursion"
+          ],
+          "strategy_specific_role_hits": [
+            "death",
+            "drain",
+            "recursion",
+            "sacrifice",
+            "token"
+          ],
+          "false_positive_hits": [
+            "death",
+            "sacrifice"
+          ],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "score": 21,
+          "alias_hits": [],
+          "signal_hits": [
+            "recursion"
+          ],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [
+            "recursion"
+          ],
+          "strategy_specific_role_hits": [
+            "recursion",
+            "token"
+          ],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "score": 15,
+          "alias_hits": [
+            "token"
+          ],
+          "signal_hits": [
+            "token"
+          ],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [
+            "token"
+          ],
+          "false_positive_hits": [
+            "token"
+          ],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "score": 14,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [
+            "recursion"
+          ],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "score": 0,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [],
+          "role_hits": [],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "tokens_go_wide",
+      "description": "Go-wide token production, combat scaling, and token payoff language.",
+      "expected_primary": "tokens",
+      "predicted_primary": "tokens",
+      "prediction_matches_expected": true,
+      "top_score": 33,
+      "ranked_scores": [
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "score": 33,
+          "alias_hits": [
+            "creature",
+            "go",
+            "tokens",
+            "wide"
+          ],
+          "signal_hits": [
+            "anthem",
+            "convoke",
+            "creature",
+            "go",
+            "wide"
+          ],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "token",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [
+            "anthem"
+          ],
+          "false_positive_hits": [
+            "tokens"
+          ],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "score": 17,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "engine",
+            "in",
+            "token",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [
+            "creature"
+          ],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "score": 15,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "engine",
+            "in",
+            "token",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "score": 9,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "score": -4,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [],
+          "role_hits": [],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [
+            "creature"
+          ],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "spellslinger_instants_sorceries",
+      "description": "Instant/sorcery density, spell payoffs, copy effects, and spell-based finishers.",
+      "expected_primary": "spellslinger",
+      "predicted_primary": "spellslinger",
+      "prediction_matches_expected": true,
+      "top_score": 37,
+      "ranked_scores": [
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "score": 37,
+          "alias_hits": [
+            "spell",
+            "spellslinger"
+          ],
+          "signal_hits": [
+            "copy",
+            "instant",
+            "magecraft",
+            "sorcery",
+            "spell"
+          ],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "spell",
+            "spell_payoff_in_command_zone",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [
+            "copy",
+            "spell"
+          ],
+          "false_positive_hits": [
+            "magecraft"
+          ],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "score": 12,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "score": 12,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "score": 12,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "score": 0,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [],
+          "role_hits": [],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "landfall_lands_matter",
+      "description": "Landfall, extra land drops, land recursion, and mana-base support language.",
+      "expected_primary": "landfall_lands_matter",
+      "predicted_primary": "landfall_lands_matter",
+      "prediction_matches_expected": true,
+      "top_score": 59,
+      "ranked_scores": [
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "score": 59,
+          "alias_hits": [
+            "extra",
+            "land",
+            "landfall",
+            "lands"
+          ],
+          "signal_hits": [
+            "drop",
+            "extra",
+            "extra_land_drop",
+            "land",
+            "land_recursion",
+            "landfall",
+            "lands",
+            "recursion"
+          ],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "land",
+            "landfall",
+            "landfall_payoff_in_command_zone",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [
+            "recursion"
+          ],
+          "strategy_specific_role_hits": [
+            "extra",
+            "land",
+            "land_recursion",
+            "landfall",
+            "lands",
+            "recursion"
+          ],
+          "false_positive_hits": [
+            "land",
+            "landfall"
+          ],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "score": 19,
+          "alias_hits": [],
+          "signal_hits": [
+            "recursion"
+          ],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [
+            "recursion"
+          ],
+          "strategy_specific_role_hits": [
+            "recursion"
+          ],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "score": 14,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [
+            "recursion"
+          ],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "score": 12,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "score": 0,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [],
+          "role_hits": [],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "voltron_commander_protection",
+      "description": "Commander-centric protection, suit-up, evasion, and combat pressure language.",
+      "expected_primary": "voltron",
+      "predicted_primary": "voltron",
+      "prediction_matches_expected": true,
+      "top_score": 28,
+      "ranked_scores": [
+        {
+          "strategy_id": "voltron",
+          "display_name": "Voltron",
+          "score": 28,
+          "alias_hits": [
+            "commander",
+            "equipment",
+            "suit",
+            "up",
+            "voltron"
+          ],
+          "signal_hits": [
+            "aura",
+            "commander",
+            "equipment",
+            "evasion"
+          ],
+          "commander_signal_hits": [
+            "combat",
+            "commander"
+          ],
+          "role_hits": [
+            "protection"
+          ],
+          "strategy_specific_role_hits": [
+            "aura",
+            "commander",
+            "equipment",
+            "evasion",
+            "protection"
+          ],
+          "false_positive_hits": [
+            "commander",
+            "equipment",
+            "protection"
+          ],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "spellslinger",
+          "display_name": "Spellslinger",
+          "score": 17,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "commander",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [
+            "protection"
+          ],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "landfall_lands_matter",
+          "display_name": "Landfall / Lands Matter",
+          "score": 15,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "commander",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "aristocrats",
+          "display_name": "Aristocrats",
+          "score": 14,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [
+            "protection"
+          ],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        },
+        {
+          "strategy_id": "tokens",
+          "display_name": "Tokens",
+          "score": 14,
+          "alias_hits": [],
+          "signal_hits": [],
+          "commander_signal_hits": [
+            "command",
+            "in",
+            "payoff",
+            "zone"
+          ],
+          "role_hits": [
+            "protection"
+          ],
+          "strategy_specific_role_hits": [],
+          "false_positive_hits": [],
+          "score_breakdown": {
+            "alias_weight": 2,
+            "signal_weight": 3,
+            "commander_signal_weight": 3,
+            "role_weight": 2,
+            "false_positive_penalty": -4
+          }
+        }
+      ]
+    }
+  ],
+  "integration_contract": {
+    "may_inform_strategy_scoring": true,
+    "may_adjust_runtime_scoring_in_this_patch": false,
+    "must_keep_legacy_fallback": true,
+    "must_not_generate_decks": true,
+    "must_not_select_exact_cards": true,
+    "must_not_make_final_deck_inclusion_decisions": true,
+    "next_integration_step": "v1.4.11 \u2014 Strategy Role Bucket Mapping Integration"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.10 previews Strategy Knowledge scoring support but does not alter live scoring yet.",
+    "next_safe_step": "v1.4.11 \u2014 Strategy Role Bucket Mapping Integration"
+  }
+}

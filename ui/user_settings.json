@@ -1,9 +1,15 @@
 {
-  "collection_source_default": "Local collection folder",
-  "collection_source_files": [],
-  "collection_source_path": "collection",
+  "collection_source_default": "Specific local collection files",
+  "collection_source_files": [
+    "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Avatar the last Airbender Box at desk.txt",
+    "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Blue Base Purple Highlight Box at Desk.txt",
+    "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Brown box with sparks at Desk.txt",
+    "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Commander Legends Battle for Baldur's Gate at Desk.txt",
+    "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Kamigawa Box at Desk.txt"
+  ],
+  "collection_source_path": "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection",
   "developer_report_viewer_last_view": "User View",
-  "guide_presentation": "Either / random",
+  "guide_presentation": "Neither / no named guide",
   "interface_mode": "User Mode",
   "report_output_folder": "Outputs",
   "schema_version": 1,

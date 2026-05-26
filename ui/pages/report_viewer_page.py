@@ -1,4 +1,6 @@
-"""Report Viewer page builder for The Dragon's Touch.
+"""
+v1.1.22.3-dev clarifies the AI Handoff Review lane as Manual Context Review so context-dependent/protected cards do not look like simple off-plan mistakes.
+Report Viewer page builder for The Dragon's Touch.
 
 v0.10.5.3.3 Report Viewer Developer Mode Visibility Hotfix:
 - Report nav visibility is controlled by Interface Mode.
@@ -44,6 +46,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QApplication,
     QFrame,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -69,11 +72,12 @@ def _make_simple_view_detail_box():
     box = QPlainTextEdit()
     box.setReadOnly(True)
     box.setObjectName("simpleViewUserDetail")
-    box.setMinimumHeight(360)
-    box.setMaximumHeight(16777215)
+    box.setMinimumHeight(240)
+    box.setMaximumHeight(420)
     box.setFrameShape(QFrame.NoFrame)
     box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-    box.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+    box.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    box.setLineWrapMode(QPlainTextEdit.WidgetWidth)
     box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     return box
 
@@ -324,6 +328,398 @@ def _build_summary_section(window):
 
 
 
+def _build_strategy_brain_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Strategy Knowledge Integration Preview", "Strategy Knowledge"], max_lines=34)
+
+    if snippet:
+        return _compact_snippet(
+            "Strategy Brain",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge context surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_knowledge_sections import build_strategy_knowledge_viewer_summary
+        fallback = build_strategy_knowledge_viewer_summary()
+    except Exception:
+        fallback = (
+            "Strategy Brain\n"
+            "==============\n\n"
+            "Run Analysis first, then return here. Strategy Knowledge context will appear when the generated report includes the v1.4.13 handoff section."
+        )
+
+    return fallback
+
+
+def _build_strategy_shell_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Build From Collection Strategy Shell Planning", "Strategy Shell Planning"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "Strategy Shell",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge rough shell-planning context surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.strategy_shell_planning import build_strategy_shell_viewer_summary
+        fallback = build_strategy_shell_viewer_summary()
+    except Exception:
+        fallback = (
+            "Strategy Shell Planning\n"
+            "=======================\n\n"
+            "Run Analysis first, then return here. Strategy shell planning appears when the generated report includes the v1.4.14 shell section."
+        )
+
+    return fallback
+
+
+def _build_exact_card_candidates_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Exact Card Candidate Selection Preview", "Exact Card Candidate Preview"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "Exact Card Candidates",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge exact-card candidates surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.exact_card_candidate_preview import build_exact_card_candidate_viewer_summary
+        fallback = build_exact_card_candidate_viewer_summary()
+    except Exception:
+        fallback = (
+            "Exact Card Candidate Preview\n"
+            "============================\n\n"
+            "Run Analysis first, then return here. Candidate preview appears when the generated report includes the v1.4.15 candidate section."
+        )
+
+    return fallback
+
+
+def _build_strategy_role_counts_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Strategy-Based Role Count Generation", "Strategy Role Count Generation"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "Role Counts",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge target role-count bands surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.strategy_role_count_generation import build_strategy_role_count_viewer_summary
+        fallback = build_strategy_role_count_viewer_summary()
+    except Exception:
+        fallback = (
+            "Strategy Role Count Generation\n"
+            "==============================\n\n"
+            "Run Analysis first, then return here. Role count target bands appear when the generated report includes the v1.4.16 role-count section."
+        )
+
+    return fallback
+
+
+def _build_mana_base_planning_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Mana Base Planning"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "Mana Base",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge mana-base planning surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.mana_base_planning import build_mana_base_viewer_summary
+        fallback = build_mana_base_viewer_summary()
+    except Exception:
+        fallback = (
+            "Mana Base Planning\n"
+            "==================\n\n"
+            "Run Analysis first, then return here. Mana-base planning appears when the generated report includes the v1.4.17 mana section."
+        )
+
+    return fallback
+
+
+def _build_land_insertion_preview_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Land Insertion Preview"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "Land Insertion",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge land insertion preview surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.land_insertion_preview import build_land_insertion_viewer_summary
+        fallback = build_land_insertion_viewer_summary()
+    except Exception:
+        fallback = (
+            "Land Insertion Preview\n"
+            "======================\n\n"
+            "Run Analysis first, then return here. Land insertion preview appears when the generated report includes the v1.4.18 land insertion section."
+        )
+
+    return fallback
+
+
+def _build_full_100_card_draft_preview_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Full 100-Card Draft Preview"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "Full Draft Preview",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge full draft preview surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.full_100_card_draft_preview import build_full_100_card_draft_viewer_summary
+        fallback = build_full_100_card_draft_viewer_summary()
+    except Exception:
+        fallback = (
+            "Full 100-Card Draft Preview\n"
+            "===========================\n\n"
+            "Run Analysis first, then return here. Full draft preview appears when the generated report includes the v1.4.19 full draft section."
+        )
+
+    return fallback
+
+
+def _build_final_inclusion_lock_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Final Inclusion Lock Integration", "Final Inclusion Lock"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "Final Inclusion Lock",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge final inclusion lock surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.final_inclusion_lock import build_final_inclusion_lock_viewer_summary
+        fallback = build_final_inclusion_lock_viewer_summary()
+    except Exception:
+        fallback = (
+            "Final Inclusion Lock\n"
+            "====================\n\n"
+            "Run Analysis first, then return here. Final inclusion lock appears when the generated report includes the v1.4.22 lock section."
+        )
+
+    return fallback
+
+
+def _build_finished_mana_base_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Finished Mana Base Generation Integration", "Finished Mana Base"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "Finished Mana Base",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge finished mana-base artifact surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.finished_mana_base_generation import build_finished_mana_base_viewer_summary
+        fallback = build_finished_mana_base_viewer_summary()
+    except Exception:
+        fallback = (
+            "Finished Mana Base\n"
+            "==================\n\n"
+            "Run Analysis first, then return here. Finished mana-base artifacts appear when the generated report includes the v1.4.23 mana-base section."
+        )
+
+    return fallback
+
+
+def _build_land_deck_write_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Land Deck-Write Integration", "Land Deck-Write"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "Land Deck-Write",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge land deck-write artifact surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.land_deck_write_integration import build_land_deck_write_viewer_summary
+        fallback = build_land_deck_write_viewer_summary()
+    except Exception:
+        fallback = (
+            "Land Deck-Write\n"
+            "===============\n\n"
+            "Run Analysis first, then return here. Land deck-write artifacts appear when the generated report includes the v1.4.24 land-write section."
+        )
+
+    return fallback
+
+
+def _build_final_deck_export_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Final Deck Export Integration", "Final Deck Export"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "Final Deck Export",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge final deck export artifact surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.final_deck_export_integration import build_final_deck_export_viewer_summary
+        fallback = build_final_deck_export_viewer_summary()
+    except Exception:
+        fallback = (
+            "Final Deck Export\n"
+            "=================\n\n"
+            "Run Analysis first, then return here. Final deck export artifacts appear when the generated report includes the v1.4.25 export section."
+        )
+
+    return fallback
+
+
+def _build_old_strategy_deprecation_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["Old Strategy System Deprecation / Fallback Cleanup", "Old Strategy System Deprecation"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "Old Strategy Deprecation",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge old-system deprecation status surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.old_strategy_deprecation import build_old_strategy_deprecation_viewer_summary
+        fallback = build_old_strategy_deprecation_viewer_summary()
+    except Exception:
+        fallback = (
+            "Old Strategy System Deprecation\n"
+            "===============================\n\n"
+            "Run Analysis first, then return here. Deprecation status appears when the generated report includes the v1.4.26 deprecation section."
+        )
+
+    return fallback
+
+
+def _build_v1_4_regression_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["v1.4 Full Regression / Lock Candidate"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "v1.4 Regression",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge v1.4 regression status surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.strategy_v1_4_regression_lock_candidate import build_v1_4_regression_viewer_summary
+        fallback = build_v1_4_regression_viewer_summary()
+    except Exception:
+        fallback = (
+            "v1.4 Full Regression / Lock Candidate\n"
+            "=====================================\n\n"
+            "Run Analysis first, then return here. v1.4 regression status appears when the generated report includes the v1.4.27 regression section."
+        )
+
+    return fallback
+
+
+def _build_v1_4_stable_lock_section(window):
+    report_path, report_text = _load_deck_report_text(window)
+    file_name = Path(report_path).name if report_path else "No deck report detected"
+
+    snippet = _extract_markdown_section(report_text, ["v1.4 Stable Lock / Handoff Package"], max_lines=42)
+
+    if snippet:
+        return _compact_snippet(
+            "v1.4 Stable Lock",
+            file_name,
+            snippet,
+            "",
+            "Strategy Knowledge v1.4 stable lock status surfaced from the generated deck report.",
+        )
+
+    try:
+        from reports.strategy_bridge.strategy_v1_4_stable_lock_handoff import build_v1_4_stable_lock_viewer_summary
+        fallback = build_v1_4_stable_lock_viewer_summary()
+    except Exception:
+        fallback = (
+            "v1.4 Stable Lock / Handoff Package\n"
+            "===================================\n\n"
+            "Run the v1.4.28 stable lock tool first, then return here."
+        )
+
+    return fallback
+
+
 def _looks_like_candidate_line(line):
     """Best-effort display filter for card/candidate lines in User View.
 
@@ -445,19 +841,21 @@ def _build_review_section(window):
     file_name = Path(report_path).name if report_path else "No deck report detected"
 
     candidates = [
+        _extract_markdown_section(report_text, ["Possible Off-Plan / Manual Context Review Examples"], max_lines=24),
+        _extract_markdown_section(report_text, ["Manual Context Review"], max_lines=24),
         _extract_markdown_section(report_text, ["Manual Review"], max_lines=24),
         _extract_markdown_section(report_text, ["Context-Dependent Cards to Review Manually"], max_lines=24),
         _extract_markdown_section(report_text, ["Cards to Review Manually"], max_lines=24),
-        _extract_first_matching_block(report_text, ["manual review", "low confidence", "caution-heavy"], max_lines=18),
+        _extract_first_matching_block(report_text, ["manual context review", "manual review", "low confidence", "caution-heavy"], max_lines=18),
     ]
     snippet = next((item for item in candidates if item), "")
 
     return _compact_snippet(
-        "Manual Review",
+        "Manual Context Review",
         file_name,
         snippet,
-        "Low-confidence, filtered, or caution-heavy cards will appear here when the deck report identifies them.",
-        "Cards or notes that need pilot judgment before treating them as recommendations.",
+        "Low-confidence, filtered, caution-heavy, or context-dependent cards will appear here when the deck report identifies them.",
+        "These are pilot/context review flags, not automatic cuts. Some may be protected elsewhere by v1.1 philosophy, commander, synergy, or role-context logic.",
     )
 
 
@@ -1041,11 +1439,11 @@ def build_report_viewer_page(window):
     user_layout.setSpacing(12)
 
     handoff_card = ReportCard("User View — AI Handoff", window.theme, badges=[("User-facing", "protected"), ("Copy-ready", "manual")])
-    handoff_card.setMinimumHeight(560)
+    handoff_card.setMinimumHeight(0)
     handoff_card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     handoff_intro = QLabel(
-        "Use this page to move from The Dragon's Touch into an AI chat. Copy or open the User Prompt first, then copy or open the Deck Report when the prompt asks for it. The section buttons show readable report snippets when available, including combo findings when the report has them."
+        "Copy the User Prompt first, then copy the Deck Report when the prompt asks for it. Use the section buttons below for readable snippets."
     )
     handoff_intro.setObjectName("defaultNote")
     handoff_intro.setWordWrap(True)
@@ -1089,7 +1487,7 @@ def build_report_viewer_page(window):
     copy_all_summary_btn = QPushButton("Copy All User View Summary")
     copy_all_summary_btn.setObjectName("utilityButton")
     copy_all_summary_btn.setMinimumHeight(38)
-    copy_all_summary_btn.setToolTip("Copy all User View sections once: Handoff, Summary, Owned, Examples, Review, Combos, Safety.")
+    copy_all_summary_btn.setToolTip("Copy the readable User View summary sections.")
 
     copy_ai_package_btn = QPushButton("Copy AI Handoff Package")
     copy_ai_package_btn.setObjectName("primaryButton")
@@ -1106,8 +1504,9 @@ def build_report_viewer_page(window):
     handoff_card.body.addLayout(export_action_row)
 
 
-    simple_view_button_row = QHBoxLayout()
-    simple_view_button_row.setSpacing(8)
+    simple_view_button_grid = QGridLayout()
+    simple_view_button_grid.setSpacing(8)
+    simple_view_button_grid.setContentsMargins(0, 2, 0, 2)
 
     simple_view_detail_box = _make_simple_view_detail_box()
 
@@ -1139,6 +1538,20 @@ def build_report_viewer_page(window):
     simple_view_details = {
         "Handoff": _handoff_status_text,
         "Summary": lambda: _build_summary_section(window),
+        "Strategy Brain": lambda: _build_strategy_brain_section(window),
+        "Strategy Shell": lambda: _build_strategy_shell_section(window),
+        "Exact Candidates": lambda: _build_exact_card_candidates_section(window),
+        "Role Counts": lambda: _build_strategy_role_counts_section(window),
+        "Mana Base": lambda: _build_mana_base_planning_section(window),
+        "Land Insertion": lambda: _build_land_insertion_preview_section(window),
+        "Full Draft": lambda: _build_full_100_card_draft_preview_section(window),
+        "Final Lock": lambda: _build_final_inclusion_lock_section(window),
+        "Finished Mana": lambda: _build_finished_mana_base_section(window),
+        "Land Write": lambda: _build_land_deck_write_section(window),
+        "Final Export": lambda: _build_final_deck_export_section(window),
+        "Old System": lambda: _build_old_strategy_deprecation_section(window),
+        "v1.4 Regression": lambda: _build_v1_4_regression_section(window),
+        "v1.4 Stable": lambda: _build_v1_4_stable_lock_section(window),
         "Owned": lambda: _build_owned_section(window),
         "Examples": lambda: _build_examples_section(window),
         "Review": lambda: _build_review_section(window),
@@ -1170,7 +1583,7 @@ def build_report_viewer_page(window):
         )
 
     def _build_all_user_view_summary_text():
-        ordered_sections = ["Handoff", "Summary", "Owned", "Examples", "Review", "Combos", "Safety"]
+        ordered_sections = ["Handoff", "Summary", "Strategy Brain", "Owned", "Examples", "Review", "Combos", "Safety"]
         chunks = []
         seen = set()
 
@@ -1325,15 +1738,21 @@ def build_report_viewer_page(window):
     load_prompt_btn.clicked.connect(lambda checked=False: _show_report_role_in_user_view("user_prompt"))
     load_report_btn.clicked.connect(lambda checked=False: _show_report_role_in_user_view("deck_report"))
 
-    for simple_view_name in ("Handoff", "Summary", "Owned", "Examples", "Review", "Combos", "Safety"):
+    visible_user_view_sections = ("Handoff", "Summary", "Strategy Brain", "Owned", "Examples", "Review", "Combos", "Safety")
+    for index, simple_view_name in enumerate(visible_user_view_sections):
         simple_view_button = QPushButton(simple_view_name)
         simple_view_button.setObjectName("smallActionButton")
         simple_view_button.setMinimumHeight(38)
+        simple_view_button.setMinimumWidth(132)
+        simple_view_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         simple_view_button.setToolTip(f"Show User View section: {simple_view_name}")
         simple_view_button.clicked.connect(lambda checked=False, name=simple_view_name: _show_simple_view_section(name))
-        simple_view_button_row.addWidget(simple_view_button)
+        simple_view_button_grid.addWidget(simple_view_button, index // 4, index % 4)
 
-    handoff_card.body.addLayout(simple_view_button_row)
+    for column_index in range(4):
+        simple_view_button_grid.setColumnStretch(column_index, 1)
+
+    handoff_card.body.addLayout(simple_view_button_grid)
     _show_simple_view_section("Handoff")
     window.simple_view_user_detail_box = simple_view_detail_box
     handoff_card.body.addWidget(simple_view_detail_box, stretch=1)
@@ -1526,3 +1945,18 @@ def build_report_viewer_page(window):
 
     window.refresh_report_viewer_file_list()
     return page
+# v1.4.13.1 marker: Strategy Knowledge context informs review language; it does not generate decks by itself.
+# v1.4.14 marker: Strategy shell planning gives rough role guidance; it does not select exact cards or generate full decks.
+# v1.4.15 marker: Exact card candidates are review-only; they are not final deck inclusions.
+# v1.4.16 marker: Role count targets are planning bands; they are not final locked deck counts.
+# v1.4.17 marker: Mana base planning is guidance only; it does not insert lands or generate a finished mana base.
+# v1.4.18 marker: Land insertion preview is not a deck write and does not create a final land list.
+# v1.4.19 marker: Full draft preview is not a final deck export and does not lock final inclusions.
+# v1.4.22 marker: Final inclusion lock is an artifact layer; it does not export the final deck.
+# v1.4.23 marker: Finished mana base is an artifact layer; it does not write lands into the deck.
+# v1.4.24 marker: Land deck-write is an artifact layer; it does not export the final deck.
+# v1.4.25 marker: Final deck export is an artifact layer; it does not remove the old strategy system.
+# v1.4.26 marker: Old strategy system is deprecated fallback; rollback remains available.
+# v1.4.27 marker: v1.4 regression preserves fallback and rollback.
+# v1.4.28 marker: v1.4 stable lock preserves fallback and rollback.
+# v1.5.29 marker: Report Viewer User View buttons are grid-based and limited to player-facing sections.

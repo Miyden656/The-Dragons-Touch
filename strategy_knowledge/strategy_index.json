@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "knowledge_base_status": "sample_verifier_test_set",
+  "strategy_count": 5,
+  "layers": {
+    "01_macro_archetypes": {
+      "display_name": "Macro Archetypes",
+      "strategies": []
+    },
+    "02_mechanical_themes": {
+      "display_name": "Mechanical Themes",
+      "strategies": [
+        "aristocrats",
+        "tokens",
+        "spellslinger",
+        "landfall_lands_matter",
+        "voltron"
+      ]
+    },
+    "03_board_politics_and_table_roles": {
+      "display_name": "Board Politics and Table Roles",
+      "strategies": []
+    },
+    "04_typal_tribal": {
+      "display_name": "Typal / Tribal",
+      "strategies": []
+    },
+    "05_niche_themes": {
+      "display_name": "Niche Themes",
+      "strategies": []
+    },
+    "06_fringe_themes": {
+      "display_name": "Fringe Themes",
+      "strategies": []
+    },
+    "07_emergent_themes": {
+      "display_name": "Emergent Themes",
+      "strategies": []
+    }
+  },
+  "strategies": {
+    "aristocrats": {
+      "display_name": "Aristocrats",
+      "layer": "02_mechanical_themes",
+      "path": "layers/02_mechanical_themes/aristocrats.md",
+      "aliases": [
+        "aristocrats",
+        "sacrifice value",
+        "death trigger value",
+        "blood artist deck"
+      ],
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "recursion",
+        "finishers_win_conditions"
+      ],
+      "category_profile": "sacrifice_death_trigger_engine",
+      "status": "schema_locked"
+    },
+    "tokens": {
+      "display_name": "Tokens",
+      "layer": "02_mechanical_themes",
+      "path": "layers/02_mechanical_themes/tokens.md",
+      "aliases": [
+        "tokens",
+        "go-wide",
+        "creature tokens",
+        "token swarm"
+      ],
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "finishers_win_conditions",
+        "card_draw_card_advantage"
+      ],
+      "category_profile": "token_material_engine",
+      "status": "schema_locked"
+    },
+    "spellslinger": {
+      "display_name": "Spellslinger",
+      "layer": "02_mechanical_themes",
+      "path": "layers/02_mechanical_themes/spellslinger.md",
+      "aliases": [
+        "spellslinger",
+        "instants and sorceries",
+        "spell payoff deck",
+        "cantrip engine"
+      ],
+      "primary_role_buckets": [
+        "strategy_enablers",
+        "strategy_payoffs",
+        "card_draw_card_advantage",
+        "finishers_win_conditions"
+      ],
+      "category_profile": "instant_sorcery_velocity_engine",
+      "status": "schema_locked"
+    },
+    "landfall_lands_matter": {
+      "display_name": "Landfall / Lands Matter",
+      "layer": "02_mechanical_themes",
+      "path": "layers/02_mechanical_themes/landfall_lands_matter.md",
+      "aliases": [
+        "landfall",
+        "lands matter",
+        "land engine",
+        "extra land drops"
+      ],
+      "primary_role_buckets": [
+        "ramp_mana_development",
+        "strategy_enablers",
+        "strategy_payoffs",
+        "mana_base_support"
+      ],
+      "category_profile": "land_drop_and_land_recursion_engine",
+      "status": "schema_locked"
+    },
+    "voltron": {
+      "display_name": "Voltron",
+      "layer": "02_mechanical_themes",
+      "path": "layers/02_mechanical_themes/voltron.md",
+      "aliases": [
+        "voltron",
+        "commander damage",
+        "suit up",
+        "auras and equipment"
+      ],
+      "primary_role_buckets": [
+        "protection",
+        "strategy_enablers",
+        "strategy_payoffs",
+        "finishers_win_conditions"
+      ],
+      "category_profile": "commander_damage_suit_up_engine",
+      "status": "schema_locked"
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "runtime_contract_version": "v1.4.9",
+  "contract_name": "Strategy Brain Lock / Runtime Selection Contract",
+  "requested_mode_env_key": "TDT_STRATEGY_BRAIN_MODE",
+  "requested_mode": "strategy_knowledge",
+  "selected_strategy_system": "expanded_strategy_scoring_with_legacy_fallback",
+  "strategy_knowledge_selected_as_default_strategy_brain": true,
+  "legacy_current_strategy_system_available": true,
+  "legacy_fallback_required": true,
+  "legacy_fallback_mode": "automatic_if_strategy_knowledge_missing_invalid_or_disabled",
+  "runtime_default_changed": true,
+  "active_runtime_replacement": false,
+  "removes_legacy_strategy_system": false,
+  "strategy_scoring_changed": false,
+  "strategy_scoring_integration_enabled": false,
+  "deck_generation_enabled": false,
+  "exact_card_selection_enabled": false,
+  "final_deck_inclusion_enabled": false,
+  "role_count_generation_enabled": false,
+  "mana_base_generation_enabled": false,
+  "land_insertion_enabled": false,
+  "shell_generation_enabled": false,
+  "full_100_card_draft_generation_enabled": false,
+  "main_py_changed": false,
+  "report_viewer_changed": false,
+  "gate_checks": {
+    "default_candidate_passed": true,
+    "bridge_preview_passed": true,
+    "shadow_compare_passed": true,
+    "loader_preview_passed": true,
+    "legacy_preservation_passed": true
+  },
+  "checked_strategy_count": 5,
+  "runtime_selection_contract": {
+    "strategy_knowledge_is_now_the_selected_default_candidate_path": true,
+    "legacy_fallback_must_remain": true,
+    "strategy_knowledge_may_inform_future_scoring": true,
+    "strategy_knowledge_may_not_generate_decks_yet": true,
+    "strategy_knowledge_may_not_select_exact_cards_yet": true,
+    "strategy_knowledge_may_not_make_final_deck_inclusion_decisions_yet": true,
+    "main_py_routing_not_enabled_in_this_patch": true,
+    "report_viewer_routing_not_enabled_in_this_patch": true
+  },
+  "next_integration_steps": [
+    "v1.4.10 \u2014 Strategy Scoring Integration Preview",
+    "v1.4.11 \u2014 Strategy Role Bucket Mapping Integration",
+    "v1.4.12 \u2014 Strategy Cut / Protect / Replacement Integration",
+    "v1.4.13 \u2014 Strategy Report Viewer / AI Handoff Integration",
+    "v1.4.14 \u2014 Build From Collection Strategy Shell Planning",
+    "v1.4.15 \u2014 Exact Card Candidate Selection Preview",
+    "v1.4.16 \u2014 Strategy-Based Role Count Generation",
+    "v1.4.17 \u2014 Mana Base Planning",
+    "v1.4.18 \u2014 Land Insertion Preview",
+    "v1.4.19 \u2014 Full 100-Card Draft Preview",
+    "v1.4.20 \u2014 Final Deck Inclusion / Deck Generation Lock Candidate",
+    "v1.4.21 \u2014 Regression / QA / v1.4 Lock"
+  ],
+  "replacement_gate": {
+    "full_replacement_allowed": false,
+    "reason": "v1.4.9 selects Strategy Knowledge as the default strategy brain path with legacy fallback, but does not integrate scoring, deck generation, main.py routing, or Report Viewer yet.",
+    "next_safe_step": "v1.4.10 \u2014 Strategy Scoring Integration Preview"
+  }
+}

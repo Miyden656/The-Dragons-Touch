@@ -1,0 +1,312 @@
+{
+  "land_deck_write_version": "v1.4.24",
+  "integration_mode": "land_deck_write_integration",
+  "land_deck_write_enabled": true,
+  "land_deck_write_mode": "opt_in_artifact_only_no_final_deck_export",
+  "runtime_behavior_changed": true,
+  "main_py_changed": false,
+  "requires_live_bridge_opt_in": true,
+  "opt_in_env_var": "TDT_STRATEGY_KNOWLEDGE_LIVE_BRIDGE",
+  "legacy_pipeline_still_available": true,
+  "active_runtime_replacement": false,
+  "final_inclusion_lock_enabled": true,
+  "finished_mana_base_generation_enabled": true,
+  "final_deck_export_enabled": false,
+  "old_strategy_system_removed": false,
+  "basic_lands_assumed_available": true,
+  "nonbasic_lands_collection_first": true,
+  "gate_checks": {
+    "final_inclusion_lock_available": true,
+    "finished_mana_base_available": true,
+    "finished_mana_blocks_export": true,
+    "basic_land_policy_available": true
+  },
+  "checked_strategy_count": 5,
+  "land_deck_write_entries": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "land_deck_write_mode": "opt_in_land_write_artifact",
+      "target_land_slots": 37,
+      "land_entries_ready_for_write": [
+        {
+          "card_name": "Swamp",
+          "count": 9,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Plains",
+          "count": 4,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Basic Land Placeholder",
+          "count": 5,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Owned Nonbasic Land Review Slot",
+          "count": 19,
+          "source": "collection_first_nonbasic_slot",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": "Fill from owned nonbasic lands first; outside upgrades only if user allows them."
+        }
+      ],
+      "land_entry_total_count": 37,
+      "locked_candidate_count": 10,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "deck_write_validation": {
+        "target_land_slots": 37,
+        "generated_land_entry_count": 37,
+        "land_entry_total_count": 37,
+        "matches_target_land_slots": true
+      },
+      "land_deck_write_boundaries": {
+        "land_deck_write_enabled": true,
+        "land_deck_write_mode": "artifact_only_no_final_deck_export",
+        "final_deck_export_enabled": false,
+        "old_strategy_system_removed": false,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "land_deck_write_mode": "opt_in_land_write_artifact",
+      "target_land_slots": 39,
+      "land_entries_ready_for_write": [
+        {
+          "card_name": "Forest",
+          "count": 9,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Island",
+          "count": 4,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Basic Land Placeholder",
+          "count": 6,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Owned Nonbasic Land Review Slot",
+          "count": 20,
+          "source": "collection_first_nonbasic_slot",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": "Fill from owned nonbasic lands first; outside upgrades only if user allows them."
+        }
+      ],
+      "land_entry_total_count": 39,
+      "locked_candidate_count": 10,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "deck_write_validation": {
+        "target_land_slots": 39,
+        "generated_land_entry_count": 39,
+        "land_entry_total_count": 39,
+        "matches_target_land_slots": true
+      },
+      "land_deck_write_boundaries": {
+        "land_deck_write_enabled": true,
+        "land_deck_write_mode": "artifact_only_no_final_deck_export",
+        "final_deck_export_enabled": false,
+        "old_strategy_system_removed": false,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "land_deck_write_mode": "opt_in_land_write_artifact",
+      "target_land_slots": 36,
+      "land_entries_ready_for_write": [
+        {
+          "card_name": "Island",
+          "count": 9,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Mountain",
+          "count": 4,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Basic Land Placeholder",
+          "count": 5,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Owned Nonbasic Land Review Slot",
+          "count": 18,
+          "source": "collection_first_nonbasic_slot",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": "Fill from owned nonbasic lands first; outside upgrades only if user allows them."
+        }
+      ],
+      "land_entry_total_count": 36,
+      "locked_candidate_count": 10,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "deck_write_validation": {
+        "target_land_slots": 36,
+        "generated_land_entry_count": 36,
+        "land_entry_total_count": 36,
+        "matches_target_land_slots": true
+      },
+      "land_deck_write_boundaries": {
+        "land_deck_write_enabled": true,
+        "land_deck_write_mode": "artifact_only_no_final_deck_export",
+        "final_deck_export_enabled": false,
+        "old_strategy_system_removed": false,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "land_deck_write_mode": "opt_in_land_write_artifact",
+      "target_land_slots": 37,
+      "land_entries_ready_for_write": [
+        {
+          "card_name": "Forest",
+          "count": 6,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Plains",
+          "count": 6,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Basic Land Placeholder",
+          "count": 6,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Owned Nonbasic Land Review Slot",
+          "count": 19,
+          "source": "collection_first_nonbasic_slot",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": "Fill from owned nonbasic lands first; outside upgrades only if user allows them."
+        }
+      ],
+      "land_entry_total_count": 37,
+      "locked_candidate_count": 10,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "deck_write_validation": {
+        "target_land_slots": 37,
+        "generated_land_entry_count": 37,
+        "land_entry_total_count": 37,
+        "matches_target_land_slots": true
+      },
+      "land_deck_write_boundaries": {
+        "land_deck_write_enabled": true,
+        "land_deck_write_mode": "artifact_only_no_final_deck_export",
+        "final_deck_export_enabled": false,
+        "old_strategy_system_removed": false,
+        "main_py_changed": false
+      }
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "land_deck_write_mode": "opt_in_land_write_artifact",
+      "target_land_slots": 36,
+      "land_entries_ready_for_write": [
+        {
+          "card_name": "Plains",
+          "count": 9,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Mountain",
+          "count": 4,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Basic Land Placeholder",
+          "count": 5,
+          "source": "assumed_available_basic_land",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": ""
+        },
+        {
+          "card_name": "Owned Nonbasic Land Review Slot",
+          "count": 18,
+          "source": "collection_first_nonbasic_slot",
+          "deck_write_status": "ready_for_opt_in_land_write_artifact",
+          "note": "Fill from owned nonbasic lands first; outside upgrades only if user allows them."
+        }
+      ],
+      "land_entry_total_count": 36,
+      "locked_candidate_count": 10,
+      "basic_lands_assumed_available": true,
+      "nonbasic_lands_collection_first": true,
+      "outside_nonbasic_upgrades_allowed_only_if_user_allows": true,
+      "deck_write_validation": {
+        "target_land_slots": 36,
+        "generated_land_entry_count": 36,
+        "land_entry_total_count": 36,
+        "matches_target_land_slots": true
+      },
+      "land_deck_write_boundaries": {
+        "land_deck_write_enabled": true,
+        "land_deck_write_mode": "artifact_only_no_final_deck_export",
+        "final_deck_export_enabled": false,
+        "old_strategy_system_removed": false,
+        "main_py_changed": false
+      }
+    }
+  ],
+  "integration_contract": {
+    "may_write_lands_into_deck_artifact": true,
+    "may_export_final_deck": false,
+    "may_remove_old_strategy_system": false,
+    "must_require_explicit_opt_in": true,
+    "must_write_lands_as_artifact_before_final_export": true,
+    "must_assume_basic_lands_available": true,
+    "must_keep_nonbasic_lands_collection_first_unless_upgrades_allowed": true,
+    "next_integration_step": "v1.4.25 \u2014 Final Deck Export Integration"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.24 enables opt-in land deck-write artifacts only. It does not export a final deck or remove the old strategy system.",
+    "next_safe_step": "v1.4.25 \u2014 Final Deck Export Integration"
+  }
+}

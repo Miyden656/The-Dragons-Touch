@@ -1,29 +1,40 @@
-# The Dragon's Touch — Clean Docs Folder
+# The Dragon's Touch Documentation Map
 
-This `docs` folder is a cleaned replacement for the old modular alpha documentation folder.
+Updated by v1.5.2 — Docs Folder Cleanup.
 
-## Recommended use
+This docs folder is now organized around clear responsibility boundaries.
 
-Delete the old `docs/` folder and replace it with this one.
+## Primary folders
 
-The active beta-support files remain at the root because the v0.12 checklist/verifier references them there:
+- `docs/patch_history/` — historical patch README files and version notes.
+- `docs/project_reference/` — developer-facing reference material by system area.
+- `docs/project_reference/cleanup/` — v1.5 cleanup audits, summaries, and diagnostics.
+- `docs/tester_docs/` — tester feedback forms, beta notes, and tester-facing materials.
+- `docs/user_docs/` — user-facing setup, troubleshooting, and first-run help.
 
-- `source_run_beta_smoke_test_checklist_v0.12.0.md`
-- `first_run_troubleshooting_v0.12.2.md`
-- `beta_tester_feedback_form_v0.12.4.md`
-- `v0.12_beta_handoff_lock_notes.md`
-- `v0.12_final_test_checklist.md`
+## Project reference subfolders
 
-## Folder map
+- `strategy/`
+- `philosophy/`
+- `commander_discovery/`
+- `commander_building/`
+- `combo_awareness/`
+- `replacement_engine/`
+- `release/`
 
-- `beta_testing/` — current v0.13 feedback form and summary tracker.
-- `project_reference/` — project identity, refactor notes, philosophy integration notes, parity/checklist references, terminal commands, and historical patch chain.
-- `stable_locks/` — milestone lock/reference notes for v0.8, v0.9, and v0.10.
-- `patch_history/` — compact patch readme trail for v0.12/v0.13 only.
-- `combo_reference/` — small combo-awareness reference notes retained from the old folder.
+## Safety notes
 
-## What was intentionally not kept in active docs
+- This cleanup did not change deck-building behavior.
+- This cleanup did not change Strategy Knowledge scoring.
+- This cleanup did not change combo awareness.
+- This cleanup did not change `main.py`.
+- Unique historical docs were preserved unless an exact duplicate already existed in the canonical location.
 
-The old folder included hundreds of historical patch notes, dev handoff notes, combo stress-test outputs, reconciliation reports, and old alpha tester scratch folders. Those were removed from the active docs replacement because they are not useful in a clean modular alpha/beta handoff folder and they make the project noisy.
+## Current inventory summary
 
-A separate archive ZIP was created so nothing is lost.
+- Total docs files recorded: 396
+- Patch history files: 222
+- Tester docs files: 3
+- User docs files: 1
+- Project reference files: 165
+- Needs-review docs still outside target buckets: 3

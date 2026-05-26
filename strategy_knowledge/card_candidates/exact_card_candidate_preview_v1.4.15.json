@@ -1,0 +1,942 @@
+{
+  "candidate_preview_version": "v1.4.15",
+  "integration_mode": "exact_card_candidate_selection_preview",
+  "exact_card_candidate_preview_enabled": true,
+  "exact_card_selection_enabled": true,
+  "exact_card_selection_mode": "preview_candidates_only",
+  "runtime_behavior_changed": true,
+  "report_output_changed": true,
+  "prompt_output_changed": true,
+  "report_viewer_changed": true,
+  "main_py_changed": false,
+  "legacy_fallback_required": true,
+  "active_runtime_replacement": false,
+  "deck_generation_enabled": false,
+  "final_deck_inclusion_enabled": false,
+  "role_count_generation_enabled": false,
+  "mana_base_generation_enabled": false,
+  "land_insertion_enabled": false,
+  "shell_generation_enabled": true,
+  "full_100_card_draft_generation_enabled": false,
+  "gate_checks": {
+    "runtime_contract_available": true,
+    "strategy_knowledge_selected_with_fallback": true,
+    "scoring_preview_available": true,
+    "role_mapping_available": true,
+    "cut_protect_available": true,
+    "report_handoff_available": true,
+    "shell_planning_available": true
+  },
+  "checked_strategy_count": 5,
+  "total_candidate_count": 50,
+  "candidate_sets": [
+    {
+      "strategy_id": "aristocrats",
+      "display_name": "Aristocrats",
+      "candidate_selection_mode": "exact_card_candidates_preview_only",
+      "owned_cards_preferred": true,
+      "outside_upgrades_allowed": false,
+      "candidate_count": 10,
+      "candidate_cards": [
+        {
+          "card_name": "Blood Artist",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 14,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [
+            "creature",
+            "death",
+            "drain",
+            "trigger"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Viscera Seer",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 11,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [
+            "creature",
+            "free",
+            "sacrifice"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Impact Tremors",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 8,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [
+            "creature",
+            "token"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Young Pyromancer",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 7,
+          "candidate_roles": [
+            "strategy_enablers",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [
+            "token"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Swiftfoot Boots",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "protection",
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Solve the Equation",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "card_draw_card_advantage",
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Secure the Wastes",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [
+            "creature",
+            "token"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "All That Glitters",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Evolving Wilds",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Cultivate",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 2,
+          "candidate_roles": [],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        }
+      ],
+      "not_recommended_preview": [
+        {
+          "card_name": "Generic Seven-Mana Dragon",
+          "owned": true,
+          "candidate_status": "not_recommended_preview",
+          "candidate_score": -3,
+          "candidate_roles": [],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": true,
+          "reason": "Card carries off-plan / low-synergy pressure and should not be promoted as a candidate for this strategy.",
+          "final_inclusion": false
+        }
+      ],
+      "candidate_boundaries": {
+        "exact_card_candidate_preview_enabled": true,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "role_count_generation_enabled": false,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "landfall_lands_matter",
+      "display_name": "Landfall / Lands Matter",
+      "candidate_selection_mode": "exact_card_candidates_preview_only",
+      "owned_cards_preferred": true,
+      "outside_upgrades_allowed": false,
+      "candidate_count": 10,
+      "candidate_cards": [
+        {
+          "card_name": "Evolving Wilds",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 13,
+          "candidate_roles": [
+            "mana_base_support",
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [
+            "land",
+            "landfall",
+            "mana"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Cultivate",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 12,
+          "candidate_roles": [
+            "mana_base_support",
+            "ramp_mana_development"
+          ],
+          "strategy_tag_hits": [
+            "land",
+            "mana"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Young Pyromancer",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 7,
+          "candidate_roles": [
+            "strategy_enablers",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [
+            "token"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Impact Tremors",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 7,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [
+            "token"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Solve the Equation",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "card_draw_card_advantage",
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Blood Artist",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "All That Glitters",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Secure the Wastes",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 5,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [
+            "token"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Viscera Seer",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Swiftfoot Boots",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        }
+      ],
+      "not_recommended_preview": [
+        {
+          "card_name": "Generic Seven-Mana Dragon",
+          "owned": true,
+          "candidate_status": "not_recommended_preview",
+          "candidate_score": -3,
+          "candidate_roles": [],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": true,
+          "reason": "Card carries off-plan / low-synergy pressure and should not be promoted as a candidate for this strategy.",
+          "final_inclusion": false
+        }
+      ],
+      "candidate_boundaries": {
+        "exact_card_candidate_preview_enabled": true,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "role_count_generation_enabled": false,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "spellslinger",
+      "display_name": "Spellslinger",
+      "candidate_selection_mode": "exact_card_candidates_preview_only",
+      "owned_cards_preferred": true,
+      "outside_upgrades_allowed": false,
+      "candidate_count": 10,
+      "candidate_cards": [
+        {
+          "card_name": "Young Pyromancer",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 11,
+          "candidate_roles": [
+            "strategy_enablers",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [
+            "spell"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Solve the Equation",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 11,
+          "candidate_roles": [
+            "card_draw_card_advantage",
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [
+            "spell"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Swiftfoot Boots",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "protection",
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Impact Tremors",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Blood Artist",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "All That Glitters",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Viscera Seer",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Secure the Wastes",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Evolving Wilds",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Cultivate",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "ramp_mana_development"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        }
+      ],
+      "not_recommended_preview": [
+        {
+          "card_name": "Generic Seven-Mana Dragon",
+          "owned": true,
+          "candidate_status": "not_recommended_preview",
+          "candidate_score": -3,
+          "candidate_roles": [],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": true,
+          "reason": "Card carries off-plan / low-synergy pressure and should not be promoted as a candidate for this strategy.",
+          "final_inclusion": false
+        }
+      ],
+      "candidate_boundaries": {
+        "exact_card_candidate_preview_enabled": true,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "role_count_generation_enabled": false,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "tokens",
+      "display_name": "Tokens",
+      "candidate_selection_mode": "exact_card_candidates_preview_only",
+      "owned_cards_preferred": true,
+      "outside_upgrades_allowed": false,
+      "candidate_count": 10,
+      "candidate_cards": [
+        {
+          "card_name": "Impact Tremors",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 11,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [
+            "token"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Secure the Wastes",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 9,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [
+            "token"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Young Pyromancer",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 7,
+          "candidate_roles": [
+            "strategy_enablers",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [
+            "token"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Swiftfoot Boots",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "protection",
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Solve the Equation",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "card_draw_card_advantage",
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Blood Artist",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "All That Glitters",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Viscera Seer",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Evolving Wilds",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Cultivate",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "ramp_mana_development"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        }
+      ],
+      "not_recommended_preview": [
+        {
+          "card_name": "Generic Seven-Mana Dragon",
+          "owned": true,
+          "candidate_status": "not_recommended_preview",
+          "candidate_score": -3,
+          "candidate_roles": [],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": true,
+          "reason": "Card carries off-plan / low-synergy pressure and should not be promoted as a candidate for this strategy.",
+          "final_inclusion": false
+        }
+      ],
+      "candidate_boundaries": {
+        "exact_card_candidate_preview_enabled": true,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "role_count_generation_enabled": false,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    },
+    {
+      "strategy_id": "voltron",
+      "display_name": "Voltron",
+      "candidate_selection_mode": "exact_card_candidates_preview_only",
+      "owned_cards_preferred": true,
+      "outside_upgrades_allowed": false,
+      "candidate_count": 10,
+      "candidate_cards": [
+        {
+          "card_name": "All That Glitters",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 14,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [
+            "aura",
+            "commander",
+            "damage",
+            "equipment"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Swiftfoot Boots",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 13,
+          "candidate_roles": [
+            "protection",
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [
+            "commander",
+            "equipment",
+            "protection"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Solve the Equation",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 7,
+          "candidate_roles": [
+            "card_draw_card_advantage",
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [
+            "card"
+          ],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Young Pyromancer",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "strategy_enablers",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Impact Tremors",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Blood Artist",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 6,
+          "candidate_roles": [
+            "finishers_win_conditions",
+            "strategy_payoffs"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Viscera Seer",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Secure the Wastes",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Evolving Wilds",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "strategy_enablers"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        },
+        {
+          "card_name": "Cultivate",
+          "owned": true,
+          "candidate_status": "candidate",
+          "candidate_score": 4,
+          "candidate_roles": [
+            "ramp_mana_development"
+          ],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": false,
+          "reason": "Owned card matches strategy and role tags; review as an exact-card candidate, not a final inclusion.",
+          "final_inclusion": false
+        }
+      ],
+      "not_recommended_preview": [
+        {
+          "card_name": "Generic Seven-Mana Dragon",
+          "owned": true,
+          "candidate_status": "not_recommended_preview",
+          "candidate_score": -3,
+          "candidate_roles": [],
+          "strategy_tag_hits": [],
+          "off_plan_pressure": true,
+          "reason": "Card carries off-plan / low-synergy pressure and should not be promoted as a candidate for this strategy.",
+          "final_inclusion": false
+        }
+      ],
+      "candidate_boundaries": {
+        "exact_card_candidate_preview_enabled": true,
+        "final_deck_inclusion_enabled": false,
+        "deck_generation_enabled": false,
+        "role_count_generation_enabled": false,
+        "mana_base_generation_enabled": false,
+        "land_insertion_enabled": false,
+        "full_100_card_draft_generation_enabled": false
+      }
+    }
+  ],
+  "integration_contract": {
+    "may_nominate_exact_card_candidates": true,
+    "may_select_final_deck_cards": false,
+    "may_make_final_deck_inclusion_decisions": false,
+    "may_generate_full_deck": false,
+    "may_generate_final_role_counts": false,
+    "may_generate_mana_base": false,
+    "may_insert_lands": false,
+    "must_label_candidates_as_review_only": true,
+    "must_keep_collection_first": true,
+    "must_not_promote_off_plan_cards": true,
+    "next_integration_step": "v1.4.16 \u2014 Strategy-Based Role Count Generation"
+  },
+  "replacement_gate": {
+    "replacement_allowed": false,
+    "reason": "v1.4.15 enables exact-card candidate nomination only. Candidates are review-only and are not final deck inclusions.",
+    "next_safe_step": "v1.4.16 \u2014 Strategy-Based Role Count Generation"
+  }
+}
