@@ -42,6 +42,41 @@ from legality.companion_rules import (
 # Companion card names are imported from legality.companion_rules.
 
 
+# =============================================================================
+# FILE LAYOUT (v1.5)
+# =============================================================================
+# This module assembles the full deck review report by orchestrating section
+# builders. Most helpers are private (_-prefixed) with version-stamped families
+# from the iterative v0.6 -> v1.1 patch history.
+#
+# Public API:
+#   build_normal_report(...)   the main orchestrator
+#   write_normal_report(...)   thin wrapper that writes the report to disk
+#
+# Helper groups, top-to-bottom by version:
+#   _v1118_*    v1.1.18 live philosophy guide section helpers
+#   _v1119_*    v1.1.19 cut/protected/replacement explanation helpers
+#   _v11191_*   v1.1.19.1 protected-infrastructure wording helpers
+#   _build_*    section builders (companion legality, decklist, collection pull)
+#   _format_*   per-card formatting (role tags, plan fit, review status)
+#   _v0946*     v0.9.4.6 dragon-gate suppression
+#   _v095_*     v0.9.5 collection-first weakness + need-aware previews
+#   _v0951_*    v0.9.5.1 need text cleanup + category mapping
+#   _v0952_*    v0.9.5.2 exact-pool preview construction
+#   _v0953_*    v0.9.5.3 color-identity guard for previews
+#   _v0954_*    v0.9.5.4 budget/bracket label addition
+#   _v0955_*    v0.9.5.5 role-alignment improvements (also referenced externally)
+#   _v09551_*   v0.9.5.5.1 need-aligned addendum
+#
+# NOTE: Many _v*_ helpers are referenced by reports/sections/* and
+# reports/strategy_sections/* via from-import. Don't delete _-prefixed
+# functions without checking cross-module imports first.
+#
+# See docs/ARCHITECTURE.md for the full scoring chain and how reports plug in.
+# =============================================================================
+
+
+
 
 def _v1118_absorb_object_public_attrs(value: Any) -> dict[str, Any]:
     """Best-effort conversion of runtime/config objects into a small safe mapping."""

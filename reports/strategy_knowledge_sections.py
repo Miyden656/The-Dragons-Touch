@@ -10,6 +10,40 @@ from reports.strategy_bridge.full_100_card_draft_preview import build_full_100_c
 from reports.strategy_bridge.exact_card_candidate_preview import build_exact_card_candidate_report_section, build_exact_card_candidate_prompt_block, build_exact_card_candidate_viewer_summary  # v1.4.15 exact card candidate preview
 from reports.strategy_bridge.strategy_shell_planning import build_strategy_shell_report_section, build_strategy_shell_prompt_block, build_strategy_shell_viewer_summary  # v1.4.14 shell planning
 
+
+# =============================================================================
+# FILE LAYOUT (v1.5)
+# =============================================================================
+# Strategy Knowledge report sections. Bridge between the 249-profile strategy
+# catalog and the report writer / report viewer / AI handoff prompt.
+#
+# This module is the runtime entry point for strategy-related report content.
+# It calls into reports/strategy_bridge/* helper modules (v1.4.10 - v1.4.41
+# phase artifacts) that themselves load JSON payloads from strategy_knowledge/
+# subdirectories.
+#
+# Public API entry points include:
+#   build_strategy_knowledge_report_section(...)
+#   build_strategy_knowledge_prompt_block(...)
+#   build_strategy_knowledge_viewer_summary(...)
+#   ...plus per-phase section/prompt/viewer triplets for each v1.4 milestone
+#
+# Helper groups:
+#   _load_json / _resolve_*       data loading helpers
+#   _v1_4_*                       version-stamped phase helpers (some are
+#                                  imported by reports/strategy_sections/*)
+#   build_*_report_section        markdown render for the report file
+#   build_*_prompt_block          blocks injected into AI handoff prompts
+#   build_*_viewer_summary        short summaries for the Report Viewer UI
+#
+# NOTE: _v1_4_* helpers may look unused locally but are imported from
+# reports/strategy_sections/adapter.py and similar. Check cross-module imports
+# before pruning.
+#
+# See docs/ARCHITECTURE.md for the strategy selector lookup chain.
+# =============================================================================
+
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 STRATEGY_ROOT = PROJECT_ROOT / "strategy_knowledge"
 

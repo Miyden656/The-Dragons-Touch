@@ -28,6 +28,33 @@ from legality.companion_rules import check_card_against_companion
 
 
 @dataclass(slots=True)
+
+
+# =============================================================================
+# FILE LAYOUT (v1.5)
+# =============================================================================
+# Collection-aware replacement candidate engine. Given a deck + the user's
+# owned collection + identified replacement needs, produce a ranked list of
+# replacement candidates from cards the user already owns.
+#
+# Public API:
+#   build_collection_candidate_summary(...)   main entry point
+#
+# Logical sections (read top-to-bottom):
+#   Data models               CollectionCandidate, RejectedCard, CategoryNeed
+#   Filters                   color legality, narrow requirement, artifact ctx
+#                              (some filter helpers imported by
+#                               replacements/collection_filters.py)
+#   Scoring                   Strong/Possible/Shakeup classification
+#   Promotion rules           bias-aware candidate promotion
+#                              (some helpers imported by
+#                               replacements/collection_ranking.py)
+#   Formatting                reason strings, swap guidance, bias notes
+#
+# Honesty principle: philosophy can nudge candidates, but cannot force bad
+# recommendations. Candidates are REVIEW candidates, never automatic swaps.
+# =============================================================================
+
 class CollectionCandidate:
     card_name: str
     quantity_owned: int

@@ -35,6 +35,33 @@ from random import choice
 from typing import Dict, List, Literal, Optional
 
 
+# =============================================================================
+# FILE LAYOUT (v1.5)
+# =============================================================================
+# Philosophy and persona definitions. The "big three" personas (Timmy/Tammy,
+# Johnny/Jenny, Spike) plus 18 sub-philosophy personas drive bias profiles
+# used by cut logic, replacement guidance, and report rendering.
+#
+# Public API includes:
+#   render_philosophy_guide_section(...)   report-facing guide content
+#   philosophy_subtype_for(...)            persona lookup
+#   philosophy_cut_bias_for(...)           cut-bias profile for a persona
+#   philosophy_replacement_bias_for(...)   replacement-bias profile
+#
+# Logical sections (read top-to-bottom):
+#   Persona definitions               18 sub-philosophy profiles
+#   _add_subtype helper               called at module load to populate
+#                                      PHILOSOPHY_PROFILES (do not remove)
+#   Subtype guides                    report-facing summaries per subtype
+#   Cut/replacement bias data         {tag: modifier} dicts per persona
+#   Rendering / lookup helpers        report and prompt builders
+#
+# This module does NOT perform strategy detection (that lives in
+# analysis/strategy_scoring.py). Philosophy is bias on top of strategy.
+# =============================================================================
+
+
+
 GuidePreference = Literal["masculine", "feminine", "either", "random", "none"]
 
 
