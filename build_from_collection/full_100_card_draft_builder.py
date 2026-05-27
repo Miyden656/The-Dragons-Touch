@@ -246,6 +246,24 @@ def build_full_100_card_draft(
     except Exception:
         philosophy_score_modifier = None  # type: ignore[assignment]
 
+    # v1.5.43 Item 5: Combo-aware scoring. Detect combos this commander +
+    # collection can reach and bias scoring toward (or away from) cards in
+    # those combo lines based on the user's chosen persona.
+    try:
+        from build_from_collection.combo_scorer import (
+            relevant_combos_for_build,
+            build_combo_name_lookup,
+            combo_persona_orientation,
+            combo_score_modifier,
+            combo_awareness_summary,
+        )
+    except Exception:
+        relevant_combos_for_build = None  # type: ignore[assignment]
+        build_combo_name_lookup = None  # type: ignore[assignment]
+        combo_persona_orientation = None  # type: ignore[assignment]
+        combo_score_modifier = None  # type: ignore[assignment]
+        combo_awareness_summary = None  # type: ignore[assignment]
+
     try:
         from analysis.role_tags import infer_card_role_tags
     except Exception:
@@ -264,6 +282,36 @@ def build_full_100_card_draft(
         is_card_allowed_in_bracket = None  # type: ignore[assignment]
         score_modifier_for_bracket = None  # type: ignore[assignment]
         bracket_to_int = None  # type: ignore[assignment]
+
+    # v1.5.43 Item 5: Pre-compute combos reachable from this commander +
+    # collection. Done ONCE before the pool loop so each card's lookup is O(1).
+    # "Reachable" = combo identity fits commander AND >=2 pieces are in the
+    # owned collection. Neutral personas skip this work entirely.
+    combo_orientation = "neutral"
+    combo_name_lookup: dict[str, list[Any]] = {}
+    reachable_combos: list[Any] = []
+    if (
+        relevant_combos_for_build is not None
+        and combo_persona_orientation is not None
+        and build_combo_name_lookup is not None
+    ):
+        combo_orientation = combo_persona_orientation(sub_philosophy)
+        if combo_orientation != "neutral":
+            try:
+                owned_names_for_combo = [
+                    str(c.get("name") or "") for c in owned_cards if c.get("name")
+                ]
+                # The commander itself is guaranteed in the deck — treat it as owned
+                # so commander-anchored combo lines (e.g., must_be_commander) score.
+                owned_names_for_combo.append(commander_name)
+                reachable_combos = relevant_combos_for_build(
+                    commander_identity=identity_set,
+                    owned_card_names=owned_names_for_combo,
+                )
+                combo_name_lookup = build_combo_name_lookup(reachable_combos)
+            except Exception:
+                reachable_combos = []
+                combo_name_lookup = {}
 
     # Build scored pool of nonland legal cards plus a separate land pool.
     nonland_pool: list[tuple[float, dict[str, Any], set[str], str]] = []
@@ -331,6 +379,11 @@ def build_full_100_card_draft(
         # tag-score modifiers on top of the existing scoring chain.
         if philosophy_score_modifier is not None and sub_philosophy:
             score += philosophy_score_modifier(card_tags, sub_philosophy)
+        # v1.5.43 Item 5: Combo-aware scoring. Bias toward (or away from) cards
+        # in combos this commander + collection can actually reach. Capped
+        # internally at +/- 6.0 so it nudges without overwhelming earlier signals.
+        if combo_score_modifier is not None and combo_orientation != "neutral" and combo_name_lookup:
+            score += combo_score_modifier(name, combo_name_lookup, combo_orientation)
         nonland_pool.append((score, {
             "name": name,
             "owned_quantity": int(card_entry.get("owned_quantity") or 1),
@@ -583,6 +636,14 @@ def build_full_100_card_draft(
             summary = philosophy_bias_summary(sub_philosophy)
             if summary:
                 notes.append(summary)
+        except Exception:
+            pass
+    # v1.5.43 Item 5: explain combo-aware scoring detection + bias direction.
+    if combo_awareness_summary is not None and combo_orientation != "neutral":
+        try:
+            combo_summary = combo_awareness_summary(reachable_combos, combo_orientation)
+            if combo_summary:
+                notes.append(combo_summary)
         except Exception:
             pass
 

@@ -128,18 +128,69 @@ def profile_for_display_name(display_name: str) -> dict[str, Any] | None:
     return None
 
 
+# v1.5.46: The 249-profile index returns this exact tag list for every
+# non-curated strategy — it's placeholder data, not signal. When we detect this
+# fingerprint we strip the utility-bucket-conflicting tags so non-curated
+# secondaries don't hijack Ramp/Protection/CardDraw/Removal cards into the
+# Strategy bucket. Thematic tags (combo/combat/sacrifice/tokens/tribal/etc.)
+# remain so Strategy bucket still has something to match.
+_PLACEHOLDER_GENERIC_TAGS: frozenset[str] = frozenset({
+    "artifacts", "board_wipe", "card_draw", "combat", "combo", "counters",
+    "enchantments", "graveyard", "lifegain", "protection", "ramp", "recursion",
+    "removal", "sacrifice", "spells", "tokens", "tribal",
+})
+
+# Tags to strip when we detect the placeholder — these are the ones that
+# conflict with the deck builder's utility buckets (Ramp / Card Draw / Removal
+# / Protection). Stripping them lets the utility buckets fill correctly.
+_PLACEHOLDER_UTILITY_TAGS_TO_STRIP: frozenset[str] = frozenset({
+    "ramp", "protection", "card_draw", "removal", "recursion", "board_wipe",
+})
+
+
+def _is_placeholder_tag_set(tags: set[str]) -> bool:
+    """True if the tag set is exactly the index's generic placeholder."""
+    return tags == set(_PLACEHOLDER_GENERIC_TAGS)
+
+
 def role_tags_for_display_name(display_name: str) -> set[str]:
     """Return the role tags for a strategy by display name.
 
-    Tries the strategy knowledge 249-profile catalog first, then falls back
-    to the legacy ARCHETYPE_DEFINITIONS so old saved choices still work.
+    v1.5.45 Item 6 Phase B: consults curated strategy_role_tag_profiles FIRST.
+    The 249-profile index has identical generic role_tags for every profile
+    (placeholder data), so without curated overrides every strategy looks the
+    same to the deck builder. The override module ships strategy-DEFINING tag
+    sets for the ~45 most-used strategies.
+
+    v1.5.46 Phase B fix: detect the index placeholder and filter out utility-
+    bucket-conflicting tags. Without this, picking a non-curated secondary
+    (e.g., "Kingmaker / Table-Balancer") unions the generic 17 tags onto the
+    curated primary, pulling ramp/protection/draw/removal cards back into the
+    Strategy bucket and starving the utility buckets.
+
+    Lookup order:
+      1. Curated strategy_role_tag_profiles (~45 strategies, sharp tag sets)
+      2. The 249-profile index (placeholder gets utility tags filtered)
+      3. Legacy ARCHETYPE_DEFINITIONS (anchors/payoffs/enablers)
     """
     bare = display_name_from_selector_value(display_name)
     if not bare or bare in ("Not selected yet", "None"):
         return set()
+    # v1.5.45: curated override layer.
+    try:
+        from strategy_knowledge.strategy_role_tag_profiles import role_tags_for_strategy
+        curated = role_tags_for_strategy(bare)
+        if curated:
+            return set(curated)
+    except Exception:
+        pass
     profile = profile_for_display_name(bare)
     if profile is not None:
-        return {str(t) for t in (profile.get("role_tags") or []) if t}
+        tags = {str(t) for t in (profile.get("role_tags") or []) if t}
+        # v1.5.46: strip utility tags if this is the generic placeholder.
+        if _is_placeholder_tag_set(tags):
+            tags -= _PLACEHOLDER_UTILITY_TAGS_TO_STRIP
+        return tags
     # Legacy fallback: ARCHETYPE_DEFINITIONS uses anchors/payoffs/enablers.
     try:
         from analysis.strategy_scoring import ARCHETYPE_DEFINITIONS

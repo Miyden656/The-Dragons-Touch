@@ -273,15 +273,36 @@ def infer_card_role_tags(card: dict[str, Any], commander_cards: list[dict[str, A
     # Interaction.
     if _has_any(text, ["destroy target", "exile target", "return target", "deals damage to target", "fight target", "target creature gets -"]):
         tags.add("targeted_removal")
-    if _has_any(text, ["destroy all", "exile all", "each creature", "all creatures", "each nonland permanent"]):
+    # Board wipes — narrowed to real wipe patterns. The legacy version fired on
+    # any "each creature" or "all creatures" text, which falsely tagged anthems,
+    # lord effects, goad triggers, and ETB +1/+1 counter spreaders as wipes.
+    if _has_any(text, [
+        "destroy all creature", "destroy all non", "destroy all permanent",
+        "destroy each creature", "destroy each non", "destroy each nonland permanent",
+        "exile all creature", "exile all non", "exile all permanent", "exile each creature",
+        "exile each non", "exile each nonland",
+        "return all creatures to", "return each creature to",
+        "return all nonland", "return all permanents",
+        "each creature you don't control", "each creature gets -",
+        "each other creature gets -",
+        "all creatures get -", "deals damage to each creature", "damage to each creature",
+        "each creature deals damage to itself",
+        "wrath of god",
+    ]):
         tags.add("board_wipe")
     if "counter target" in text:
         tags.add("counterspell")
         if _has_any(text, ["without paying", "rather than pay", "if you control your commander"]):
             tags.update(["free_interaction", "bracket_pressure"])
 
-    # Protection.
-    if _has_any(text, ["hexproof", "indestructible", "phase out", "protection from", "prevent all damage", "ward", "can't be countered"]):
+    # Protection. v1.5.44 Item 6 — adds "shroud" (old keyword still used by
+    # cards like Lightning Greaves, Gilded Light, Simic Sky Swallower) and
+    # "totem armor" (Auras that absorb a destroy).
+    if _has_any(text, [
+        "hexproof", "indestructible", "phase out", "protection from",
+        "prevent all damage", "ward", "can't be countered",
+        "shroud", "totem armor",
+    ]):
         tags.add("protection")
     if _has_any(text, ["your opponents can't cast spells this turn", "opponents can't cast spells this turn"]):
         tags.update(["protection", "combo_protection", "bracket_pressure"])
@@ -383,6 +404,23 @@ def infer_card_role_tags(card: dict[str, Any], commander_cards: list[dict[str, A
 
     if _has_any(text, ["flashback", "jump-start", "cast target instant", "cast target sorcery"]):
         tags.update(["spell_recursion_possible", "graveyard_enabler"])
+    # v1.5.44 Item 6 — graveyard-cast engines (Underworld Breach, Yawgmoth's Will-likes)
+    # are the backbone of storm/recursion combo lines. Tag them as both combo
+    # pieces and spell-recursion enablers so they land in the right buckets.
+    if _has_any(text, [
+        "each instant and sorcery card in your graveyard has escape",
+        "each nonland card in your graveyard has escape",
+        "you may play lands and cast spells from your graveyard",
+        "cast spells from your graveyard",
+        "cast a spell from your graveyard",
+        "you may cast that card from your graveyard",
+    ]):
+        tags.update([
+            "spell_recursion_possible",
+            "graveyard_enabler",
+            "combo_piece_possible",
+            "synergy_piece",
+        ])
 
     # Blink / ETB / LTB.
     if _has_any(text, ["enters the battlefield", "enter the battlefield", "when this creature enters", "whenever another creature enters"]):
@@ -485,7 +523,15 @@ def infer_card_role_tags(card: dict[str, Any], commander_cards: list[dict[str, A
     if not card.get("name") or not type_line:
         tags.add("manual_review")
 
-    return sorted(tags)
+    # v1.5.44 Item 6 — final overlay: apply curated card-name overrides. This
+    # runs after pattern matching so it can both ADD missing tags (e.g., make
+    # Cyclonic Rift a board_wipe) and REMOVE incorrect ones (e.g., strip the
+    # false board_wipe from Demonic Consultation).
+    try:
+        from analysis.role_tag_overrides import apply_role_tag_overrides
+        return apply_role_tag_overrides(card.get("name") or "", tags)
+    except Exception:
+        return sorted(tags)
 
 
 def summarize_role_reason(card: dict[str, Any], tags: list[str]) -> str:
