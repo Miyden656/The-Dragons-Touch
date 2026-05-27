@@ -1,8 +1,0 @@
-TDT v1.5.31.4 — Normal Report Candidate / Combo User Wording Cleanup
-
-Copy tools/ into the project root, then run:
-
-py tools\apply_v1.5.31.4_normal_report_candidate_combo_wording_cleanup.py
-py tools\verify_v1.5.31.4_normal_report_candidate_combo_wording_cleanup.py
-
-This suppresses remaining candidate-engine and combo-report internals from the normal report.
