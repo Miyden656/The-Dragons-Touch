@@ -31,6 +31,7 @@ try:
     from PySide6.QtCore import Qt, QUrl
     from PySide6.QtGui import QDesktopServices
     from PySide6.QtWidgets import (
+        QApplication,
         QCheckBox,
         QComboBox,
         QGridLayout,
@@ -47,6 +48,7 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
     from PySide6.QtCore import Qt, QUrl
     from PySide6.QtGui import QDesktopServices
     from PySide6.QtWidgets import (
+        QApplication,
         QCheckBox,
         QComboBox,
         QGridLayout,
@@ -69,6 +71,105 @@ WUBRG_COLOR_WORDS = {
     "G": "Green",
     "C": "Colorless",
 }
+
+
+# --- Build Setup Panel (v1.5.33 — Bin B foundation) ---------------------------
+# These are pulled from the existing build_from_collection + philosophy modules.
+# The Build Setup Panel surfaces them as real selectors and stores the user's
+# choices on a BuildPreferenceDataShape instance kept on the window object.
+def _build_setup_panel_options() -> dict[str, list[str]]:
+    """Return the option lists used by Build Setup Panel selectors.
+
+    v1.5.38 (Task #39): Primary + Secondary strategy now pull from the
+    Strategy Knowledge 249-profile catalog instead of the 22 macro archetypes.
+    Each entry is prefixed with its layer category — e.g.
+    "[Macro] Aggro", "[Typal] Dragon Typal" — so the user can browse by
+    strategy family in a single dropdown.
+
+    Falls back to ARCHETYPE_DEFINITIONS (the legacy 22-archetype list) if the
+    Strategy Knowledge catalog can't be loaded so the UI still builds.
+    """
+    try:
+        from strategy_knowledge.strategy_selector_catalog import (
+            selector_options_for_primary,
+            selector_options_for_secondary,
+        )
+        primary = selector_options_for_primary()
+        secondary = selector_options_for_secondary()
+    except Exception:
+        # Legacy fallback: use the 22 ARCHETYPE_DEFINITIONS names.
+        try:
+            from analysis.strategy_scoring import ARCHETYPE_DEFINITIONS
+            primary = ["Not selected yet"] + list(ARCHETYPE_DEFINITIONS.keys())
+            secondary = ["None"] + list(ARCHETYPE_DEFINITIONS.keys())
+        except Exception:
+            primary = ["Not selected yet"]
+            secondary = ["None"]
+
+    try:
+        from build_from_collection.philosophy_bracket_preferences import (
+            MAIN_PHILOSOPHY_OPTIONS,
+            SUB_PHILOSOPHY_OPTIONS,
+            BRACKET_PREFERENCE_OPTIONS,
+        )
+        mains = list(MAIN_PHILOSOPHY_OPTIONS)
+        subs = list(SUB_PHILOSOPHY_OPTIONS)
+        brackets = list(BRACKET_PREFERENCE_OPTIONS)
+    except Exception:
+        mains = ["Not selected yet"]
+        subs = ["No Persona / Not Sure Yet"]
+        brackets = ["Not Sure Yet"]
+
+    return {
+        "primary": primary,
+        "secondary": secondary,
+        "main_philosophy": mains,
+        "sub_philosophy": subs,
+        "bracket": brackets,
+    }
+
+
+def _build_sub_philosophy_by_main() -> dict[str, list[str]]:
+    """Map each main philosophy to the sub-philosophy options that belong to it.
+
+    The sub-philosophy display labels follow the format "Subtype Name — Persona Name".
+    We match the prefix (before " — ") against the canonical subtype tuples in
+    philosophy/philosophy_profile.py to group them. Mains that don't have a
+    persona family (e.g. "No Philosophy / Adventurer Guide", "Hybrid / Mixed")
+    only get the no-persona fallback.
+    """
+    try:
+        from build_from_collection.philosophy_bracket_preferences import SUB_PHILOSOPHY_OPTIONS
+        from philosophy.philosophy_profile import (
+            TIMMY_TAMMY_SUBTYPES,
+            JOHNNY_JENNY_SUBTYPES,
+            SPIKE_SUBTYPES,
+        )
+    except Exception:
+        return {}
+
+    fallback = ["No Persona / Not Sure Yet"]
+    families = {
+        "Timmy/Tammy": set(TIMMY_TAMMY_SUBTYPES),
+        "Johnny/Jenny": set(JOHNNY_JENNY_SUBTYPES),
+        "Spike": set(SPIKE_SUBTYPES),
+    }
+    mapping: dict[str, list[str]] = {
+        "No Philosophy / Adventurer Guide": list(fallback),
+        "Hybrid / Mixed": list(fallback),
+    }
+    for main, subtype_names in families.items():
+        matches = list(fallback)
+        for option in SUB_PHILOSOPHY_OPTIONS:
+            base = option.split(" — ", 1)[0].strip()
+            if base in subtype_names:
+                matches.append(option)
+        mapping[main] = matches
+    return mapping
+
+
+_COLLECTION_FIRST_TOGGLE_LABEL_ON = "Use owned cards as the starting point."
+_COLLECTION_FIRST_TOGGLE_LABEL_OFF = "Open to outside upgrades alongside my collection."
 
 COLOR_IDENTITY_FILTER_OPTIONS = [
     "Any color identity",
@@ -257,12 +358,19 @@ def _disabled_checkbox(label, checked=False):
     return box
 
 
-def _add_filter_row(grid, row, label_text, widget):
-    """Add one labeled filter row to the Commander Discovery preview grid."""
+def _add_filter_row(grid, row, label_text, widget_or_layout):
+    """Add one labeled filter row to the Commander Discovery preview grid.
+
+    Accepts either a single QWidget or a QLayout (for multi-widget rows
+    like the WUBRGC mana-color button row).
+    """
     label = QLabel(label_text)
     label.setObjectName("mutedLabel")
     grid.addWidget(label, row, 0)
-    grid.addWidget(widget, row, 1)
+    if isinstance(widget_or_layout, (QHBoxLayout, QVBoxLayout, QGridLayout)):
+        grid.addLayout(widget_or_layout, row, 1)
+    else:
+        grid.addWidget(widget_or_layout, row, 1)
 
 
 def _last_report_path(window):
@@ -275,10 +383,12 @@ def _refresh_commander_discovery_buttons(window):
     has_report = bool(path and path.exists())
     open_report_button = getattr(window, "commander_discovery_open_report_button", None)
     if open_report_button is not None:
-        # User Mode should not kick the user out of the UI to open raw markdown.
-        # Developer Mode keeps the raw report tool for QA and validation.
-        open_report_button.setVisible(_is_developer_mode(window))
-        open_report_button.setEnabled(has_report and _is_developer_mode(window))
+        # v1.5.39: Open Report button now visible + functional in both modes.
+        # The Ready for the Call? card now renders the same way regardless of
+        # interface mode, since the dev-mode construction was the one that
+        # reliably worked.
+        open_report_button.setVisible(True)
+        open_report_button.setEnabled(has_report)
     _refresh_random_commander_button(window)
 
 
@@ -307,11 +417,8 @@ def _candidate_detail_text(candidate):
         f"- Mana value: {candidate.get('mana_value_text') or candidate.get('mana_value') or 'Unknown'}",
         f"- Owned quantity: {candidate.get('owned_quantity', 0)}",
         f"- Eligibility status: {candidate.get('status_text') or candidate.get('eligibility_status') or 'Unknown'}",
-        f"- Eligibility rule: {candidate.get('eligibility_rule') or 'Unknown'}",
         f"- Type line: {candidate.get('type_line') or 'Unknown'}",
     ]
-    if candidate.get("commander_eligibility_reason"):
-        lines.append(f"- Reason: {candidate.get('commander_eligibility_reason')}")
     if candidate.get("special_commander_rule"):
         lines.append(f"- Special rule note: {candidate.get('special_commander_rule')}")
     if manual_notes:
@@ -319,17 +426,16 @@ def _candidate_detail_text(candidate):
         for note in manual_notes[:6]:
             lines.append(f"  - {note}")
     if source_files:
-        lines.append("- Source files:")
+        from pathlib import Path as _P
+        lines.append("- Found in:")
         for source in source_files[:6]:
-            lines.append(f"  - {source}")
+            lines.append(f"  - {_P(str(source)).name}")
         if len(source_files) > 6:
-            lines.append(f"  - ...and {len(source_files) - 6} more source file(s)")
+            lines.append(f"  - ...and {len(source_files) - 6} more")
     if candidate.get("oracle_text_preview"):
         lines.append("")
         lines.append("Oracle text preview:")
         lines.append(str(candidate.get("oracle_text_preview")))
-    lines.append("")
-    lines.append("v1.2.8.4 boundary: selection and filtering are informational only and do not build a deck shell yet.")
     return "\n".join(lines)
 
 
@@ -844,7 +950,91 @@ def _format_owned_cards_by_role_write_result(result, output):
         "No deck generation.",
     ])
 
+def _load_full_owned_collection_for_role_bucketing(window):
+    """v1.5.35: Load the real user collection for Owned Cards by Role.
+
+    Returns a list of card dicts shaped like:
+        {
+            "name": <card_name>,
+            "owned_quantity": <int>,
+            "oracle_text": <str>,
+            "type_line": <str>,
+            "source_files": [<filename>, ...]
+        }
+
+    Falls back to a small sample if the collection or Scryfall data can't be
+    loaded so the UI handler can still produce something useful.
+    """
+    try:
+        from commander_discovery.ui_scan_path import resolve_commander_discovery_collection_files
+        from data.scryfall_loader import load_scryfall_lookup
+        from data.collection_loader import load_collection_sources
+        from pathlib import Path as _P
+    except Exception:
+        return _sample_owned_cards_by_role_candidates_fallback()
+
+    state = getattr(window, "state", None)
+    if state is None:
+        return _sample_owned_cards_by_role_candidates_fallback()
+
+    try:
+        collection_files = resolve_commander_discovery_collection_files(state)
+        if not collection_files:
+            return _sample_owned_cards_by_role_candidates_fallback()
+
+        scryfall_cards, scryfall_lookup = load_scryfall_lookup()
+        summary = load_collection_sources(
+            collection_files,
+            mode="prefer",
+            scryfall_lookup=scryfall_lookup,
+            source_mode=str(getattr(state, "collection_source_mode", "selected_files") or "selected_files"),
+            collection_folder=getattr(state, "collection_folder", None),
+            scryfall_cards=scryfall_cards,
+        )
+    except Exception:
+        return _sample_owned_cards_by_role_candidates_fallback()
+
+    cards: list[dict] = []
+    seen_names: set[str] = set()
+    for entry in summary.entries:
+        name = entry.scryfall_name or entry.card_name
+        if not name or name in seen_names:
+            continue
+        seen_names.add(name)
+        scry = scryfall_lookup.get(name.lower(), {}) or {}
+        # Pull oracle text and type line for the role inference; fall back to whatever
+        # the collection entry already has if Scryfall didn't find it.
+        oracle_text = str(scry.get("oracle_text", "") or scry.get("card_faces", [{}])[0].get("oracle_text", "")) if scry else ""
+        type_line = str(scry.get("type_line", "") or "")
+        sources_for_card = summary.card_sources.get(name, []) or summary.card_sources.get(entry.card_name, [])
+        if not sources_for_card and entry.source_file:
+            sources_for_card = [entry.source_file]
+        cards.append({
+            "name": name,
+            "owned_quantity": int(summary.card_quantities.get(name, entry.quantity)),
+            "oracle_text": oracle_text,
+            "type_line": type_line,
+            "source_files": [_P(str(p)).name for p in sources_for_card if p],
+        })
+    if not cards:
+        return _sample_owned_cards_by_role_candidates_fallback()
+    return cards
+
+
+def _sample_owned_cards_by_role_candidates_fallback():
+    """Tiny safety-net sample for when the real collection load fails."""
+    return [
+        {"name": "Sol Ring", "owned_quantity": 1, "oracle_text": "Add two colorless mana.", "type_line": "Artifact", "source_files": []},
+        {"name": "Arcane Signet", "owned_quantity": 1, "oracle_text": "Add one mana of any color in your commander's color identity.", "type_line": "Artifact", "source_files": []},
+        {"name": "Command Tower", "owned_quantity": 1, "oracle_text": "Add one mana of any color in your commander's color identity.", "type_line": "Land", "source_files": []},
+    ]
+
+
 def _sample_owned_cards_by_role_candidates(window):
+    """Legacy sample-data path kept only as the last-resort safety fallback.
+
+    Real collection loading now goes through _load_full_owned_collection_for_role_bucketing.
+    """
     return [
         {"name": "Sol Ring", "owned_quantity": 1, "oracle_text": "Add two colorless mana.", "type_line": "Artifact"},
         {"name": "Arcane Signet", "owned_quantity": 1, "oracle_text": "Add one mana of any color in your commander's color identity.", "type_line": "Artifact"},
@@ -852,22 +1042,66 @@ def _sample_owned_cards_by_role_candidates(window):
     ]
 
 def _preview_write_owned_cards_by_role_output(window):
+    """v1.5.35: Build the Owned Cards by Role report from the real user collection.
+
+    Pulls primary/secondary strategy from the BuildPreferenceDataShape that the
+    Build Setup Panel populates. Each card row includes the collection filename
+    so the user can find the card in their physical/folder collection.
+
+    v1.5.36: progress feedback — the button + output box show "Working…" while
+    the slow Scryfall+classification work runs, so the user sees the click was
+    registered.
+    """
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
         QMessageBox.information(window, "No Commander Selected", "Select a commander candidate first.")
         _refresh_build_start_preview_controls(window)
         return
+
+    button = getattr(window, "commander_discovery_owned_cards_by_role_output_button", None)
+    box = getattr(window, "commander_discovery_owned_cards_by_role_output_box", None)
+    original_button_text = "Write Owned Cards By Role Output"
+    if button is not None:
+        try:
+            original_button_text = button.text()
+            button.setEnabled(False)
+            button.setText("Working…")
+        except Exception:
+            pass
+    if box is not None:
+        try:
+            box.setPlainText(
+                "Building Owned Cards By Role report…\n\n"
+                "This loads your Scryfall data and walks every card in your collection,\n"
+                "so it can take 20-60 seconds depending on collection size.\n\n"
+                "The button will re-enable when the report is ready."
+            )
+        except Exception:
+            pass
+    # Force the UI to repaint before the heavy work begins.
+    try:
+        QApplication.processEvents()
+    except Exception:
+        pass
+
     try:
         from build_from_collection.owned_cards_by_role_output import create_owned_cards_by_role_output
         from build_from_collection.owned_cards_by_role_report_writer import write_owned_cards_by_role_output
+
         commander_name = candidate.get("commander_name") if isinstance(candidate, dict) else getattr(candidate, "commander_name", None)
         if not commander_name:
             commander_name = candidate.get("card_name", "Selected commander") if isinstance(candidate, dict) else getattr(candidate, "card_name", "Selected commander")
+
+        prefs = getattr(window, "commander_discovery_build_preferences", None)
+        primary_strategy = (prefs.primary_strategy if prefs and prefs.primary_strategy else "Not selected yet")
+        secondary_strategy = (prefs.secondary_strategy if prefs and prefs.secondary_strategy else "None")
+
+        owned_cards = _load_full_owned_collection_for_role_bucketing(window)
         output = create_owned_cards_by_role_output(
-            owned_cards=_sample_owned_cards_by_role_candidates(window),
+            owned_cards=owned_cards,
             selected_commander=commander_name,
-            primary_strategy=getattr(window, "commander_discovery_selected_primary_strategy", "") or "Not selected yet",
-            secondary_strategy=getattr(window, "commander_discovery_selected_secondary_strategy", "") or "Not selected yet",
+            primary_strategy=primary_strategy,
+            secondary_strategy=secondary_strategy,
         )
         output_root = getattr(getattr(window, "state", None), "report_output_folder", "Outputs") or "Outputs"
         result = write_owned_cards_by_role_output(output, output_root=output_root)
@@ -877,9 +1111,16 @@ def _preview_write_owned_cards_by_role_output(window):
     except Exception as exc:
         window.commander_discovery_owned_cards_by_role_output = {}
         window.commander_discovery_owned_cards_by_role_write_result = {}
-        preview_text = f"Owned Cards By Role Output failed before completion.\n- Error detail: {exc}\n\nNo deck generation."
+        preview_text = f"Owned Cards By Role Output failed before completion.\n- Error detail: {exc}"
         QMessageBox.warning(window, "Owned Cards By Role Output Failed", str(exc))
-    box = getattr(window, "commander_discovery_owned_cards_by_role_output_box", None)
+    finally:
+        if button is not None:
+            try:
+                button.setText(original_button_text)
+                button.setEnabled(True)
+            except Exception:
+                pass
+
     if box is not None:
         box.setPlainText(preview_text)
     _refresh_build_start_preview_controls(window)
@@ -1188,6 +1429,11 @@ def _refresh_build_start_preview_controls(window):
     owned_cards_by_role_button = getattr(window, "commander_discovery_owned_cards_by_role_output_button", None)
     if owned_cards_by_role_button is not None:
         owned_cards_by_role_button.setEnabled(bool(candidate))
+    # v1.5.37: Full 100-Card Draft button — was missing from the refresh list,
+    # which kept it permanently disabled even after a commander was selected.
+    full_100_card_draft_button = getattr(window, "commander_discovery_full_100_card_draft_output_button", None)
+    if full_100_card_draft_button is not None:
+        full_100_card_draft_button.setEnabled(bool(candidate))
 
 def _preview_build_from_selected_commander(window):
     # Create a display-only v1.3 handoff preview from the selected commander.
@@ -1230,6 +1476,15 @@ def _selected_commander_candidate_changed(window, index):
     if getattr(window, "commander_discovery_candidate_detail_box", None) is not None:
         window.commander_discovery_candidate_detail_box.setPlainText(_candidate_detail_text(candidate))
     _refresh_build_start_preview_controls(window)
+    # v1.5.33: keep the Build Setup Panel summary in sync with the active commander.
+    # v1.5.34: wrapped defensively — any failure here used to silently block the
+    # rest of the click handler in user mode.
+    refresh_build_setup = getattr(window, "refresh_build_setup_panel_summary", None)
+    if callable(refresh_build_setup):
+        try:
+            refresh_build_setup()
+        except Exception:
+            pass
 
 
 def _candidate_filter_value(window, attr, default=""):
@@ -1354,11 +1609,32 @@ def _candidate_matches_text_filter(candidate, search_text):
     return text in " ".join(str(part).lower() for part in haystack_parts)
 
 
+def _candidate_matches_color_letter_filter(candidate, selected_letters):
+    """v1.5.32: Filter commanders by the set of WUBRGC letters selected via mana buttons.
+
+    Empty set = no filter (show all).
+    {'C'} = colorless commanders only (color_identity_key == '').
+    Any subset of WUBRG = exact identity match — the commander's color_identity_key,
+        sorted, must equal the selected letters sorted.
+    """
+    if not selected_letters:
+        return True
+    key = str(candidate.get("color_identity_key") or "").upper()
+    if selected_letters == {"C"}:
+        return key == ""
+    # WUBRG exact-match path: ignore stray C if it slipped in alongside colors.
+    wanted = {letter for letter in selected_letters if letter in "WUBRG"}
+    if not wanted:
+        return True
+    candidate_letters = {letter for letter in key if letter in "WUBRG"}
+    return candidate_letters == wanted
+
+
 def _candidate_matches_live_filters(window, candidate):
-    """Apply the v1.2.8 live UI filter surface to one candidate summary."""
+    """Apply the live UI filter surface to one candidate summary."""
+    color_letters = getattr(window, "commander_discovery_color_letter_filter", set()) or set()
     return (
-        _candidate_matches_identity_filter(candidate, _candidate_filter_value(window, "commander_discovery_color_identity_filter", "Any color identity"))
-        and _candidate_matches_group_filter(candidate, _candidate_filter_value(window, "commander_discovery_color_group_filter", "Any group"))
+        _candidate_matches_color_letter_filter(candidate, color_letters)
         and _candidate_matches_owned_filter(candidate, _candidate_filter_value(window, "commander_discovery_owned_quantity_filter", "Any owned quantity"))
         and _candidate_matches_type_filter(candidate, _candidate_filter_value(window, "commander_discovery_candidate_type_filter", "All possible commanders"))
         and _candidate_matches_text_filter(candidate, _candidate_filter_value(window, "commander_discovery_search_filter", ""))
@@ -1447,9 +1723,19 @@ def _run_guarded_commander_discovery_scan(window):
         window.state.status = "Commander Discovery report written"
         if getattr(window, "commander_discovery_scan_card", None) is not None:
             window.commander_discovery_scan_card.setVisible(False)
+            window.commander_discovery_scan_card.update()
         if getattr(window, "commander_discovery_ready_card", None) is not None:
             window.commander_discovery_ready_card.setVisible(True)
+            window.commander_discovery_ready_card.update()
         _populate_commander_discovery_selector(window, result)
+        # v1.5.41: force the Qt event loop to process the visibility/layout
+        # changes before showing the modal. The previous flow let the page sit
+        # in a stale state until the user navigated away and back — the modal
+        # was the only thing pulling Qt's attention.
+        try:
+            QApplication.processEvents()
+        except Exception:
+            pass
         QMessageBox.information(
             window,
             "Commander Discovery Scan Complete",
@@ -1486,12 +1772,31 @@ def _set_candidate_type_filter(window, label):
 
 
 def _choose_random_commander_candidate(window):
-    """I Want You! randomly selects one visible commander candidate after a scan."""
+    """I Want You! randomly selects one visible commander candidate after a scan.
+
+    v1.5.36: every visible state change happens via an always-on-screen status
+    label first, so the user gets immediate feedback even if QMessageBox
+    rendering is being suppressed in user mode for layout/focus reasons. This
+    label is also a diagnostic: if it doesn't update, we know the click signal
+    never reached this handler.
+    """
+    status_label = getattr(window, "commander_discovery_random_status_label", None)
+
+    def _set_status(text: str) -> None:
+        if status_label is not None:
+            try:
+                status_label.setText(text)
+            except Exception:
+                pass
+
+    _set_status("Picking a random commander…")
+
     candidates = getattr(window, "commander_discovery_candidate_summaries", []) or []
     if not candidates:
         candidates = getattr(window, "commander_discovery_all_candidate_summaries", []) or []
     combo = getattr(window, "commander_discovery_candidate_combo", None)
     if not candidates or combo is None:
+        _set_status("No commander candidates loaded yet — run a scan first.")
         QMessageBox.information(
             window,
             "No Commander Candidates Yet",
@@ -1504,10 +1809,12 @@ def _choose_random_commander_candidate(window):
         _load_filtered_candidates_into_selector(window, candidates)
     combo.setCurrentIndex(chosen)
     candidate = candidates[chosen]
+    chosen_name = candidate.get("card_name", "Unknown")
+    _set_status(f"Random pick: {chosen_name}")
     QMessageBox.information(
         window,
         "I Want You!",
-        f"Commander selected: {candidate.get('card_name', 'Unknown')}\n\nThis only selects a commander. Deck-shell building begins later in v1.3.",
+        f"Commander selected: {chosen_name}\n\nThis only selects a commander. Deck-shell building begins later in v1.3.",
     )
 
 
@@ -1556,30 +1863,120 @@ def _format_rough_shell_write_result(result, model, commander_name):
 
 
 def _preview_write_rough_shell_output(window):
+    """v1.5.36 Bin B Phase 3: Real Rough Shell with strategy-driven role guidance.
+
+    Pulls commander + primary/secondary strategy + philosophy + bracket from the
+    BuildPreferenceDataShape on the window, then emits a markdown report telling
+    the user what to look for in their collection (oracle keywords, card types,
+    example effects) for each role the chosen strategy needs.
+
+    Writes alongside the legacy rough-shell model file structure so the existing
+    writer + manifest path remains the same.
+    """
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
         QMessageBox.information(window, "No Commander Selected", "Select a commander candidate first.")
         _refresh_build_start_preview_controls(window)
         return
+
+    button = getattr(window, "commander_discovery_rough_shell_output_button", None)
+    box = getattr(window, "commander_discovery_rough_shell_output_box", None)
+    original_button_text = "Write Rough Shell Output"
+    if button is not None:
+        try:
+            original_button_text = button.text()
+            button.setEnabled(False)
+            button.setText("Working…")
+        except Exception:
+            pass
+    if box is not None:
+        try:
+            box.setPlainText("Building Rough Shell guidance from your strategy + commander selection…")
+        except Exception:
+            pass
+    try:
+        QApplication.processEvents()
+    except Exception:
+        pass
+
     try:
         from build_from_collection.rough_shell_output import create_rough_shell_output_model
         from build_from_collection.rough_shell_report_writer import write_rough_shell_output
+        from build_from_collection.rough_shell_guidance import build_rough_shell_markdown
+        from pathlib import Path as _P
+
         if isinstance(candidate, dict):
             commander_name = candidate.get("commander_name") or candidate.get("card_name") or "Selected commander"
+            color_identity = _format_color_identity_for_user(candidate)
         else:
             commander_name = getattr(candidate, "commander_name", None) or getattr(candidate, "card_name", "Selected commander")
+            color_identity = "Unknown"
+
+        prefs = getattr(window, "commander_discovery_build_preferences", None)
+        primary_strategy = (prefs.primary_strategy if prefs and prefs.primary_strategy else "")
+        secondary_strategy = (prefs.secondary_strategy if prefs and prefs.secondary_strategy else "")
+        main_philosophy = (prefs.main_philosophy if prefs else "") or ""
+        sub_philosophy = (prefs.sub_philosophy if prefs else "") or ""
+        bracket_preference = (prefs.bracket_preference if prefs else "") or ""
+        collection_first_preference = (
+            prefs.collection_first_preference if prefs and prefs.collection_first_preference
+            else _COLLECTION_FIRST_TOGGLE_LABEL_ON
+        )
+
+        # Use the legacy writer to get the output folder + write the model file
+        # (preserves existing tooling/manifest paths). We then add our richer
+        # guidance markdown into the same folder as the human-readable report.
         model = create_rough_shell_output_model()
         output_root = getattr(getattr(window, "state", None), "report_output_folder", "Outputs") or "Outputs"
         result = write_rough_shell_output(model, selected_commander=commander_name, output_root=output_root)
+
+        # Overwrite the human report with the real strategy-driven guidance.
+        guidance_md = build_rough_shell_markdown(
+            commander_name=commander_name,
+            color_identity=color_identity,
+            primary_strategy=primary_strategy,
+            secondary_strategy=secondary_strategy,
+            main_philosophy=main_philosophy,
+            sub_philosophy=sub_philosophy,
+            bracket_preference=bracket_preference,
+            collection_first_preference=collection_first_preference,
+        )
+        result_data = result.to_dict() if hasattr(result, "to_dict") else {}
+        human_report_path = result_data.get("human_report_path")
+        if human_report_path:
+            try:
+                _P(str(human_report_path)).write_text(guidance_md, encoding="utf-8")
+            except Exception:
+                pass
+
         window.commander_discovery_rough_shell_output = model.to_dict()
-        window.commander_discovery_rough_shell_write_result = result.to_dict()
-        preview_text = _format_rough_shell_write_result(result, model, commander_name)
+        window.commander_discovery_rough_shell_write_result = result_data
+        preview_text = (
+            f"Rough Shell guidance written for {commander_name}.\n"
+            f"\nStrategy: {primary_strategy or '(not selected)'}"
+            f" + {secondary_strategy or 'no secondary'}"
+            f"\nPhilosophy: {main_philosophy or '(not selected)'}"
+            f" — {sub_philosophy or '(none)'}"
+            f"\nBracket: {bracket_preference or '(not selected)'}"
+            f"\n\nFiles written:\n"
+            f"- Human-readable report: {result_data.get('human_report_path')}\n"
+            f"- AI handoff prompt: {result_data.get('ai_handoff_prompt_path')}\n"
+            f"- Manifest: {result_data.get('manifest_path')}\n"
+            f"\nThis is guidance only. No exact card selection, no deck generation."
+        )
     except Exception as exc:
         window.commander_discovery_rough_shell_output = {}
         window.commander_discovery_rough_shell_write_result = {}
-        preview_text = f"Rough Shell Output failed before completion.\n- Error detail: {exc}\n\nNo deck generation."
+        preview_text = f"Rough Shell Output failed before completion.\n- Error detail: {exc}"
         QMessageBox.warning(window, "Rough Shell Output Failed", str(exc))
-    box = getattr(window, "commander_discovery_rough_shell_output_box", None)
+    finally:
+        if button is not None:
+            try:
+                button.setText(original_button_text)
+                button.setEnabled(True)
+            except Exception:
+                pass
+
     if box is not None:
         box.setPlainText(preview_text)
     _refresh_build_start_preview_controls(window)
@@ -1619,30 +2016,136 @@ def _format_full_100_card_draft_write_result(result, model, commander_name):
 
 
 def _preview_write_full_100_card_draft_output(window):
+    """v1.5.37 Bin B Phase 4: Real 100-card decklist generator.
+
+    Pulls commander + build preferences + the user's owned collection, runs the
+    deck-building algorithm, and writes a markdown report containing a
+    copy-paste-ready decklist (for Archidekt / Moxfield) plus a role-bucket
+    breakdown showing where each card came from in the user's collection.
+    """
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
         QMessageBox.information(window, "No Commander Selected", "Select a commander candidate first.")
         _refresh_build_start_preview_controls(window)
         return
+
+    button = getattr(window, "commander_discovery_full_100_card_draft_output_button", None)
+    box = getattr(window, "commander_discovery_full_100_card_draft_output_box", None)
+    original_button_text = "Write Full 100-Card Draft Output"
+    if button is not None:
+        try:
+            original_button_text = button.text()
+            button.setEnabled(False)
+            button.setText("Generating deck…")
+        except Exception:
+            pass
+    if box is not None:
+        try:
+            box.setPlainText(
+                "Generating a 100-card draft from your collection…\n\n"
+                "Loading Scryfall, walking your collection, role-tagging every card,\n"
+                "and assembling a color-identity-legal 100-card draft.\n\n"
+                "This takes 30-90 seconds depending on collection size.\n"
+                "The button will re-enable when the draft is ready."
+            )
+        except Exception:
+            pass
+    try:
+        QApplication.processEvents()
+    except Exception:
+        pass
+
     try:
         from build_from_collection.full_100_card_draft_output import create_full_100_card_draft_output_model
         from build_from_collection.full_100_card_draft_report_writer import write_full_100_card_draft_output
-        if isinstance(candidate, dict):
-            commander_name = candidate.get("commander_name") or candidate.get("card_name") or "Selected commander"
-        else:
-            commander_name = getattr(candidate, "commander_name", None) or getattr(candidate, "card_name", "Selected commander")
+        from build_from_collection.full_100_card_draft_builder import (
+            build_full_100_card_draft,
+            render_full_100_card_draft_markdown,
+        )
+        from commander_discovery.ui_scan_path import resolve_commander_discovery_collection_files
+        from data.scryfall_loader import load_scryfall_lookup
+        from data.collection_loader import load_collection_sources
+        from pathlib import Path as _P
+
+        commander_payload = candidate if isinstance(candidate, dict) else {}
+        commander_name = commander_payload.get("commander_name") or commander_payload.get("card_name") or "Selected commander"
+
+        prefs = getattr(window, "commander_discovery_build_preferences", None)
+        primary_strategy = (prefs.primary_strategy if prefs and prefs.primary_strategy else "")
+        secondary_strategy = (prefs.secondary_strategy if prefs and prefs.secondary_strategy else "")
+        bracket_preference = (prefs.bracket_preference if prefs and prefs.bracket_preference else "")
+
+        # Reuse the same loader path the Owned Cards by Role feature uses so the
+        # collection comes in with source_files attached.
+        owned_cards = _load_full_owned_collection_for_role_bucketing(window)
+
+        # We also need scryfall_lookup directly for the builder (which inspects
+        # color identity and oracle text per card).
+        state = getattr(window, "state", None)
+        scryfall_cards, scryfall_lookup = load_scryfall_lookup()
+
+        result = build_full_100_card_draft(
+            commander_candidate=commander_payload,
+            owned_cards=owned_cards,
+            scryfall_lookup=scryfall_lookup,
+            primary_strategy=primary_strategy,
+            secondary_strategy=secondary_strategy,
+            bracket_preference=bracket_preference,
+        )
+        markdown = render_full_100_card_draft_markdown(result)
+
+        # Use the existing writer to get a manifest + folder structure, then
+        # overwrite the human-readable report file with the real decklist.
         model = create_full_100_card_draft_output_model(selected_commander=commander_name)
         output_root = getattr(getattr(window, "state", None), "report_output_folder", "Outputs") or "Outputs"
-        result = write_full_100_card_draft_output(model, selected_commander=commander_name, output_root=output_root)
-        window.commander_discovery_full_100_card_draft_output = model.to_dict()
-        window.commander_discovery_full_100_card_draft_write_result = result.to_dict()
-        preview_text = _format_full_100_card_draft_write_result(result, model, commander_name)
+        write_result = write_full_100_card_draft_output(
+            model, selected_commander=commander_name, output_root=output_root
+        )
+        write_result_data = write_result.to_dict() if hasattr(write_result, "to_dict") else {}
+        human_report_path = write_result_data.get("human_report_path")
+        if human_report_path:
+            try:
+                _P(str(human_report_path)).write_text(markdown, encoding="utf-8")
+            except Exception:
+                pass
+
+        window.commander_discovery_full_100_card_draft_output = result.to_dict()
+        window.commander_discovery_full_100_card_draft_write_result = write_result_data
+
+        # Preview text in the box: brief summary + the copy-paste decklist preview.
+        from build_from_collection.full_100_card_draft_builder import render_full_100_card_draft_plain_decklist
+        plain_decklist = render_full_100_card_draft_plain_decklist(result)
+        preview_text = (
+            f"Full 100-Card Draft written for {commander_name}.\n"
+            f"\nStrategy: {primary_strategy or '(not selected)'}"
+            f" + {secondary_strategy or 'no secondary'}"
+            f"\nTotal cards: {result.total_cards}/100"
+            f"\nColor identity: {'/'.join(result.color_identity) if result.color_identity else 'Colorless'}"
+            f"\n\nFiles written:\n"
+            f"- Human-readable + copy-paste decklist: {write_result_data.get('human_report_path')}\n"
+            f"- AI handoff prompt: {write_result_data.get('ai_handoff_prompt_path')}\n"
+            f"- Manifest: {write_result_data.get('manifest_path')}\n"
+            f"\n--- Copy-paste decklist (also in the human-readable file) ---\n\n"
+            f"{plain_decklist}\n"
+        )
     except Exception as exc:
+        import traceback as _tb
         window.commander_discovery_full_100_card_draft_output = {}
         window.commander_discovery_full_100_card_draft_write_result = {}
-        preview_text = f"Full 100-Card Draft Output failed before completion.\n- Error detail: {exc}\n\nNo deck generation."
-        QMessageBox.warning(window, "Full 100-Card Draft Output Failed", str(exc))
-    box = getattr(window, "commander_discovery_full_100_card_draft_output_box", None)
+        preview_text = (
+            f"Full 100-Card Draft failed before completion.\n"
+            f"- Error detail: {exc}\n\n"
+            f"Traceback:\n{_tb.format_exc()}"
+        )
+        QMessageBox.warning(window, "Full 100-Card Draft Failed", str(exc))
+    finally:
+        if button is not None:
+            try:
+                button.setText(original_button_text)
+                button.setEnabled(True)
+            except Exception:
+                pass
+
     if box is not None:
         box.setPlainText(preview_text)
     _refresh_build_start_preview_controls(window)
@@ -1659,8 +2162,9 @@ def build_commander_discovery_page(window):
     body = TexturedPanel(window.theme, kind="iron", glow=False)
     add_shadow(body, blur=24, y=8)
     b_layout = QVBoxLayout(body)
-    b_layout.setContentsMargins(22, 22, 22, 22)
-    b_layout.setSpacing(16)
+    # v1.5.32: tightened spacing so the Commander's Call page doesn't feel sparse.
+    b_layout.setContentsMargins(18, 14, 18, 14)
+    b_layout.setSpacing(10)
 
     if _is_developer_mode(window):
         top = QHBoxLayout()
@@ -1675,21 +2179,26 @@ def build_commander_discovery_page(window):
 
     run_card = ReportCard("Scan Your Collection for Commanders", window.theme, badges=[("Local scan", "primary"), ("Writes report", "manual")])
     window.commander_discovery_scan_card = run_card
-    run_card.body.addWidget(window.make_text(
-        "Start here. Scan your local collection to find possible commanders you own. Once a scan succeeds, this section collapses so you can focus on browsing results.",
-        paper=True,
-    ))
-    window.commander_discovery_status_box = window.readonly_text_box(
-        "No Commander Discovery scan has been run in this UI session yet.\n"
-        "- Stage a collection folder or selected collection files first.\n"
-        "- Click Scan Collection and Write Report when ready.\n"
-        "- The generated report can be opened directly from this page.\n"
-        "- Discovered commanders will populate the selector below.",
-        min_height=150,
-        max_height=230,
-    )
-    window.commander_discovery_status_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-    run_card.body.addWidget(window.commander_discovery_status_box)
+
+    # v1.5.32: Scan card compacted — match the "Ready for the Call?" pattern:
+    # the button itself is the primary affordance. The verbose status box is kept
+    # for developer mode only, since user-mode users just need to click "Scan".
+    if _is_developer_mode(window):
+        window.commander_discovery_status_box = window.readonly_text_box(
+            "No Commander Discovery scan has been run in this UI session yet.\n"
+            "- Stage a collection folder or selected collection files first.\n"
+            "- Click Scan Collection and Write Report when ready.\n"
+            "- The generated report can be opened directly from this page.\n"
+            "- Discovered commanders will populate the selector below.",
+            min_height=150,
+            max_height=230,
+        )
+        window.commander_discovery_status_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        run_card.body.addWidget(window.commander_discovery_status_box)
+    else:
+        # Keep the attribute present so downstream code that sets status text doesn't crash.
+        window.commander_discovery_status_box = window.readonly_text_box("", min_height=0, max_height=0)
+        window.commander_discovery_status_box.setVisible(False)
 
     scan_action_row = QHBoxLayout()
     window.commander_discovery_scan_button = QPushButton("Scan Collection and Write Report")
@@ -1705,6 +2214,13 @@ def build_commander_discovery_page(window):
         run_card.setVisible(False)
     b_layout.addWidget(run_card)
 
+    # v1.5.39: Ready for the Call? card is now constructed IDENTICALLY in both
+    # user mode and developer mode. Previously user mode hid the Open Report
+    # button and dropped the boundary note, and the user reported the random
+    # button intermittently failed in user mode but always worked in dev mode.
+    # The dev-mode construction works reliably, so we use it for both. The
+    # "Open Report" button is now always visible; the boundary note explains
+    # both modes plainly.
     ready_card = ReportCard("Ready for the Call?", window.theme, badges=[("Scan complete", "protected"), ("Random selector", "primary")])
     window.commander_discovery_ready_card = ready_card
     ready_row = QHBoxLayout()
@@ -1719,18 +2235,25 @@ def build_commander_discovery_page(window):
     ready_row.addWidget(window.commander_discovery_random_button)
     ready_report_button = QPushButton("Open Report")
     ready_report_button.setObjectName("utilityButton")
-    ready_report_button.setToolTip("Developer Mode only: open the raw Commander Discovery markdown report outside the UI.")
+    ready_report_button.setToolTip("Open the raw Commander Discovery markdown report outside the UI.")
     ready_report_button.clicked.connect(lambda checked=False: _open_latest_commander_discovery_report(window))
-    # Share the same report-button state target so the normal refresh helper controls it.
-    # v1.2.8.4: hidden in User Mode because raw file opening feels like dev tooling.
     window.commander_discovery_open_report_button = ready_report_button
-    ready_report_button.setVisible(_is_developer_mode(window))
+    # v1.5.39: Open Report is always visible now (was dev-mode-only).
+    ready_report_button.setVisible(True)
     ready_row.addWidget(ready_report_button)
     ready_card.body.addLayout(ready_row)
-    if _is_developer_mode(window):
-        ready_card.body.addWidget(window.default_note(
-            "Developer boundary: Ready for the Call replaces the scan card after success. I Want You! only chooses from the local result list; it does not build a deck, rerun the scanner, or modify a deck."
-        ))
+
+    # v1.5.36 + v1.5.39: always-on-screen status label updated by _choose_random_commander_candidate.
+    window.commander_discovery_random_status_label = QLabel("Ready — click I Want You! to pick a random commander.")
+    window.commander_discovery_random_status_label.setObjectName("mutedLabel")
+    window.commander_discovery_random_status_label.setStyleSheet("font-style: italic; padding-top: 4px;")
+    window.commander_discovery_random_status_label.setWordWrap(True)
+    ready_card.body.addWidget(window.commander_discovery_random_status_label)
+
+    # v1.5.39: boundary note now shown in both modes (was dev-mode-only).
+    ready_card.body.addWidget(window.default_note(
+        "I Want You! only picks from the local result list. It does not build a deck, rerun the scanner, or modify a deck."
+    ))
     ready_card.setVisible(bool(_last_report_path(window) and _last_report_path(window).exists()))
     b_layout.addWidget(ready_card)
 
@@ -1742,15 +2265,132 @@ def build_commander_discovery_page(window):
 
     filter_grid = QGridLayout()
     filter_grid.setHorizontalSpacing(14)
-    filter_grid.setVerticalSpacing(10)
+    filter_grid.setVerticalSpacing(8)
 
-    window.commander_discovery_color_identity_filter = QComboBox()
-    window.commander_discovery_color_identity_filter.addItems(COLOR_IDENTITY_FILTER_OPTIONS)
-    window.commander_discovery_color_identity_filter.currentIndexChanged.connect(lambda index: _apply_commander_discovery_filters(window))
+    # v1.5.32: Replace the Color Identity dropdown with toggleable WUBRGC buttons.
+    # State: window.commander_discovery_color_letter_filter is a set of color letters
+    # currently selected. Empty set = no color filter (show all).
+    window.commander_discovery_color_letter_filter = set()
+    window.commander_discovery_color_letter_buttons = {}
 
-    window.commander_discovery_color_group_filter = QComboBox()
-    window.commander_discovery_color_group_filter.addItems(["Any group", "Colorless", "Mono-color", "Two-color", "Three-color", "Four-color", "Five-color"])
-    window.commander_discovery_color_group_filter.currentIndexChanged.connect(lambda index: _apply_commander_discovery_filters(window))
+    # MTG guild / shard / wedge / four-color / five-color identity names.
+    # Map a frozenset of color letters to the player-friendly identity name.
+    _COLOR_IDENTITY_NAMES: dict[frozenset, str] = {
+        frozenset(): "Any color identity",
+        frozenset({"C"}): "Colorless",
+        frozenset({"W"}): "Mono-White",
+        frozenset({"U"}): "Mono-Blue",
+        frozenset({"B"}): "Mono-Black",
+        frozenset({"R"}): "Mono-Red",
+        frozenset({"G"}): "Mono-Green",
+        frozenset({"W", "U"}): "Azorius",
+        frozenset({"U", "B"}): "Dimir",
+        frozenset({"B", "R"}): "Rakdos",
+        frozenset({"R", "G"}): "Gruul",
+        frozenset({"W", "G"}): "Selesnya",
+        frozenset({"W", "B"}): "Orzhov",
+        frozenset({"U", "R"}): "Izzet",
+        frozenset({"B", "G"}): "Golgari",
+        frozenset({"W", "R"}): "Boros",
+        frozenset({"U", "G"}): "Simic",
+        frozenset({"W", "U", "B"}): "Esper",
+        frozenset({"U", "B", "R"}): "Grixis",
+        frozenset({"B", "R", "G"}): "Jund",
+        frozenset({"W", "R", "G"}): "Naya",
+        frozenset({"W", "U", "G"}): "Bant",
+        frozenset({"W", "B", "G"}): "Abzan",
+        frozenset({"W", "U", "R"}): "Jeskai",
+        frozenset({"U", "B", "G"}): "Sultai",
+        frozenset({"W", "B", "R"}): "Mardu",
+        frozenset({"U", "R", "G"}): "Temur",
+        frozenset({"W", "U", "B", "R"}): "Yore-Tiller (missing Green)",
+        frozenset({"U", "B", "R", "G"}): "Glint-Eye (missing White)",
+        frozenset({"W", "B", "R", "G"}): "Dune-Brood (missing Blue)",
+        frozenset({"W", "U", "R", "G"}): "Ink-Treader (missing Black)",
+        frozenset({"W", "U", "B", "G"}): "Witch-Maw (missing Red)",
+        frozenset({"W", "U", "B", "R", "G"}): "Five-color (WUBRG)",
+    }
+
+    def _identity_label_for(selection: set) -> str:
+        return _COLOR_IDENTITY_NAMES.get(frozenset(selection), ", ".join(sorted(selection)) or "Any color identity")
+
+    def _refresh_color_identity_label():
+        label = getattr(window, "commander_discovery_color_identity_label", None)
+        if label is not None:
+            label.setText(f"Identity: {_identity_label_for(window.commander_discovery_color_letter_filter)}")
+
+    def _on_color_letter_toggled(letter: str, checked: bool):
+        if checked:
+            window.commander_discovery_color_letter_filter.add(letter)
+        else:
+            window.commander_discovery_color_letter_filter.discard(letter)
+        # Colorless is mutually exclusive with WUBRG choices.
+        if letter == "C" and checked:
+            for other in ("W", "U", "B", "R", "G"):
+                window.commander_discovery_color_letter_filter.discard(other)
+                btn = window.commander_discovery_color_letter_buttons.get(other)
+                if btn is not None and btn.isChecked():
+                    btn.blockSignals(True)
+                    btn.setChecked(False)
+                    btn.blockSignals(False)
+        elif letter in {"W", "U", "B", "R", "G"} and checked:
+            window.commander_discovery_color_letter_filter.discard("C")
+            btn_c = window.commander_discovery_color_letter_buttons.get("C")
+            if btn_c is not None and btn_c.isChecked():
+                btn_c.blockSignals(True)
+                btn_c.setChecked(False)
+                btn_c.blockSignals(False)
+        _refresh_color_identity_label()
+        _apply_commander_discovery_filters(window)
+
+    # v1.5.32: Visual toggle feedback for the mana-color buttons. The :checked
+    # state gets a colored background that matches the mana symbol so the user
+    # can see at a glance which colors are active in the filter.
+    _COLOR_BUTTON_STYLES = {
+        "W": "background-color: #f7efc8; color: #3b2f0f; border: 2px solid #3b2f0f; font-weight: bold;",
+        "U": "background-color: #bbe1ff; color: #0b3c66; border: 2px solid #0b3c66; font-weight: bold;",
+        "B": "background-color: #555555; color: #f1f1f1; border: 2px solid #1a1a1a; font-weight: bold;",
+        "R": "background-color: #f4b3a2; color: #5a1414; border: 2px solid #5a1414; font-weight: bold;",
+        "G": "background-color: #c5e2c2; color: #1f4023; border: 2px solid #1f4023; font-weight: bold;",
+        "C": "background-color: #d0d0d0; color: #2a2a2a; border: 2px solid #2a2a2a; font-weight: bold;",
+    }
+
+    color_button_row = QHBoxLayout()
+    color_button_row.setSpacing(6)
+    for letter, label_text, tooltip in (
+        ("W", "W", "White"),
+        ("U", "U", "Blue"),
+        ("B", "B", "Black"),
+        ("R", "R", "Red"),
+        ("G", "G", "Green"),
+        ("C", "C", "Colorless"),
+    ):
+        btn = QPushButton(label_text)
+        btn.setObjectName(f"manaColorButton_{letter}")
+        btn.setCheckable(True)
+        btn.setMinimumWidth(44)
+        btn.setMaximumWidth(56)
+        btn.setMinimumHeight(34)
+        btn.setToolTip(f"Filter by {tooltip} in color identity. Toggle multiple for multi-color exact identity.")
+        # Unchecked = subdued; checked = bright color matching the mana symbol.
+        btn.setStyleSheet(
+            "QPushButton { background-color: rgba(255,255,255,0.05); color: #cfc7b8; border: 1px solid #6e604a; border-radius: 4px; font-weight: bold; }"
+            f"QPushButton:checked {{ {_COLOR_BUTTON_STYLES[letter]} border-radius: 4px; }}"
+        )
+        btn.toggled.connect(lambda checked, l=letter: _on_color_letter_toggled(l, checked))
+        window.commander_discovery_color_letter_buttons[letter] = btn
+        color_button_row.addWidget(btn)
+
+    # Color identity name label sits immediately to the right of the buttons.
+    window.commander_discovery_color_identity_label = QLabel("Identity: Any color identity")
+    window.commander_discovery_color_identity_label.setObjectName("mutedLabel")
+    window.commander_discovery_color_identity_label.setStyleSheet("font-style: italic; padding-left: 10px;")
+    color_button_row.addWidget(window.commander_discovery_color_identity_label, stretch=1)
+
+    # The legacy filter attribute remains but unused; downstream filter code reads
+    # window.commander_discovery_color_letter_filter instead. Keeping the attribute
+    # as None means _candidate_filter_value() returns its default safely.
+    window.commander_discovery_color_identity_filter = None
 
     window.commander_discovery_search_filter = QLineEdit()
     window.commander_discovery_search_filter.setPlaceholderText("Name, type line, oracle text, source file, or rule note")
@@ -1764,11 +2404,14 @@ def build_commander_discovery_page(window):
     window.commander_discovery_candidate_type_filter.addItems(CANDIDATE_TYPE_FILTER_OPTIONS)
     window.commander_discovery_candidate_type_filter.currentIndexChanged.connect(lambda index: _apply_commander_discovery_filters(window))
 
-    _add_filter_row(filter_grid, 0, "Color identity (WUBRG/C)", window.commander_discovery_color_identity_filter)
-    _add_filter_row(filter_grid, 1, "Color group", window.commander_discovery_color_group_filter)
-    _add_filter_row(filter_grid, 2, "Search text", window.commander_discovery_search_filter)
-    _add_filter_row(filter_grid, 3, "Owned quantity", window.commander_discovery_owned_quantity_filter)
-    _add_filter_row(filter_grid, 4, "Commander type", window.commander_discovery_candidate_type_filter)
+    # Keep color_group attribute as a dummy so existing downstream code (if any) still works,
+    # but don't show the row — the user requested it be removed.
+    window.commander_discovery_color_group_filter = None
+
+    _add_filter_row(filter_grid, 0, "Color identity (WUBRG/C)", color_button_row)
+    _add_filter_row(filter_grid, 1, "Search text", window.commander_discovery_search_filter)
+    _add_filter_row(filter_grid, 2, "Owned quantity", window.commander_discovery_owned_quantity_filter)
+    _add_filter_row(filter_grid, 3, "Commander type", window.commander_discovery_candidate_type_filter)
     filter_surface.body.addLayout(filter_grid)
 
     window.commander_discovery_filter_status_label = QLabel("Showing 0 of 0 possible commander(s) after filters.")
@@ -1798,16 +2441,35 @@ def build_commander_discovery_page(window):
         type_button_row.addWidget(button)
     selector.body.addLayout(type_button_row)
 
-    window.commander_discovery_all_candidate_summaries = []
-    window.commander_discovery_candidate_summaries = []
-    window.commander_discovery_selected_candidate = ""
-    window.commander_discovery_selected_candidate_summary = None
-    window.commander_discovery_build_start_handoff_preview = {}
-    window.commander_discovery_build_setup_panel_preview = {}
-    window.commander_discovery_commander_preference_handoff_preview = {}
+    # v1.5.32: Preserve previously-scanned candidate state across page rebuilds.
+    # Before this fix, navigating away and back wiped the candidate lists, which
+    # left the random "I Want You!" button disabled even though a valid scan
+    # report exists. Now we only initialize empty lists on first-ever build.
+    if not hasattr(window, "commander_discovery_all_candidate_summaries"):
+        window.commander_discovery_all_candidate_summaries = []
+    if not hasattr(window, "commander_discovery_candidate_summaries"):
+        window.commander_discovery_candidate_summaries = []
+    if not hasattr(window, "commander_discovery_selected_candidate"):
+        window.commander_discovery_selected_candidate = ""
+    if not hasattr(window, "commander_discovery_selected_candidate_summary"):
+        window.commander_discovery_selected_candidate_summary = None
+    if not hasattr(window, "commander_discovery_build_start_handoff_preview"):
+        window.commander_discovery_build_start_handoff_preview = {}
+    if not hasattr(window, "commander_discovery_build_setup_panel_preview"):
+        window.commander_discovery_build_setup_panel_preview = {}
+    if not hasattr(window, "commander_discovery_commander_preference_handoff_preview"):
+        window.commander_discovery_commander_preference_handoff_preview = {}
+
+    _preserved_summaries = list(window.commander_discovery_all_candidate_summaries)
     window.commander_discovery_candidate_combo = QComboBox()
-    window.commander_discovery_candidate_combo.addItem("Run a Commander Discovery scan to populate candidates")
-    window.commander_discovery_candidate_combo.setEnabled(False)
+    if _preserved_summaries:
+        window.commander_discovery_candidate_combo.addItems([
+            c.get("display_label", c.get("card_name", "Unknown")) for c in window.commander_discovery_candidate_summaries or _preserved_summaries
+        ])
+        window.commander_discovery_candidate_combo.setEnabled(True)
+    else:
+        window.commander_discovery_candidate_combo.addItem("Run a Commander Discovery scan to populate candidates")
+        window.commander_discovery_candidate_combo.setEnabled(False)
     window.commander_discovery_candidate_combo.currentIndexChanged.connect(lambda index: _selected_commander_candidate_changed(window, index))
     selector.body.addWidget(window.commander_discovery_candidate_combo)
 
@@ -1824,6 +2486,15 @@ def build_commander_discovery_page(window):
         ))
     b_layout.addWidget(selector)
 
+
+    # v1.5.32: The remaining cards on this page are deferred Bin B feature placeholders
+    # (Build From Collection Preview, Build Setup Panel, Commander+Preference Handoff,
+    # Build-Start Summary, Rough Shell, Full 100-Card Draft, Owned Cards By Role).
+    # None of them currently produce real deck-building output — they emit placeholder
+    # text only. The widgets are still constructed so other code paths that hold
+    # references don't crash, but the cards are only added to the visible layout
+    # when running in Developer Mode. When the Bin B features land, the gating goes.
+    _commander_call_deferred_features_visible = _is_developer_mode(window)
 
     build_start = ReportCard("Build From Collection Preview", window.theme, badges=[("v1.3.1", "primary"), ("No deck generation", "protected")])
     build_start.body.addWidget(window.make_text(
@@ -1848,32 +2519,192 @@ def build_commander_discovery_page(window):
         build_start.body.addWidget(window.default_note(
             "Developer boundary: v1.3.1 uses build_commander_selection_handoff() only for a display preview. It does not write a build file, generate cards, alter scoring, or call main.py."
         ))
-    b_layout.addWidget(build_start)
+    if _commander_call_deferred_features_visible:
+        b_layout.addWidget(build_start)
 
-    build_setup = ReportCard("Build Setup Panel Preview", window.theme, badges=[("v1.3.3", "primary"), ("Basic lands assumed", "protected"), ("No deck generation", "protected")])
+    # v1.5.33 Build Setup Panel (Bin B foundation):
+    # Replaces the old placeholder preview with real selector widgets. Choices
+    # are captured into window.commander_discovery_build_preferences (a
+    # BuildPreferenceDataShape instance from build_from_collection.preferences)
+    # and the other Bin B features (Owned Cards by Role, Rough Shell, Full
+    # 100-Card Draft) will read from this object.
+    try:
+        from build_from_collection.preferences import BuildPreferenceDataShape, DEFAULT_COLLECTION_FIRST_PREFERENCE
+        if not hasattr(window, "commander_discovery_build_preferences"):
+            window.commander_discovery_build_preferences = BuildPreferenceDataShape()
+    except Exception:
+        window.commander_discovery_build_preferences = None
+
+    _build_setup_opts = _build_setup_panel_options()
+    _sub_philosophy_by_main = _build_sub_philosophy_by_main()
+
+    build_setup = ReportCard("Build Setup Panel", window.theme, badges=[("Live selectors", "primary"), ("Captures build preferences", "protected")])
     build_setup.body.addWidget(window.make_text(
-        "Preview the future Build From Collection setup context before shell planning. Basic lands are assumed available later, while nonbasic lands remain collection-first.",
+        "Pick the strategy, philosophy, and table-level preferences for the deck you want to build around the selected commander. Choices captured here feed the Bin B Build From Collection features.",
         paper=True,
     ))
-    setup_action_row = QHBoxLayout()
-    window.commander_discovery_build_setup_panel_preview_button = QPushButton("Preview Build Setup")
-    window.commander_discovery_build_setup_panel_preview_button.setObjectName("utilityButton")
-    window.commander_discovery_build_setup_panel_preview_button.setEnabled(False)
-    window.commander_discovery_build_setup_panel_preview_button.clicked.connect(lambda checked=False: _preview_build_setup_panel(window))
-    setup_action_row.addWidget(window.commander_discovery_build_setup_panel_preview_button)
-    build_setup.body.addLayout(setup_action_row)
+
+    build_setup_grid = QGridLayout()
+    build_setup_grid.setHorizontalSpacing(14)
+    build_setup_grid.setVerticalSpacing(8)
+
+    # Track widgets on the window so external callers can read/update them.
+    window.commander_discovery_primary_strategy_selector = QComboBox()
+    window.commander_discovery_primary_strategy_selector.addItems(_build_setup_opts["primary"])
+    window.commander_discovery_secondary_strategy_selector = QComboBox()
+    window.commander_discovery_secondary_strategy_selector.addItems(_build_setup_opts["secondary"])
+    window.commander_discovery_main_philosophy_selector = QComboBox()
+    window.commander_discovery_main_philosophy_selector.addItems(_build_setup_opts["main_philosophy"])
+    window.commander_discovery_sub_philosophy_selector = QComboBox()
+    # Sub-philosophy is populated by main-philosophy selection (defaults to the
+    # first main's subs).
+    _initial_main = _build_setup_opts["main_philosophy"][0] if _build_setup_opts["main_philosophy"] else ""
+    window.commander_discovery_sub_philosophy_selector.addItems(
+        _sub_philosophy_by_main.get(_initial_main, ["No Persona / Not Sure Yet"])
+    )
+    window.commander_discovery_bracket_selector = QComboBox()
+    window.commander_discovery_bracket_selector.addItems(_build_setup_opts["bracket"])
+    window.commander_discovery_collection_first_toggle = QCheckBox(_COLLECTION_FIRST_TOGGLE_LABEL_ON)
+    window.commander_discovery_collection_first_toggle.setChecked(True)
+    window.commander_discovery_collection_first_toggle.setToolTip(
+        "On: prefer your owned cards. Off: open to outside-collection upgrades."
+    )
+
+    def _commit_build_setup_panel_choices():
+        """Push current selector values into BuildPreferenceDataShape and refresh the live summary."""
+        prefs = getattr(window, "commander_discovery_build_preferences", None)
+        if prefs is None:
+            return
+        primary = window.commander_discovery_primary_strategy_selector.currentText()
+        secondary = window.commander_discovery_secondary_strategy_selector.currentText()
+        prefs.primary_strategy = "" if primary == "Not selected yet" else primary
+        prefs.secondary_strategy = "" if secondary in ("None", "Not selected yet") else secondary
+        prefs.main_philosophy = window.commander_discovery_main_philosophy_selector.currentText()
+        prefs.sub_philosophy = window.commander_discovery_sub_philosophy_selector.currentText()
+        prefs.persona = prefs.sub_philosophy
+        prefs.bracket_preference = window.commander_discovery_bracket_selector.currentText()
+        prefs.collection_first_preference = (
+            _COLLECTION_FIRST_TOGGLE_LABEL_ON
+            if window.commander_discovery_collection_first_toggle.isChecked()
+            else _COLLECTION_FIRST_TOGGLE_LABEL_OFF
+        )
+        _refresh_build_setup_panel_summary()
+
+    def _on_main_philosophy_changed():
+        """When the main philosophy changes, repopulate the sub-philosophy dropdown."""
+        main = window.commander_discovery_main_philosophy_selector.currentText()
+        subs = _sub_philosophy_by_main.get(main, ["No Persona / Not Sure Yet"])
+        sub_combo = window.commander_discovery_sub_philosophy_selector
+        sub_combo.blockSignals(True)
+        sub_combo.clear()
+        sub_combo.addItems(subs)
+        sub_combo.setCurrentIndex(0)
+        sub_combo.blockSignals(False)
+        _commit_build_setup_panel_choices()
+
+    def _refresh_build_setup_panel_summary():
+        """Render the captured BuildPreferenceDataShape into the read-only summary box.
+
+        v1.5.34: wrapped in try/except so that any Qt object lifetime issue or
+        missing widget reference here never propagates out of a signal handler
+        chain (which was causing the "I Want You!" random button to silently
+        fail in user mode — the chain went combo.setCurrentIndex →
+        currentIndexChanged → _selected_commander_candidate_changed →
+        refresh_build_setup_panel_summary → raise, and the QMessageBox at
+        the end of _choose_random_commander_candidate never got reached).
+        """
+        try:
+            box = getattr(window, "commander_discovery_build_setup_panel_preview_box", None)
+            if box is None:
+                return
+            candidate = _current_selected_commander_candidate(window)
+            prefs = getattr(window, "commander_discovery_build_preferences", None)
+            commander_name = (candidate or {}).get("card_name") or "Not selected yet"
+            color_identity = _format_color_identity_for_user(candidate) if candidate else "Not selected yet"
+            primary = (prefs.primary_strategy if prefs else "") or "Not selected yet"
+            secondary = (prefs.secondary_strategy if prefs else "") or "None"
+            main_phi = (prefs.main_philosophy if prefs else "") or "Not selected yet"
+            sub_phi = (prefs.sub_philosophy if prefs else "") or "Not selected yet"
+            bracket = (prefs.bracket_preference if prefs else "") or "Not selected yet"
+            collection_pref = (prefs.collection_first_preference if prefs else _COLLECTION_FIRST_TOGGLE_LABEL_ON)
+            lines = [
+                "Build Setup Summary",
+                "===================",
+                "",
+                f"Commander:       {commander_name}",
+                f"Color identity:  {color_identity}",
+                "",
+                f"Primary strategy:    {primary}",
+                f"Secondary strategy:  {secondary}",
+                f"Main philosophy:     {main_phi}",
+                f"Sub-philosophy:      {sub_phi}",
+                f"Bracket preference:  {bracket}",
+                "",
+                f"Collection preference: {collection_pref}",
+                "",
+                "These choices will be used by the Build From Collection features when they are available.",
+            ]
+            box.setPlainText("\n".join(lines))
+        except Exception:
+            # Never let a presentation refresh exception break upstream signal handlers.
+            pass
+
+    # Expose the refresh helper so the commander-selection callback can call it
+    # whenever the user picks a different commander.
+    window.refresh_build_setup_panel_summary = _refresh_build_setup_panel_summary
+
+    # Wire change handlers AFTER widgets are populated so the initial addItems
+    # calls don't fire stray callbacks.
+    window.commander_discovery_primary_strategy_selector.currentIndexChanged.connect(
+        lambda index: _commit_build_setup_panel_choices()
+    )
+    window.commander_discovery_secondary_strategy_selector.currentIndexChanged.connect(
+        lambda index: _commit_build_setup_panel_choices()
+    )
+    window.commander_discovery_main_philosophy_selector.currentIndexChanged.connect(
+        lambda index: _on_main_philosophy_changed()
+    )
+    window.commander_discovery_sub_philosophy_selector.currentIndexChanged.connect(
+        lambda index: _commit_build_setup_panel_choices()
+    )
+    window.commander_discovery_bracket_selector.currentIndexChanged.connect(
+        lambda index: _commit_build_setup_panel_choices()
+    )
+    window.commander_discovery_collection_first_toggle.toggled.connect(
+        lambda checked: _commit_build_setup_panel_choices()
+    )
+
+    _add_filter_row(build_setup_grid, 0, "Primary strategy", window.commander_discovery_primary_strategy_selector)
+    _add_filter_row(build_setup_grid, 1, "Secondary strategy", window.commander_discovery_secondary_strategy_selector)
+    _add_filter_row(build_setup_grid, 2, "Main philosophy", window.commander_discovery_main_philosophy_selector)
+    _add_filter_row(build_setup_grid, 3, "Sub-philosophy / persona", window.commander_discovery_sub_philosophy_selector)
+    _add_filter_row(build_setup_grid, 4, "Bracket preference", window.commander_discovery_bracket_selector)
+    _add_filter_row(build_setup_grid, 5, "Collection-first", window.commander_discovery_collection_first_toggle)
+    build_setup.body.addLayout(build_setup_grid)
+
     window.commander_discovery_build_setup_panel_preview_box = window.readonly_text_box(
-        _empty_build_setup_panel_preview_text(),
-        min_height=240,
-        max_height=340,
+        "Pick selectors above to populate the build setup summary.",
+        min_height=200,
+        max_height=300,
     )
     window.commander_discovery_build_setup_panel_preview_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
     build_setup.body.addWidget(window.commander_discovery_build_setup_panel_preview_box)
+
+    # Keep the old preview button as a legacy attribute (always None) so any
+    # external code that still references it doesn't crash. The button itself
+    # is gone — selectors update the summary live.
+    window.commander_discovery_build_setup_panel_preview_button = None
+
     if _is_developer_mode(window):
         build_setup.body.addWidget(window.default_note(
-            "Developer boundary: v1.3.3 previews build preferences plus the Basic Land Access Assumption only. It does not generate a mana base, add lands, write a decklist, alter scoring, or call main.py."
+            "Developer note: BuildPreferenceDataShape stored on window.commander_discovery_build_preferences. Choices are presentation-only until Bin B features (Owned Cards by Role, Rough Shell, Full 100-Card Draft) consume them."
         ))
+
+    # Always visible (no dev-mode gate) — this IS the user's entry point for Bin B.
     b_layout.addWidget(build_setup)
+
+    # Seed the summary box with current state so it's populated even before any selector change.
+    _refresh_build_setup_panel_summary()
 
     commander_preference = ReportCard("Commander + Preference Handoff Preview", window.theme, badges=[("v1.3.4", "primary"), ("Setup context only", "protected"), ("No deck generation", "protected")])
     commander_preference.body.addWidget(window.make_text("Combine the selected commander, build preference placeholders, and Basic Land Access Assumption into one setup-context preview before role-bucket planning.", paper=True))
@@ -1889,7 +2720,8 @@ def build_commander_discovery_page(window):
     commander_preference.body.addWidget(window.commander_discovery_commander_preference_handoff_preview_box)
     if _is_developer_mode(window):
         commander_preference.body.addWidget(window.default_note("Developer boundary: v1.3.4 combines commander selection, build preferences, and the Basic Land Access Assumption only. It does not generate role buckets, build a mana base, add lands, score cards, alter cuts/replacements, or call main.py."))
-    b_layout.addWidget(commander_preference)
+    if _commander_call_deferred_features_visible:
+        b_layout.addWidget(commander_preference)
 
 
     build_start_summary_output = ReportCard("Build-Start Summary Output", window.theme, badges=[("v1.3.19", "primary"), ("Depth B", "protected"), ("No deck generation", "protected")])
@@ -1906,10 +2738,18 @@ def build_commander_discovery_page(window):
     build_start_summary_output.body.addWidget(window.commander_discovery_build_start_summary_output_box)
     if _is_developer_mode(window):
         build_start_summary_output.body.addWidget(window.default_note("Developer boundary: v1.3.19 writes the depth-B build-start report and AI handoff prompt only. No exact card selection, role counts, mana base, shell, or deck generation."))
-    b_layout.addWidget(build_start_summary_output)
+    if _commander_call_deferred_features_visible:
+        b_layout.addWidget(build_start_summary_output)
 
-    rough_shell_output = ReportCard("Rough Shell Output", window.theme, badges=[("v1.3.23", "primary"), ("Depth D", "protected"), ("No deck generation", "protected")])
-    rough_shell_output.body.addWidget(window.make_text("Write the selected commander's depth-D Rough Shell output as a human-readable report and AI handoff prompt. This writes a rough-shell report only; it does not complete a shell or generate a deck.", paper=True))
+    # v1.5.36 Bin B Phase 3: Rough Shell is now a real strategy-driven guidance feature.
+    # Un-defer from the developer gate so user mode sees it next to Owned Cards By Role.
+    rough_shell_output = ReportCard("Rough Shell — What To Look For", window.theme, badges=[("Live feature", "primary"), ("Strategy-driven", "protected")])
+    rough_shell_output.body.addWidget(window.make_text(
+        "Tells you what to look for in your collection for the selected commander and strategy: "
+        "the role buckets the deck needs, oracle keywords to scan for, card types, and example effects. "
+        "Pair this with Owned Cards By Role to find which of your owned cards fit each role.",
+        paper=True,
+    ))
     rough_shell_action_row = QHBoxLayout()
     window.commander_discovery_rough_shell_output_button = QPushButton("Write Rough Shell Output")
     window.commander_discovery_rough_shell_output_button.setObjectName("primaryButton")
@@ -1917,15 +2757,31 @@ def build_commander_discovery_page(window):
     window.commander_discovery_rough_shell_output_button.clicked.connect(lambda checked=False: _preview_write_rough_shell_output(window))
     rough_shell_action_row.addWidget(window.commander_discovery_rough_shell_output_button)
     rough_shell_output.body.addLayout(rough_shell_action_row)
-    window.commander_discovery_rough_shell_output_box = window.readonly_text_box(_empty_rough_shell_output_text(), min_height=320, max_height=520)
+    window.commander_discovery_rough_shell_output_box = window.readonly_text_box(
+        "Pick a commander, set Primary strategy in the Build Setup Panel, then click Write Rough Shell Output.\n\n"
+        "The report will tell you what kinds of cards to dig for in your collection — oracle keywords, "
+        "card types, and example effects — based on the strategy you picked.",
+        min_height=320,
+        max_height=520,
+    )
     window.commander_discovery_rough_shell_output_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
     rough_shell_output.body.addWidget(window.commander_discovery_rough_shell_output_box)
-    if _is_developer_mode(window):
-        rough_shell_output.body.addWidget(window.default_note("Developer boundary: v1.3.23 writes the depth-D rough-shell report and AI handoff prompt only. No exact card selection, role counts, mana base, completed shell, shell generation, or deck generation."))
+    # Always added — Rough Shell is now a live user-mode feature.
     b_layout.addWidget(rough_shell_output)
 
-    full_100_card_draft_output = ReportCard("Full 100-Card Draft Output", window.theme, badges=[("v1.3.25", "primary"), ("Depth E", "protected"), ("No deck generation", "protected")])
-    full_100_card_draft_output.body.addWidget(window.make_text("Write the selected commander's depth-E Full 100-Card Draft model output as a human-readable report and AI handoff prompt. This writes a future full-draft model only; it does not generate a 100-card deck.", paper=True))
+    # v1.5.37 Bin B Phase 4: Full 100-Card Draft is now a real deck generator.
+    # Un-defer from the developer gate so user mode sees it as the final Bin B output.
+    full_100_card_draft_output = ReportCard(
+        "Full 100-Card Draft Output",
+        window.theme,
+        badges=[("Live feature", "primary"), ("Builds a copy-paste decklist", "protected")],
+    )
+    full_100_card_draft_output.body.addWidget(window.make_text(
+        "Generates a complete 100-card Commander decklist from your owned collection: 1 commander + lands + ramp + draw + removal + protection + strategy pieces + flex. "
+        "Color-identity-correct against the selected commander, role-bucketed against your chosen primary/secondary strategy. "
+        "Output is copy-paste-ready for Archidekt, Moxfield, and other deckbuilding sites.",
+        paper=True,
+    ))
     full_100_card_draft_action_row = QHBoxLayout()
     window.commander_discovery_full_100_card_draft_output_button = QPushButton("Write Full 100-Card Draft Output")
     window.commander_discovery_full_100_card_draft_output_button.setObjectName("primaryButton")
@@ -1933,18 +2789,31 @@ def build_commander_discovery_page(window):
     window.commander_discovery_full_100_card_draft_output_button.clicked.connect(lambda checked=False: _preview_write_full_100_card_draft_output(window))
     full_100_card_draft_action_row.addWidget(window.commander_discovery_full_100_card_draft_output_button)
     full_100_card_draft_output.body.addLayout(full_100_card_draft_action_row)
-    window.commander_discovery_full_100_card_draft_output_box = window.readonly_text_box(_empty_full_100_card_draft_output_text(), min_height=320, max_height=520)
+    window.commander_discovery_full_100_card_draft_output_box = window.readonly_text_box(
+        "Pick a commander, set Primary strategy in the Build Setup Panel, then click Write Full 100-Card Draft Output.\n\n"
+        "The generator will build a complete 100-card Commander decklist using your owned cards and color-identity rules, "
+        "and produce a copy-paste-friendly list you can drop into any deckbuilding site.\n\n"
+        "Treat the output as a starting draft — pilot judgement decides final inclusions.",
+        min_height=320,
+        max_height=520,
+    )
     window.commander_discovery_full_100_card_draft_output_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
     full_100_card_draft_output.body.addWidget(window.commander_discovery_full_100_card_draft_output_box)
-    if _is_developer_mode(window):
-        full_100_card_draft_output.body.addWidget(window.default_note("Developer boundary: v1.3.25 writes the depth-E full-draft model report and AI handoff prompt only. No exact card selection, role counts, mana base, full 100-card draft generation, or deck generation."))
+    # Always added — Full 100-Card Draft is now a live user-mode feature.
     b_layout.addWidget(full_100_card_draft_output)
 
 
 
 
-    owned_cards_by_role_output = ReportCard("Owned Cards By Role Output", window.theme, badges=[("v1.3.21", "primary"), ("Depth C", "protected"), ("No deck generation", "protected")])
-    owned_cards_by_role_output.body.addWidget(window.make_text("Write the selected commander's depth-C Owned Cards By Role output as a human-readable report and AI handoff prompt. This writes possible owned-card role fits only; it does not make final deck inclusion decisions or generate a deck.", paper=True))
+    # v1.5.35 Bin B Phase 2: Owned Cards By Role is now a real feature wired
+    # to the user's collection and the Build Setup Panel's strategy choices.
+    # Un-defered from the dev-only gate so user mode sees it as the first
+    # actionable Bin B output.
+    owned_cards_by_role_output = ReportCard("Owned Cards By Role Output", window.theme, badges=[("Live feature", "primary"), ("Collection-aware", "protected")])
+    owned_cards_by_role_output.body.addWidget(window.make_text(
+        "Groups every card in your loaded collection into role buckets (ramp, card draw, removal, protection, strategy enablers, payoffs, etc.) and shows which collection file each card lives in. Use this to find where in your collection to pull cards from when building around the selected commander.",
+        paper=True,
+    ))
     owned_cards_by_role_action_row = QHBoxLayout()
     window.commander_discovery_owned_cards_by_role_output_button = QPushButton("Write Owned Cards By Role Output")
     window.commander_discovery_owned_cards_by_role_output_button.setObjectName("primaryButton")
@@ -1952,9 +2821,14 @@ def build_commander_discovery_page(window):
     window.commander_discovery_owned_cards_by_role_output_button.clicked.connect(lambda checked=False: _preview_write_owned_cards_by_role_output(window))
     owned_cards_by_role_action_row.addWidget(window.commander_discovery_owned_cards_by_role_output_button)
     owned_cards_by_role_output.body.addLayout(owned_cards_by_role_action_row)
-    window.commander_discovery_owned_cards_by_role_output_box = window.readonly_text_box(_empty_owned_cards_by_role_output_text(), min_height=320, max_height=520)
+    window.commander_discovery_owned_cards_by_role_output_box = window.readonly_text_box(
+        "Pick a commander, set your strategy in the Build Setup Panel, then click Write Owned Cards By Role Output.\n\nThe report will list every owned card grouped by role, with the collection file it came from beside each card.",
+        min_height=320,
+        max_height=520,
+    )
     window.commander_discovery_owned_cards_by_role_output_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
     owned_cards_by_role_output.body.addWidget(window.commander_discovery_owned_cards_by_role_output_box)
+    # Always added — Owned Cards By Role is now a live user-mode feature.
     b_layout.addWidget(owned_cards_by_role_output)
 
     if _is_developer_mode(window):
@@ -2018,6 +2892,12 @@ def build_commander_discovery_page(window):
         ))
         b_layout.addWidget(workflow)
 
+    # v1.5.32: If we preserved candidates across a page rebuild, re-apply the
+    # filter to repopulate the visible selector list and re-enable the random
+    # button. Without this, navigating back to the page after a scan left the
+    # "I Want You!" button stuck disabled.
+    if window.commander_discovery_all_candidate_summaries:
+        _apply_commander_discovery_filters(window)
     _refresh_commander_discovery_buttons(window)
     _refresh_build_start_preview_controls(window)
     content.addWidget(body)

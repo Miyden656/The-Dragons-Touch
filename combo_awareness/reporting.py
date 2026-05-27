@@ -9,11 +9,22 @@ Scope guard: reporting split only; no wording/behavior changes, no app integrati
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Iterable
 
 from .matcher import combo_card_names
 from .models import DeckData, MatchResult, MatchSummary
 from .normalization import identity_to_string, normalize_card_name
+
+
+def _path_basename(value: Any) -> str:
+    """Return just the filename portion of a path-like value for user-facing reports."""
+    if value is None:
+        return ""
+    try:
+        return Path(str(value)).name or str(value)
+    except Exception:
+        return str(value)
 
 def format_combo_result(result: MatchResult) -> list[str]:
     combo = result.combo
@@ -143,16 +154,35 @@ def _result_has_collection_source(result: MatchResult) -> bool:
 def _combo_size(result: MatchResult) -> int:
     return len(combo_card_names(result.combo))
 
+BRACKET_TAG_LABELS: dict[str, str] = {
+    "E": "Exhibition",
+    "C": "Core",
+    "O": "Oddball",
+    "P": "Powerful",
+    "S": "Spicy",
+    "R": "Ruthless",
+    "B": "Banned",
+}
+
+
+def _bracket_tag_label(raw: Any) -> str:
+    """Return the readable bracket tag name (e.g. 'Ruthless') or '' if unknown."""
+    code = str(raw or "").strip().upper()
+    if not code:
+        return ""
+    return BRACKET_TAG_LABELS.get(code, code)
+
+
 def _bracket_rank(result: MatchResult) -> int:
-    """Lightweight ordering for readability, not a power judgment."""
+    """Combo sort order from light to heavy: Exhibition → Core → Oddball → Powerful → Spicy → Ruthless → Banned."""
     order = {
-        "E": 0,
-        "C": 1,
-        "S": 2,
-        "R": 3,
-        "O": 4,
-        "B": 5,
-        "P": 6,
+        "E": 0,  # Exhibition (any deck / bracket 1)
+        "C": 1,  # Core (bracket 2+)
+        "O": 2,  # Oddball (bracket 2-3)
+        "P": 3,  # Powerful (bracket 3+)
+        "S": 4,  # Spicy (bracket 3-4)
+        "R": 5,  # Ruthless (bracket 4+)
+        "B": 6,  # Banned (not legal in Commander)
     }
     return order.get(str(result.combo.get("bracket_tag") or "").upper(), 99)
 
@@ -217,7 +247,9 @@ def _format_concise_combo_line(index: int, result: MatchResult) -> str:
         output = str(produces)
     else:
         output = "Combo output available in full breakdown"
-    return f"{index}. **{card_names}** — {output} _(Bracket tag: {bracket})_"
+    label = _bracket_tag_label(result.combo.get("bracket_tag") or result.combo.get("bracket"))
+    suffix = f" _(Combo tier: {label})_" if label else ""
+    return f"{index}. **{card_names}** — {output}{suffix}"
 
 def _unique_preserve_order(items: Iterable[str]) -> list[str]:
     seen: set[str] = set()
@@ -296,15 +328,24 @@ def _group_collection_potential_results(results: list[MatchResult]) -> list[dict
 def _format_grouped_concise_potential_line(index: int, group: dict[str, Any]) -> list[str]:
     missing = group["missing"]
     sources = group.get("sources") or []
-    found_in = "; ".join(sources) if sources else "loaded collection files"
+    readable_sources = [_path_basename(s) for s in sources]
+    found_in = "; ".join(readable_sources) if readable_sources else "loaded collection files"
     variant_count = len(group.get("results") or [])
     variant_word = "variant" if variant_count == 1 else "variants"
     bracket_tags = group.get("bracket_tags") or []
-    bracket_note = f" _(Bracket tags seen: {', '.join(bracket_tags)})_" if bracket_tags else ""
+    readable_tags = [
+        label for label in (_bracket_tag_label(t) for t in bracket_tags) if label
+    ]
+    # Deduplicate while preserving order.
+    seen: list[str] = []
+    for label in readable_tags:
+        if label not in seen:
+            seen.append(label)
+    tier_suffix = f" _(Combo tier: {', '.join(seen)})_" if seen else ""
 
     lines = [
         f"{index}. **{missing}** — found in: `{found_in}`",
-        f"   - Completes {variant_count:,} potential combo {variant_word}.{bracket_note}",
+        f"   - Completes {variant_count:,} potential combo {variant_word}.{tier_suffix}",
     ]
 
     examples = group.get("examples") or []
@@ -349,15 +390,9 @@ def build_combo_report_section_markdown(
 
     if standalone_artifact:
         lines: list[str] = [
-            "# v1.4-expanded-strategy-scoring — Combo Awareness Report Section",
+            "# Combo Awareness Report Section",
             "",
-            "## Scope Guard",
-            "",
-            "- This is a standalone report-section artifact.",
-            "- The same concise section may also be appended to the normal Dragon's Touch report when combo data is available.",
-            "- No API calls were made.",
-            "- Findings are informational by default, not automatic recommendations.",
-            "- This concise Combo Awareness section is embedded in the normal deck report for AI handoff when combo data is available.",
+            "_Findings are informational. Missing cards are not automatic add recommendations._",
             "",
             "## Combo Awareness",
             "",
@@ -375,7 +410,7 @@ def build_combo_report_section_markdown(
         ]
 
     lines.extend([
-        f"Deck checked: `{deck.path}`",
+        f"Deck checked: `{_path_basename(deck.path)}`",
         f"Commander(s): {', '.join(deck.commander_names) if deck.commander_names else 'Not detected'}",
         f"Commander identity: {identity_to_string(commander_identity) if commander_identity is not None else 'Unavailable/not applied'}",
         "",
@@ -383,7 +418,6 @@ def build_combo_report_section_markdown(
         "",
         f"- Infinite combos found in deck: {len(strict_summary.complete_combos):,}",
         f"- Relevant potential combos found: {len(strict_summary.one_card_away_combos):,}",
-        f"- Dragon's Touch Potential Combos: {len(strict_summary.one_card_away_combos):,}",
     ])
 
     if collection_loaded:
@@ -435,14 +469,11 @@ def build_combo_report_section_markdown(
         lines.append("")
 
     lines.extend([
-        "### Report Section Notes",
+        "### Things to keep in mind",
         "",
-        "- This section intentionally hides Combo Finder parity and all-raw debug counts.",
-        "- Collection-completable potential combos are grouped by missing card for readability.",
-        "- Full combo variant details remain available in the isolated combo awareness breakdown artifact.",
-        "- Verify template/state requirements before treating a combo as actually executable in-game.",
-        "- Check whether the playgroup is comfortable with known infinite combos before adding missing pieces.",
-        "- Missing-card combo optimization should remain opt-in; combo analysis itself is always included when data is available.",
+        "- Verify the playgroup is comfortable with known infinite combos before adding any missing pieces.",
+        "- Some combos may require specific board states or template conditions to actually execute in a game.",
+        "- Missing cards listed here are review options, not automatic add recommendations.",
         "",
     ])
 

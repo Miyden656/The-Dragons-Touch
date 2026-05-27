@@ -114,6 +114,9 @@ class OwnedCardsByRoleEntry:
     possible_roles: list[str] = field(default_factory=list)
     source: str = "collection"
     notes: list[str] = field(default_factory=list)
+    # v1.5.35: Bin B Owned Cards by Role — per-card collection source filenames
+    # so the user can locate the card in their physical/folder collection.
+    source_files: list[str] = field(default_factory=list)
     # Runtime boundary aliases.
     selects_exact_card: bool = False
     selected_for_deck: bool = False
@@ -126,6 +129,7 @@ class OwnedCardsByRoleEntry:
             "possible_roles": list(self.possible_roles),
             "source": self.source,
             "notes": list(self.notes),
+            "source_files": list(self.source_files),
             "selects_exact_card": self.selects_exact_card,
             "selected_for_deck": self.selected_for_deck,
             "final_deck_inclusion": self.final_deck_inclusion,
@@ -208,6 +212,7 @@ def create_owned_cards_by_role_entry(
     possible_roles: Iterable[str] | None = None,
     source: str = "collection",
     notes: Iterable[str] | None = None,
+    source_files: Iterable[str] | None = None,
     **_: Any,
 ) -> OwnedCardsByRoleEntry:
     """Create a preview-only owned-card role entry."""
@@ -215,12 +220,16 @@ def create_owned_cards_by_role_entry(
     name = card_name or _name_from_card(raw_card)
     quantity = owned_quantity if owned_quantity is not None else _quantity_from_card(raw_card)
     roles = list(possible_roles) if possible_roles is not None else infer_possible_roles_for_owned_card(raw_card)
+    # If source_files wasn't passed explicitly, look it up off the card dict.
+    if source_files is None and isinstance(raw_card, dict):
+        source_files = raw_card.get("source_files") or []
     return OwnedCardsByRoleEntry(
         card_name=name,
         owned_quantity=quantity,
         possible_roles=list(dict.fromkeys(roles)),
         source=source,
         notes=list(notes or ["Possible role fit only; not a final deck inclusion."]),
+        source_files=list(source_files or []),
     )
 
 
@@ -288,13 +297,30 @@ def owned_cards_by_role_output_lines(output: OwnedCardsByRoleOutput) -> list[str
     ]
 
     grouped = output.grouped_by_role or _group_entries_by_role(output.entries)
-    for role in ROLE_BUCKETS:
+    # Sort role buckets by ROLE_BUCKETS order, then any extras at the end.
+    seen_roles = [role for role in ROLE_BUCKETS if grouped.get(role)]
+    extras = [role for role in grouped if role not in seen_roles and grouped.get(role)]
+    for role in seen_roles + extras:
         cards = grouped.get(role, [])
         if not cards:
             continue
         lines.append(f"## {role}")
+        lines.append(f"_{len(cards)} owned card(s)_")
+        lines.append("")
         for card in cards:
-            lines.append(f"- {card.get('card_name', 'Unknown Card')} x{card.get('owned_quantity', 1)}")
+            name = card.get("card_name", "Unknown Card")
+            qty = card.get("owned_quantity", 1)
+            sources = card.get("source_files") or []
+            if sources:
+                # Show one card per line with its source file(s); deduplicate.
+                seen: list[str] = []
+                for src in sources:
+                    if src and src not in seen:
+                        seen.append(src)
+                source_text = "; ".join(seen)
+                lines.append(f"- **{name}** ×{qty} — found in: `{source_text}`")
+            else:
+                lines.append(f"- **{name}** ×{qty}")
         lines.append("")
 
     if not grouped:

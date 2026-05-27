@@ -1,11 +1,11 @@
 {
   "collection_source_default": "Specific local collection files",
   "collection_source_files": [
-    "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Avatar the last Airbender Box at desk.txt",
-    "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Blue Base Purple Highlight Box at Desk.txt",
     "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Brown box with sparks at Desk.txt",
     "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Commander Legends Battle for Baldur's Gate at Desk.txt",
-    "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Kamigawa Box at Desk.txt"
+    "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Kamigawa Box at Desk.txt",
+    "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in March of the Machine Aftermath Box at Desk.txt",
+    "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection/Cards in Phyrexian Bundle Box at Desk.txt"
   ],
   "collection_source_path": "C:/Users/Bruce/Desktop/The Dragon's Touch (Modular Alpha)/collection",
   "developer_report_viewer_last_view": "User View",
@@ -14,5 +14,5 @@
   "report_output_folder": "Outputs",
   "schema_version": 1,
   "theme": "Dragon Forge",
-  "ui_density": "Normal"
+  "ui_density": "Comfortable"
 }

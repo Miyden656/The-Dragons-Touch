@@ -32,6 +32,12 @@ LEGACY_MARKDOWN_SECTIONS_TO_HIDE = [
     "Final Deck Export Status",
     "v1.4 Full Regression / Lock Candidate",
     "v1.4 Stable Lock / Handoff Package",
+    # v1.5.32 — actual rendered prompt section titles (the entries above used older
+    # rendering. These cover the current emission from the strategy bridge.)
+    "v1.4 Regression / Lock Candidate Context",
+    "v1.4 Stable Lock Context",
+    "v1.4 Regression Status Note",
+    "v1.4 Stable Lock Status",
 ]
 
 LEGACY_PROMPT_BLOCK_TITLES_TO_HIDE = [
@@ -157,6 +163,18 @@ def clean_player_facing_prompt_text(prompt_text: str) -> str:
         cleaned = _remove_markdown_h2_section(cleaned, title)
 
     cleaned = cleaned.replace(OLD_COMBO_BOUNDARY, NEW_COMBO_BOUNDARY)
+
+    # v1.5.32 — strip dev-facing language from the combo handoff addendum.
+    cleaned = cleaned.replace(
+        "The full combo breakdown artifact is optional/dev-facing support. Do not require it for the normal interactive review unless the pilot asks for deeper combo troubleshooting.",
+        "The detailed combo breakdown artifact is optional. The pilot does not need to upload it unless they want deeper combo troubleshooting.",
+    )
+    # v1.5.32 — strip the dev "Current boundary:" disclaimer about unbuilt features.
+    cleaned = re.sub(
+        r"\n?Current boundary: Strategy Knowledge is report/handoff context only\.[^\n]*\n?",
+        "\n",
+        cleaned,
+    )
 
     # Defensive cleanup for leaked legacy statuses.
     cleaned = cleaned.replace("Status: **STABLE_LOCK_FAIL**", "Status: **STABLE_LOCK_PASS**")

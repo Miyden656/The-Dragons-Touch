@@ -329,31 +329,19 @@ def _build_summary_section(window):
 
 
 def _build_strategy_brain_section(window):
+    """Show the deck's detected strategy — primary, secondary, confidence, synergy packages."""
     report_path, report_text = _load_deck_report_text(window)
     file_name = Path(report_path).name if report_path else "No deck report detected"
 
-    snippet = _extract_markdown_section(report_text, ["Strategy Knowledge Integration Preview", "Strategy Knowledge"], max_lines=34)
+    snippet = _extract_markdown_section(report_text, ["Strategy Read"], max_lines=40)
 
-    if snippet:
-        return _compact_snippet(
-            "Strategy Brain",
-            file_name,
-            snippet,
-            "",
-            "Strategy Knowledge context surfaced from the generated deck report.",
-        )
-
-    try:
-        from reports.strategy_knowledge_sections import build_strategy_knowledge_viewer_summary
-        fallback = build_strategy_knowledge_viewer_summary()
-    except Exception:
-        fallback = (
-            "Strategy Brain\n"
-            "==============\n\n"
-            "Run Analysis first, then return here. Strategy Knowledge context will appear when the generated report includes the v1.4.13 handoff section."
-        )
-
-    return fallback
+    return _compact_snippet(
+        "Strategy Detection",
+        file_name,
+        snippet,
+        "Run Analysis first, then return here. Strategy detection appears once the deck report is generated.",
+        "What The Dragon's Touch thinks this deck is trying to do. Use this as context; pilot intent still decides.",
+    )
 
 
 def _build_strategy_shell_section(window):
@@ -788,7 +776,13 @@ def _candidate_display_lines_from_section(snippet, max_lines=14):
 
 
 def _owned_candidate_snippet_from_report(report_text):
+    # Headings updated for v1.5.32: the post-processor renames "Collection Pull Candidates"
+    # to "Collection-Based Review Candidates" and "Top Ranked Collection-First Candidates"
+    # to "Best Owned Cards to Review", so look up the renamed headings too.
     sections = [
+        _extract_markdown_section(report_text, ["Best Owned Cards to Review"], max_lines=60),
+        _extract_markdown_section(report_text, ["Possible Owned Candidates"], max_lines=60),
+        _extract_markdown_section(report_text, ["Collection-Based Review Candidates"], max_lines=60),
         _extract_markdown_section(report_text, ["Strong Owned Candidates"], max_lines=42),
         _extract_markdown_section(report_text, ["Top Ranked Collection-First Candidates"], max_lines=42),
         _extract_markdown_section(report_text, ["Collection Pull Candidates"], max_lines=42),
@@ -864,6 +858,7 @@ def _build_safety_section(window):
     file_name = Path(report_path).name if report_path else "No deck report detected"
 
     candidates = [
+        _extract_markdown_section(report_text, ["How to Read This Review"], max_lines=20),
         _extract_markdown_section(report_text, ["User-Facing Boundaries"], max_lines=20),
         _extract_markdown_section(report_text, ["Safety", "Safety Notes"], max_lines=20),
         _extract_first_matching_block(report_text, ["Automatic swaps", "collection-first", "not confirmed owned"], max_lines=20),
@@ -1739,6 +1734,11 @@ def build_report_viewer_page(window):
     load_report_btn.clicked.connect(lambda checked=False: _show_report_role_in_user_view("deck_report"))
 
     visible_user_view_sections = ("Handoff", "Summary", "Strategy Brain", "Owned", "Examples", "Review", "Combos", "Safety")
+    # v1.5.32: Buttons that only matter when their section has real content for the
+    # current report. We probe content after the row is built and hide buttons whose
+    # section is empty / shows only the "no content" fallback.
+    _hideable_when_empty = {"Examples", "Review"}
+    simple_view_buttons: dict[str, QPushButton] = {}
     for index, simple_view_name in enumerate(visible_user_view_sections):
         simple_view_button = QPushButton(simple_view_name)
         simple_view_button.setObjectName("smallActionButton")
@@ -1748,12 +1748,36 @@ def build_report_viewer_page(window):
         simple_view_button.setToolTip(f"Show User View section: {simple_view_name}")
         simple_view_button.clicked.connect(lambda checked=False, name=simple_view_name: _show_simple_view_section(name))
         simple_view_button_grid.addWidget(simple_view_button, index // 4, index % 4)
+        simple_view_buttons[simple_view_name] = simple_view_button
 
     for column_index in range(4):
         simple_view_button_grid.setColumnStretch(column_index, 1)
 
+    def _refresh_user_view_button_visibility():
+        """Hide buttons whose section has no real content for the loaded report."""
+        for name, button in simple_view_buttons.items():
+            if name not in _hideable_when_empty:
+                button.setVisible(True)
+                continue
+            try:
+                content = _simple_view_section_text(name) or ""
+            except Exception:
+                content = ""
+            stripped = content.strip()
+            # The compact-snippet builder always includes the title + source line plus
+            # the fallback message. We treat the section as "empty" if it contains the
+            # fallback message AND no other substantive content beyond the header.
+            is_empty = (
+                not stripped
+                or "will appear here when present" in stripped
+                or "will appear here when the deck report identifies" in stripped
+            )
+            button.setVisible(not is_empty)
+
     handoff_card.body.addLayout(simple_view_button_grid)
     _show_simple_view_section("Handoff")
+    _refresh_user_view_button_visibility()
+    window.refresh_user_view_button_visibility = _refresh_user_view_button_visibility
     window.simple_view_user_detail_box = simple_view_detail_box
     handoff_card.body.addWidget(simple_view_detail_box, stretch=1)
     user_layout.addWidget(handoff_card, stretch=1)
