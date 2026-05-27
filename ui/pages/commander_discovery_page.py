@@ -2074,6 +2074,7 @@ def _preview_write_full_100_card_draft_output(window):
         primary_strategy = (prefs.primary_strategy if prefs and prefs.primary_strategy else "")
         secondary_strategy = (prefs.secondary_strategy if prefs and prefs.secondary_strategy else "")
         bracket_preference = (prefs.bracket_preference if prefs and prefs.bracket_preference else "")
+        sub_philosophy = (prefs.sub_philosophy if prefs and prefs.sub_philosophy else "")
 
         # Reuse the same loader path the Owned Cards by Role feature uses so the
         # collection comes in with source_files attached.
@@ -2091,6 +2092,7 @@ def _preview_write_full_100_card_draft_output(window):
             primary_strategy=primary_strategy,
             secondary_strategy=secondary_strategy,
             bracket_preference=bracket_preference,
+            sub_philosophy=sub_philosophy,
         )
         markdown = render_full_100_card_draft_markdown(result)
 

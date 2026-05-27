@@ -201,6 +201,7 @@ def build_full_100_card_draft(
     primary_strategy: str = "",
     secondary_strategy: str = "",
     bracket_preference: str = "",
+    sub_philosophy: str = "",
 ) -> Full100CardDraftResult:
     """Generate a 100-card Commander decklist from the user's owned collection.
 
@@ -235,6 +236,15 @@ def build_full_100_card_draft(
         commander_amp_tags = commander_amplifier_tags(commander_scry)
     except Exception:
         commander_amp_tags = set()
+
+    # v1.5.42 Item 4: Philosophy / persona bias. Different sub-philosophies
+    # (Battlecruiser vs Engine Builder vs Efficiency Optimizer etc.) get
+    # different tag-score modifiers so the same commander+collection produces
+    # meaningfully different decks per persona choice.
+    try:
+        from build_from_collection.philosophy_bias import philosophy_score_modifier
+    except Exception:
+        philosophy_score_modifier = None  # type: ignore[assignment]
 
     try:
         from analysis.role_tags import infer_card_role_tags
@@ -317,6 +327,10 @@ def build_full_100_card_draft(
                 # 1.5 per matching amplifier tag, capped so a 5-tag overlap
                 # doesn't completely dominate the pool ranking.
                 score += min(len(overlap) * 1.5, 6.0)
+        # v1.5.42 Item 4: Philosophy / persona bias. Add the persona's
+        # tag-score modifiers on top of the existing scoring chain.
+        if philosophy_score_modifier is not None and sub_philosophy:
+            score += philosophy_score_modifier(card_tags, sub_philosophy)
         nonland_pool.append((score, {
             "name": name,
             "owned_quantity": int(card_entry.get("owned_quantity") or 1),
@@ -560,6 +574,15 @@ def build_full_100_card_draft(
         try:
             from build_from_collection.commander_text_scorer import commander_amplifier_summary
             notes.append(commander_amplifier_summary(commander_scry))
+        except Exception:
+            pass
+    # v1.5.42 Item 4: explain the philosophy / persona bias applied.
+    if sub_philosophy:
+        try:
+            from build_from_collection.philosophy_bias import philosophy_bias_summary
+            summary = philosophy_bias_summary(sub_philosophy)
+            if summary:
+                notes.append(summary)
         except Exception:
             pass
 
