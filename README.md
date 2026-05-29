@@ -1,4 +1,4 @@
-# The Dragon's Touch — v1.5 Source-Run Beta
+# The Dragon's Touch — v1.6.0 Community Release
 
 **The Dragon's Touch** is a free community Commander deck-building support tool for *Magic: The Gathering*.
 
@@ -16,23 +16,38 @@ The current beta is distributed as a **source-run ZIP**. It is not an installed 
 
 ---
 
-## Current beta status
+## Current release
 
 ```text
-Current polish version: v1.5.0
-Stable base:            v0.11 Stable — Source-Run Beta Handoff Lock
-Package type:           Source-run ZIP
-Primary launch:         py desktop_ui_launcher.py
-Fallback launch:        py ui\dragons_touch_pyside6_workstation.py
+Current version:    v1.6.0 (community release)
+Stable base:        v1.5.0 (six-signal scoring chain locked)
+Distribution:       Standalone EXE bundle + source-run ZIP
+EXE launch:         Double-click TheDragonsTouch.exe
+Source-run launch:  py desktop_ui_launcher.py
+                    py ui\dragons_touch_pyside6_workstation.py (fallback)
 ```
 
-The EXE/installer path remains paused. The protected beta handoff path is source-run.
+The v1.6.0 community release is the first version distributed as a standalone EXE bundle for users who don't want to install Python. See [Distribution](#distribution--two-paths) below for both paths.
 
 ---
 
-## What's new in v1.5
+## What's new in v1.6
 
-v1.5 ships the **Commander's Call** deck-building suite (Bin B) and a fully wired six-signal scoring chain.
+v1.6 is a stability + UX overhaul on top of the v1.5 scoring engine.
+
+- **Closed the long-standing navigate-away-and-back bug.** Post-scan button clicks now fire on first try without requiring the workaround. Root cause was a stale shiboken widget reference in a refresh function silently aborting the scan handler — diagnosed via four rounds of targeted logging, fixed by the new `_safe_widget_call` helper applied codebase-wide.
+- **70 → 1 popup removal.** Confirmation dialogs, success notifications, "no commander selected" nudges, and "X failed" error popups have all been replaced with inline status updates, disabled buttons + tooltips, or silent no-ops. The only remaining popup is the destructive "Reset Settings to Defaults" confirmation.
+- **Per-card "why" annotations on the Full 100-Card Draft.** Each card in the generated decklist surfaces the scoring signals that earned it a slot — *Strategy fit*, *Commander amplifier*, *Combo piece*, *Persona pick* — so you can scan the deck and see at a glance what role each card is playing.
+- **First-run polish.** A "Where to Next?" guidance card on Deck Selection explains the two main flows. The Archidekt export tip is now inline at the top of the Select File tab. When the scan fails because Scryfall data is missing or no collection is staged, the app auto-navigates to Settings with an explanatory status banner instead of a dead-end warning.
+- **State preservation across page rebuilds.** Build Setup Panel selections (Primary/Secondary strategy, Philosophy/Sub-philosophy, Bracket, Collection toggle) now persist when you navigate away and back.
+- **Standalone EXE build pipeline.** New `TheDragonsTouch.spec` + `build_exe.bat` produces a one-folder distributable. See [Distribution](#distribution--two-paths).
+- **New stability test.** `tests/test_safe_widget_call.py` reproduces the navigate-away-and-back bug pattern against mocked stale widget stubs to prevent regression.
+
+---
+
+## What v1.5 shipped (still active in v1.6)
+
+v1.5 added the **Commander's Call** deck-building suite (Bin B) and the fully wired six-signal scoring chain.
 
 The Full 100-Card Draft Builder now respects six independent signals when picking cards for your deck:
 
@@ -58,13 +73,6 @@ Top-level v1.5 features:
 - **18 sub-philosophy personas** that drive meaningfully different decks from the same commander+collection
 - **Combo Awareness** plugged into the picker — combo-leaning personas float combo pieces in, combo-averse personas push them out
 - **249 strategy profile catalog** with 46 hand-curated strategy-defining tag sets so the Strategy bucket actually reflects the chosen strategy
-
-### Stability hardening (late v1.5)
-
-- Closed a long-standing post-scan bug where clicks stopped firing until you navigated away and back — fixed by making the refresh functions safe against stale shiboken widget references after page rebuilds
-- Eliminated a flash popup that briefly appeared during page transitions (a parentless QPushButton becoming a top-level Qt window)
-- Stale-reference safety pattern (`_safe_widget_call`) applied codebase-wide to the same vulnerability class
-- New `tests/test_safe_widget_call.py` smoke test reproduces the bug pattern against mocked stale stubs to prevent regression
 
 ---
 
@@ -163,36 +171,19 @@ ui\                  PySide6 desktop UI (pages, services, theme)
 
 ---
 
-## Required source-run tools
+## Feedback & bug reports
 
-For this beta, the tools folder should include:
+The best place to report a bug, request a feature, or share feedback is the project's [GitHub Issues](https://github.com/Miyden656/The-Dragons-Touch/issues) page.
 
-```text
-tools\data_setup.py
-tools\build_combo_index.py
-tools\download_commander_spellbook_bulk_json.py
-```
+When reporting a bug, what helps most:
 
----
+- What you were trying to do (the goal, not just the click sequence)
+- What you expected vs. what actually happened
+- A screenshot if it's a UI issue
+- The contents of any error message or traceback
+- Which commander / decklist / collection you were working with (no need to share the full file — just the broad strokes)
 
-## Beta tester feedback
-
-Useful feedback includes:
-
-- Did the app launch?
-- Could you reach Settings → Data Setup?
-- Did data setup work?
-- Could you load a decklist?
-- Did Run Analysis complete?
-- Did Report Viewer open the report?
-- Was the report understandable?
-- Were cut suggestions useful?
-- Were any cards clearly misunderstood?
-- Did any error appear?
-- What deck did you test?
-- Did Combo Awareness appear to work as expected?
-
-Screenshots and copied error text are very helpful.
+For feature requests, framing it as *"I want to do X but the tool makes me do Y"* is more useful than a specific implementation request — it lets the design respond to the underlying need.
 
 ---
 
