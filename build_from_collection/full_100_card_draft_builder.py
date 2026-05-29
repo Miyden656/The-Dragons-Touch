@@ -83,6 +83,14 @@ class DraftedCardEntry:
     is_commander: bool = False
     mana_value: float = 0.0
     type_line: str = ""
+    # Short reason tags describing WHY this card was picked. Drawn from the
+    # six-signal scoring chain: strategy fit (card tags overlap chosen
+    # strategy's tag set), commander amplifier (card tags overlap the
+    # commander's derived amplifier tags), combo piece (card name appears in
+    # a combo this commander+collection can reach), persona pick (philosophy
+    # bias score modifier was meaningfully positive). Empty for basic lands
+    # and the commander itself.
+    why_tags: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -94,6 +102,7 @@ class DraftedCardEntry:
             "is_commander": self.is_commander,
             "mana_value": self.mana_value,
             "type_line": self.type_line,
+            "why_tags": list(self.why_tags),
         }
 
 
@@ -362,6 +371,13 @@ def build_full_100_card_draft(
 
         bucket = _classify_role_bucket(card_tags, combined_strategy_tags)
         score = _score_card(card_tags, combined_strategy_tags, mana_value)
+        # Track which signals contributed to this card's score — used to render
+        # short per-card "why" tags in the markdown output so the user can see
+        # at a glance why a particular card was included.
+        why_tags: list[str] = []
+        strategy_match_count = len(card_tags & combined_strategy_tags) if combined_strategy_tags else 0
+        if strategy_match_count > 0:
+            why_tags.append("Strategy fit")
         # v1.5.40: Apply the bracket score modifier (soft preference shift).
         if score_modifier_for_bracket is not None and bracket_preference:
             score += score_modifier_for_bracket(card_tags, bracket_preference)
@@ -375,21 +391,30 @@ def build_full_100_card_draft(
                 # 1.5 per matching amplifier tag, capped so a 5-tag overlap
                 # doesn't completely dominate the pool ranking.
                 score += min(len(overlap) * 1.5, 6.0)
+                why_tags.append("Commander amplifier")
         # v1.5.42 Item 4: Philosophy / persona bias. Add the persona's
         # tag-score modifiers on top of the existing scoring chain.
         if philosophy_score_modifier is not None and sub_philosophy:
-            score += philosophy_score_modifier(card_tags, sub_philosophy)
+            philosophy_amount = philosophy_score_modifier(card_tags, sub_philosophy)
+            score += philosophy_amount
+            if philosophy_amount >= 1.0:
+                why_tags.append("Persona pick")
         # v1.5.43 Item 5: Combo-aware scoring. Bias toward (or away from) cards
         # in combos this commander + collection can actually reach. Capped
         # internally at +/- 6.0 so it nudges without overwhelming earlier signals.
         if combo_score_modifier is not None and combo_orientation != "neutral" and combo_name_lookup:
             score += combo_score_modifier(name, combo_name_lookup, combo_orientation)
+            # Flag combo pieces regardless of orientation — the user wants to
+            # know which cards form a reachable combo line in their deck.
+            if combo_name_lookup.get(name.lower()):
+                why_tags.append("Combo piece")
         nonland_pool.append((score, {
             "name": name,
             "owned_quantity": int(card_entry.get("owned_quantity") or 1),
             "source_files": list(card_entry.get("source_files") or []),
             "type_line": type_line,
             "mana_value": mana_value,
+            "why_tags": why_tags,
         }, card_tags, bucket))
 
     # Sort nonland pool by score descending.
@@ -415,6 +440,7 @@ def build_full_100_card_draft(
             source_files=card["source_files"],
             mana_value=card["mana_value"],
             type_line=card["type_line"],
+            why_tags=list(card.get("why_tags") or []),
         ))
         picked_names.add(card["name"])
 
@@ -432,6 +458,7 @@ def build_full_100_card_draft(
             source_files=card["source_files"],
             mana_value=card["mana_value"],
             type_line=card["type_line"],
+            why_tags=list(card.get("why_tags") or []),
         ))
         picked_names.add(card["name"])
 
@@ -461,6 +488,7 @@ def build_full_100_card_draft(
                 source_files=card["source_files"],
                 mana_value=card["mana_value"],
                 type_line=card["type_line"],
+                why_tags=list(card.get("why_tags") or []),
             ))
             picked_names.add(card["name"])
             added_in_pass = True
@@ -697,6 +725,11 @@ def render_full_100_card_draft_markdown(result: Full100CardDraftResult) -> str:
         lines.append("")
         for entry in bucket_entries:
             line = f"- **{entry.card_name}** ×{entry.quantity}"
+            # Per-card "why" annotation — short reason tags from the scoring chain.
+            # Shows the user at a glance why a particular card was included
+            # (strategy fit, commander amplifier, combo piece, persona pick).
+            if entry.why_tags:
+                line += f" — _why: {', '.join(entry.why_tags)}_"
             if entry.source_files:
                 seen: list[str] = []
                 for src in entry.source_files:
