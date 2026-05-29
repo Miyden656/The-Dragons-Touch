@@ -1,0 +1,8 @@
+# Build-time dependencies for producing a Windows EXE bundle.
+# These are NOT needed by end users who download the prebuilt EXE — only by
+# someone running build_exe.bat to produce a new EXE from source.
+#
+# Install with:
+#     py -3 -m pip install -r build-requirements.txt
+
+pyinstaller>=6.0

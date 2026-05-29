@@ -13,6 +13,8 @@ env/
 build/
 dist/
 *.spec
+# Our tracked PyInstaller spec — exception to the *.spec ignore.
+!TheDragonsTouch.spec
 
 # Local generated outputs
 Outputs/
