@@ -1,23 +1,24 @@
 """Rough Shell Output Model.
 
-v1.3.22.1 syntax recovery hotfix.
+Defines the depth-D Rough Shell section schema and AI handoff text.
 
-This module supports depth D - Rough Shell by defining a rough shell
-output model. It is intentionally model-only for now.
+Rough Shell is "what to look for in your collection" guidance for the
+commander + strategy combination — it lists relevant role tags with
+plain-English descriptions, oracle keywords, and example cards. It
+is intentionally not a generated deck.
 
-Rough shell, not final deck.
+The actual guidance markdown is built by build_rough_shell_markdown() in
+rough_shell_guidance.py. This module supplies the surrounding section
+schema and AI handoff prompt used by the report writer.
 
-No exact card selection in this patch.
-No final deck inclusion decisions in this patch.
-No role-count target generation in this patch.
-No mana-base generation in this patch.
-No land insertion in this patch.
-No completed shell generation in this patch.
-No shell generation in this patch.
-No deck generation in this patch.
+Land policy:
+- Basic lands are assumed available.
+- Nonbasic lands remain collection-first unless outside-collection upgrades are allowed by the user.
 
-Basic lands are assumed available.
-Nonbasic lands remain collection-first unless outside-collection upgrades are allowed by the user.
+The dataclass boundary flags (generates_deck, generates_shell, etc.) remain
+False because Rough Shell genuinely is guidance-only — the deck-generation
+features live at depth E (Full 100-Card Draft). Do not flip them without
+auditing dev-mode contract callers.
 """
 
 from __future__ import annotations
@@ -30,12 +31,11 @@ DEFAULT_ROUGH_SHELL_SECTIONS: tuple[str, ...] = (
     "Commander Context",
     "Strategy Plan",
     "Core Role Buckets",
-    "Owned Cards By Role",
-    "Possible Rough Shell Sections",
+    "What To Look For In Your Collection",
+    "Role-Tag Guidance",
     "Basic Land Access Policy",
     "Nonbasic Land Collection-First Policy",
-    "Future Mana Base Plan",
-    "Future Final Deck Draft",
+    "Next Step: Full 100-Card Draft",
 )
 
 
@@ -102,9 +102,9 @@ class RoughShellOutputModel:
     )
 
     boundary_note: str = (
-        "Rough shell, not final deck. This output model does not select exact cards, "
-        "make final deck inclusion decisions, generate role-count targets, generate a mana base, "
-        "insert lands, complete a shell, generate a shell, or generate a deck."
+        "Rough Shell is collection-scan guidance, not a generated deck. "
+        "It tells the user what to look for in their collection for the chosen commander + strategy. "
+        "Use the Full 100-Card Draft button to generate an actual decklist."
     )
 
     def to_dict(self) -> dict[str, Any]:
@@ -162,56 +162,45 @@ def rough_shell_section_names(model: RoughShellOutputModel | None = None) -> lis
 
 
 def rough_shell_output_model_lines(model: RoughShellOutputModel | None = None) -> list[str]:
-    """Return human-readable rough-shell output model lines."""
+    """Return human-readable rough-shell summary lines."""
     actual = model or create_rough_shell_output_model()
     lines = [
         actual.name,
         f"Build depth: {actual.build_depth_label}",
-        "Rough shell, not final deck.",
+        "Rough Shell is collection-scan guidance, not a generated deck.",
         actual.basic_land_policy,
         actual.nonbasic_land_policy,
         "",
-        "Rough shell sections:",
+        "Rough Shell sections:",
     ]
     for section in actual.sections:
         lines.append(f"- {section.name}")
     lines.extend([
         "",
-        "Boundary:",
-        "- No exact card selection in this patch.",
-        "- No final deck inclusion decisions in this patch.",
-        "- No role-count target generation in this patch.",
-        "- No mana-base generation in this patch.",
-        "- No land insertion in this patch.",
-        "- No completed shell generation in this patch.",
-        "- No shell generation in this patch.",
-        "- No deck generation in this patch.",
+        "To generate an actual decklist from your collection, use the Full 100-Card Draft button.",
     ])
     return lines
 
 
 def rough_shell_handoff_prompt(model: RoughShellOutputModel | None = None) -> str:
-    """Return AI handoff prompt text for the rough-shell output model."""
+    """Return AI handoff prompt text for the Rough Shell guidance."""
     actual = model or create_rough_shell_output_model()
     lines = [
-        "AI Handoff Prompt - Rough Shell Output Model",
+        "AI Handoff Prompt - Rough Shell",
         "",
-        "Use this as depth D setup context only.",
-        "This is a rough shell model, not a final decklist and not a completed shell.",
-        "Preserve the not-final boundary.",
-        "Do not select exact cards yet unless a later patch explicitly allows it.",
-        "Do not make final deck inclusion decisions.",
-        "Do not generate role-count targets.",
-        "Do not generate a mana base.",
-        "Do not insert lands.",
-        "Do not generate a completed shell.",
-        "Do not generate a deck.",
+        "This file accompanies collection-scan guidance for a Commander build.",
+        "It is not a generated decklist — it tells the user what to look for in their collection.",
         "",
         f"Build depth: {actual.build_depth_label}",
         actual.basic_land_policy,
         actual.nonbasic_land_policy,
         "",
-        "Sections to preserve:",
+        "Useful follow-ups for the user:",
+        "- Suggest owned-card candidates that match the role-tag guidance shown.",
+        "- Flag missing roles where the user's collection may be thin.",
+        "- Recommend affordable outside-collection upgrades for weak roles, if the user is open to them.",
+        "",
+        "Sections in the guidance file:",
     ]
     lines.extend(f"- {section.name}" for section in actual.sections)
     return "\n".join(lines)

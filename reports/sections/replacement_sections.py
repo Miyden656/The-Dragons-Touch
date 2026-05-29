@@ -796,7 +796,7 @@ def _v0954_add_budget_bracket_labels_to_exact_preview(report_text: str) -> str:
     if "Bracket/table-fit status: review required" not in safety_block:
         additions.append("- Bracket/table-fit status: review required before recommending exact examples.")
     if "Price data source: none" not in safety_block:
-        additions.append("- Price data source: none in this patch.")
+        additions.append("- Price data source: none.")
     if "Power-level guarantee: none" not in safety_block:
         additions.append("- Power-level guarantee: none; these remain exploratory examples.")
 

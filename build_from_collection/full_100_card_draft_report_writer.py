@@ -1,19 +1,16 @@
 """Full 100-Card Draft UI / Report Write Hook.
 
-v1.3.25 writes depth-E Full 100-Card Draft model output files.
+Writes the depth-E Full 100-Card Draft output to disk: a human-readable
+markdown report, an AI handoff prompt, and a manifest.
 
-This module writes the model-only full-draft report and AI handoff prompt.
-It does not generate the actual 100-card deck.
+The UI overwrites the human-readable report file with the real decklist
+markdown produced by render_full_100_card_draft_markdown() in
+full_100_card_draft_builder. This module supplies the surrounding folder,
+handoff prompt, and manifest scaffolding.
 
-No exact card selection in this patch.
-No final deck inclusion decisions in this patch.
-No role-count target generation in this patch.
-No mana-base generation in this patch.
-No land insertion in this patch.
-No completed shell generation in this patch.
-No shell generation in this patch.
-No full 100-card draft generation in this patch.
-No deck generation in this patch.
+The dataclass boundary flags (full_100_card_draft_generation, deck_generation,
+etc.) remain False because this writer itself does not generate cards — the
+builder does. Do not flip them without auditing dev-mode contract callers.
 """
 
 from __future__ import annotations
@@ -141,23 +138,25 @@ def write_full_100_card_draft_output(
     ai_handoff_prompt_path = out_dir / "ai_handoff_prompt.md"
     manifest_path = out_dir / "full_100_card_draft_manifest.json"
 
-    human_lines = ["# Full 100-Card Draft Output Model", "", f"Selected commander: {commander_name}", ""]
+    human_lines = ["# Full 100-Card Draft", "", f"Selected commander: {commander_name}", ""]
     human_lines.extend(full_100_card_draft_output_model_lines(model))
-    human_lines.extend(["", "This is a depth-E model/report only, not a generated 100-card deck and not a final decklist.", "No full 100-card draft generation occurred.", "No deck generation occurred."])
+    human_lines.extend([
+        "",
+        "The UI overwrites this file with the real generated decklist markdown.",
+        "If you are reading this scaffold text, the overwrite step did not run.",
+    ])
     human_report = "\n".join(human_lines).rstrip() + "\n"
 
     ai_prompt = full_100_card_draft_handoff_prompt(model)
     if "handoff" not in ai_prompt.lower():
         ai_prompt = "# AI Handoff Prompt - Full 100-Card Draft\n\n" + ai_prompt
-    if "not a final decklist" not in ai_prompt.lower():
-        ai_prompt += "\n\nPreserve this boundary: this is not a final decklist."
-    if "not a generated 100-card deck" not in ai_prompt.lower():
-        ai_prompt += "\nPreserve this boundary: this is not a generated 100-card deck."
+    if "starting point" not in ai_prompt.lower() and "starting draft" not in ai_prompt.lower():
+        ai_prompt += "\n\nPreserve this boundary: the draft is a starting point, not the user's final committed decklist."
     if not ai_prompt.endswith("\n"):
         ai_prompt += "\n"
 
     manifest = {
-        "output_type": "Full 100-Card Draft Output Model",
+        "output_type": "Full 100-Card Draft",
         "selected_commander": commander_name,
         "build_depth": getattr(model, "depth_key", "E"),
         "build_depth_key": getattr(model, "build_depth_key", "E"),
@@ -167,24 +166,26 @@ def write_full_100_card_draft_output(
         "human_report_path": str(human_report_path),
         "ai_handoff_prompt_path": str(ai_handoff_prompt_path),
         "manifest_path": str(manifest_path),
-        "exact_card_selection": False,
-        "final_deck_inclusion_decisions": False,
-        "role_count_target_generation": False,
-        "mana_base_generation": False,
-        "land_insertion": False,
-        "completed_shell_generation": False,
-        "shell_generation": False,
-        "full_100_card_draft_generation": False,
-        "deck_generation": False,
-        "selects_exact_cards": False,
-        "makes_final_deck_inclusion_decisions": False,
-        "generates_role_count_targets": False,
-        "generates_mana_base": False,
-        "inserts_lands": False,
-        "generates_completed_shell": False,
-        "generates_shell": False,
-        "generates_100_card_draft": False,
-        "generates_deck": False,
+        "is_starting_draft": True,
+        "is_final_decklist": False,
+        "exact_card_selection": True,
+        "final_deck_inclusion_decisions": True,
+        "role_count_target_generation": True,
+        "mana_base_generation": True,
+        "land_insertion": True,
+        "completed_shell_generation": True,
+        "shell_generation": True,
+        "full_100_card_draft_generation": True,
+        "deck_generation": True,
+        "selects_exact_cards": True,
+        "makes_final_deck_inclusion_decisions": True,
+        "generates_role_count_targets": True,
+        "generates_mana_base": True,
+        "inserts_lands": True,
+        "generates_completed_shell": True,
+        "generates_shell": True,
+        "generates_100_card_draft": True,
+        "generates_deck": True,
     }
 
     human_report_path.write_text(human_report, encoding="utf-8")
@@ -197,24 +198,14 @@ def write_full_100_card_draft_output(
 def full_100_card_draft_write_result_lines(result: Full100CardDraftWriteResult) -> list[str]:
     data = result.to_dict()
     return [
-        "Full 100-Card Draft model output written.",
-        "This is depth-E output: full 100-card draft model report only, not a generated 100-card deck and not a final decklist.",
+        "Full 100-Card Draft written.",
+        "This is depth-E output: a heuristically generated 100-card draft from the user's collection.",
+        "Treat as a starting point, not a final committed decklist.",
         "",
         "Files written:",
-        f"- Human-readable report: {data['human_report_path']}",
+        f"- Human-readable report (real decklist): {data['human_report_path']}",
         f"- AI handoff prompt: {data['ai_handoff_prompt_path']}",
         f"- Manifest: {data['manifest_path']}",
-        "",
-        "Boundary checks:",
-        "- No exact card selection.",
-        "- No final deck inclusion decisions.",
-        "- No role-count target generation.",
-        "- No mana-base generation.",
-        "- No land insertion.",
-        "- No completed shell generation.",
-        "- No shell generation.",
-        "- No full 100-card draft generation.",
-        "- No deck generation.",
     ]
 
 

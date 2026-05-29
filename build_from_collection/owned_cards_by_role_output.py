@@ -1,21 +1,22 @@
 """Owned Cards By Role Output.
 
-v1.3.21.4 depth-C and not-final boundary recovery.
+Depth-C output: groups the user's owned cards into 11 possible role
+buckets (Ramp, Card Draw, Targeted Removal, Board Wipes, Protection,
+Recursion, Strategy Enablers, Strategy Payoffs, Finishers, Mana Base
+Support, Flex). Each card may appear in multiple buckets if its oracle
+text matches more than one role pattern.
 
-This module supports depth C - Owned Cards By Role by grouping owned
-cards into possible role buckets. It is intentionally not final deck
-selection.
+This is a role-bucketing summary — it tells the user which owned cards
+could fill which roles. It is not a generated deck. The deck-generation
+feature lives at depth E (Full 100-Card Draft).
 
-No exact card selection in this patch.
-No final deck inclusion decisions in this patch.
-No role-count target generation in this patch.
-No mana-base generation in this patch.
-No land insertion in this patch.
-No shell generation in this patch.
-No deck generation in this patch.
+Land policy:
+- Basic lands are assumed available.
+- Nonbasic lands remain collection-first unless outside-collection upgrades are allowed by the user.
 
-Basic lands are assumed available.
-Nonbasic lands remain collection-first unless outside-collection upgrades are allowed by the user.
+The dataclass boundary flags (generates_deck, generates_shell, etc.) remain
+False because role bucketing is intentionally not deck selection. Do not
+flip them without auditing dev-mode contract callers.
 """
 
 from __future__ import annotations
@@ -284,15 +285,15 @@ def create_owned_cards_by_role_output(
 def owned_cards_by_role_output_lines(output: OwnedCardsByRoleOutput) -> list[str]:
     """Create human-readable lines for depth-C output."""
     lines = [
-        "# Owned Cards By Role Output",
+        "# Owned Cards By Role",
         "",
         f"Build depth: {output.build_depth_label}",
         f"Commander: {output.selected_commander}",
         f"Primary strategy: {output.primary_strategy}",
         f"Secondary strategy: {output.secondary_strategy}",
         "",
-        "These are possible owned-card role fits only, not final deck inclusions.",
-        "No exact card selection, role-count target generation, mana-base generation, land insertion, shell generation, or deck generation occurs here.",
+        "Possible role fits from your collection — a card may appear in more than one bucket.",
+        "This is a role-bucketing summary, not a generated decklist. Use the Full 100-Card Draft button to generate an actual deck.",
         "",
     ]
 
@@ -335,22 +336,18 @@ def owned_cards_by_role_handoff_prompt(output: OwnedCardsByRoleOutput) -> str:
         [
             "AI Handoff Prompt - Owned Cards By Role",
             "",
-            "Use this handoff to review possible owned-card role fits for a Commander build.",
-            "This is not a final decklist and not a final deck inclusion decision.",
-            "Preserve the not-final boundary: do not treat listed cards as selected for the deck.",
+            "This file lists the user's owned cards grouped into possible role buckets.",
+            "It is a role-bucketing summary, not a generated decklist — a card may fit several buckets.",
             "",
             f"Commander: {output.selected_commander}",
             f"Build depth: {output.build_depth_label}",
             f"Primary strategy: {output.primary_strategy}",
             f"Secondary strategy: {output.secondary_strategy}",
             "",
-            "Boundaries:",
-            "- Do not generate a deck.",
-            "- Do not generate a shell.",
-            "- Do not generate a mana base.",
-            "- Do not insert lands.",
-            "- Do not create role-count targets.",
-            "- Do not make final deck inclusion decisions.",
+            "Useful follow-ups for the user:",
+            "- Suggest which cards from each bucket are the strongest fits for the commander + strategy.",
+            "- Flag buckets that look thin and recommend affordable additions.",
+            "- Help the user prioritize when a card could plausibly fill multiple roles.",
             "",
             "Owned cards by possible role:",
             *owned_cards_by_role_output_lines(output),

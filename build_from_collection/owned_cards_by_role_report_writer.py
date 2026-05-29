@@ -1,17 +1,16 @@
 """Owned Cards By Role UI / Report Write Hook.
 
-v1.3.21 writes depth-C Owned Cards By Role output files.
+Writes the depth-C Owned Cards By Role output to disk: a human-readable
+markdown report grouping the user's owned cards into 11 role buckets,
+an AI handoff prompt, and a manifest.
 
-This module writes possible owned-card role fits only.
-It does not make final deck inclusion decisions.
+This is a role-bucketing summary — it tells the user which owned cards
+could fill which roles. It is not a generated deck. The deck-generation
+feature lives at depth E (Full 100-Card Draft).
 
-No exact card selection in this patch.
-No final deck inclusion decisions in this patch.
-No role-count target generation in this patch.
-No mana-base generation in this patch.
-No land insertion in this patch.
-No shell generation in this patch.
-No deck generation in this patch.
+The dataclass boundary flags (deck_generation, shell_generation, etc.) remain
+False because role bucketing is intentionally not deck selection. Do not
+flip them without auditing dev-mode contract callers.
 """
 
 from __future__ import annotations
@@ -81,7 +80,9 @@ def write_owned_cards_by_role_output(output: OwnedCardsByRoleOutput, output_root
     if not ai_prompt.endswith("\n"):
         ai_prompt += "\n"
     manifest = {
-        "output_type": "Owned Cards By Role Output",
+        "output_type": "Owned Cards By Role",
+        "is_role_bucketing_summary": True,
+        "is_generated_decklist": False,
         "build_depth": getattr(output, "depth_key", getattr(output, "build_depth_key", "C")),
         # v1.3.21.7 writer depth label compatibility guard
         "build_depth_label": getattr(output, "depth_label", getattr(output, "build_depth_label", "C - Owned Cards By Role")),
@@ -109,21 +110,12 @@ def write_owned_cards_by_role_output(output: OwnedCardsByRoleOutput, output_root
 def owned_cards_by_role_write_result_lines(result: OwnedCardsByRoleWriteResult) -> list[str]:
     data = result.to_dict()
     return [
-        "Owned Cards By Role output written.",
-        "This is depth-C output: possible owned-card role fits only.",
-        "It does not select exact cards or make final deck inclusion decisions.",
+        "Owned Cards By Role report written.",
+        "This is depth-C output: the user's owned cards grouped into 11 possible role buckets.",
+        "Use the Full 100-Card Draft button to generate an actual decklist.",
         "",
         "Files written:",
         f"- Human-readable report: {data['human_report_path']}",
         f"- AI handoff prompt: {data['ai_handoff_prompt_path']}",
         f"- Manifest: {data['manifest_path']}",
-        "",
-        "Boundary checks:",
-        "- No exact card selection.",
-        "- No final deck inclusion decisions.",
-        "- No role-count target generation.",
-        "- No mana-base generation.",
-        "- No land insertion.",
-        "- No shell generation.",
-        "- No deck generation.",
     ]

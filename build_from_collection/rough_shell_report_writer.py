@@ -1,18 +1,20 @@
 """Rough Shell UI / Report Write Hook.
 
-v1.3.23 writes depth-D Rough Shell output files.
+Writes the depth-D Rough Shell guidance output to disk: a human-readable
+markdown guidance file, an AI handoff prompt, and a manifest.
 
-This module writes a rough-shell model report and AI handoff prompt only.
-It does not generate a completed shell or a deck.
+The UI overwrites the human-readable file with the real strategy-driven
+guidance markdown produced by build_rough_shell_markdown() in
+rough_shell_guidance.py. This module supplies the surrounding folder,
+handoff prompt, and manifest scaffolding.
 
-No exact card selection in this patch.
-No final deck inclusion decisions in this patch.
-No role-count target generation in this patch.
-No mana-base generation in this patch.
-No land insertion in this patch.
-No completed shell generation in this patch.
-No shell generation in this patch.
-No deck generation in this patch.
+Rough Shell is collection-scan guidance — "what to look for in your
+collection for this commander + strategy" — not a generated deck. The
+deck-generation feature lives at depth E (Full 100-Card Draft).
+
+The dataclass boundary flags (generates_deck, generates_shell, etc.) remain
+False because Rough Shell genuinely is guidance-only. Do not flip them
+without auditing dev-mode contract callers.
 """
 
 from __future__ import annotations
@@ -134,7 +136,7 @@ def write_rough_shell_output(
     manifest_path = out_dir / "rough_shell_manifest.json"
 
     human_lines = [
-        "# Rough Shell Output",
+        "# Rough Shell",
         "",
         f"Selected commander: {commander_name}",
         "",
@@ -142,21 +144,23 @@ def write_rough_shell_output(
     human_lines.extend(rough_shell_output_model_lines(model))
     human_lines.extend([
         "",
-        "This is a rough shell model/report only, not a completed shell and not a final decklist.",
-        "No deck generation occurred.",
+        "The UI overwrites this file with the real strategy-driven guidance markdown.",
+        "If you are reading this scaffold text, the overwrite step did not run.",
     ])
     human_report = "\n".join(human_lines).rstrip() + "\n"
 
     ai_prompt = rough_shell_handoff_prompt(model)
     if "handoff" not in ai_prompt.lower():
         ai_prompt = "# AI Handoff Prompt - Rough Shell\n\n" + ai_prompt
-    if "not a final decklist" not in ai_prompt.lower():
-        ai_prompt += "\n\nPreserve this boundary: this is not a final decklist and not a completed shell."
+    if "guidance" not in ai_prompt.lower():
+        ai_prompt += "\n\nRough Shell is collection-scan guidance, not a generated decklist."
     if not ai_prompt.endswith("\n"):
         ai_prompt += "\n"
 
     manifest = {
-        "output_type": "Rough Shell Output",
+        "output_type": "Rough Shell Guidance",
+        "is_guidance_only": True,
+        "is_generated_decklist": False,
         "selected_commander": commander_name,
         "build_depth": getattr(model, "depth_key", "D"),
         "build_depth_key": getattr(model, "build_depth_key", "D"),
@@ -199,23 +203,14 @@ def write_rough_shell_output(
 def rough_shell_write_result_lines(result: RoughShellWriteResult) -> list[str]:
     data = result.to_dict()
     return [
-        "Rough Shell output written.",
-        "This is depth-D output: rough shell report only, not a completed shell and not a final decklist.",
+        "Rough Shell guidance written.",
+        "This is depth-D output: collection-scan guidance for the commander + strategy.",
+        "Use the Full 100-Card Draft button to generate an actual decklist.",
         "",
         "Files written:",
-        f"- Human-readable report: {data['human_report_path']}",
+        f"- Human-readable guidance: {data['human_report_path']}",
         f"- AI handoff prompt: {data['ai_handoff_prompt_path']}",
         f"- Manifest: {data['manifest_path']}",
-        "",
-        "Boundary checks:",
-        "- No exact card selection.",
-        "- No final deck inclusion decisions.",
-        "- No role-count target generation.",
-        "- No mana-base generation.",
-        "- No land insertion.",
-        "- No completed shell generation.",
-        "- No shell generation.",
-        "- No deck generation.",
     ]
 
 
