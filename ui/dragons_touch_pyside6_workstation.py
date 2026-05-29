@@ -498,8 +498,13 @@ class MainWindow(QMainWindow):
         layout.addSpacing(10)
         line = QFrame(); line.setObjectName("goldDivider"); line.setFixedHeight(1); layout.addWidget(line)
         quick = QLabel("QUICK ACTIONS"); quick.setObjectName("sidebarSectionTitle"); layout.addWidget(quick)
-        for label in ["Save UI Session Placeholder", "Open Output Folder Later", "Export Placeholder"]:
-            b = QPushButton(label); b.setObjectName("utilityButton"); b.clicked.connect(self.placeholder_message); layout.addWidget(b)
+        # Category E (popup removal): placeholder Quick Actions hidden in user mode
+        # (was: "Save UI Session Placeholder", "Open Output Folder Later", "Export Placeholder").
+        # These buttons were dev-mode stubs that fired a "UI Foundation Placeholder" modal.
+        # For community release they're hidden; restore them by setting a dev-mode flag.
+        if self.is_dev_mode() if hasattr(self, "is_dev_mode") else False:
+            for label in ["Save UI Session Placeholder", "Open Output Folder Later", "Export Placeholder"]:
+                b = QPushButton(label); b.setObjectName("utilityButton"); b.clicked.connect(self.placeholder_message); layout.addWidget(b)
         layout.addStretch(1)
         dragon_note = TexturedPanel(self.theme, kind="iron_2", glow=True, corners=False)
         note_layout = QVBoxLayout(dragon_note); note_layout.setContentsMargins(12, 10, 12, 10)
@@ -758,23 +763,28 @@ class MainWindow(QMainWindow):
                 label.setText(value)
 
     def rebuild_then_message(self, page_index, title, message):
-        """Update the visible UI first, then show the confirmation popup after the redraw begins."""
+        """Rebuild the shell, then post `title: message` to state.status.
+
+        Category B (popup removal): the deferred QMessageBox.information was
+        the previous feedback path. Now we just update the status panel so
+        the feedback is inline.
+        """
         self.rebuild_shell(page_index)
-        QTimer.singleShot(90, lambda: QMessageBox.information(self, title, message))
+        try:
+            self.state.status = f"{title}: {message}" if message else title
+            self.refresh_context_panel_values()
+        except Exception:
+            pass
 
     def placeholder_message(self):
-        QMessageBox.information(
-            self,
-            "UI Foundation Placeholder",
-            f"This control is a future/placeholder utility in {APP_VERSION}. The active alpha workflow is Deck Selection -> Review Setup -> Philosophy Lens -> Run Analysis -> Report Viewer. Settings holds app-wide defaults."
-        )
+        # Category E (popup removal): silent no-op. Active alpha workflow is
+        # Deck Selection → Review Setup → Philosophy Lens → Run Analysis → Report Viewer.
+        # Placeholder Quick Actions are hidden in user mode; this is defensive.
+        pass
 
     def backend_hook_message(self, hook_name):
-        QMessageBox.information(
-            self,
-            "Backend Hook Placeholder",
-            f"{hook_name} is reserved for a later deliberate patch. The active alpha workflow still uses guarded main.py execution and the locked {LOCKED_BACKEND_VERSION} backend boundary."
-        )
+        # Category E (popup removal): silent no-op. Reserved hook stub.
+        pass
 
     def page_header(self, title, subtitle):
         panel = TexturedPanel(self.theme, kind="iron", glow=True, corners=True)
@@ -870,7 +880,9 @@ class MainWindow(QMainWindow):
         """Save a pasted decklist into the Decklist Folder using next-number naming."""
         text = str(deck_text or "").strip()
         if not text:
-            QMessageBox.information(self, "No Decklist Pasted", "Paste a decklist before saving it.")
+            # Category C (popup removal): paste box is empty; status text surfaces this.
+            self.state.status = "Paste a decklist into the Paste tab before saving."
+            self.refresh_context_panel_values()
             return ""
 
         safe_name = self.sanitize_deck_file_name(deck_name)
@@ -910,7 +922,9 @@ class MainWindow(QMainWindow):
 
     def reload_selected_deck_preview(self):
         if self.state.selected_deck_path == "No deck file selected":
-            self.placeholder_message()
+            # Category C (popup removal): refresh button should be disabled when no deck selected.
+            self.state.status = "Select a deck file on the Deck Selection page first."
+            self.refresh_context_panel_values()
             return
         self.load_deck_file_preview(self.state.selected_deck_path)
 
@@ -921,10 +935,17 @@ class MainWindow(QMainWindow):
             try:
                 text = Path(path).read_text(encoding="cp1252")
             except Exception as exc:
-                QMessageBox.warning(self, "Deck Preview Failed", f"Could not read deck file:\n{path}\n\n{exc}")
+                # Category D (popup removal): surface in status + stderr.
+                import sys as _err_sys
+                print(f"Deck Preview Failed: could not read {path}: {exc}", file=_err_sys.stderr)
+                self.state.status = f"Deck preview failed — could not read {Path(path).name}"
+                self.refresh_context_panel_values()
                 return
         except Exception as exc:
-            QMessageBox.warning(self, "Deck Preview Failed", f"Could not read deck file:\n{path}\n\n{exc}")
+            import sys as _err_sys
+            print(f"Deck Preview Failed: could not read {path}: {exc}", file=_err_sys.stderr)
+            self.state.status = f"Deck preview failed — could not read {Path(path).name}"
+            self.refresh_context_panel_values()
             return
 
         summary = self.summarize_deck_preview(text, Path(path).stem)
@@ -1683,11 +1704,17 @@ class MainWindow(QMainWindow):
     def open_folder_path(self, folder_path, label):
         path_text = folder_path or "Not detected"
         if path_text == "Not detected":
-            QMessageBox.information(self, f"{label} Not Detected", f"No {label.lower()} has been detected from a successful guarded run yet.")
+            # Category C (popup removal): button disabled when folder not detected.
+            self.state.status = f"No {label.lower()} detected yet — run Analysis first."
+            self.refresh_context_panel_values()
             return
         path = Path(path_text)
         if not path.exists() or not path.is_dir():
-            QMessageBox.warning(self, f"{label} Missing", f"The detected {label.lower()} does not exist or is not a folder:\n\n{path}")
+            # Category D (popup removal): surface in status + stderr.
+            import sys as _err_sys
+            print(f"{label} Missing: detected {label.lower()} not found at {path}", file=_err_sys.stderr)
+            self.state.status = f"{label} missing — {path}"
+            self.refresh_context_panel_values()
             return
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
 
@@ -1726,48 +1753,49 @@ class MainWindow(QMainWindow):
 
 
     def guarded_execution_placeholder_message(self):
-        QMessageBox.information(
-            self,
-            "Guarded Execution Bridge",
-            "v0.6.7.9.9 can attempt a guarded QProcess run of py main.py only after explicit confirmation.\n\n"
-            "This patch attempts the selected deck handoff across Build-up, Cut-down, Auto-batch defaults, Philosophy Lens/subtype, Guide Presentation, Collection Mode, and Collection Source, then safely captures any unexpected prompt/error for review."
-        )
+        # Category E (popup removal): silent no-op. Dev-mode preview button explained itself
+        # in a modal — for community release the button it's wired to is hidden in user mode
+        # (see run_analysis_page.py).
+        pass
 
     def start_guarded_backend_run(self):
         """Run py main.py only after explicit confirmation, using QProcess and captured output."""
         if self.state.guarded_run_in_progress:
-            QMessageBox.information(self, "Guarded Run Already Active", "main.py is already running. Wait for it to finish before starting another guarded run.")
+            # Category C (popup removal): the run-in-progress visible state on the Run Analysis page is the signal.
+            self.state.last_guarded_run_status = "main.py is already running. Wait for it to finish before starting another guarded run."
+            self.refresh_run_analysis_previews()
             return
 
         entrypoint_path = self.backend_entrypoint_path()
         if self.state.selected_deck_path == "No deck file selected":
-            QMessageBox.warning(
-                self,
-                "Deck File Required",
-                "Choose a deck on the Deck Selection page before running main.py from the UI.\n\nThe guarded bridge now hands that selected deck to main.py using MTG_DECK_FILE so the backend processes the same deck shown in Current Deck Context."
+            # Category D (popup removal): error already surfaced via last_guarded_run_status + refresh below.
+            self.state.last_guarded_run_status = (
+                "Guarded run blocked: choose a deck on Deck Selection page first. "
+                "The guarded bridge hands that selected deck to main.py using MTG_DECK_FILE."
             )
-            self.state.last_guarded_run_status = "Guarded run blocked: no Deck Selection file staged for MTG_DECK_FILE handoff."
             self.refresh_run_analysis_previews()
             return
 
         self.normalize_collection_source_for_guarded_run()
         if self.state.collection_mode not in {"No collection", "Full card pool only", "No replacement suggestions"} and not self.collection_source_detail_answered():
-            QMessageBox.warning(
-                self,
-                "Collection Source Detail Required",
-                "Collection mode is enabled, but the active collection source detail is not staged. Choose a collection folder or select collection files before running main.py."
+            # Category D (popup removal): error already in last_guarded_run_status.
+            self.state.last_guarded_run_status = (
+                "Guarded run blocked: collection mode is enabled but no collection source is staged. "
+                "Choose a collection folder or select collection files first."
             )
-            self.state.last_guarded_run_status = "Guarded run blocked: active collection source detail was not staged."
             self.refresh_collection_page_widgets()
             self.refresh_run_analysis_previews()
             return
 
         if not entrypoint_path.exists():
-            QMessageBox.warning(
-                self,
-                "main.py Not Found",
-                f"The guarded bridge could not find the backend entrypoint:\n\n{entrypoint_path}\n\nConfirm you launched the UI from the project root or update the working directory in a later settings patch."
+            # Category D (popup removal): error → status + stderr.
+            import sys as _err_sys
+            print(f"main.py Not Found at {entrypoint_path}", file=_err_sys.stderr)
+            self.state.last_guarded_run_status = (
+                f"Guarded run blocked: backend entrypoint not found at {entrypoint_path}. "
+                "Confirm the UI was launched from the project root."
             )
+            self.refresh_run_analysis_previews()
             return
 
         deck_note = self.state.selected_deck_path
@@ -1798,11 +1826,12 @@ class MainWindow(QMainWindow):
             "- stdin is closed after the known answers, so the next unknown interactive prompt may produce EOF and be captured safely.\n\n"
             "Run py main.py now?"
         )
-        answer = QMessageBox.question(self, "Confirm Guarded Backend Run", message, QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if answer != QMessageBox.Yes:
-            self.state.last_guarded_run_status = "Guarded run cancelled by user before execution."
-            self.refresh_run_analysis_previews()
-            return
+        # Category A (popup removal 2026-05-29): user clicked Run, just run.
+        # The status text + visible progress on the Run Analysis page is the
+        # feedback. The pre-run details message above is preserved as the
+        # status text so the user can still see what's about to happen.
+        self.state.last_guarded_run_status = "Starting guarded run: " + message
+        self.refresh_run_analysis_previews()
 
         self.state.guarded_run_in_progress = True
         self.state.last_guarded_run_started_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -1887,8 +1916,8 @@ class MainWindow(QMainWindow):
         self.refresh_run_analysis_previews()
         if exit_code == 0:
             self.go_to(self.REPORT)
-        else:
-            QMessageBox.information(self, "Guarded Run Finished", self.state.last_guarded_run_status)
+        # Category D (popup removal): failure path — status already updated above,
+        # Run Analysis page refresh shows the failure inline.
 
     def handle_guarded_process_error(self, error):
         self.state.guarded_run_in_progress = False
@@ -1900,7 +1929,7 @@ class MainWindow(QMainWindow):
         self.detect_report_outputs_from_stdout(self.backend_process_stdout or "")
         self.backend_process = None
         self.refresh_run_analysis_previews()
-        QMessageBox.warning(self, "Guarded Run Failed", self.state.last_guarded_run_status)
+        # Category D (popup removal): error in last_guarded_run_status, visible on Run Analysis page.
 
     def trim_process_output(self, text, limit=6000):
         return backend_runner.trim_process_output(text, limit=limit)
@@ -1970,11 +1999,8 @@ class MainWindow(QMainWindow):
         )
 
     def run_placeholder_message(self):
-        QMessageBox.information(
-            self,
-            "Run Analysis Backend Hook Prepared",
-            f"{APP_VERSION} has gathered staged UI choices and can run py main.py only through the guarded confirmation button. This preview button does not run the backend. Use Guarded Execution to review the command and the full known CLI input bridge before starting a confirmed run."
-        )
+        # Category E (popup removal): silent no-op. Dev-mode preview hook.
+        pass
 
     def page_run_review(self):
         return build_run_analysis_page(self)
@@ -2142,14 +2168,19 @@ class MainWindow(QMainWindow):
         query = self.report_viewer_search_input.text().strip() if self.report_viewer_search_input is not None else ""
         self.state.report_viewer_search_text = query
         if not query:
-            QMessageBox.information(self, "Search Report", "Enter text to search inside the currently loaded report.")
+            # Category C (popup removal): empty query is a no-op; user just sees nothing happen.
             return
         found = self.report_viewer_text_box.find(query)
         if not found:
             self.report_viewer_text_box.moveCursor(QTextCursor.Start)
             found = self.report_viewer_text_box.find(query)
         if not found:
-            QMessageBox.information(self, "Search Report", f"No match found for: {query}")
+            # Category C (popup removal): use the search input's tooltip to surface "no match".
+            try:
+                if self.report_viewer_search_input is not None:
+                    self.report_viewer_search_input.setToolTip(f"No match found for: {query}")
+            except Exception:
+                pass
 
     def latest_successful_run_checkpoint_text(self):
         success = str(self.state.last_guarded_run_return_code) == "0"
@@ -2296,40 +2327,36 @@ class MainWindow(QMainWindow):
         self.refresh_report_viewer_current_file_controls()
 
     def reload_latest_reports_into_viewer(self):
+        # Category B (popup removal): the file list visibly refreshes — that's the feedback.
         self.refresh_report_viewer_file_list()
-        QMessageBox.information(
-            self,
-            "Report Viewer Reloaded",
-            "Detected report files from the latest guarded run have been refreshed. Report contents are still shown as plain text only."
-        )
 
     def refresh_current_report_file(self):
         path = Path(self.state.report_viewer_current_file)
         if not path.exists() or not path.is_file():
-            QMessageBox.information(self, "No Report File Selected", "No loaded report file is available to refresh yet.")
+            # Category C (popup removal): button should be disabled when no report file (see refresh_report_viewer_current_file_controls).
             return
+        # Category B (popup removal): the report content visibly updates — that's the feedback.
         self.load_report_file_into_viewer(str(path))
-        QMessageBox.information(self, "Report File Refreshed", f"Reloaded {path.name} from disk.")
 
     def copy_current_report_text(self):
         text = self.state.report_viewer_current_text or ""
         if not text.strip():
-            QMessageBox.information(self, "No Report Text", "No loaded report text is available to copy yet.")
+            # Category C (popup removal): copy button should be disabled when no text.
             return
+        # Category B (popup removal): clipboard works silently like every other app.
         QApplication.clipboard().setText(text)
-        QMessageBox.information(self, "Report Text Copied", "The currently loaded report text has been copied to the clipboard.")
 
     def open_current_report_file(self):
         path = Path(self.state.report_viewer_current_file)
         if not path.exists() or not path.is_file():
-            QMessageBox.information(self, "No Report File Selected", "No loaded report file is available to open yet.")
+            # Category C (popup removal): button should be disabled when no report file.
             return
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
 
     def open_current_report_folder(self):
         path = Path(self.state.report_viewer_current_file)
         if not path.exists() or not path.is_file():
-            QMessageBox.information(self, "No Report File Selected", "No loaded report file is available yet.")
+            # Category C (popup removal): button should be disabled when no report file.
             return
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(path.parent)))
 

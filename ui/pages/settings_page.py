@@ -331,19 +331,15 @@ def _show_data_setup_message(title, message, *, error=False):
 
 
 def _confirm_data_setup_action(title, message):
-    """Return True if the user confirms a guarded data setup action."""
-    try:
-        result = QMessageBox.question(
-            None,
-            title,
-            message,
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No,
-        )
-        return result == QMessageBox.StandardButton.Yes
-    except Exception as exc:
-        print(f"Could not show confirmation dialog: {exc}")
-        return False
+    """Always-confirm data setup actions.
+
+    Category A (popup removal 2026-05-29): the user clicked a Download/Update
+    button — that IS the confirmation. We don't ask a second time. The
+    title/message stay in the function signature for status-text logging
+    (callers print them to the status widget).
+    """
+    print(f"{title}: {message}")
+    return True
 
 
 def _download_scryfall_data_guarded(status_widget, action_button=None):

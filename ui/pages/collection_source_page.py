@@ -71,10 +71,13 @@ def build_collection_source_page(window):
     files_btn = QPushButton("Select Collection Files")
     window.collection_files_button = files_btn
     files_btn.clicked.connect(window.choose_collection_files)
-    folder_btn.setVisible(window.state.collection_source_mode == "Entire collection folder")
-    files_btn.setVisible(window.state.collection_source_mode == "Select collection files")
+    # addWidget before setVisible — calling setVisible on a parentless QWidget
+    # makes Qt show it as a top-level window with default 640x480 chrome,
+    # which flashed briefly on app startup before reparenting.
     source_card.body.addWidget(folder_btn)
     source_card.body.addWidget(files_btn)
+    folder_btn.setVisible(window.state.collection_source_mode == "Entire collection folder")
+    files_btn.setVisible(window.state.collection_source_mode == "Select collection files")
 
     summary_card = TexturedPanel(window.theme, kind="iron_2", glow=True)
     summary_card.setMinimumHeight(245)

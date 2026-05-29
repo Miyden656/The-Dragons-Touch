@@ -28,7 +28,7 @@ import random
 # v1.3.14 marker: Strategy Selection / Override Preview UI is selection-only; no deck generation.
 
 try:
-    from PySide6.QtCore import Qt, QUrl
+    from PySide6.QtCore import Qt, QUrl, QTimer
     from PySide6.QtGui import QDesktopServices
     from PySide6.QtWidgets import (
         QApplication,
@@ -45,7 +45,7 @@ try:
 
     from ui.widgets import add_shadow, ReportCard, SmallStat, TexturedPanel
 except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
-    from PySide6.QtCore import Qt, QUrl
+    from PySide6.QtCore import Qt, QUrl, QTimer
     from PySide6.QtGui import QDesktopServices
     from PySide6.QtWidgets import (
         QApplication,
@@ -381,14 +381,12 @@ def _last_report_path(window):
 def _refresh_commander_discovery_buttons(window):
     path = _last_report_path(window)
     has_report = bool(path and path.exists())
+    # v1.5.39: Open Report button is visible in both User and Developer modes.
+    # Stale-reference safe — the open_report_button reference on window can be
+    # destroyed during page rebuilds (see _safe_widget_call docstring).
     open_report_button = getattr(window, "commander_discovery_open_report_button", None)
-    if open_report_button is not None:
-        # v1.5.39: Open Report button now visible + functional in both modes.
-        # The Ready for the Call? card now renders the same way regardless of
-        # interface mode, since the dev-mode construction was the one that
-        # reliably worked.
-        open_report_button.setVisible(True)
-        open_report_button.setEnabled(has_report)
+    _safe_set_visible(open_report_button, True)
+    _safe_set_enabled(open_report_button, has_report)
     _refresh_random_commander_button(window)
 
 
@@ -650,7 +648,7 @@ def _select_commander_build_depth(window, depth_key):
             f"- Error detail: {exc}\n\n"
             "No deck was generated, no lands were added, no cards were selected, no role counts were created, and no normal deck review behavior was changed."
         )
-        QMessageBox.warning(window, "Build Depth Selection Failed", str(exc))
+        # Category D (popup removal): error already surfaced via preview_text on the card box.
 
     box = getattr(window, "commander_discovery_build_depth_selection_preview_box", None)
     if box is not None:
@@ -722,11 +720,7 @@ def _strategy_combo_value(window, attr):
 def _preview_strategy_selection_override(window):
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
-        QMessageBox.information(
-            window,
-            "No Commander Selected",
-            "Select a commander candidate first. v1.3.14 only previews strategy selection after a commander is selected.",
-        )
+        # Category C (popup removal): button disabled when no candidate selected.
         _refresh_build_start_preview_controls(window)
         return
     try:
@@ -754,7 +748,7 @@ def _preview_strategy_selection_override(window):
             f"- Error detail: {exc}\n\n"
             "No deck was generated, no lands were added, no cards were selected, no role counts were created, and no normal deck review behavior was changed."
         )
-        QMessageBox.warning(window, "Strategy Selection Preview Failed", str(exc))
+        # Category D (popup removal): error already in preview_text below.
 
     box = getattr(window, "commander_discovery_strategy_selection_override_preview_box", None)
     if box is not None:
@@ -816,7 +810,7 @@ def _preview_collection_source_preference(window):
         window.commander_discovery_selected_collection_source_preference = ""
         window.commander_discovery_outside_collection_upgrades_allowed = False
         preview_text = f"Collection Source Preference Preview failed before completion.\n- Error detail: {exc}\n\nNo deck generation."
-        QMessageBox.warning(window, "Collection Source Preference Preview Failed", str(exc))
+        # Category D (popup removal): error already in preview_text.
     box = getattr(window, "commander_discovery_collection_source_preference_preview_box", None)
     if box is not None:
         box.setPlainText(preview_text)
@@ -871,11 +865,7 @@ def _format_build_start_summary_write_result(result, output):
 def _preview_write_build_start_summary_output(window):
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
-        QMessageBox.information(
-            window,
-            "No Commander Selected",
-            "Select a commander candidate first. v1.3.19.2 only writes the build-start summary after a commander is selected.",
-        )
+        # Category C (popup removal): button disabled when no candidate selected.
         _refresh_build_start_preview_controls(window)
         return
     try:
@@ -911,7 +901,7 @@ def _preview_write_build_start_summary_output(window):
             f"- Error detail: {exc}\n\n"
             "No deck was generated, no lands were inserted, no exact cards were selected, and no normal deck review behavior was changed."
         )
-        QMessageBox.warning(window, "Build-Start Summary Output Failed", str(exc))
+        # Category D (popup removal): error already in preview_text.
 
     box = getattr(window, "commander_discovery_build_start_summary_output_box", None)
     if box is not None:
@@ -1054,7 +1044,7 @@ def _preview_write_owned_cards_by_role_output(window):
     """
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
-        QMessageBox.information(window, "No Commander Selected", "Select a commander candidate first.")
+        # Category C (popup removal): button is disabled when no candidate is selected (see _refresh_build_start_preview_controls); refresh the disable state defensively.
         _refresh_build_start_preview_controls(window)
         return
 
@@ -1112,7 +1102,7 @@ def _preview_write_owned_cards_by_role_output(window):
         window.commander_discovery_owned_cards_by_role_output = {}
         window.commander_discovery_owned_cards_by_role_write_result = {}
         preview_text = f"Owned Cards By Role Output failed before completion.\n- Error detail: {exc}"
-        QMessageBox.warning(window, "Owned Cards By Role Output Failed", str(exc))
+        # Category D (popup removal): error already in preview_text.
     finally:
         if button is not None:
             try:
@@ -1263,11 +1253,7 @@ def _format_commander_shell_skeleton_preview(preview):
 def _preview_build_setup_panel(window):
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
-        QMessageBox.information(
-            window,
-            "No Commander Selected",
-            "Select a commander candidate first. v1.3.3 only previews build setup after a commander is selected.",
-        )
+        # Category C (popup removal): button disabled when no candidate selected.
         _refresh_build_start_preview_controls(window)
         return
 
@@ -1284,7 +1270,7 @@ def _preview_build_setup_panel(window):
             f"- Error detail: {exc}\n\n"
             "No deck was generated, no lands were added, and no normal deck review behavior was changed."
         )
-        QMessageBox.warning(window, "Build Setup Preview Failed", str(exc))
+        # Category D (popup removal): error already in preview_text.
 
     box = getattr(window, "commander_discovery_build_setup_panel_preview_box", None)
     if box is not None:
@@ -1294,7 +1280,7 @@ def _preview_build_setup_panel(window):
 def _preview_commander_preference_handoff(window):
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
-        QMessageBox.information(window, "No Commander Selected", "Select a commander candidate first. v1.3.4 only previews commander + preference handoff context after a commander is selected.")
+        # Category C (popup removal): button disabled when no candidate selected.
         _refresh_build_start_preview_controls(window)
         return
     try:
@@ -1305,7 +1291,7 @@ def _preview_commander_preference_handoff(window):
     except Exception as exc:
         window.commander_discovery_commander_preference_handoff_preview = {}
         preview_text = "Commander + Preference Handoff Preview failed before completion.\n- Error detail: " + str(exc) + "\n\nNo deck was generated, no lands were added, no cards were scored, and no normal deck review behavior was changed."
-        QMessageBox.warning(window, "Commander + Preference Preview Failed", str(exc))
+        # Category D (popup removal): error already in preview_text.
     box = getattr(window, "commander_discovery_commander_preference_handoff_preview_box", None)
     if box is not None:
         box.setPlainText(preview_text)
@@ -1316,11 +1302,7 @@ def _preview_commander_preference_handoff(window):
 def _preview_build_from_collection_setup_summary(window):
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
-        QMessageBox.information(
-            window,
-            "No Commander Selected",
-            "Select a commander candidate first. v1.3.11 only summarizes setup context after a commander is selected.",
-        )
+        # Category C (popup removal): button disabled when no candidate selected.
         _refresh_build_start_preview_controls(window)
         return
 
@@ -1349,7 +1331,7 @@ def _preview_build_from_collection_setup_summary(window):
             f"- Error detail: {exc}\n\n"
             "No deck was generated, no lands were added, no cards were selected, no role counts were created, and no normal deck review behavior was changed."
         )
-        QMessageBox.warning(window, "Setup Summary Preview Failed", str(exc))
+        # Category D (popup removal): error already in preview_text.
 
     box = getattr(window, "commander_discovery_setup_summary_preview_box", None)
     if box is not None:
@@ -1359,11 +1341,7 @@ def _preview_build_from_collection_setup_summary(window):
 def _preview_commander_shell_skeleton(window):
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
-        QMessageBox.information(
-            window,
-            "No Commander Selected",
-            "Select a commander candidate first. v1.3.10 only previews the shell skeleton after a commander is selected.",
-        )
+        # Category C (popup removal): button disabled when no candidate selected.
         _refresh_build_start_preview_controls(window)
         return
 
@@ -1380,70 +1358,91 @@ def _preview_commander_shell_skeleton(window):
             f"- Error detail: {exc}\n\n"
             "No deck was generated, no lands were added, no cards were selected, no role counts were created, and no normal deck review behavior was changed."
         )
-        QMessageBox.warning(window, "Shell Skeleton Preview Failed", str(exc))
+        # Category D (popup removal): error already in preview_text.
 
     box = getattr(window, "commander_discovery_shell_skeleton_preview_box", None)
     if box is not None:
         box.setPlainText(preview_text)
     _refresh_build_start_preview_controls(window)
 
+def _safe_set_enabled(widget, enabled: bool) -> None:
+    """Call setEnabled on a possibly-stale widget reference. See _safe_widget_call."""
+    _safe_widget_call(widget, "setEnabled", enabled)
+
+
+def _safe_set_visible(widget, visible: bool) -> None:
+    """Call setVisible on a possibly-stale widget reference. See _safe_widget_call."""
+    _safe_widget_call(widget, "setVisible", visible)
+
+
+def _safe_widget_call(widget, method_name: str, *args) -> None:
+    """Call a method on a possibly-stale widget reference.
+
+    `window.commander_discovery_*` attributes survive page rebuilds, but the
+    widgets they point to can be destroyed on the C++ side during the rebuild
+    (especially dev-mode-only widgets that the new user-mode build doesn't
+    recreate). Calling any method on a destroyed shiboken-wrapped widget
+    raises `RuntimeError: libshiboken: Internal C++ object already deleted.`
+    We catch that specific error and silently skip the stale reference —
+    the new page's widgets get refreshed elsewhere via fresh references.
+
+    Diagnosed 2026-05-29: this stale-reference RuntimeError thrown from
+    `_refresh_build_start_preview_controls` was the actual root cause of the
+    long-standing "navigate-away-and-back" bug. The exception propagated up
+    through `_selected_commander_candidate_changed` →
+    `_load_filtered_candidates_into_selector` → `_apply_commander_discovery_filters`
+    → `_populate_commander_discovery_selector` → the scan handler, silently
+    aborting the rest of the post-scan flow. Buttons in the Ready card and
+    report cards never got enabled because the scan handler never completed.
+    """
+    if widget is None:
+        return
+    try:
+        getattr(widget, method_name)(*args)
+    except RuntimeError:
+        # libshiboken: Internal C++ object already deleted. Stale reference
+        # to a widget destroyed by a previous page rebuild.
+        pass
+
+
 def _refresh_build_start_preview_controls(window):
-    # Enable build-from-collection preview buttons only when a candidate is selected.
+    """Enable build-from-collection preview/output buttons only when a candidate is selected.
+
+    Category C (popup removal): each disable-able button also gets a tooltip
+    explaining the prerequisite, so the user knows what's needed when the
+    button is greyed out (replaces the old "Select a commander first" modal).
+    """
     candidate = _current_selected_commander_candidate(window)
-    button = getattr(window, "commander_discovery_start_build_preview_button", None)
-    if button is not None:
-        button.setEnabled(bool(candidate))
-    setup_button = getattr(window, "commander_discovery_build_setup_panel_preview_button", None)
-    if setup_button is not None:
-        setup_button.setEnabled(bool(candidate))
-    commander_preference_button = getattr(window, "commander_discovery_commander_preference_handoff_preview_button", None)
-    if commander_preference_button is not None:
-        commander_preference_button.setEnabled(bool(candidate))
-    shell_skeleton_button = getattr(window, "commander_discovery_shell_skeleton_preview_button", None)
-    if shell_skeleton_button is not None:
-        shell_skeleton_button.setEnabled(bool(candidate))
-    setup_summary_button = getattr(window, "commander_discovery_setup_summary_preview_button", None)
-    if setup_summary_button is not None:
-        setup_summary_button.setEnabled(bool(candidate))
-    build_depth_buttons = getattr(window, "commander_discovery_build_depth_selection_buttons", []) or []
-    for build_depth_button in build_depth_buttons:
-        build_depth_button.setEnabled(bool(candidate))
-    strategy_button = getattr(window, "commander_discovery_strategy_selection_override_preview_button", None)
-    if strategy_button is not None:
-        strategy_button.setEnabled(bool(candidate))
-    strategy_combos = [
-        getattr(window, "commander_discovery_primary_strategy_combo", None),
-        getattr(window, "commander_discovery_secondary_strategy_combo", None),
-    ]
-    for strategy_combo in strategy_combos:
-        if strategy_combo is not None:
-            strategy_combo.setEnabled(bool(candidate))
-
-
-    build_start_summary_button = getattr(window, "commander_discovery_build_start_summary_output_button", None)
-    if build_start_summary_button is not None:
-        build_start_summary_button.setEnabled(bool(candidate))
-    rough_shell_output_button = getattr(window, "commander_discovery_rough_shell_output_button", None)
-    if rough_shell_output_button is not None:
-        rough_shell_output_button.setEnabled(bool(candidate))
-    owned_cards_by_role_button = getattr(window, "commander_discovery_owned_cards_by_role_output_button", None)
-    if owned_cards_by_role_button is not None:
-        owned_cards_by_role_button.setEnabled(bool(candidate))
-    # v1.5.37: Full 100-Card Draft button — was missing from the refresh list,
-    # which kept it permanently disabled even after a commander was selected.
-    full_100_card_draft_button = getattr(window, "commander_discovery_full_100_card_draft_output_button", None)
-    if full_100_card_draft_button is not None:
-        full_100_card_draft_button.setEnabled(bool(candidate))
+    is_enabled = bool(candidate)
+    disabled_tooltip = "" if is_enabled else "Select a commander from the result list above first."
+    for attr_name in (
+        # Dev-mode preview buttons (older Bin A surfaces).
+        "commander_discovery_start_build_preview_button",
+        "commander_discovery_build_setup_panel_preview_button",
+        "commander_discovery_commander_preference_handoff_preview_button",
+        "commander_discovery_shell_skeleton_preview_button",
+        "commander_discovery_setup_summary_preview_button",
+        "commander_discovery_strategy_selection_override_preview_button",
+        "commander_discovery_primary_strategy_combo",
+        "commander_discovery_secondary_strategy_combo",
+        # User-mode build setup / output buttons (Bin B).
+        "commander_discovery_build_start_summary_output_button",
+        "commander_discovery_rough_shell_output_button",
+        "commander_discovery_owned_cards_by_role_output_button",
+        "commander_discovery_full_100_card_draft_output_button",
+    ):
+        widget = getattr(window, attr_name, None)
+        _safe_set_enabled(widget, is_enabled)
+        _safe_widget_call(widget, "setToolTip", disabled_tooltip)
+    for build_depth_button in (getattr(window, "commander_discovery_build_depth_selection_buttons", []) or []):
+        _safe_set_enabled(build_depth_button, is_enabled)
+        _safe_widget_call(build_depth_button, "setToolTip", disabled_tooltip)
 
 def _preview_build_from_selected_commander(window):
     # Create a display-only v1.3 handoff preview from the selected commander.
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
-        QMessageBox.information(
-            window,
-            "No Commander Selected",
-            "Select a commander candidate first. v1.3.1 only previews the build-start handoff after a commander is selected.",
-        )
+        # Category C (popup removal): button disabled when no candidate selected.
         _refresh_build_start_preview_controls(window)
         return
 
@@ -1460,7 +1459,7 @@ def _preview_build_from_selected_commander(window):
             f"- Error detail: {exc}\n\n"
             "No deck was generated and no normal deck review behavior was changed."
         )
-        QMessageBox.warning(window, "Build-Start Preview Failed", str(exc))
+        # Category D (popup removal): error already in preview_text.
 
     box = getattr(window, "commander_discovery_build_start_preview_box", None)
     if box is not None:
@@ -1473,8 +1472,11 @@ def _selected_commander_candidate_changed(window, index):
     candidate = candidates[index] if 0 <= index < len(candidates) else None
     window.commander_discovery_selected_candidate = candidate.get("card_name", "") if candidate else ""
     window.commander_discovery_selected_candidate_summary = candidate
-    if getattr(window, "commander_discovery_candidate_detail_box", None) is not None:
-        window.commander_discovery_candidate_detail_box.setPlainText(_candidate_detail_text(candidate))
+    _safe_widget_call(
+        getattr(window, "commander_discovery_candidate_detail_box", None),
+        "setPlainText",
+        _candidate_detail_text(candidate),
+    )
     _refresh_build_start_preview_controls(window)
     # v1.5.33: keep the Build Setup Panel summary in sync with the active commander.
     # v1.5.34: wrapped defensively — any failure here used to silently block the
@@ -1664,9 +1666,11 @@ def _load_filtered_candidates_into_selector(window, candidates):
 
 
 def _update_filter_status(window, before_count, after_count):
-    status = getattr(window, "commander_discovery_filter_status_label", None)
-    if status is not None:
-        status.setText(f"Showing {after_count} of {before_count} possible commander(s) after filters.")
+    _safe_widget_call(
+        getattr(window, "commander_discovery_filter_status_label", None),
+        "setText",
+        f"Showing {after_count} of {before_count} possible commander(s) after filters.",
+    )
 
 
 def _apply_commander_discovery_filters(window):
@@ -1684,19 +1688,23 @@ def _populate_commander_discovery_selector(window, result):
     _apply_commander_discovery_filters(window)
 
 def _run_guarded_commander_discovery_scan(window):
-    """Run the first guarded Commander Discovery UI scan path."""
-    reply = QMessageBox.question(
-        window,
-        "Run Commander Discovery Scan",
-        "Scan the staged local collection files for commander candidates and write a Commander Discovery report?\n\n"
-        "This will not run normal deck review, modify your deck, generate a 100-card shell, or make network/API calls.",
-        QMessageBox.Yes | QMessageBox.No,
-        QMessageBox.No,
-    )
-    if reply != QMessageBox.Yes:
-        return
+    """Run the Commander Discovery UI scan path.
 
-    _set_commander_discovery_status(window, "Commander Discovery scan is running...\n- Loading local Scryfall data\n- Loading staged local collection source\n- Finding commander candidates\n- Writing markdown report\n- Preparing Commander Result List")
+    Category A (popup removal 2026-05-29): the user clicked the Scan button,
+    just scan. The "this will not modify your deck" disclaimers are preserved
+    in the inline status text so the boundary is still surfaced — just not
+    as a Yes/No interruption.
+    """
+    _set_commander_discovery_status(
+        window,
+        "Commander Discovery scan is running...\n"
+        "- Loading local Scryfall data\n"
+        "- Loading staged local collection source\n"
+        "- Finding commander candidates\n"
+        "- Writing markdown report\n"
+        "- Preparing Commander Result List\n\n"
+        "This scan does not run normal deck review, modify your deck, generate a 100-card shell, or make network/API calls.",
+    )
     if getattr(window, "commander_discovery_scan_button", None) is not None:
         window.commander_discovery_scan_button.setEnabled(False)
 
@@ -1707,7 +1715,7 @@ def _run_guarded_commander_discovery_scan(window):
     except Exception as exc:  # Defensive UI boundary.
         result = None
         _set_commander_discovery_status(window, f"Commander Discovery scan failed before completion.\n- Error detail: {exc}")
-        QMessageBox.warning(window, "Commander Discovery Scan Failed", str(exc))
+        # Category D (popup removal): error already in status box.
     finally:
         if getattr(window, "commander_discovery_scan_button", None) is not None:
             window.commander_discovery_scan_button.setEnabled(True)
@@ -1721,42 +1729,110 @@ def _run_guarded_commander_discovery_scan(window):
         window.commander_discovery_last_report_path = result.report_path
         window.commander_discovery_last_scan_result = result
         window.state.status = "Commander Discovery report written"
+        # Immediate visibility feedback: hide the scan card and show the Ready
+        # card on the CURRENT page widgets. This guarantees the user sees
+        # state change even if the deferred rebuild below fails for any
+        # reason. If the rebuild succeeds, these widgets get destroyed
+        # moments later anyway, and the fresh page sets visibility correctly
+        # based on `_last_report_path(window).exists()`.
         if getattr(window, "commander_discovery_scan_card", None) is not None:
             window.commander_discovery_scan_card.setVisible(False)
-            window.commander_discovery_scan_card.update()
         if getattr(window, "commander_discovery_ready_card", None) is not None:
             window.commander_discovery_ready_card.setVisible(True)
-            window.commander_discovery_ready_card.update()
-        _populate_commander_discovery_selector(window, result)
-        # v1.5.41: force the Qt event loop to process the visibility/layout
-        # changes before showing the modal. The previous flow let the page sit
-        # in a stale state until the user navigated away and back — the modal
-        # was the only thing pulling Qt's attention.
+        # Defense in depth: if any future code in the populate cascade throws,
+        # the scan handler should still finish (the original bug here was a
+        # RuntimeError on a stale widget reference in
+        # _refresh_build_start_preview_controls — fixed by the _safe_set_enabled
+        # helper, but the wrapper is cheap insurance against future regressions).
         try:
-            QApplication.processEvents()
-        except Exception:
-            pass
-        QMessageBox.information(
-            window,
-            "Commander Discovery Scan Complete",
-            f"Commander candidates found: {result.commander_candidate_count}\nReport written:\n{result.report_path}",
-        )
+            _populate_commander_discovery_selector(window, result)
+        except Exception as _populate_exc:
+            import sys as _populate_sys
+            print(
+                f"_populate_commander_discovery_selector raised: {type(_populate_exc).__name__}: {_populate_exc}",
+                file=_populate_sys.stderr,
+            )
+
+        # 2026-05-29 pragmatic fix: programmatically rebuild the page on the
+        # next event-loop tick using `go_to(COMMANDER_DISCOVERY)` — the same
+        # code path that runs when the user navigates to Commander's Call
+        # from another page. go_to handles page destruction + rebuild AND
+        # sets the stack's current index AND updates nav-button checked
+        # state, all of which are required for the new page to actually be
+        # shown to the user (calling refresh_commander_discovery_page alone
+        # rebuilds but doesn't necessarily show). Wrapped in try/except so
+        # the modal still appears even if the rebuild fails. The data sits
+        # on `window` (commander_discovery_all_candidate_summaries with the
+        # candidates), so the freshly built page picks it up and renders
+        # everything correctly.
+        # Category B (popup removal 2026-05-29): scan success is signaled by
+        # the visible state change — Scan card hides, Ready card shows,
+        # filter label updates to "Showing N of N" — and by the status text
+        # in result.to_status_text() already pushed to the status box at
+        # line 1748. No modal needed.
+        def _rebuild_after_scan():
+            try:
+                if hasattr(window, "go_to") and hasattr(window, "COMMANDER_DISCOVERY"):
+                    window.go_to(window.COMMANDER_DISCOVERY)
+            except Exception:
+                pass
+
+        QTimer.singleShot(0, _rebuild_after_scan)
     else:
         _populate_commander_discovery_selector(window, result)
-        QMessageBox.warning(window, "Commander Discovery Scan Did Not Complete", result.message or "The scan did not complete.")
-    _refresh_commander_discovery_buttons(window)
+        warning_message = result.message or "The scan did not complete."
+        # First-run polish: when the scan fails because Scryfall data is
+        # missing or a collection isn't staged, offer to jump straight to
+        # Settings (where Data Setup + Collection Source live) instead of
+        # leaving the user with a dead-end warning popup.
+        is_scryfall_missing = "Scryfall data could not be loaded" in warning_message
+        is_collection_missing = "No local collection files are staged" in warning_message
+        if is_scryfall_missing or is_collection_missing:
+            problem = "Scryfall data" if is_scryfall_missing else "a staged collection folder"
+            QTimer.singleShot(0, lambda: _offer_jump_to_settings(window, problem, warning_message))
+        else:
+            # Category D (popup removal): error already in commander_discovery_status_box
+            # via result.to_status_text() set above. No modal needed.
+            pass
+        # Failure path: no page rebuild (the scan card stays visible so the
+        # user can retry), so synchronously refresh the buttons here.
+        _refresh_commander_discovery_buttons(window)
+
+
+def _offer_jump_to_settings(window, problem: str, full_message: str) -> None:
+    """Auto-navigate to Settings when the scan fails for a fixable-in-Settings
+    reason (Scryfall data missing or no collection staged), and post a status
+    message explaining what to do next.
+
+    Category A (popup removal 2026-05-29): no confirmation dialog — the user's
+    intent (run a scan) clearly maps to "I need to set this up first," so we
+    just take them there with a clear status banner.
+    """
+    if hasattr(window, "go_to") and hasattr(window, "SETTINGS"):
+        # Set status before navigating so the right-side context panel
+        # explains why the page changed.
+        try:
+            window.state.status = (
+                f"Commander's Call needs {problem}. Open Data Setup or Collection Source below to set it up, "
+                "then return to The Commander's Call."
+            )
+            if hasattr(window, "refresh_context_panel_values"):
+                window.refresh_context_panel_values()
+        except Exception:
+            pass
+        window.go_to(window.SETTINGS)
     if hasattr(window, "refresh_context_panel_values"):
         window.refresh_context_panel_values()
 
 
 def _refresh_random_commander_button(window):
     """Enable I Want You! only after Commander Discovery has candidates to choose from."""
-    button = getattr(window, "commander_discovery_random_button", None)
-    if button is None:
-        return
     candidates = getattr(window, "commander_discovery_candidate_summaries", []) or []
     all_candidates = getattr(window, "commander_discovery_all_candidate_summaries", []) or []
-    button.setEnabled(bool(candidates or all_candidates))
+    _safe_set_enabled(
+        getattr(window, "commander_discovery_random_button", None),
+        bool(candidates or all_candidates),
+    )
 
 
 def _set_candidate_type_filter(window, label):
@@ -1796,12 +1872,10 @@ def _choose_random_commander_candidate(window):
         candidates = getattr(window, "commander_discovery_all_candidate_summaries", []) or []
     combo = getattr(window, "commander_discovery_candidate_combo", None)
     if not candidates or combo is None:
+        # Category C (popup removal): status label already says "Run a scan first" + the
+        # I Want You! button is disabled by _refresh_random_commander_button when there are
+        # no candidates, so this is a defensive fallback.
         _set_status("No commander candidates loaded yet — run a scan first.")
-        QMessageBox.information(
-            window,
-            "No Commander Candidates Yet",
-            "Run Commander Discovery first. After commanders are found, I Want You! can randomly choose one from the visible list.",
-        )
         return
     chosen = random.randrange(len(candidates))
     # If the random source fell back to all candidates, reload the selector first so the index is valid.
@@ -1810,18 +1884,16 @@ def _choose_random_commander_candidate(window):
     combo.setCurrentIndex(chosen)
     candidate = candidates[chosen]
     chosen_name = candidate.get("card_name", "Unknown")
-    _set_status(f"Random pick: {chosen_name}")
-    QMessageBox.information(
-        window,
-        "I Want You!",
-        f"Commander selected: {chosen_name}\n\nThis only selects a commander. Deck-shell building begins later in v1.3.",
-    )
+    # Category B (popup removal 2026-05-29): the always-visible status label
+    # below the I Want You! button is the success signal — no modal needed.
+    _set_status(f"Random pick: {chosen_name} — set as the current commander.")
 
 
 def _open_latest_commander_discovery_report(window):
     path = _last_report_path(window)
     if not path or not path.exists():
-        QMessageBox.information(window, "No Commander Discovery Report", "No Commander Discovery report has been written in this UI session yet.")
+        # Category C (popup removal): Open Report button is disabled until a report exists
+        # (see _refresh_commander_discovery_buttons.setEnabled(has_report)). Silent return.
         _refresh_commander_discovery_buttons(window)
         return
     QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
@@ -1875,7 +1947,7 @@ def _preview_write_rough_shell_output(window):
     """
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
-        QMessageBox.information(window, "No Commander Selected", "Select a commander candidate first.")
+        # Category C (popup removal): button is disabled when no candidate is selected (see _refresh_build_start_preview_controls); refresh the disable state defensively.
         _refresh_build_start_preview_controls(window)
         return
 
@@ -1968,7 +2040,7 @@ def _preview_write_rough_shell_output(window):
         window.commander_discovery_rough_shell_output = {}
         window.commander_discovery_rough_shell_write_result = {}
         preview_text = f"Rough Shell Output failed before completion.\n- Error detail: {exc}"
-        QMessageBox.warning(window, "Rough Shell Output Failed", str(exc))
+        # Category D (popup removal): error already in preview_text.
     finally:
         if button is not None:
             try:
@@ -2025,7 +2097,7 @@ def _preview_write_full_100_card_draft_output(window):
     """
     candidate = _current_selected_commander_candidate(window)
     if not candidate:
-        QMessageBox.information(window, "No Commander Selected", "Select a commander candidate first.")
+        # Category C (popup removal): button is disabled when no candidate is selected (see _refresh_build_start_preview_controls); refresh the disable state defensively.
         _refresh_build_start_preview_controls(window)
         return
 
@@ -2139,7 +2211,7 @@ def _preview_write_full_100_card_draft_output(window):
             f"- Error detail: {exc}\n\n"
             f"Traceback:\n{_tb.format_exc()}"
         )
-        QMessageBox.warning(window, "Full 100-Card Draft Failed", str(exc))
+        # Category D (popup removal): error + traceback already in preview_text.
     finally:
         if button is not None:
             try:
@@ -2205,6 +2277,14 @@ def build_commander_discovery_page(window):
     scan_action_row = QHBoxLayout()
     window.commander_discovery_scan_button = QPushButton("Scan Collection and Write Report")
     window.commander_discovery_scan_button.setObjectName("primaryButton")
+    # Cheap insurance: prevent Enter/focus from auto-activating this primary
+    # button. Not the cause of the earlier flash popup (that was an unrelated
+    # parentless-widget bug, fixed by reordering setVisible after addWidget),
+    # but worth keeping so a confirmation dialog can never fire from anything
+    # other than a real user click.
+    window.commander_discovery_scan_button.setAutoDefault(False)
+    window.commander_discovery_scan_button.setDefault(False)
+    window.commander_discovery_scan_button.setFocusPolicy(Qt.ClickFocus)
     window.commander_discovery_scan_button.clicked.connect(lambda checked=False: _run_guarded_commander_discovery_scan(window))
     scan_action_row.addWidget(window.commander_discovery_scan_button)
     run_card.body.addLayout(scan_action_row)
@@ -2212,9 +2292,12 @@ def build_commander_discovery_page(window):
         run_card.body.addWidget(window.default_note(
             "Developer guardrail: this button only runs Commander Discovery. It does not run deck review, cut logic, replacement logic, combo matching, or build-from-collection automation."
         ))
+    # addWidget before setVisible — calling setVisible on a parentless widget
+    # makes Qt treat it as a top-level window with default chrome (see flash
+    # popup root-cause analysis 2026-05-29).
+    b_layout.addWidget(run_card)
     if _last_report_path(window) and _last_report_path(window).exists():
         run_card.setVisible(False)
-    b_layout.addWidget(run_card)
 
     # v1.5.39: Ready for the Call? card is now constructed IDENTICALLY in both
     # user mode and developer mode. Previously user mode hid the Open Report
@@ -2240,10 +2323,16 @@ def build_commander_discovery_page(window):
     ready_report_button.setToolTip("Open the raw Commander Discovery markdown report outside the UI.")
     ready_report_button.clicked.connect(lambda checked=False: _open_latest_commander_discovery_report(window))
     window.commander_discovery_open_report_button = ready_report_button
-    # v1.5.39: Open Report is always visible now (was dev-mode-only).
-    ready_report_button.setVisible(True)
     ready_row.addWidget(ready_report_button)
+    # CRITICAL Qt ordering: addLayout(ready_row) must run BEFORE setVisible(True).
+    # QHBoxLayout.addWidget does NOT reparent children if the layout itself has
+    # no parent widget yet — so right after `ready_row.addWidget(...)`, the
+    # button is still parentless. Calling setVisible(True) on a parentless
+    # QWidget makes Qt show it as a top-level window with default 640x480
+    # chrome — the "flash popup" the user saw. Only after addLayout reparents
+    # the layout's children does setVisible behave as inline-show.
     ready_card.body.addLayout(ready_row)
+    ready_report_button.setVisible(True)
 
     # v1.5.36 + v1.5.39: always-on-screen status label updated by _choose_random_commander_candidate.
     window.commander_discovery_random_status_label = QLabel("Ready — click I Want You! to pick a random commander.")
@@ -2256,8 +2345,10 @@ def build_commander_discovery_page(window):
     ready_card.body.addWidget(window.default_note(
         "I Want You! only picks from the local result list. It does not build a deck, rerun the scanner, or modify a deck."
     ))
-    ready_card.setVisible(bool(_last_report_path(window) and _last_report_path(window).exists()))
+    # addWidget before setVisible — calling setVisible(True) on a parentless
+    # ReportCard would briefly show it as a top-level Qt window.
     b_layout.addWidget(ready_card)
+    ready_card.setVisible(bool(_last_report_path(window) and _last_report_path(window).exists()))
 
     filter_surface = ReportCard("Browse and Filter Commanders", window.theme, badges=[("Live narrowing", "primary"), ("No rescan", "protected")])
     filter_surface.body.addWidget(window.make_text(
@@ -2655,6 +2746,38 @@ def build_commander_discovery_page(window):
     # whenever the user picks a different commander.
     window.refresh_build_setup_panel_summary = _refresh_build_setup_panel_summary
 
+    # Restore widget values from persisted prefs after a page rebuild. The
+    # BuildPreferenceDataShape on window survives rebuilds (line 2648), but
+    # the freshly-built combo boxes default to index 0 — so without this
+    # restore step the user has to redo their Primary / Secondary / Philosophy /
+    # Sub-philosophy / Bracket / Collection choices every time they navigate
+    # back to Commander's Call. Runs BEFORE signal wiring so we don't fire
+    # spurious _commit_build_setup_panel_choices calls on each setCurrentText.
+    _build_prefs = getattr(window, "commander_discovery_build_preferences", None)
+    if _build_prefs is not None:
+        _primary = _build_prefs.primary_strategy or "Not selected yet"
+        _secondary = _build_prefs.secondary_strategy or "None"
+        _main_phi = _build_prefs.main_philosophy or (_initial_main or "")
+        _sub_phi = _build_prefs.sub_philosophy or "No Persona / Not Sure Yet"
+        _bracket = _build_prefs.bracket_preference or "Not Sure Yet"
+        _collection_first = _build_prefs.collection_first_preference or _COLLECTION_FIRST_TOGGLE_LABEL_ON
+        # setCurrentText is a no-op on values not in the combo's items, so
+        # we can call it safely even when a value falls outside the list.
+        window.commander_discovery_primary_strategy_selector.setCurrentText(_primary)
+        window.commander_discovery_secondary_strategy_selector.setCurrentText(_secondary)
+        window.commander_discovery_main_philosophy_selector.setCurrentText(_main_phi)
+        # The sub-philosophy list depends on the main, so repopulate it to
+        # match the restored main BEFORE setting the sub value.
+        _subs_for_restored_main = _sub_philosophy_by_main.get(_main_phi, ["No Persona / Not Sure Yet"])
+        _sub_combo_to_restore = window.commander_discovery_sub_philosophy_selector
+        _sub_combo_to_restore.clear()
+        _sub_combo_to_restore.addItems(_subs_for_restored_main)
+        _sub_combo_to_restore.setCurrentText(_sub_phi)
+        window.commander_discovery_bracket_selector.setCurrentText(_bracket)
+        window.commander_discovery_collection_first_toggle.setChecked(
+            _collection_first == _COLLECTION_FIRST_TOGGLE_LABEL_ON
+        )
+
     # Wire change handlers AFTER widgets are populated so the initial addItems
     # calls don't fire stray callbacks.
     window.commander_discovery_primary_strategy_selector.currentIndexChanged.connect(
@@ -2905,6 +3028,7 @@ def build_commander_discovery_page(window):
     content.addWidget(body)
     content.addStretch(1)
     layout.addWidget(scroll, stretch=1)
+
     return page
 
 
@@ -2957,7 +3081,7 @@ def _preview_build_from_collection_output_selector(window):
             f"- Error detail: {exc}\n\n"
             "No writer was executed, no exact cards were selected, no role counts were created, no mana base was generated, no lands were inserted, no shell was generated, no 100-card draft was generated, and no deck was generated."
         )
-        QMessageBox.warning(window, "Output Selector Preview Failed", str(exc))
+        # Category D (popup removal): error already in preview_text.
 
     box = getattr(window, "commander_discovery_output_selector_preview_box", None)
     if box is not None:

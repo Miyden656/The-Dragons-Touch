@@ -96,7 +96,10 @@ def _clear_pasted_decklist(window):
 def _use_pasted_decklist_without_saving(window):
     text = _paste_deck_text(window)
     if not text:
-        QMessageBox.information(window, "No Decklist Pasted", "Paste a decklist before using it for this run.")
+        # Category C (popup removal): paste box is the source of truth — user sees it's empty.
+        window.state.status = "Paste a decklist into the Paste tab before using it for this run."
+        if hasattr(window, "refresh_context_panel_values"):
+            window.refresh_context_panel_values()
         return
 
     path_text = window.create_temp_pasted_decklist(text)
@@ -108,7 +111,10 @@ def _use_pasted_decklist_without_saving(window):
 def _save_pasted_decklist(window):
     text = _paste_deck_text(window)
     if not text:
-        QMessageBox.information(window, "No Decklist Pasted", "Paste a decklist before saving it.")
+        # Category C (popup removal): paste box is the source of truth.
+        window.state.status = "Paste a decklist into the Paste tab before saving."
+        if hasattr(window, "refresh_context_panel_values"):
+            window.refresh_context_panel_values()
         return
 
     name, ok = QInputDialog.getText(window, "Save Pasted Decklist", "Deck name:")
@@ -120,9 +126,12 @@ def _save_pasted_decklist(window):
         return
 
     window.load_deck_file_preview(path_text)
+    # Category B (popup removal): the status update + visible preview is the
+    # feedback. The right-side context panel shows "Saved pasted decklist: X"
+    # via window.state.status; the deck preview box on this page now shows
+    # the file content. No modal needed.
     window.state.status = f"Saved pasted decklist: {Path(path_text).name}"
     window.refresh_context_panel_values()
-    QMessageBox.information(window, "Decklist Saved", f"Saved and selected:\n\n{path_text}")
 
 
 def _select_deck_file(window):
@@ -186,6 +195,14 @@ def build_deck_selection_page(window):
     select_card = ReportCard("Select File", window.theme, badges=[("Current", "primary")])
     select_card.body.addWidget(window.default_note(
         "Select an existing decklist file. This preserves the current file-selection workflow."
+    ))
+    # First-run polish: surface the Archidekt export path inline so new users
+    # know where to get a compatible plain-text decklist from.
+    select_card.body.addWidget(window.make_text(
+        "New here? From Archidekt, open your deck → Export / Download → save the plain-text decklist, "
+        "then use Choose Folder + Select Deck File below to pick it. Commander sections, maybeboard, tokens, "
+        "and companion sections are previewed conservatively before the backend validation run.",
+        paper=True,
     ))
 
     deck_folder_row = QHBoxLayout()
@@ -325,15 +342,18 @@ def build_deck_selection_page(window):
 
     shell_layout.addWidget(tabs)
 
-    forge_card = ReportCard("Forge Note", window.theme, badges=[("Helpful", "manual")])
-    forge_card.body.addWidget(window.make_text(
-        "The Dragon's Touch works best when your Commander decklist is plain text. "
-        "You can select an existing file, paste a decklist for one run, or save a pasted list into the Decklist Folder.\n\n"
-        "Archidekt setup: open your deck on Archidekt, use Export / Download, copy or save the plain-text decklist, then select or paste it here. "
-        "Commander sections, maybeboard, tokens, and companion sections are previewed conservatively before the backend validation run.",
+    # First-run polish: clear "where to next" guidance for the two main flows.
+    next_steps_card = ReportCard("Where to Next?", window.theme, badges=[("Quick Start", "primary")])
+    next_steps_card.body.addWidget(window.make_text(
+        "Two ways to use The Dragon's Touch:\n\n"
+        "• Deck review — pick or paste a decklist above, then go to Run Analysis to generate a "
+        "cut/protect/replacement report. Open it from Report Viewer.\n\n"
+        "• Commander's Call — build a deck FROM your card collection. Open Settings → Collection Source "
+        "first to point at your collection folder, then go to The Commander's Call to scan for possible commanders.\n\n"
+        "Both flows need Scryfall data. If you haven't downloaded it yet, Settings has a one-click Data Setup button.",
         paper=True,
     ))
-    shell_layout.addWidget(forge_card)
+    shell_layout.addWidget(next_steps_card)
 
     content.layout().addWidget(shell)
     layout.addWidget(scroll, stretch=1)

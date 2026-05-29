@@ -1410,7 +1410,10 @@ def build_report_viewer_page(window):
 
     user_view_btn = _make_report_view_mode_button("User View", "Show the AI handoff and readable guidance lane.")
     dev_view_btn = _make_report_view_mode_button("Dev View", "Show raw report preview, search, and loaded report status.")
-    dev_view_btn.setVisible(window.is_dev_mode())
+    # dev_view_btn's initial visibility is set after mode_row is added to its
+    # parent layout (further down at viewer_layout.addLayout(mode_row)) — see
+    # _set_dev_view_btn_initial_visibility() below. Calling setVisible(True)
+    # on a parentless widget would briefly flash it as a top-level window.
 
     # v0.10.5.3.3: keep these controls addressable so Interface Mode can refresh
     # without rebuilding the Settings page or causing the mode-switch flash.
@@ -1421,6 +1424,8 @@ def build_report_viewer_page(window):
     mode_row.addWidget(user_view_btn)
     mode_row.addWidget(dev_view_btn)
     viewer_layout.addLayout(mode_row)
+    # Set dev_view_btn's initial visibility now that mode_row is parented.
+    dev_view_btn.setVisible(window.is_dev_mode())
 
     report_mode_stack = QStackedWidget()
     report_mode_stack.setObjectName("reportViewerModeStack")
@@ -1564,11 +1569,13 @@ def build_report_viewer_page(window):
         return value() if callable(value) else str(value or "")
 
     def _copy_text_to_clipboard(title, text_value):
+        # Category B (popup removal): clipboard works silently like every
+        # other desktop app. User verifies by pasting. The "There is no
+        # text to copy yet" nudge stays as a status update on the status
+        # label (handled by category C in a later pass).
         if not text_value or not str(text_value).strip():
-            QMessageBox.information(window, title, "There is no text to copy yet.")
             return
         QApplication.clipboard().setText(str(text_value).strip())
-        QMessageBox.information(window, title, "Copied to clipboard.")
 
     def _copy_current_simple_view_section():
         section_name = current_simple_view_section.get("name", "Handoff")
@@ -1636,38 +1643,61 @@ def build_report_viewer_page(window):
         path_text = _find_report_role_path(window, role)
         label = _role_display_name(role)
         if not path_text:
-            QMessageBox.information(
-                window,
-                f"{label} Not Found",
-                f"No generated {label.lower()} file was detected yet. Run Analysis first, then return to Report Viewer."
-            )
+            # Category C (popup removal): surface the "run analysis first" hint inline in the detail box.
+            try:
+                simple_view_detail_box.setPlainText(
+                    f"No generated {label.lower()} file was detected yet. "
+                    "Run Analysis first, then return to Report Viewer."
+                )
+            except Exception:
+                pass
             _show_simple_view_section("Handoff")
             return
         try:
             text = window.read_report_file_text(path_text)
         except Exception as exc:
-            QMessageBox.warning(window, f"{label} Copy Failed", f"Could not read {label.lower()}:\n\n{path_text}\n\n{exc}")
+            # Category D (popup removal): log to stderr for diagnostics, show
+            # error inline in the detail box where the user is looking.
+            import sys as _err_sys
+            print(f"{label} Copy Failed: could not read {path_text}: {exc}", file=_err_sys.stderr)
+            try:
+                simple_view_detail_box.setPlainText(
+                    f"Could not read {label.lower()}:\n\n{path_text}\n\nError: {exc}"
+                )
+            except Exception:
+                pass
             return
         QApplication.clipboard().setText(text)
         _show_simple_view_section("Handoff")
-        QMessageBox.information(window, f"{label} Copied", f"Copied {Path(path_text).name} to the clipboard.")
+        # Category B (popup removal): clipboard is silent. User can paste to verify.
 
     def _show_report_role_in_user_view(role):
         path_text = _find_report_role_path(window, role)
         label = _role_display_name(role)
         if not path_text:
-            QMessageBox.information(
-                window,
-                f"{label} Not Found",
-                f"No generated {label.lower()} file was detected yet. Run Analysis first, then return to Report Viewer."
-            )
+            # Category C (popup removal): inline hint in detail box.
+            try:
+                simple_view_detail_box.setPlainText(
+                    f"No generated {label.lower()} file was detected yet. "
+                    "Run Analysis first, then return to Report Viewer."
+                )
+            except Exception:
+                pass
             _show_simple_view_section("Handoff")
             return
 
         try:
             text_value = window.read_report_file_text(path_text)
         except Exception as exc:
-            QMessageBox.warning(window, f"{label} Open Failed", f"Could not read {label.lower()}:\n\n{path_text}\n\n{exc}")
+            # Category D (popup removal): log to stderr, surface in detail box.
+            import sys as _err_sys
+            print(f"{label} Open Failed: could not read {path_text}: {exc}", file=_err_sys.stderr)
+            try:
+                simple_view_detail_box.setPlainText(
+                    f"Could not read {label.lower()}:\n\n{path_text}\n\nError: {exc}"
+                )
+            except Exception:
+                pass
             return
 
         window.load_report_file_into_viewer(path_text)
@@ -1711,11 +1741,14 @@ def build_report_viewer_page(window):
         path_text = _find_report_role_path(window, role)
         label = _role_display_name(role)
         if not path_text:
-            QMessageBox.information(
-                window,
-                f"{label} Not Found",
-                f"No generated {label.lower()} file was detected yet. Run Analysis first, then return to Report Viewer."
-            )
+            # Category C (popup removal): inline hint in detail box.
+            try:
+                simple_view_detail_box.setPlainText(
+                    f"No generated {label.lower()} file was detected yet. "
+                    "Run Analysis first, then return to Report Viewer."
+                )
+            except Exception:
+                pass
             _show_simple_view_section("Handoff")
             return
         window.load_report_file_into_viewer(path_text)

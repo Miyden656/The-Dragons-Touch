@@ -227,8 +227,10 @@ def build_run_analysis_page(window):
     result_card.body.addWidget(result_box)
     result_card.body.addWidget(window.default_note("After a successful run, Report Viewer opens automatically. You can also return here from the navigation map."))
     window.run_latest_output_card = result_card
-    result_card.setVisible(window.is_dev_mode())
+    # addWidget before setVisible — calling setVisible(True) on a parentless
+    # widget makes Qt show it as a top-level window with default chrome.
     l_layout.addWidget(result_card, stretch=1)
+    result_card.setVisible(window.is_dev_mode())
 
     # Idle Run Analysis intentionally does not show the helper-dragon loading forge.
     # The large helper-dragon loading canvas is reserved only for active guarded backend runs.
@@ -259,14 +261,14 @@ def build_run_analysis_page(window):
     advanced_layout = QVBoxLayout(advanced_container)
     advanced_layout.setContentsMargins(0, 0, 0, 0)
     advanced_layout.setSpacing(14)
-    advanced_container.setVisible(window.is_dev_mode())
+    # advanced_container is added to r_layout further down (line ~412) — defer
+    # setVisible until then to avoid the parentless-top-level-window flash.
     window.run_advanced_details_container = advanced_container
     window.run_advanced_details_toggle = advanced_toggle
-    advanced_toggle.setVisible(window.is_dev_mode())
+    advanced_toggle.setVisible(window.is_dev_mode())  # advanced_toggle is already parented at line 256
     # v0.10.5.5 user/developer visibility boundary
     if hasattr(window, 'is_dev_facing_mode'):
         advanced_toggle.setVisible(window.is_dev_facing_mode())
-        advanced_container.setVisible(window.is_dev_facing_mode())
         advanced_toggle.setChecked(window.is_dev_facing_mode())
         advanced_toggle.setText('Hide Advanced Run Details' if window.is_dev_facing_mode() else 'Show Advanced Run Details')
 
@@ -353,9 +355,14 @@ def build_run_analysis_page(window):
     guarded_box.setObjectName("guardedExecutionPreview")
     window.guarded_execution_preview_box = guarded_box
     guarded_card.body.addWidget(guarded_box)
-    guarded_preview_btn = QPushButton("Validate Guarded Run Preview — No Execution")
-    guarded_preview_btn.clicked.connect(window.guarded_execution_placeholder_message)
-    guarded_card.body.addWidget(guarded_preview_btn)
+    # Category E (popup removal): the validate-preview button was a dev-mode
+    # placeholder that fired a "Guarded Execution Bridge" modal. For community
+    # release it's dev-mode-only — the real Run Analysis button below is what
+    # user-mode users click.
+    if hasattr(window, "is_dev_mode") and window.is_dev_mode():
+        guarded_preview_btn = QPushButton("Validate Guarded Run Preview — No Execution")
+        guarded_preview_btn.clicked.connect(window.guarded_execution_placeholder_message)
+        guarded_card.body.addWidget(guarded_preview_btn)
     guarded_run_btn = QPushButton("Run Analysis")
     guarded_run_btn.clicked.connect(window.start_guarded_backend_run)
     guarded_card.body.addWidget(guarded_run_btn)
@@ -410,6 +417,11 @@ def build_run_analysis_page(window):
     detail_stack.setCurrentIndex(0)
     advanced_layout.addWidget(detail_stack, stretch=1)
     r_layout.addWidget(advanced_container, stretch=1)
+    # Set initial visibility AFTER addWidget so a parentless top-level window
+    # doesn't briefly appear in dev mode.
+    advanced_container.setVisible(
+        window.is_dev_facing_mode() if hasattr(window, 'is_dev_facing_mode') else window.is_dev_mode()
+    )
 
     def _toggle_advanced_run_details(checked):
         advanced_container.setVisible(checked)
