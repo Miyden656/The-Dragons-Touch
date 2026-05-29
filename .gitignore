@@ -37,14 +37,13 @@ data/combo.json
 data/commander_spellbook/combo_index.json
 data/commander_spellbook/combo_index_parity.json
 
-# Local/private collection data
-collection/
-*_collection.txt
+# Local/private collection data — ignore .txt contents but keep the
+# collection/ folder visible so users see where to put their files.
+# A README.md inside the folder explains the format.
+collection/*.txt
 
-# Decklists
-
-Decklists/
-*_Decklists.txt
+# Decklists — same pattern: ignore .txt contents, keep folder.
+Decklists/*.txt
 
 # Old internal backups
 Old Do not use/
