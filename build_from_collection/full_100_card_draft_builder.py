@@ -119,6 +119,18 @@ class Full100CardDraftResult:
     missing_slots: dict[str, int] = field(default_factory=dict)
     total_cards: int = 0
     notes: list[str] = field(default_factory=list)
+    # v1.6.1 Phase 1: legality / matching diagnostics surfaced in the report
+    # so the user can see exactly what the pre-build gates filtered out.
+    # These are owned-collection card counts, not unique-name counts.
+    collection_cards_analyzed: int = 0
+    scryfall_unmatched_count: int = 0
+    color_identity_excluded_count: int = 0
+    legality_banned_excluded_count: int = 0
+    legality_not_legal_excluded_count: int = 0
+    legality_restricted_excluded_count: int = 0
+    bracket_excluded_count: int = 0
+    allow_banned_cards: bool = False
+    commander_is_banned: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -131,6 +143,15 @@ class Full100CardDraftResult:
             "missing_slots": dict(self.missing_slots),
             "total_cards": self.total_cards,
             "notes": list(self.notes),
+            "collection_cards_analyzed": self.collection_cards_analyzed,
+            "scryfall_unmatched_count": self.scryfall_unmatched_count,
+            "color_identity_excluded_count": self.color_identity_excluded_count,
+            "legality_banned_excluded_count": self.legality_banned_excluded_count,
+            "legality_not_legal_excluded_count": self.legality_not_legal_excluded_count,
+            "legality_restricted_excluded_count": self.legality_restricted_excluded_count,
+            "bracket_excluded_count": self.bracket_excluded_count,
+            "allow_banned_cards": self.allow_banned_cards,
+            "commander_is_banned": self.commander_is_banned,
         }
 
 
@@ -211,11 +232,19 @@ def build_full_100_card_draft(
     secondary_strategy: str = "",
     bracket_preference: str = "",
     sub_philosophy: str = "",
+    allow_banned_cards: bool = False,
 ) -> Full100CardDraftResult:
     """Generate a 100-card Commander decklist from the user's owned collection.
 
     owned_cards is a list of dicts with at minimum: name, owned_quantity, oracle_text,
     type_line, source_files. (Same shape produced by the Owned Cards by Role loader.)
+
+    allow_banned_cards (v1.6.1) is the explicit, off-by-default escape hatch for
+    Rule Zero / house-rules tables. When False (the default), any card Scryfall
+    marks as banned in Commander is dropped before bracket filtering. When True,
+    banned cards are allowed through and the report says CUSTOM MODE. Cards
+    marked `not_legal` in Commander (un-cards / conspiracies / etc.) are ALWAYS
+    dropped, even in custom mode.
     """
     commander_name = (
         commander_candidate.get("commander_name")
@@ -223,6 +252,15 @@ def build_full_100_card_draft(
         or "Selected commander"
     )
     commander_scry = scryfall_lookup.get(commander_name.lower(), {}) or {}
+    # v1.6.1 Phase 1: detect a banned commander up front. Phase 2 will block
+    # banned commanders at the discovery layer; for now we flag the build so
+    # the report can shout about it instead of silently producing an illegal
+    # deck.
+    try:
+        from legality.build_legality_gate import is_card_banned_in_commander as _is_banned_cmdr
+        commander_is_banned = bool(commander_scry) and _is_banned_cmdr(commander_scry)
+    except Exception:
+        commander_is_banned = False
     commander_identity = _card_color_identity(commander_scry)
     # Fall back to the candidate's stored identity_key (string like "URG") if Scryfall lookup empty.
     if not commander_identity:
@@ -292,6 +330,26 @@ def build_full_100_card_draft(
         score_modifier_for_bracket = None  # type: ignore[assignment]
         bracket_to_int = None  # type: ignore[assignment]
 
+    # v1.6.1 Phase 1: Commander legality gate. Excludes cards Scryfall marks
+    # as banned or not_legal in Commander BEFORE the bracket filter sees them.
+    # This is the single source of truth for "is this card playable in 99".
+    # Without this gate, a banned card in the user's collection would land in
+    # the deck whenever color identity allowed it.
+    try:
+        from legality.build_legality_gate import (
+            should_exclude_from_commander_build,
+            commander_legality_gate_summary,
+            EXCLUDE_REASON_BANNED,
+            EXCLUDE_REASON_NOT_LEGAL,
+            EXCLUDE_REASON_RESTRICTED,
+        )
+    except Exception:
+        should_exclude_from_commander_build = None  # type: ignore[assignment]
+        commander_legality_gate_summary = None  # type: ignore[assignment]
+        EXCLUDE_REASON_BANNED = "banned"
+        EXCLUDE_REASON_NOT_LEGAL = "not_legal"
+        EXCLUDE_REASON_RESTRICTED = "restricted"
+
     # v1.5.43 Item 5: Pre-compute combos reachable from this commander +
     # collection. Done ONCE before the pool loop so each card's lookup is O(1).
     # "Reachable" = combo identity fits commander AND >=2 pieces are in the
@@ -326,6 +384,13 @@ def build_full_100_card_draft(
     nonland_pool: list[tuple[float, dict[str, Any], set[str], str]] = []
     nonbasic_land_pool: list[tuple[float, dict[str, Any]]] = []
     bracket_excluded_count = 0
+    # v1.6.1 Phase 1: counters surfaced in the report so the user can see
+    # exactly what the legality + color-identity gates filtered out.
+    color_identity_excluded_count = 0
+    legality_banned_excluded_count = 0
+    legality_not_legal_excluded_count = 0
+    legality_restricted_excluded_count = 0
+    scryfall_unmatched_count = 0
 
     for card_entry in owned_cards:
         name = card_entry.get("name") or ""
@@ -333,10 +398,30 @@ def build_full_100_card_draft(
             continue
         scry = scryfall_lookup.get(name.lower(), {}) or {}
         if not scry:
-            continue  # Skip cards not in Scryfall — can't verify identity.
+            # Card name didn't resolve in Scryfall (printed-name MDFC, typo,
+            # name drift). Counted so the report can flag it for the user.
+            scryfall_unmatched_count += 1
+            continue
+        # v1.6.1 Phase 1: Commander legality gate. Run BEFORE the bracket
+        # filter so a banned card is rejected at any bracket, with or without
+        # bracket-pressure tags. The allow_banned_cards flag is the explicit
+        # off-by-default Rule Zero / custom-mode escape hatch.
+        if should_exclude_from_commander_build is not None:
+            excluded, reason = should_exclude_from_commander_build(
+                scry, allow_banned_cards=allow_banned_cards,
+            )
+            if excluded:
+                if reason == EXCLUDE_REASON_BANNED:
+                    legality_banned_excluded_count += 1
+                elif reason == EXCLUDE_REASON_NOT_LEGAL:
+                    legality_not_legal_excluded_count += 1
+                elif reason == EXCLUDE_REASON_RESTRICTED:
+                    legality_restricted_excluded_count += 1
+                continue
         card_identity = _card_color_identity(scry)
         # Color identity rule: card's identity must be a subset of commander's.
         if card_identity and not card_identity.issubset(identity_set):
+            color_identity_excluded_count += 1
             continue
         type_line = str(scry.get("type_line") or "")
         mana_value = float(scry.get("cmc") or 0)
@@ -618,6 +703,39 @@ def build_full_100_card_draft(
     total_cards = sum(e.quantity for e in entries)
 
     notes: list[str] = []
+    # v1.6.1 Phase 1: legality gate summary FIRST so users see this before
+    # bracket / persona / combo notes. Banned-commander flag is loudest.
+    if commander_is_banned:
+        if allow_banned_cards:
+            notes.append(
+                f"CUSTOM MODE: selected commander '{commander_name}' is BANNED "
+                "in Commander but allow_banned_cards=True. This deck is illegal "
+                "at any normal Commander table — Rule Zero / playgroup approval "
+                "required before play."
+            )
+        else:
+            notes.append(
+                f"WARNING: selected commander '{commander_name}' is BANNED in "
+                "Commander. The deck builder will still produce a list, but "
+                "the deck is not legal. Pick a different commander."
+            )
+    if commander_legality_gate_summary is not None:
+        notes.append(commander_legality_gate_summary(
+            banned_excluded=legality_banned_excluded_count,
+            not_legal_excluded=legality_not_legal_excluded_count,
+            restricted_excluded=legality_restricted_excluded_count,
+            allow_banned_cards=allow_banned_cards,
+        ))
+    if color_identity_excluded_count > 0:
+        notes.append(
+            f"{color_identity_excluded_count} card(s) from your collection were "
+            f"excluded for color identity (outside the commander's color identity)."
+        )
+    if scryfall_unmatched_count > 0:
+        notes.append(
+            f"{scryfall_unmatched_count} card(s) from your collection could not be "
+            f"resolved against the local Scryfall database and were skipped."
+        )
     if total_cards < 100:
         notes.append(
             f"Deck is {total_cards} cards — short by {100 - total_cards}. "
@@ -685,6 +803,15 @@ def build_full_100_card_draft(
         missing_slots=missing_slots,
         total_cards=total_cards,
         notes=notes,
+        collection_cards_analyzed=len(owned_cards),
+        scryfall_unmatched_count=scryfall_unmatched_count,
+        color_identity_excluded_count=color_identity_excluded_count,
+        legality_banned_excluded_count=legality_banned_excluded_count,
+        legality_not_legal_excluded_count=legality_not_legal_excluded_count,
+        legality_restricted_excluded_count=legality_restricted_excluded_count,
+        bracket_excluded_count=bracket_excluded_count,
+        allow_banned_cards=allow_banned_cards,
+        commander_is_banned=commander_is_banned,
     )
 
 
@@ -749,6 +876,41 @@ def render_full_100_card_draft_markdown(result: Full100CardDraftResult) -> str:
         target = TARGET_COUNTS.get(bucket, 0)
         status = "✓" if count >= target else f"⚠ short by {target - count}"
         lines.append(f"- {bucket}: {count}/{target} {status}")
+    lines.append("")
+
+    # v1.6.1 Phase 1: Legality & collection-diagnostics block. Lets the user
+    # see at a glance how the legality / color-identity / Scryfall-match
+    # gates filtered their collection before deck construction.
+    lines.append("## Legality & Collection Diagnostics")
+    lines.append("")
+    lines.append(f"- Collection cards analyzed: {result.collection_cards_analyzed}")
+    lines.append(f"- Scryfall-unmatched cards skipped: {result.scryfall_unmatched_count}")
+    lines.append(f"- Excluded for color identity: {result.color_identity_excluded_count}")
+    lines.append(
+        f"- Excluded for Commander legality (banned): "
+        f"{result.legality_banned_excluded_count}"
+    )
+    lines.append(
+        f"- Excluded for Commander legality (not legal in format): "
+        f"{result.legality_not_legal_excluded_count}"
+    )
+    if result.legality_restricted_excluded_count:
+        lines.append(
+            f"- Excluded as restricted: {result.legality_restricted_excluded_count}"
+        )
+    lines.append(f"- Excluded by bracket filter: {result.bracket_excluded_count}")
+    # Top-line legality verdict — first thing a pilot wants to know.
+    if result.commander_is_banned and not result.allow_banned_cards:
+        verdict = "❌ ILLEGAL — selected commander is banned in Commander"
+    elif result.commander_is_banned and result.allow_banned_cards:
+        verdict = "❌ ILLEGAL (CUSTOM MODE) — commander is banned; deck is house-rules only"
+    elif result.allow_banned_cards and result.legality_banned_excluded_count == 0:
+        verdict = "✓ Legal in Commander (custom mode flag set but no banned cards were in the collection)"
+    elif result.allow_banned_cards:
+        verdict = "❌ CUSTOM MODE — banned cards were allowed into the deck; not legal at a normal table"
+    else:
+        verdict = "✓ Passed Commander legality gate (no banned / not-legal cards entered the build)"
+    lines.append(f"- Legality verdict: {verdict}")
     lines.append("")
     if result.missing_slots:
         lines.append("**Missing slots:**")
