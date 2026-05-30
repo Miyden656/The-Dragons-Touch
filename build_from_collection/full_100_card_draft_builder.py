@@ -270,7 +270,23 @@ def build_full_100_card_draft(
         or commander_candidate.get("card_name")
         or "Selected commander"
     )
-    commander_scry = scryfall_lookup.get(commander_name.lower(), {}) or {}
+    # v1.6.1 Phase 4: build a name-resolution index ONCE per build call so
+    # we can resolve the commander and per-owned-card names through the same
+    # smart resolver the collection loader uses (exact → normalized → face /
+    # printed / flavor alt). Falls back to the raw lookup if the module
+    # isn't importable.
+    try:
+        from data.card_resolution import (
+            build_card_resolution_indexes,
+            resolve_card_simple,
+        )
+        _resolution_indexes = build_card_resolution_indexes(scryfall_lookup)
+        _resolve = lambda nm: resolve_card_simple(nm, scryfall_lookup, _resolution_indexes)
+    except Exception:
+        _resolution_indexes = None
+        _resolve = lambda nm: scryfall_lookup.get((nm or "").lower())
+
+    commander_scry = _resolve(commander_name) or {}
     # v1.6.1 Phase 1: detect a banned commander up front. Phase 2 will block
     # banned commanders at the discovery layer; for now we flag the build so
     # the report can shout about it instead of silently producing an illegal
@@ -438,12 +454,23 @@ def build_full_100_card_draft(
         name = card_entry.get("name") or ""
         if not name or name == commander_name:
             continue
-        scry = scryfall_lookup.get(name.lower(), {}) or {}
+        # v1.6.1 Phase 4: smart resolver (exact → normalized → face /
+        # printed / flavor alt) instead of raw .lower() lookup. Handles
+        # MDFC face names, split-card sides, accented variants, and the
+        # printed/flavor-name reprints (Universes Within, etc.) cleanly.
+        scry = _resolve(name) or {}
         if not scry:
             # Card name didn't resolve in Scryfall (printed-name MDFC, typo,
             # name drift). Counted so the report can flag it for the user.
             scryfall_unmatched_count += 1
             continue
+        # v1.6.1 Phase 4: rewrite the working name to the canonical Scryfall
+        # name. If the user typed "Fire" we want the decklist line to say
+        # "Fire // Ice" so it pastes into Archidekt / Moxfield correctly and
+        # so duplicate detection across alt spellings works.
+        canonical_name = str(scry.get("name") or name)
+        if canonical_name and canonical_name != name:
+            name = canonical_name
         # v1.6.1 Phase 1: Commander legality gate. Run BEFORE the bracket
         # filter so a banned card is rejected at any bracket, with or without
         # bracket-pressure tags. The allow_banned_cards flag is the explicit

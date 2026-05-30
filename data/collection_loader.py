@@ -33,6 +33,35 @@ _QUANTITY_RE = re.compile(r"^\s*(?P<qty>\d+)\s+(?P<rest>.+?)\s*$")
 _SUFFIX_RE = re.compile(r"\s+\*[^*]+\*\s*$")
 
 
+# v1.6.1 Phase 4: name-resolution logic moved to data/card_resolution.py so
+# the deck builder can call into the same routines. Re-imported here so the
+# existing collection_loader API surface (parse_*, load_*) is unchanged.
+from data.card_resolution import (
+    build_card_resolution_indexes as _build_resolution_indexes,
+    resolve_card_in_indexes as _resolve_collection_card_in_indexes,
+    normalize_lookup_key as _normalize_lookup_key,
+    collector_key as _collector_key,
+)
+
+
+def _resolve_collection_card(
+    card_name: str,
+    set_code: str | None,
+    collector_number: str | None,
+    scryfall_lookup: dict[str, dict[str, Any]],
+    indexes: dict[str, Any],
+) -> tuple[str, bool, str, dict[str, Any] | None]:
+    """Thin wrapper preserving the historical loader signature.
+
+    The full resolution logic now lives in data/card_resolution.py so the
+    builder can reuse it. Keeping this wrapper means the call sites below
+    don't have to change.
+    """
+    return _resolve_collection_card_in_indexes(
+        card_name, set_code, collector_number, scryfall_lookup, indexes,
+    )
+
+
 @dataclass(slots=True)
 class CollectionCardEntry:
     raw_line: str
@@ -85,112 +114,11 @@ class CollectionLoadSummary:
         return len(self.selected_files)
 
 
-def _normalize_lookup_key(text: object) -> str:
-    return " ".join(str(text).strip().lower().replace("\n", " ").split())
-
-
-def _collector_key(set_code: str | None, collector_number: str | None) -> tuple[str, str] | None:
-    if not set_code or not collector_number:
-        return None
-    number = str(collector_number).strip().lower()
-    number = number.replace("★", "").replace("*", "")
-    return (str(set_code).strip().lower(), number)
-
-
-def _iter_scryfall_records(
-    scryfall_lookup: dict[str, dict[str, Any]],
-    scryfall_cards: Sequence[dict[str, Any]] | None = None,
-) -> list[dict[str, Any]]:
-    if scryfall_cards:
-        return [card for card in scryfall_cards if isinstance(card, dict)]
-    # Fallback is less complete because name lookup collapses printings, but it
-    # preserves compatibility if full Scryfall cards are not passed yet.
-    return [card for card in scryfall_lookup.values() if isinstance(card, dict)]
-
-
-def _build_resolution_indexes(
-    scryfall_lookup: dict[str, dict[str, Any]],
-    scryfall_cards: Sequence[dict[str, Any]] | None = None,
-) -> dict[str, Any]:
-    records = _iter_scryfall_records(scryfall_lookup, scryfall_cards)
-    exact_name_index: dict[str, dict[str, Any]] = {}
-    alternate_name_index: dict[str, dict[str, Any]] = {}
-    set_collector_index: dict[tuple[str, str], dict[str, Any]] = {}
-
-    for card in records:
-        name = card.get("name")
-        if name:
-            exact_name_index.setdefault(str(name).lower(), card)
-            exact_name_index.setdefault(_normalize_lookup_key(name), card)
-
-        for alt_key in ["printed_name", "flavor_name"]:
-            alt_name = card.get(alt_key)
-            if alt_name:
-                alternate_name_index.setdefault(str(alt_name).lower(), card)
-                alternate_name_index.setdefault(_normalize_lookup_key(alt_name), card)
-
-        for face in card.get("card_faces", []) or []:
-            for alt_key in ["name", "printed_name", "flavor_name"]:
-                alt_name = face.get(alt_key)
-                if alt_name:
-                    alternate_name_index.setdefault(str(alt_name).lower(), card)
-                    alternate_name_index.setdefault(_normalize_lookup_key(alt_name), card)
-
-        key = _collector_key(card.get("set"), card.get("collector_number"))
-        if key:
-            set_collector_index.setdefault(key, card)
-
-    return {
-        "exact_name": exact_name_index,
-        "alternate_name": alternate_name_index,
-        "set_collector": set_collector_index,
-    }
-
-
-def _resolve_collection_card(
-    card_name: str,
-    set_code: str | None,
-    collector_number: str | None,
-    scryfall_lookup: dict[str, dict[str, Any]],
-    indexes: dict[str, Any],
-) -> tuple[str, bool, str, dict[str, Any] | None]:
-    """Resolve without fuzzy-correcting bad export data.
-
-    Resolution order:
-    1. Exact Scryfall name match.
-    2. Normalized name match.
-    3. Set code + collector number match.
-    4. Printed/flavor/card-face alternate name match.
-    5. Not found.
-    """
-    clean = card_name.strip()
-    if not clean:
-        return clean, False, "not_found", None
-
-    # 1. Exact name match. This uses the original lookup first to preserve legacy behavior.
-    record = scryfall_lookup.get(clean.lower()) or indexes["exact_name"].get(clean.lower())
-    if record:
-        return str(record.get("name") or clean), True, "exact_name", record
-
-    # 2. Normalized name match.
-    normalized_key = _normalize_lookup_key(clean)
-    record = indexes["exact_name"].get(normalized_key)
-    if record:
-        return str(record.get("name") or clean), True, "normalized_name", record
-
-    # 3. Set code + collector number match. This is for real alternate printed names/reskins.
-    key = _collector_key(set_code, collector_number)
-    if key:
-        record = indexes["set_collector"].get(key)
-        if record:
-            return str(record.get("name") or clean), True, "set_collector", record
-
-    # 4. Printed/flavor/card-face alternate name match.
-    record = indexes["alternate_name"].get(clean.lower()) or indexes["alternate_name"].get(normalized_key)
-    if record:
-        return str(record.get("name") or clean), True, "printed_or_alternate_name", record
-
-    return clean, False, "not_found", None
+# v1.6.1 Phase 4: _normalize_lookup_key, _collector_key, _iter_scryfall_records,
+# _build_resolution_indexes, and the resolver were moved to
+# data/card_resolution.py and re-imported at the top of this file. The thin
+# `_resolve_collection_card` wrapper preserves the legacy call signature so
+# the parse_* / load_* functions below don't need any changes.
 
 
 def _parse_card_text_and_print_info(card_text: str) -> tuple[str, str | None, str | None]:
