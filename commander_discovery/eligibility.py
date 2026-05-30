@@ -23,13 +23,23 @@ from dataclasses import dataclass, field
 from typing import Any, Iterable
 
 from legality.build_legality_gate import is_card_banned_in_commander
+# v1.6.1 Phase 6: keep the command-zone rule names aligned with the
+# authoritative reference module so the strings don't drift apart.
+from rules.commander_format_rules import (
+    COMMAND_ZONE_RULE_BASIC_LEGENDARY_CREATURE as _CZ_BASIC,
+)
 
 
 ELIGIBILITY_STATUS_ELIGIBLE = "eligible"
 ELIGIBILITY_STATUS_MANUAL_REVIEW = "manual_review"
 ELIGIBILITY_STATUS_NOT_CANDIDATE = "not_candidate"
 
-RULE_BASIC_LEGENDARY_CREATURE = "basic_legendary_creature"
+# v1.6.1 Phase 6: rule strings re-exported here for the eligibility result
+# shape. RULE_BASIC_LEGENDARY_CREATURE is the same string as the canonical
+# COMMAND_ZONE_RULE_BASIC_LEGENDARY_CREATURE in rules/commander_format_rules.py.
+# When you add or rename a command-zone rule, update the constant in
+# rules/commander_format_rules.py FIRST, then mirror here.
+RULE_BASIC_LEGENDARY_CREATURE = _CZ_BASIC
 RULE_SPECIAL_COMMANDER_TEXT = "special_commander_text"
 RULE_DEFERRED_PAIRING_RULE = "deferred_pairing_rule"
 RULE_NOT_A_COMMANDER_CANDIDATE = "not_a_commander_candidate"

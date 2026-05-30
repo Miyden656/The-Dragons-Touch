@@ -25,12 +25,19 @@ from legality.companion_rules import (
     get_companion_restriction_summary,
 )
 from parsing.deck_parser import ParsedDeck
+# v1.6.1 Phase 6: Commander format rules now live in rules/commander_format_rules.py.
+# We import the constants here so the deck-size check has a single source of
+# truth instead of a magic 100 sprinkled through this file.
+from rules.commander_format_rules import (
+    COMMANDER_DECK_SIZE,
+    is_commander_deck_size_legal,
+)
 
 
 @dataclass(slots=True)
 class CommanderLegalitySummary:
     deck_card_count: int
-    expected_deck_size: int = 100
+    expected_deck_size: int = COMMANDER_DECK_SIZE
     deck_size_legal: bool = False
     cards_not_found: list[str] = field(default_factory=list)
     color_identity_violations: list[dict[str, Any]] = field(default_factory=list)
@@ -285,7 +292,7 @@ def build_commander_legality_summary(
 
     return CommanderLegalitySummary(
         deck_card_count=parsed_deck.deck_card_count,
-        deck_size_legal=parsed_deck.deck_card_count == 100,
+        deck_size_legal=is_commander_deck_size_legal(parsed_deck.deck_card_count),
         cards_not_found=cards_not_found,
         color_identity_violations=color_identity_violations,
         manual_review_color_identity=manual_review_color_identity,
