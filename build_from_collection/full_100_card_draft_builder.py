@@ -1017,77 +1017,22 @@ def render_full_100_card_draft_markdown(result: Full100CardDraftResult) -> str:
         lines.append(f"- {bucket}: {count}/{target} {status}")
     lines.append("")
 
-    # v1.6.1 Phase 1: Legality & collection-diagnostics block. Lets the user
-    # see at a glance how the legality / color-identity / Scryfall-match
-    # gates filtered their collection before deck construction.
-    lines.append("## Legality & Collection Diagnostics")
-    lines.append("")
-    lines.append(f"- Collection cards analyzed: {result.collection_cards_analyzed}")
-    lines.append(f"- Scryfall-unmatched cards skipped: {result.scryfall_unmatched_count}")
-    lines.append(f"- Excluded for color identity: {result.color_identity_excluded_count}")
-    lines.append(
-        f"- Excluded for Commander legality (banned): "
-        f"{result.legality_banned_excluded_count}"
-    )
-    lines.append(
-        f"- Excluded for Commander legality (not legal in format): "
-        f"{result.legality_not_legal_excluded_count}"
-    )
-    if result.legality_restricted_excluded_count:
-        lines.append(
-            f"- Excluded as restricted: {result.legality_restricted_excluded_count}"
+    # v1.6.1 Phase 7: the structured Build Validation report block replaces
+    # the legacy "Legality & Collection Diagnostics" wall of lines. The new
+    # block has a top-line verdict (LEGAL / LEGAL but weak / collection-
+    # limited / ILLEGAL / CUSTOM MODE) followed by per-component sub-sections.
+    try:
+        from build_from_collection.build_validation_report import (
+            build_validation_report_lines,
         )
-    lines.append(f"- Excluded by bracket filter: {result.bracket_excluded_count}")
-    # v1.6.1 Phase 3: creature density block. Shows whether the deck is
-    # creature-heavy / -light / balanced relative to the strategy's expected
-    # band so the user can tell at a glance whether the result feels right.
-    if result.creature_band_category:
-        band_text = (
-            f"{result.creature_band_floor}-{result.creature_band_ceiling} "
-            f"(target {result.creature_band_target}, category "
-            f"{result.creature_band_category})"
-        )
-        lines.append(
-            f"- Creature count: {result.creature_count} "
-            f"(noncreature nonland: {result.noncreature_nonland_count})"
-        )
-        lines.append(f"- Creature band for chosen strategy: {band_text}")
-        if result.creature_count < result.creature_band_floor:
-            lines.append(
-                f"- Creature density status: ⚠ below floor "
-                f"({result.creature_band_floor})"
-            )
-        elif result.creature_count > result.creature_band_ceiling:
-            lines.append(
-                f"- Creature density status: ⚠ above ceiling "
-                f"({result.creature_band_ceiling}) — collection thin on "
-                f"noncreature support"
-            )
-        else:
-            lines.append("- Creature density status: ✓ within band")
-        if result.creatures_skipped_for_ceiling > 0:
-            lines.append(
-                f"- Creatures skipped to enforce ceiling: "
-                f"{result.creatures_skipped_for_ceiling}"
-            )
-        if result.creatures_added_past_ceiling > 0:
-            lines.append(
-                f"- Extra creatures added past ceiling (safety-net fill): "
-                f"{result.creatures_added_past_ceiling}"
-            )
-    # Top-line legality verdict — first thing a pilot wants to know.
-    if result.commander_is_banned and not result.allow_banned_cards:
-        verdict = "❌ ILLEGAL — selected commander is banned in Commander"
-    elif result.commander_is_banned and result.allow_banned_cards:
-        verdict = "❌ ILLEGAL (CUSTOM MODE) — commander is banned; deck is house-rules only"
-    elif result.allow_banned_cards and result.legality_banned_excluded_count == 0:
-        verdict = "✓ Legal in Commander (custom mode flag set but no banned cards were in the collection)"
-    elif result.allow_banned_cards:
-        verdict = "❌ CUSTOM MODE — banned cards were allowed into the deck; not legal at a normal table"
-    else:
-        verdict = "✓ Passed Commander legality gate (no banned / not-legal cards entered the build)"
-    lines.append(f"- Legality verdict: {verdict}")
-    lines.append("")
+        lines.extend(build_validation_report_lines(result))
+    except Exception:
+        # Defensive fallback so the report still renders if the validation
+        # module fails to import — only happens during partial installs.
+        lines.append("## Build Validation")
+        lines.append("")
+        lines.append("- (Build validation module unavailable in this build.)")
+        lines.append("")
     if result.missing_slots:
         lines.append("**Missing slots:**")
         for bucket, missing in result.missing_slots.items():
