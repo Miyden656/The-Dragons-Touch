@@ -183,6 +183,16 @@ class CommanderDiscoveryScanResult:
     resolved_collection_cards: int = 0
     unresolved_collection_cards: int = 0
     skipped_nonlegendary_cards: int = 0
+    # v1.6.1 Phase 2: number of cards that LOOK like commander candidates
+    # (legendary creature or special command-zone text) but were excluded
+    # because Scryfall marks them banned in Commander. Tracked separately from
+    # skipped_nonlegendary_cards so the UI / report can surface "your collection
+    # contains N banned commanders" instead of hiding it in the non-legendary
+    # bucket.
+    banned_commanders_skipped: int = 0
+    # When True, the scan was run in custom / Rule Zero mode. Banned commanders
+    # were surfaced as candidates with a BANNED warning instead of being dropped.
+    allow_banned_commanders: bool = False
     manual_review_candidate_count: int = 0
     mvp_candidate_count: int = 0
     warnings: list[str] = field(default_factory=list)
@@ -212,6 +222,8 @@ class CommanderDiscoveryScanResult:
             "resolved_collection_cards": self.resolved_collection_cards,
             "unresolved_collection_cards": self.unresolved_collection_cards,
             "skipped_nonlegendary_cards": self.skipped_nonlegendary_cards,
+            "banned_commanders_skipped": self.banned_commanders_skipped,
+            "allow_banned_commanders": self.allow_banned_commanders,
             "warnings": list(self.warnings),
             "candidates": [candidate.to_dict() for candidate in self.candidates],
         }

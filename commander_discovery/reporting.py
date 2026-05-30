@@ -52,6 +52,18 @@ def build_commander_discovery_report(
     lines.append(f"- Unique collection cards resolved: {result.resolved_collection_cards}")
     lines.append(f"- Unresolved collection cards: {result.unresolved_collection_cards}")
     lines.append(f"- Skipped non-commander cards: {result.skipped_nonlegendary_cards}")
+    # v1.6.1 Phase 2: surface banned-commander gate results explicitly so the
+    # user can see whether banned legendary creatures were excluded and how many.
+    if result.allow_banned_commanders:
+        lines.append(
+            f"- Banned-in-Commander commander candidates included (CUSTOM MODE): "
+            f"{result.banned_commanders_skipped}"
+        )
+    else:
+        lines.append(
+            f"- Banned-in-Commander commander candidates excluded from discovery: "
+            f"{result.banned_commanders_skipped}"
+        )
     lines.append("")
     lines.append("## MVP Boundary")
     lines.append("")

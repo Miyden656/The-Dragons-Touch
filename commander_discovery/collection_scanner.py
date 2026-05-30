@@ -10,7 +10,10 @@ from __future__ import annotations
 
 from typing import Any, Iterable
 
-from .eligibility import classify_commander_eligibility
+from .eligibility import (
+    RULE_BANNED_COMMANDER,
+    classify_commander_eligibility,
+)
 from .models import CommanderCandidate, CommanderDiscoveryScanResult
 
 
@@ -20,19 +23,28 @@ Bucket = dict[str, Any]
 def scan_collection_for_legendary_creature_candidates(
     collection_summary: Any,
     scryfall_lookup: dict[str, dict[str, Any]] | None,
+    *,
+    allow_banned_commanders: bool = False,
 ) -> CommanderDiscoveryScanResult:
     """Compatibility wrapper for the v1.2.1 scanner name.
 
     v1.2.2 may include manual-review special-rule candidates in the full result.
+    v1.6.1 Phase 2 adds the optional allow_banned_commanders flag.
     Use result.legendary_creature_candidates to read only MVP Legendary Creature
     candidates.
     """
-    return scan_collection_for_commanders(collection_summary, scryfall_lookup)
+    return scan_collection_for_commanders(
+        collection_summary,
+        scryfall_lookup,
+        allow_banned_commanders=allow_banned_commanders,
+    )
 
 
 def scan_collection_for_commanders(
     collection_summary: Any,
     scryfall_lookup: dict[str, dict[str, Any]] | None,
+    *,
+    allow_banned_commanders: bool = False,
 ) -> CommanderDiscoveryScanResult:
     """Scan a CollectionLoadSummary-like object for commander candidates.
 
@@ -80,14 +92,23 @@ def scan_collection_for_commanders(
 
     candidates: list[CommanderCandidate] = []
     skipped_nonlegendary_cards = 0
+    # v1.6.1 Phase 2: count banned-commander exclusions separately so the UI /
+    # report can surface "N banned commanders in your collection were excluded"
+    # rather than lumping them in with non-legendary cards.
+    banned_commanders_skipped = 0
     manual_review_candidate_count = 0
     mvp_candidate_count = 0
 
     for payload in buckets.values():
         card = payload["card"]
-        classification = classify_commander_eligibility(card)
+        classification = classify_commander_eligibility(
+            card, allow_banned_commanders=allow_banned_commanders,
+        )
         if not classification.include_in_discovery:
-            skipped_nonlegendary_cards += 1
+            if classification.rule == RULE_BANNED_COMMANDER:
+                banned_commanders_skipped += 1
+            else:
+                skipped_nonlegendary_cards += 1
             continue
         if classification.is_mvp_eligible:
             mvp_candidate_count += 1
@@ -119,6 +140,8 @@ def scan_collection_for_commanders(
         resolved_collection_cards=len(buckets),
         unresolved_collection_cards=unresolved_collection_cards,
         skipped_nonlegendary_cards=skipped_nonlegendary_cards,
+        banned_commanders_skipped=banned_commanders_skipped,
+        allow_banned_commanders=allow_banned_commanders,
         manual_review_candidate_count=manual_review_candidate_count,
         mvp_candidate_count=mvp_candidate_count,
         warnings=warnings,

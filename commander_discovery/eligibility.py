@@ -5,15 +5,24 @@ v1.2.2 refines The Commander's Call data layer by separating:
 - future/manual-review command-zone candidates
 - non-candidates
 
+v1.6.1 Phase 2 adds the banned-commander gate: legendary creatures (and
+special-rule command-zone cards) that Scryfall marks as banned in Commander
+are excluded from discovery by default. Pass `allow_banned_commanders=True`
+when calling classify_commander_eligibility() / scan_collection_for_commanders()
+to opt in for custom or Rule Zero play — normal discovery never returns banned
+commanders.
+
 This module is intentionally conservative. It does not validate legal partner
-pairs, background pairs, Doctor's companion pairs, banned lists, color identity
-rules for deck construction, or any full deck-building behavior.
+pairs, background pairs, Doctor's companion pairs, color identity rules for
+deck construction, or any full deck-building behavior.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any, Iterable
+
+from legality.build_legality_gate import is_card_banned_in_commander
 
 
 ELIGIBILITY_STATUS_ELIGIBLE = "eligible"
@@ -24,6 +33,17 @@ RULE_BASIC_LEGENDARY_CREATURE = "basic_legendary_creature"
 RULE_SPECIAL_COMMANDER_TEXT = "special_commander_text"
 RULE_DEFERRED_PAIRING_RULE = "deferred_pairing_rule"
 RULE_NOT_A_COMMANDER_CANDIDATE = "not_a_commander_candidate"
+# v1.6.1 Phase 2: the card LOOKS like a commander candidate (legendary creature
+# or special command-zone text) but Scryfall lists it as banned in Commander.
+# By default we drop it from discovery; with allow_banned_commanders=True the
+# caller can surface it for a custom / Rule Zero mode.
+RULE_BANNED_COMMANDER = "banned_commander"
+
+_BANNED_COMMANDER_NOTE = (
+    "Scryfall legalities.commander == 'banned'. Excluded from normal commander "
+    "discovery. Pass allow_banned_commanders=True to opt in for custom / Rule "
+    "Zero play."
+)
 
 
 @dataclass(slots=True)
@@ -56,13 +76,103 @@ class CommanderEligibilityClassification:
         }
 
 
-def classify_commander_eligibility(card: dict[str, Any] | None) -> CommanderEligibilityClassification:
-    """Classify commander-discovery eligibility without changing deck review behavior."""
+def is_banned_commander_candidate(card: dict[str, Any] | None) -> bool:
+    """True if the card LOOKS like a commander but Scryfall marks it banned.
+
+    A card qualifies when it is either:
+      (a) a basic legendary creature, OR
+      (b) carries special command-zone text ("can be your commander", partner,
+          background, Friends Forever, Doctor's Companion, planeswalker-commander),
+    AND `legalities.commander == "banned"` in Scryfall.
+
+    This is the "banned commander" check used by the discovery layer's gate.
+    """
+    if not isinstance(card, dict):
+        return False
+    looks_like_commander = (
+        is_basic_legendary_creature_candidate(card)
+        or bool(get_special_commander_rule_note(card))
+    )
+    return looks_like_commander and is_card_banned_in_commander(card)
+
+
+def classify_commander_eligibility(
+    card: dict[str, Any] | None,
+    *,
+    allow_banned_commanders: bool = False,
+) -> CommanderEligibilityClassification:
+    """Classify commander-discovery eligibility without changing deck review behavior.
+
+    v1.6.1 Phase 2: when `allow_banned_commanders=False` (the default), a card
+    that would otherwise be a commander candidate but is banned in Commander is
+    returned as NOT_CANDIDATE with rule=banned_commander so the scanner drops
+    it cleanly. When True, the card is still surfaced (ELIGIBLE for basic
+    legendary, MANUAL_REVIEW for special-rule) but its special_rule_note carries
+    an explicit BANNED warning so any UI or report consumer can label it.
+    """
     if not isinstance(card, dict):
         return CommanderEligibilityClassification(reason="No Scryfall card metadata was available.")
 
     special_note = get_special_commander_rule_note(card)
     manual_notes = [special_note] if special_note else []
+    card_is_banned = is_card_banned_in_commander(card)
+
+    # v1.6.1 Phase 2: banned-commander gate runs FIRST so a banned legendary
+    # creature is never reported as ELIGIBLE under default settings.
+    if card_is_banned and (
+        is_basic_legendary_creature_candidate(card) or special_note
+    ):
+        if not allow_banned_commanders:
+            banned_notes = list(manual_notes)
+            if _BANNED_COMMANDER_NOTE not in banned_notes:
+                banned_notes.append(_BANNED_COMMANDER_NOTE)
+            return CommanderEligibilityClassification(
+                status=ELIGIBILITY_STATUS_NOT_CANDIDATE,
+                rule=RULE_BANNED_COMMANDER,
+                reason=(
+                    "Card is banned in Commander (Scryfall legalities.commander = "
+                    "'banned'). Excluded from normal commander discovery."
+                ),
+                special_rule_note=_BANNED_COMMANDER_NOTE,
+                manual_review_notes=banned_notes,
+                is_mvp_eligible=False,
+                is_special_rule_candidate=False,
+            )
+        # Custom mode: surface the candidate but loud-flag the banned status.
+        banned_warning = (
+            "⚠ BANNED IN COMMANDER — this card is on the Commander banned list. "
+            "Allowed only because allow_banned_commanders=True (custom / Rule Zero)."
+        )
+        merged_special_note = (
+            f"{banned_warning} {special_note}".strip() if special_note else banned_warning
+        )
+        merged_manual_notes = [banned_warning] + manual_notes
+        if is_basic_legendary_creature_candidate(card):
+            return CommanderEligibilityClassification(
+                status=ELIGIBILITY_STATUS_ELIGIBLE,
+                rule=RULE_BANNED_COMMANDER,
+                reason=(
+                    "Legendary Creature but BANNED in Commander. Allowed only via "
+                    "custom / Rule Zero opt-in."
+                ),
+                special_rule_note=merged_special_note,
+                manual_review_notes=merged_manual_notes,
+                is_mvp_eligible=False,
+                is_special_rule_candidate=True,
+            )
+        # Special-rule banned commander in custom mode.
+        return CommanderEligibilityClassification(
+            status=ELIGIBILITY_STATUS_MANUAL_REVIEW,
+            rule=RULE_BANNED_COMMANDER,
+            reason=(
+                "Special command-zone text but BANNED in Commander. Allowed only "
+                "via custom / Rule Zero opt-in."
+            ),
+            special_rule_note=merged_special_note,
+            manual_review_notes=merged_manual_notes,
+            is_mvp_eligible=False,
+            is_special_rule_candidate=True,
+        )
 
     if is_basic_legendary_creature_candidate(card):
         return CommanderEligibilityClassification(
@@ -104,14 +214,26 @@ def is_basic_legendary_creature_candidate(card: dict[str, Any] | None) -> bool:
     return any("Legendary Creature" in type_line for type_line in iter_type_lines(card))
 
 
-def is_commander_discovery_candidate(card: dict[str, Any] | None) -> bool:
+def is_commander_discovery_candidate(
+    card: dict[str, Any] | None,
+    *,
+    allow_banned_commanders: bool = False,
+) -> bool:
     """Return True when the card should be included in discovery results."""
-    return classify_commander_eligibility(card).include_in_discovery
+    return classify_commander_eligibility(
+        card, allow_banned_commanders=allow_banned_commanders,
+    ).include_in_discovery
 
 
-def get_commander_candidate_reason(card: dict[str, Any] | None) -> str:
+def get_commander_candidate_reason(
+    card: dict[str, Any] | None,
+    *,
+    allow_banned_commanders: bool = False,
+) -> str:
     """Return the classification reason for a card."""
-    return classify_commander_eligibility(card).reason
+    return classify_commander_eligibility(
+        card, allow_banned_commanders=allow_banned_commanders,
+    ).reason
 
 
 def get_special_commander_rule_note(card: dict[str, Any] | None) -> str:

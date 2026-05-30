@@ -43,6 +43,12 @@ class CommanderDiscoveryUiScanResult:
     manual_review_candidate_count: int = 0
     unresolved_collection_cards: int = 0
     skipped_nonlegendary_cards: int = 0
+    # v1.6.1 Phase 2: number of cards that LOOKED like a commander but were
+    # excluded because they are banned in Commander. Default = 0 means either
+    # the collection has no banned commanders or custom mode is on (in which
+    # case banned commanders appear as candidates instead).
+    banned_commanders_skipped: int = 0
+    allow_banned_commanders: bool = False
     candidate_summaries: list[dict[str, Any]] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     error: str = ""
@@ -75,6 +81,8 @@ class CommanderDiscoveryUiScanResult:
             manual_review_candidate_count=scan_result.manual_review_candidate_count,
             unresolved_collection_cards=scan_result.unresolved_collection_cards,
             skipped_nonlegendary_cards=scan_result.skipped_nonlegendary_cards,
+            banned_commanders_skipped=scan_result.banned_commanders_skipped,
+            allow_banned_commanders=scan_result.allow_banned_commanders,
             candidate_summaries=[_candidate_to_ui_summary(candidate) for candidate in scan_result.candidates],
             warnings=list(scan_result.warnings),
         )
@@ -99,6 +107,8 @@ class CommanderDiscoveryUiScanResult:
             f"- Unique collection cards resolved: {self.unique_collection_cards}",
             f"- Unresolved collection cards: {self.unresolved_collection_cards}",
             f"- Skipped non-commander cards: {self.skipped_nonlegendary_cards}",
+            f"- Banned commanders excluded: {self.banned_commanders_skipped}"
+            + (" (custom mode: shown above)" if self.allow_banned_commanders else ""),
             f"- Report written: {self.report_path}",
         ]
         if self.candidate_summaries:
