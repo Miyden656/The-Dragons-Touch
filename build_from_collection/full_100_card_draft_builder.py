@@ -131,6 +131,17 @@ class Full100CardDraftResult:
     bracket_excluded_count: int = 0
     allow_banned_cards: bool = False
     commander_is_banned: bool = False
+    # v1.6.1 Phase 3: creature-density diagnostics so the user can see at a
+    # glance whether the deck is creature-heavy / -light / balanced for the
+    # chosen strategy. Defaults are wide so legacy callers see "no signal".
+    creature_count: int = 0
+    noncreature_nonland_count: int = 0
+    creature_band_category: str = ""
+    creature_band_floor: int = 0
+    creature_band_target: int = 0
+    creature_band_ceiling: int = 0
+    creatures_skipped_for_ceiling: int = 0
+    creatures_added_past_ceiling: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -152,6 +163,14 @@ class Full100CardDraftResult:
             "bracket_excluded_count": self.bracket_excluded_count,
             "allow_banned_cards": self.allow_banned_cards,
             "commander_is_banned": self.commander_is_banned,
+            "creature_count": self.creature_count,
+            "noncreature_nonland_count": self.noncreature_nonland_count,
+            "creature_band_category": self.creature_band_category,
+            "creature_band_floor": self.creature_band_floor,
+            "creature_band_target": self.creature_band_target,
+            "creature_band_ceiling": self.creature_band_ceiling,
+            "creatures_skipped_for_ceiling": self.creatures_skipped_for_ceiling,
+            "creatures_added_past_ceiling": self.creatures_added_past_ceiling,
         }
 
 
@@ -315,6 +334,29 @@ def build_full_100_card_draft(
         from analysis.role_tags import infer_card_role_tags
     except Exception:
         infer_card_role_tags = None  # type: ignore[assignment]
+
+    # v1.6.1 Phase 3: Strategy-aware creature density band. Caps the deck's
+    # total creature count at fill-time so even a creature-heavy collection
+    # doesn't over-tilt the build. Falls back to a wide default band when the
+    # module is unavailable so the builder still works.
+    try:
+        from build_from_collection.creature_skeleton import (
+            classify_creature_band,
+            is_creature_type_line,
+            creature_band_status_label,
+            BAND_DEFAULT,
+        )
+        creature_band = classify_creature_band(
+            strategy_tags=combined_strategy_tags,
+            primary_strategy_label=primary_strategy,
+            secondary_strategy_label=secondary_strategy,
+        )
+    except Exception:
+        classify_creature_band = None  # type: ignore[assignment]
+        is_creature_type_line = lambda tl: "Creature" in (tl or "")  # type: ignore[assignment]
+        creature_band_status_label = None  # type: ignore[assignment]
+        BAND_DEFAULT = None  # type: ignore[assignment]
+        creature_band = None
 
     # v1.5.40: Bracket-aware filtering. Cards that fail the bracket filter
     # never enter the pool (hard exclude); cards that pass get a soft score
@@ -500,6 +542,9 @@ def build_full_100_card_draft(
             "type_line": type_line,
             "mana_value": mana_value,
             "why_tags": why_tags,
+            # v1.6.1 Phase 3: type-aware fill needs to know creature-ness per
+            # card so the creature ceiling can be enforced at pick time.
+            "is_creature": is_creature_type_line(type_line),
         }, card_tags, bucket))
 
     # Sort nonland pool by score descending.
@@ -509,15 +554,33 @@ def build_full_100_card_draft(
     picked_names: set[str] = set()
     picks_by_bucket: dict[str, list[DraftedCardEntry]] = {b: [] for b in ROLE_BUCKET_ORDER}
 
-    # Pass 1: try to fill each role bucket from cards whose best bucket matches.
-    for score, card, tags, bucket in nonland_pool:
-        if card["name"] in picked_names:
-            continue
-        target = TARGET_COUNTS.get(bucket, 0)
-        if target == 0:
-            continue
-        if len(picks_by_bucket[bucket]) >= target:
-            continue
+    # v1.6.1 Phase 3: creature-ceiling enforcement state.
+    # Commander is usually a creature; pre-count it. Planeswalker / background /
+    # special-rule commanders may not be — check the type line.
+    commander_is_creature = is_creature_type_line(
+        str(commander_scry.get("type_line") or "")
+    )
+    creature_count = 1 if commander_is_creature else 0
+    creature_ceiling = creature_band.ceiling if creature_band is not None else 99
+    creatures_skipped_for_ceiling = 0  # diagnostic
+    creatures_added_past_ceiling = 0  # safety-net pass relaxes ceiling
+
+    def _try_add_to_bucket(
+        bucket: str,
+        card: dict,
+        *,
+        enforce_creature_ceiling: bool,
+    ) -> bool:
+        """Add card to picks_by_bucket[bucket] if it fits the bucket + creature ceiling.
+
+        Returns True if added, False if skipped. Updates creature_count and
+        the skipped/over-ceiling diagnostic counters.
+        """
+        nonlocal creature_count, creatures_skipped_for_ceiling, creatures_added_past_ceiling
+        is_creature = bool(card.get("is_creature"))
+        if enforce_creature_ceiling and is_creature and creature_count >= creature_ceiling:
+            creatures_skipped_for_ceiling += 1
+            return False
         picks_by_bucket[bucket].append(DraftedCardEntry(
             card_name=card["name"],
             quantity=1,
@@ -528,24 +591,35 @@ def build_full_100_card_draft(
             why_tags=list(card.get("why_tags") or []),
         ))
         picked_names.add(card["name"])
+        if is_creature:
+            creature_count += 1
+            if not enforce_creature_ceiling and creature_count > creature_ceiling:
+                creatures_added_past_ceiling += 1
+        return True
 
-    # Pass 2: pour leftover top-scored cards into Flex until target.
+    # Pass 1: try to fill each role bucket from cards whose best bucket matches.
+    # Creature ceiling enforced for Strategy + Flex (Utility buckets rarely
+    # contain creatures, but the same enforcement applies uniformly).
+    for score, card, tags, bucket in nonland_pool:
+        if card["name"] in picked_names:
+            continue
+        target = TARGET_COUNTS.get(bucket, 0)
+        if target == 0:
+            continue
+        if len(picks_by_bucket[bucket]) >= target:
+            continue
+        _try_add_to_bucket(bucket, card, enforce_creature_ceiling=True)
+
+    # Pass 2: pour leftover top-scored cards into Flex until target. Creature
+    # ceiling enforced — this is where the bias toward creatures matters most
+    # because the scoring formula rewards tag-heavy cards (creatures usually win).
     flex_target = TARGET_COUNTS["Flex"]
     for score, card, tags, bucket in nonland_pool:
         if len(picks_by_bucket["Flex"]) >= flex_target:
             break
         if card["name"] in picked_names:
             continue
-        picks_by_bucket["Flex"].append(DraftedCardEntry(
-            card_name=card["name"],
-            quantity=1,
-            role_bucket="Flex",
-            source_files=card["source_files"],
-            mana_value=card["mana_value"],
-            type_line=card["type_line"],
-            why_tags=list(card.get("why_tags") or []),
-        ))
-        picked_names.add(card["name"])
+        _try_add_to_bucket("Flex", card, enforce_creature_ceiling=True)
 
     # v1.5.39: After the standard passes, compute the deck-size shortfall and
     # ALWAYS try to hit 100 cards. If non-flex role buckets came up short
@@ -559,27 +633,24 @@ def build_full_100_card_draft(
 
     # Target non-land total = 100 - target lands (37) = 63
     target_nonland_total = 100 - TARGET_COUNTS["Lands"]
-    while _current_nonland_total() < target_nonland_total:
-        added_in_pass = False
-        for score, card, tags, bucket in nonland_pool:
-            if _current_nonland_total() >= target_nonland_total:
+
+    # v1.6.1 Phase 3: Two-stage safety-net fill. First try to hit 100 with the
+    # ceiling enforced (prefers noncreatures). If still short, relax the
+    # ceiling so the deck reaches 100 (better an extra creature than a 95-card
+    # deck). The relax-pass increments creatures_added_past_ceiling so the
+    # report can explain the bulge.
+    for enforce_ceiling in (True, False):
+        while _current_nonland_total() < target_nonland_total:
+            added_in_pass = False
+            for score, card, tags, bucket in nonland_pool:
+                if _current_nonland_total() >= target_nonland_total:
+                    break
+                if card["name"] in picked_names:
+                    continue
+                if _try_add_to_bucket("Flex", card, enforce_creature_ceiling=enforce_ceiling):
+                    added_in_pass = True
+            if not added_in_pass:
                 break
-            if card["name"] in picked_names:
-                continue
-            picks_by_bucket["Flex"].append(DraftedCardEntry(
-                card_name=card["name"],
-                quantity=1,
-                role_bucket="Flex",
-                source_files=card["source_files"],
-                mana_value=card["mana_value"],
-                type_line=card["type_line"],
-                why_tags=list(card.get("why_tags") or []),
-            ))
-            picked_names.add(card["name"])
-            added_in_pass = True
-        # No more unused cards in the pool — stop trying to fill from collection.
-        if not added_in_pass:
-            break
 
     # Lands: take up to ~17 owned nonbasics, fill rest with basics.
     nonbasic_land_pool.sort(key=lambda x: x[1]["name"])
@@ -702,6 +773,20 @@ def build_full_100_card_draft(
 
     total_cards = sum(e.quantity for e in entries)
 
+    # v1.6.1 Phase 3: compute final creature / noncreature counts from the
+    # assembled deck. creature_count was tracked during the fill passes for
+    # ceiling enforcement; recompute here to match what actually landed in
+    # the final entries list (e.g., the commander + all drafted creatures).
+    final_creature_count = 0
+    final_noncreature_nonland_count = 0
+    for entry in entries:
+        if entry.is_basic_land or entry.role_bucket == "Lands":
+            continue
+        if is_creature_type_line(entry.type_line):
+            final_creature_count += entry.quantity
+        else:
+            final_noncreature_nonland_count += entry.quantity
+
     notes: list[str] = []
     # v1.6.1 Phase 1: legality gate summary FIRST so users see this before
     # bracket / persona / combo notes. Banned-commander flag is loudest.
@@ -736,6 +821,25 @@ def build_full_100_card_draft(
             f"{scryfall_unmatched_count} card(s) from your collection could not be "
             f"resolved against the local Scryfall database and were skipped."
         )
+    # v1.6.1 Phase 3: creature-density note. Surfaces the band, the actual
+    # count, and whether the ceiling was relaxed during the safety-net fill
+    # pass so the user can read the structural shape at a glance.
+    if creature_band is not None and creature_band_status_label is not None:
+        label = creature_band_status_label(creature_band, final_creature_count)
+        notes.append(f"Creature skeleton ({creature_band.category}): {label}")
+        if creatures_added_past_ceiling > 0:
+            notes.append(
+                f"{creatures_added_past_ceiling} creature(s) were added past the "
+                f"creature ceiling ({creature_band.ceiling}) during the safety-net "
+                f"fill — your collection was thin on noncreature support for this "
+                f"strategy, so the deck pushed past the band to reach 100 cards."
+            )
+        elif creatures_skipped_for_ceiling > 0:
+            notes.append(
+                f"{creatures_skipped_for_ceiling} creature pick(s) were skipped "
+                f"because the creature ceiling ({creature_band.ceiling}) was "
+                f"already reached. Their slot went to noncreature support instead."
+            )
     if total_cards < 100:
         notes.append(
             f"Deck is {total_cards} cards — short by {100 - total_cards}. "
@@ -812,6 +916,14 @@ def build_full_100_card_draft(
         bracket_excluded_count=bracket_excluded_count,
         allow_banned_cards=allow_banned_cards,
         commander_is_banned=commander_is_banned,
+        creature_count=final_creature_count,
+        noncreature_nonland_count=final_noncreature_nonland_count,
+        creature_band_category=creature_band.category if creature_band else "",
+        creature_band_floor=creature_band.floor if creature_band else 0,
+        creature_band_target=creature_band.target if creature_band else 0,
+        creature_band_ceiling=creature_band.ceiling if creature_band else 0,
+        creatures_skipped_for_ceiling=creatures_skipped_for_ceiling,
+        creatures_added_past_ceiling=creatures_added_past_ceiling,
     )
 
 
@@ -899,6 +1011,43 @@ def render_full_100_card_draft_markdown(result: Full100CardDraftResult) -> str:
             f"- Excluded as restricted: {result.legality_restricted_excluded_count}"
         )
     lines.append(f"- Excluded by bracket filter: {result.bracket_excluded_count}")
+    # v1.6.1 Phase 3: creature density block. Shows whether the deck is
+    # creature-heavy / -light / balanced relative to the strategy's expected
+    # band so the user can tell at a glance whether the result feels right.
+    if result.creature_band_category:
+        band_text = (
+            f"{result.creature_band_floor}-{result.creature_band_ceiling} "
+            f"(target {result.creature_band_target}, category "
+            f"{result.creature_band_category})"
+        )
+        lines.append(
+            f"- Creature count: {result.creature_count} "
+            f"(noncreature nonland: {result.noncreature_nonland_count})"
+        )
+        lines.append(f"- Creature band for chosen strategy: {band_text}")
+        if result.creature_count < result.creature_band_floor:
+            lines.append(
+                f"- Creature density status: ⚠ below floor "
+                f"({result.creature_band_floor})"
+            )
+        elif result.creature_count > result.creature_band_ceiling:
+            lines.append(
+                f"- Creature density status: ⚠ above ceiling "
+                f"({result.creature_band_ceiling}) — collection thin on "
+                f"noncreature support"
+            )
+        else:
+            lines.append("- Creature density status: ✓ within band")
+        if result.creatures_skipped_for_ceiling > 0:
+            lines.append(
+                f"- Creatures skipped to enforce ceiling: "
+                f"{result.creatures_skipped_for_ceiling}"
+            )
+        if result.creatures_added_past_ceiling > 0:
+            lines.append(
+                f"- Extra creatures added past ceiling (safety-net fill): "
+                f"{result.creatures_added_past_ceiling}"
+            )
     # Top-line legality verdict — first thing a pilot wants to know.
     if result.commander_is_banned and not result.allow_banned_cards:
         verdict = "❌ ILLEGAL — selected commander is banned in Commander"
