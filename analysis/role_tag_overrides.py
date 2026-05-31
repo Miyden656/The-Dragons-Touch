@@ -264,6 +264,197 @@ ROLE_TAG_OVERRIDES: dict[str, dict[str, list[str]]] = {
         "add": ["protection", "equipment_synergy"],
         "remove": [],
     },
+
+    # ----------------------------------------------------------------- v1.6.2 Phase A: Devotion payoffs
+    # Mono-color devotion staples — Gary, Heliod, Nykthos, Thassa Deep-Dwelling,
+    # Erebos God of the Dead, Karametra's Acolyte, the older Omnath.
+    "gray merchant of asphodel": {
+        "add": ["devotion_payoff", "lifedrain_payoff", "etb_value", "win_condition"],
+        "remove": [],
+    },
+    "heliod, sun-crowned": {
+        "add": ["devotion_payoff", "lifegain_payoff", "combo_piece_possible", "counter_synergy"],
+        "remove": [],
+    },
+    "nykthos, shrine to nyx": {
+        "add": ["devotion_payoff", "mana_source", "ramp", "mana_doubler"],
+        "remove": [],
+    },
+    "karametra's acolyte": {
+        "add": ["devotion_payoff", "mana_dork", "ramp", "mana_source"],
+        "remove": [],
+    },
+    "thassa, deep-dwelling": {
+        "add": ["devotion_payoff", "blink_flicker", "etb_amplifier", "synergy_piece"],
+        "remove": [],
+    },
+    "thassa, god of the sea": {
+        "add": ["devotion_payoff", "evasion_support", "card_selection"],
+        "remove": [],
+    },
+    "erebos, god of the dead": {
+        "add": ["devotion_payoff", "card_draw", "card_advantage"],
+        "remove": [],
+    },
+    "purphoros, god of the forge": {
+        "add": ["devotion_payoff", "etb_value", "damage_payoff", "go_wide_token_engine"],
+        "remove": [],
+    },
+    "omnath, locus of mana": {
+        "add": ["devotion_payoff", "mana_sink", "ramp", "go_tall_support"],
+        "remove": [],
+    },
+
+    # ----------------------------------------------------------------- v1.6.2 Phase A: Token doublers
+    # The big four: Doubling Season, Anointed Procession, Parallel Lives,
+    # Mondrak Glory Dominus. Plus the green-only Primal Vigor (also doubles
+    # opponents' tokens), and the newer Ojer Taq Deepcrater (auto-flips).
+    "doubling season": {
+        "add": ["token_doubler", "token_maker", "counter_synergy", "synergy_piece"],
+        "remove": [],
+    },
+    "anointed procession": {
+        "add": ["token_doubler", "token_maker", "synergy_piece"],
+        "remove": [],
+    },
+    "parallel lives": {
+        "add": ["token_doubler", "token_maker", "synergy_piece"],
+        "remove": [],
+    },
+    "mondrak, glory dominus": {
+        "add": ["token_doubler", "token_maker", "synergy_piece", "go_wide_token_engine"],
+        "remove": [],
+    },
+    "primal vigor": {
+        # Doubles tokens AND +1/+1 counters. Symmetric — doubles opponents'
+        # tokens too — but still a payoff for token commanders.
+        "add": ["token_doubler", "token_maker", "counter_synergy", "synergy_piece"],
+        "remove": [],
+    },
+    "adric, master of defense": {
+        "add": ["token_doubler", "token_maker", "synergy_piece"],
+        "remove": [],
+    },
+    "ojer taq, deepcrater // temple of civilization": {
+        "add": ["token_doubler", "token_maker", "synergy_piece"],
+        "remove": [],
+    },
+
+    # ----------------------------------------------------------------- v1.6.2 Phase A: Overrun finishers
+    # One-shot win conditions for go-wide / typal decks. Distinguished from
+    # anthems (which are ongoing) by "until end of turn" + decisive pump.
+    "craterhoof behemoth": {
+        "add": ["overrun_finisher", "win_condition", "etb_value", "combat_synergy", "tribal_payoff"],
+        "remove": [],
+    },
+    "overwhelming stampede": {
+        "add": ["overrun_finisher", "win_condition", "combat_synergy"],
+        "remove": [],
+    },
+    "triumph of the hordes": {
+        "add": ["overrun_finisher", "win_condition", "combat_synergy", "high_bracket_pressure"],
+        "remove": [],
+    },
+    "pathbreaker ibex": {
+        "add": ["overrun_finisher", "win_condition", "combat_synergy", "attack_trigger_payoff"],
+        "remove": [],
+    },
+    "akroma's will": {
+        "add": ["overrun_finisher", "win_condition", "protection", "combat_synergy"],
+        "remove": [],
+    },
+    "finale of devastation": {
+        "add": ["overrun_finisher", "win_condition", "tutor", "mana_sink"],
+        "remove": [],
+    },
+    "trumpet blast": {
+        "add": ["overrun_finisher", "combat_synergy"],
+        "remove": [],
+    },
+    "end-raze forerunners": {
+        "add": ["overrun_finisher", "win_condition", "etb_value", "combat_synergy"],
+        "remove": [],
+    },
+
+    # ----------------------------------------------------------------- v1.6.2 Phase A: Untap engines
+    # Repeatable activation enablers — critical for activated-ability
+    # commanders (Aisha, Shorikai, Urza, Daretti).
+    "voltaic key": {
+        "add": ["untap_engine", "repeatable_activation", "activated_ability_synergy"],
+        "remove": [],
+    },
+    "manifold key": {
+        "add": ["untap_engine", "repeatable_activation", "activated_ability_synergy", "evasion_support"],
+        "remove": [],
+    },
+    "aphetto alchemist": {
+        "add": ["untap_engine", "repeatable_activation", "activated_ability_synergy"],
+        "remove": [],
+    },
+    "pemmin's aura": {
+        "add": ["untap_engine", "repeatable_activation", "activated_ability_synergy", "aura_synergy"],
+        "remove": [],
+    },
+    "freed from the real": {
+        "add": ["untap_engine", "repeatable_activation", "activated_ability_synergy", "aura_synergy", "combo_piece_possible"],
+        "remove": [],
+    },
+    "thousand-year elixir": {
+        "add": ["untap_engine", "repeatable_activation", "activated_ability_synergy"],
+        "remove": [],
+    },
+    "magewright's stone": {
+        "add": ["untap_engine", "repeatable_activation", "activated_ability_synergy"],
+        "remove": [],
+    },
+    "puppet strings": {
+        "add": ["untap_engine", "repeatable_activation"],
+        "remove": [],
+    },
+    "kiora's follower": {
+        "add": ["untap_engine", "repeatable_activation", "mana_dork", "ramp"],
+        "remove": [],
+    },
+    "tidewater minion": {
+        "add": ["untap_engine", "repeatable_activation", "combo_piece_possible"],
+        "remove": [],
+    },
+
+    # ----------------------------------------------------------------- v1.6.2 Phase A: Uncounterable enablers
+    # Stompy / Big Mana / Storm commanders care about making their key spells
+    # uncounterable.
+    "cavern of souls": {
+        "add": ["uncounterable_enabler", "mana_source", "tribal_payoff", "synergy_piece"],
+        "remove": [],
+    },
+    "allosaurus shepherd": {
+        "add": ["uncounterable_enabler", "tribal_payoff", "protection"],
+        "remove": [],
+    },
+    "boseiju, who endures": {
+        "add": ["targeted_removal", "mana_source", "synergy_piece"],
+        "remove": [],
+    },
+    "vexing shusher": {
+        "add": ["uncounterable_enabler", "protection", "synergy_piece"],
+        "remove": [],
+    },
+    "veil of summer": {
+        "add": ["uncounterable_enabler", "protection", "card_draw", "free_interaction", "bracket_pressure"],
+        "remove": [],
+    },
+    "city of solitude": {
+        "add": ["uncounterable_enabler", "protection"],
+        "remove": [],
+    },
+    "conqueror's flail": {
+        "add": ["uncounterable_enabler", "equipment_synergy", "protection"],
+        "remove": [],
+    },
+    "grand abolisher": {
+        "add": ["uncounterable_enabler", "protection", "synergy_piece"],
+        "remove": [],
+    },
 }
 
 

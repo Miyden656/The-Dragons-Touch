@@ -506,6 +506,89 @@ def infer_card_role_tags(card: dict[str, Any], commander_cards: list[dict[str, A
     if _has_any(text, ["you win the game", "each opponent loses the game", "loses the game"]):
         tags.update(["win_condition", "combo_piece_possible", "bracket_pressure"])
 
+    # v1.6.2 Phase A: Devotion payoff. Mono- and dual-color decks running a
+    # devotion strategy (Mono-Black Gary, Heliod / Daxos Mono-White, Thassa
+    # Mono-Blue, Omnath Locus of All) want to score devotion enablers strongly.
+    if _has_any(text, ["devotion to", "your devotion to"]):
+        tags.update(["devotion_payoff", "synergy_piece"])
+        # Devotion to a SPECIFIC color is the strongest payoff signal.
+        for color_phrase in (
+            "devotion to white", "devotion to blue", "devotion to black",
+            "devotion to red", "devotion to green",
+        ):
+            if color_phrase in text:
+                tags.add("devotion_color_specific")
+                break
+
+    # v1.6.2 Phase A: Token doubler / token amplifier. Doubling Season, Anointed
+    # Procession, Parallel Lives, Mondrak Glory Dominus, Primal Vigor, Ojer
+    # Taq Deepcrater, Adric Master of Defense. The key phrasing is "if an
+    # effect would create one or more tokens ... creates twice that many" or
+    # similar. Token commanders (Baylen, Krenko, Adeline) score these strongly.
+    if "create" in text and "token" in text:
+        if _has_any(text, [
+            "twice that many",
+            "that many plus one",
+            "double the number",
+            "creates twice as many",
+            "two of those tokens",
+            "plus that many",
+        ]):
+            tags.update(["token_doubler", "token_maker", "synergy_piece"])
+
+    # v1.6.2 Phase A: Overrun / mass-pump finisher. "Creatures you control get
+    # +X/+X until end of turn" + trample/menace is the Craterhoof / Overwhelming
+    # Stampede / Triumph of the Hordes / Pathbreaker Ibex pattern. Distinct
+    # from `anthem` (which is ongoing) — these are one-shot win conditions.
+    if "creatures you control" in text and "until end of turn" in text:
+        if _has_any(text, [
+            "gain trample",
+            "have trample",
+            "+x/+x",
+            "+2/+2",
+            "+3/+3",
+            "+4/+4",
+            "+5/+5",
+            "equal to the greatest power",
+            "gets +x/+x until end of turn equal to",
+            "equal to the number of creatures you control",
+        ]):
+            tags.update(["overrun_finisher", "win_condition", "combat_synergy", "go_wide_token_engine"])
+
+    # v1.6.2 Phase A: Untap engine / repeatable activation. Voltaic Key,
+    # Manifold Key, Aphetto Alchemist, Pemmin's Aura, Freed from the Real,
+    # Thousand-Year Elixir, Magewright's Stone, Puppet Strings, Kiora's
+    # Follower. Critical for activated-ability commanders (Aisha, Shorikai,
+    # Urza Lord High Artificer, Daretti, Jodah).
+    if "untap target" in text:
+        if _has_any(text, ["artifact", "creature", "permanent", "land"]):
+            tags.update(["untap_engine", "repeatable_activation", "activated_ability_synergy", "synergy_piece"])
+    if _has_any(text, [
+        "creatures you control have haste and",
+        "you may tap creatures you control as though they had haste",
+        "{t}: untap target",
+    ]):
+        tags.update(["untap_engine", "repeatable_activation", "activated_ability_synergy"])
+
+    # v1.6.2 Phase A: Uncounterable enabler. Cavern of Souls, Allosaurus
+    # Shepherd, Boseiju Who Endures, Vexing Shusher, Veil of Summer, City of
+    # Solitude. The key distinction: the card makes OTHER spells (yours)
+    # uncounterable, NOT just itself. Stompy / Big Mana / Storm commanders
+    # benefit.
+    if "can't be countered" in text:
+        # Distinguish "this spell can't be countered" (self-only) from
+        # "your spells can't be countered" / "creature spells you control
+        # can't be countered" (enabler).
+        if _has_any(text, [
+            "creature spells you cast can't be countered",
+            "creature spells you control can't be countered",
+            "your spells can't be countered",
+            "spells you cast can't be countered",
+            "spells of the chosen type can't be countered",
+            "spells your opponents control can't be countered",  # rare anti-pattern
+        ]):
+            tags.update(["uncounterable_enabler", "protection", "synergy_piece"])
+
 
     # Name-specific amplifier cleanup for cards whose current Oracle text can be
     # difficult to classify from broad patterns alone. This is intentionally
