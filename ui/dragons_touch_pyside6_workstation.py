@@ -485,10 +485,10 @@ class MainWindow(QMainWindow):
             ("📣  The Commander's Call", self.COMMANDER_DISCOVERY),
             ("🐉  Commander Guide", self.COMMANDER_GUIDE),
             ("⚒  Settings", self.SETTINGS),
+            # Maintainer-only: curate AI training candidates. Always created so the
+            # mode toggle can show/hide it live; visibility set below + on mode change.
+            ("🛠  Training Review", self.TRAINING_REVIEW),
         ]
-        # Maintainer-only: curate AI training candidates. Hidden in user mode.
-        if self.is_dev_mode():
-            nav_items.append(("🛠  Training Review", self.TRAINING_REVIEW))
         group = QButtonGroup(self)
         group.setExclusive(True)
         for text, index in nav_items:
@@ -507,6 +507,10 @@ class MainWindow(QMainWindow):
             group.addButton(btn)
             self.nav_buttons.append(btn)
             layout.addWidget(btn)
+            if index == self.TRAINING_REVIEW:
+                # Dev-only: keep a handle and gate visibility by interface mode.
+                self._training_review_nav_btn = btn
+                btn.setVisible(self.is_dev_mode())
         layout.addSpacing(10)
         line = QFrame(); line.setObjectName("goldDivider"); line.setFixedHeight(1); layout.addWidget(line)
         quick = QLabel("QUICK ACTIONS"); quick.setObjectName("sidebarSectionTitle"); layout.addWidget(quick)
@@ -900,7 +904,14 @@ class MainWindow(QMainWindow):
             return ""
 
         safe_name = self.sanitize_deck_file_name(deck_name)
-        folder = Path(getattr(self.state, "deck_folder", "Decklists") or "Decklists")
+        raw_folder = getattr(self.state, "deck_folder", "") or ""
+        folder = Path(raw_folder) if raw_folder else Path("Decklists")
+        # Never save into the temp staging folder, even if state.deck_folder was
+        # transiently pointed there by a "Use for This Run" preview. The real
+        # Decklists folder is the canonical save target.
+        if folder.name == "_temp_pasted_decklists" or "_temp_pasted_decklists" in folder.parts:
+            folder = Path(self.default_deck_folder() or "Decklists")
+            self.state.deck_folder = str(folder)
         folder.mkdir(parents=True, exist_ok=True)
 
         number = self.next_decklist_number(folder)
@@ -964,7 +975,12 @@ class MainWindow(QMainWindow):
 
         summary = self.summarize_deck_preview(text, Path(path).stem)
         self.state.selected_deck_path = path
-        self.state.deck_folder = str(Path(path).parent)
+        # Only update the persistent decklist folder if this is a real saved
+        # deck. The temp staging folder must not become the user's decklist
+        # folder (it would poison both "Choose Folder" and future Save targets).
+        loaded_parent = Path(path).parent
+        if loaded_parent.name != "_temp_pasted_decklists" and "_temp_pasted_decklists" not in loaded_parent.parts:
+            self.state.deck_folder = str(loaded_parent)
         self.state.deck_preview_text = text[:12000] + ("\n\n... preview truncated for UI responsiveness ..." if len(text) > 12000 else "")
         self.state.deck_name = summary["deck_name"]
         self.state.commander = summary["commander"]
