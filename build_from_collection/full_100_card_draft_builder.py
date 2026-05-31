@@ -351,6 +351,26 @@ def build_full_100_card_draft(
     except Exception:
         infer_card_role_tags = None  # type: ignore[assignment]
 
+    # v1.6.2 Phase C: Tribal fidelity boost. When the commander is a typal
+    # legendary creature (Dragon, Dinosaur, Rabbit, etc.), on-tribe creatures
+    # in the collection get an explicit score boost so the Strategy bucket
+    # doesn't fill with random off-tribe creatures whose scores happen to be
+    # high (the Ghalta 2-dinosaur-of-29 problem).
+    try:
+        from build_from_collection.tribal_fidelity import (
+            extract_commander_tribes,
+            extract_card_tribes,
+            tribal_fidelity_boost,
+            describe_tribal_match,
+        )
+        commander_tribes = extract_commander_tribes(commander_scry)
+    except Exception:
+        extract_commander_tribes = None  # type: ignore[assignment]
+        extract_card_tribes = None  # type: ignore[assignment]
+        tribal_fidelity_boost = None  # type: ignore[assignment]
+        describe_tribal_match = None  # type: ignore[assignment]
+        commander_tribes = set()
+
     # v1.6.1 Phase 3: Strategy-aware creature density band. Caps the deck's
     # total creature count at fill-time so even a creature-heavy collection
     # doesn't over-tilt the build. Falls back to a wide default band when the
@@ -562,6 +582,25 @@ def build_full_100_card_draft(
             # know which cards form a reachable combo line in their deck.
             if combo_name_lookup.get(name.lower()):
                 why_tags.append("Combo piece")
+        # v1.6.2 Phase C: Tribal fidelity boost. On-tribe creatures get an
+        # explicit score nudge so the Strategy bucket prefers (e.g.) Dinosaurs
+        # for Ghalta over generic green creatures with high tag counts.
+        if (
+            commander_tribes
+            and tribal_fidelity_boost is not None
+            and extract_card_tribes is not None
+        ):
+            card_tribes_set = extract_card_tribes(scry)
+            if card_tribes_set:
+                boost = tribal_fidelity_boost(commander_tribes, card_tribes_set)
+                if boost > 0:
+                    score += boost
+                    if describe_tribal_match is not None:
+                        match_label = describe_tribal_match(
+                            commander_tribes, card_tribes_set,
+                        )
+                        if match_label:
+                            why_tags.append(match_label)
         nonland_pool.append((score, {
             "name": name,
             "owned_quantity": int(card_entry.get("owned_quantity") or 1),
