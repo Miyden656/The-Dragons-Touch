@@ -290,6 +290,13 @@ class MainWindow(QMainWindow):
         self.refresh_run_analysis_previews()
         self.refresh_report_viewer_mode_controls()
         self.refresh_report_viewer_file_list()
+        # Show/hide the dev-only Training Review nav button live on mode change
+        # (no full page rebuild needed — just toggle the button's visibility).
+        btn = getattr(self, "_training_review_nav_btn", None)
+        if btn is not None:
+            btn.setVisible(self.is_dev_mode())
+            if not self.is_dev_mode() and self.stack.currentIndex() == self.TRAINING_REVIEW:
+                self.go_to(self.DECK_SELECTION)  # don't strand the user on a now-hidden page
         # v0.10.5.1.1: Do not rebuild the current page during combo-box mode changes.
         # Rebuilding while the Settings combo popup is closing creates a visible flash.
         # The new mode is persisted immediately; page-specific visibility will update
