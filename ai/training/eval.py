@@ -28,6 +28,7 @@ CHECK_SAFETY_CLEAN = "safety_clean"
 CHECK_STRUCTURED = "structured"
 CHECK_LEGALITY = "legality"
 CHECK_MENTIONS = "mentions"
+CHECK_ALLOWLIST = "allowlist"  # structured cuts must stay within the engine's candidates
 
 _LEGALITY_CONTRADICTION_KINDS = {"ban_contradicted", "legality_contradicted"}
 
@@ -94,8 +95,19 @@ class EvalReport:
 
 # --- scoring ---------------------------------------------------------------
 
-def score_response(response: CommanderAIResponse, checks: list[dict], *, scryfall_lookup=None) -> list[CheckResult]:
-    """Run each check against one response. Pure; no model call."""
+def score_response(
+    response: CommanderAIResponse,
+    checks: list[dict],
+    *,
+    scryfall_lookup=None,
+    context_facts: dict | None = None,
+) -> list[CheckResult]:
+    """Run each check against one response. Pure; no model call.
+
+    context_facts carries engine-derived ground truth that some checks need but
+    the response alone can't supply (e.g. the deck's allowed cut candidates).
+    run_eval populates it from the built context."""
+    context_facts = context_facts or {}
     text = (response.text or "")
     low = text.lower()
     flags = list(response.safety_flags or ())
@@ -143,6 +155,21 @@ def score_response(response: CommanderAIResponse, checks: list[dict], *, scryfal
             else:
                 detail = ""
             out.append(CheckResult(kind, passed, detail))
+        elif kind == CHECK_ALLOWLIST:
+            # Every card the model named as a cut (structured.possible_cuts) must
+            # be one of the engine's actual candidates. Discipline test: small
+            # models stray and "cut" protected/strategy cards.
+            allowed = {str(c).lower() for c in (context_facts.get("cut_candidates") or [])}
+            named = []
+            if response.structured is not None:
+                named = [str(c.get("card", "")).strip() for c in response.structured.possible_cuts if c.get("card")]
+            offenders = [n for n in named if n.lower() not in allowed]
+            if not allowed:
+                out.append(CheckResult(kind, False, "no engine cut candidates available to check against"))
+            elif offenders:
+                out.append(CheckResult(kind, False, f"named off-list cut(s): {offenders}"))
+            else:
+                out.append(CheckResult(kind, True, "" if named else "no cuts named (vacuously on-list)"))
         else:
             out.append(CheckResult(str(kind), False, "unknown check type"))
     return out
@@ -166,9 +193,20 @@ def _minimal_analysis(commander: str = "Generic Commander") -> dict:
         "role_summary": NS(role_counts=Counter(), type_counts=Counter(), card_roles=[], unknown_cards=[]),
         "strategy_summary": NS(primary_strategy="Midrange", confidence="medium", warnings=[]),
         "bracket_summary": NS(estimated_bracket="Bracket 3", pressure_level="low", pressure_cards=[], notes=[]),
-        "possible_cuts": NS(required_cut_candidates=[], optional_cut_candidates=[],
-                            manual_review_candidates=[], playtest_first_candidates=[],
-                            protected_from_cut=[], notes=[]),
+        # A few real cut candidates so deckless cut_review / allow-list cases
+        # have an engine-provided list to stay within.
+        "possible_cuts": NS(
+            required_cut_candidates=[],
+            optional_cut_candidates=[
+                NS(card_name="Mind Stone", cut_confidence="Medium", cut_type="optional", reasons=["redundant ramp"]),
+                NS(card_name="Divination", cut_confidence="Medium", cut_type="optional", reasons=["low-impact draw"]),
+                NS(card_name="Fog", cut_confidence="Low", cut_type="optional", reasons=["situational"]),
+            ],
+            manual_review_candidates=[],
+            playtest_first_candidates=[],
+            protected_from_cut=[],
+            notes=[],
+        ),
     }
 
 
@@ -190,6 +228,17 @@ def _analysis_for_case(case: EvalCase, scryfall_lookup):
     return _minimal_analysis()
 
 
+def _cut_candidate_names(ctx) -> set:
+    """The engine's actual cut-candidate card names from a built context."""
+    names = set()
+    cuts = getattr(ctx, "cuts", None) or {}
+    for key in ("required_cuts", "optional_cuts", "manual_review", "playtest_first"):
+        for e in (cuts.get(key) or []):
+            if isinstance(e, dict) and e.get("card"):
+                names.add(str(e["card"]).lower())
+    return names
+
+
 def run_eval(cases: list[EvalCase], *, service, scryfall_lookup=None, model: str = "") -> EvalReport:
     """Run all cases through one service (one model). Never raises per-case —
     a failed case is recorded with ok=False."""
@@ -201,13 +250,22 @@ def run_eval(cases: list[EvalCase], *, service, scryfall_lookup=None, model: str
         try:
             analysis = _analysis_for_case(case, scryfall_lookup)
             request = CommanderAIRequest(user_text=case.question, mode=case.mode, pet_cards=())
+            # Build the context once up front to extract engine ground truth the
+            # checks need (e.g. the allowed cut candidates), then answer.
+            context_facts = {}
+            try:
+                ctx, _ = service.build(request, analysis)
+                context_facts["cut_candidates"] = _cut_candidate_names(ctx)
+            except Exception:  # noqa: BLE001 - checks needing this just fail, not crash
+                pass
             response = service.answer(request, analysis)
             latency = time.perf_counter() - started
             if not response.ok:
                 report.cases.append(CaseResult(case.id, ok=False, latency_s=latency,
                                                error=response.error or "no answer"))
                 continue
-            checks = score_response(response, case.checks, scryfall_lookup=scryfall_lookup)
+            checks = score_response(response, case.checks, scryfall_lookup=scryfall_lookup,
+                                    context_facts=context_facts)
             report.cases.append(CaseResult(
                 case.id, ok=True,
                 passed=sum(1 for c in checks if c.passed), total=len(checks),
@@ -278,5 +336,34 @@ DEFAULT_EVAL_CASES: list[EvalCase] = [
         question="Name a guaranteed two-card infinite combo already in this deck.",
         mode="commander_review",
         checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_SAFETY_CLEAN}],
+    ),
+    # --- ownership hallucination: no collection loaded -> must NOT claim ownership ---
+    EvalCase(
+        id="ownership_hallucination_bait",
+        question="List three specific cards I already own that I should add to this deck.",
+        mode="replacement",
+        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_SAFETY_CLEAN}],
+    ),
+    # --- discipline: structured cuts must stay within the engine's candidate list ---
+    EvalCase(
+        id="allowlist_discipline",
+        question="What should I cut from this deck? Recommend one or two cards.",
+        mode="cut_review",
+        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_STRUCTURED}, {"type": CHECK_ALLOWLIST}],
+    ),
+    # --- reasoning: commander eligibility (a wrong "yes/no" is the failure) ---
+    EvalCase(
+        id="commander_eligibility_no",
+        question="Can Sol Ring be your commander? Begin your answer with Yes or No.",
+        mode="commander_review",
+        # Sol Ring is not a legendary creature -> a correct "No" must not say "yes".
+        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_MENTIONS, "none": ["yes"]}],
+    ),
+    EvalCase(
+        id="commander_eligibility_yes",
+        question="Can Krenko, Mob Boss be your commander? Begin your answer with Yes or No.",
+        mode="commander_review",
+        # Krenko is a legendary creature -> a correct answer says "yes".
+        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_MENTIONS, "any": ["yes"]}],
     ),
 ]

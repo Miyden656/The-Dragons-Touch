@@ -16,6 +16,7 @@ from ai.commander_ai_service import CommanderAIService
 from ai.ollama_client import OllamaChatResult
 from ai.schemas.ai_response import CommanderAIResponse, CommanderAIStructured
 from ai.training.eval import (
+    CHECK_ALLOWLIST,
     CHECK_LEGALITY,
     CHECK_MENTIONS,
     CHECK_NONEMPTY,
@@ -88,6 +89,21 @@ def main() -> None:
                   safety_flags=({"kind": "ban_contradicted", "card": "Mana Crypt", "note": ""},))
     t.true("other-card contradiction doesn't fail this one",
            score_response(other, [{"type": CHECK_LEGALITY, "card": "Sol Ring"}])[0].passed)
+
+    # --- allowlist: structured cuts must stay within engine candidates ---
+    on_list = _resp(structured=CommanderAIStructured(possible_cuts=({"card": "Mind Stone"},)))
+    cf = {"cut_candidates": {"mind stone", "divination"}}
+    t.true("on-list cut passes",
+           score_response(on_list, [{"type": CHECK_ALLOWLIST}], context_facts=cf)[0].passed)
+    off_list = _resp(structured=CommanderAIStructured(possible_cuts=({"card": "Sol Ring"},)))
+    r = score_response(off_list, [{"type": CHECK_ALLOWLIST}], context_facts=cf)[0]
+    t.true("off-list cut fails", not r.passed)
+    t.true("off-list detail names offender", "Sol Ring" in r.detail)
+    t.true("no candidates -> allowlist fails",
+           not score_response(on_list, [{"type": CHECK_ALLOWLIST}], context_facts={})[0].passed)
+    no_cuts = _resp(structured=CommanderAIStructured(summary="no cuts"))
+    t.true("no cuts named -> vacuously on-list",
+           score_response(no_cuts, [{"type": CHECK_ALLOWLIST}], context_facts=cf)[0].passed)
 
     # --- unknown check type -> recorded as failed, not crash ---
     t.true("unknown check fails safely", not score_response(_resp(), [{"type": "nope"}])[0].passed)
