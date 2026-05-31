@@ -1988,14 +1988,6 @@ def build_report_viewer_page(window):
 
     viewer_layout.addWidget(report_mode_stack, stretch=1)
 
-    # Phase 5b: in-app "Ask the Commander Guide" panel (local AI, off by default).
-    # Self-contained module; bulletproof builder so it can never break this page.
-    try:
-        from ui.pages.commander_ai_panel import build_commander_ai_panel
-    except ImportError:
-        from pages.commander_ai_panel import build_commander_ai_panel
-    viewer_layout.addWidget(build_commander_ai_panel(window))
-
     # Always land on User View first. Dev-Facing Mode exposes Dev View as an optional raw/QA lane.
     _show_user_view()
 

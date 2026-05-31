@@ -24,13 +24,13 @@ from pathlib import Path
 try:
     from PySide6.QtCore import QObject, QThread, Signal, Slot
     from PySide6.QtWidgets import (
-        QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTextEdit, QWidget,
+        QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget,
     )
     from ui.widgets import ReportCard
 except ImportError:  # running from inside ui/
     from PySide6.QtCore import QObject, QThread, Signal, Slot
     from PySide6.QtWidgets import (
-        QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTextEdit, QWidget,
+        QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget,
     )
     from widgets import ReportCard
 
@@ -249,14 +249,24 @@ def _save_training_example(window, result, status):
 
 # --- panel construction ---------------------------------------------------
 
-def build_commander_ai_panel(window) -> QWidget:
-    """Build the Ask-the-Guide panel. Never raises — returns a fallback on error."""
+def build_commander_ai_page(window) -> QWidget:
+    """Full, scrollable Commander Guide page. Never raises — returns a fallback on error."""
+    page, layout = window.page_container(
+        "Commander Guide",
+        "Ask the local AI about your selected deck. It uses The Dragon's Touch analysis as the "
+        "source of truth and runs entirely on your machine. Enable it in Settings -> Local "
+        "Commander AI, then pick a deck in Deck Selection.",
+    )
+    scroll, content = window.scroll_content()
     try:
-        return _build_panel(window)
-    except Exception as exc:  # noqa: BLE001 - the Report Viewer must always render.
+        content.addWidget(_build_panel(window))
+    except Exception as exc:  # noqa: BLE001 - the page must always render.
         label = QLabel(f"Commander AI panel unavailable: {exc}")
         label.setWordWrap(True)
-        return label
+        content.addWidget(label)
+    content.addStretch(1)
+    layout.addWidget(scroll, stretch=1)
+    return page
 
 
 def _build_panel(window) -> QWidget:
@@ -304,10 +314,9 @@ def _build_panel(window) -> QWidget:
     button_row.addStretch(1)
     card.body.addLayout(button_row)
 
-    output = QTextEdit()
-    output.setReadOnly(True)
-    output.setMinimumHeight(180)
-    output.setPlaceholderText("The Guide's answer will appear here.")
+    # Use the app's themed read-only text box so the answer is readable in BOTH
+    # themes (a raw QTextEdit rendered white-on-cream and was unreadable).
+    output = window.readonly_text_box("The Guide's answer will appear here.", min_height=240, max_height=640)
     card.body.addWidget(output)
 
     status = QLabel("")
