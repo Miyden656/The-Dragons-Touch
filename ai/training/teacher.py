@@ -156,6 +156,51 @@ class _TransportError(Exception):
         self.message = message
 
 
+# --- cost estimation (NO api call, NO key needed) --------------------------
+
+def estimate_for_deck(
+    deck_path,
+    *,
+    config,
+    scryfall_lookup,
+    persona: str,
+    prompt_plan,
+    out_tokens: int = 3500,  # conservative: prose + JSON + thinking; errs high on purpose
+) -> tuple[float, int]:
+    """Estimate the teacher cost for one deck WITHOUT calling the API.
+
+    Builds the real grounded prompts locally (free) and prices them at Opus
+    rates, deliberately over-estimating output so the preview is a ceiling, not
+    a floor. Returns (estimated_usd, prompt_count)."""
+    from pathlib import Path
+
+    import main
+    from config import RuntimeConfig
+    from parsing.deck_parser import parse_deck_file
+    from ai.commander_ai_service import CommanderAIService
+    from ai.schemas.ai_context import CommanderAIRequest
+
+    parsed = parse_deck_file(Path(deck_path), scryfall_lookup=scryfall_lookup)
+    runtime = RuntimeConfig(
+        output_mode="normal", review_direction="both", build_up_config={},
+        cut_depth_config={}, prompt_interaction_mode="guided",
+        philosophy_key=persona, guide_preference="either",
+        intended_bracket="Bracket 3", collection_mode="none",
+    )
+    analysis = main.build_analysis_context(parsed, runtime, scryfall_lookup, None)
+    service = CommanderAIService(config, scryfall_lookup=scryfall_lookup)
+
+    total = 0.0
+    n = 0
+    for mode, question in prompt_plan:
+        _ctx, messages = service.build(CommanderAIRequest(user_text=question, mode=mode), analysis)
+        in_chars = sum(len(str(m.get("content", ""))) for m in messages)
+        in_tokens = in_chars / 4.0  # rough chars->tokens
+        total += (in_tokens * _PRICE_IN_PER_M + out_tokens * _PRICE_OUT_PER_M) / 1_000_000.0
+        n += 1
+    return total, n
+
+
 # --- per-deck gold generation ---------------------------------------------
 
 def generate_teacher_for_deck(

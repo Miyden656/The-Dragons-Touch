@@ -29,7 +29,12 @@ if str(_PROJECT_ROOT) not in sys.path:
 from ai.commander_ai_config import from_settings  # noqa: E402
 from ai.training.corpus import default_corpus_path  # noqa: E402
 from ai.training.generate import DEFAULT_PROMPT_PLAN, append_candidates  # noqa: E402
-from ai.training.teacher import TEACHER_MODEL, TeacherClient, generate_teacher_for_deck  # noqa: E402
+from ai.training.teacher import (  # noqa: E402
+    TEACHER_MODEL,
+    TeacherClient,
+    estimate_for_deck,
+    generate_teacher_for_deck,
+)
 
 
 def _load_config():
@@ -53,16 +58,22 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--model", type=str, default=TEACHER_MODEL, help=f"Teacher model (default {TEACHER_MODEL})")
     parser.add_argument("--out", type=str, default="", help="Corpus file to append to")
     parser.add_argument("--max-cost", type=float, default=0.0, metavar="USD", help="Stop once estimated spend exceeds this (0 = no cap)")
+    parser.add_argument("--estimate", action="store_true", help="Preview the cost WITHOUT calling the API or spending anything (no key needed)")
     args = parser.parse_args(argv)
+
+    config = _load_config()
+
+    # --estimate works with no key and spends nothing — run it before anything else.
+    if args.estimate:
+        return _estimate(args, config)
 
     teacher = TeacherClient(model=args.model)
     if not teacher.available():
         print("ANTHROPIC_API_KEY is not set — this tool calls the paid Claude API.")
         print("  1. Get a key at https://console.anthropic.com (Settings -> API Keys).")
         print("  2. PowerShell:  setx ANTHROPIC_API_KEY \"sk-ant-...\"   (then reopen the terminal)")
+        print("\nTip: run with --estimate first to see the cost — it spends nothing and needs no key.")
         return 0
-
-    config = _load_config()
 
     import main as app_main
     _cards, lookup, err = app_main.load_scryfall_or_none()
@@ -109,6 +120,47 @@ def main(argv: list[str] | None = None) -> int:
                   f"dropped {stats['dropped']}, ~${stats['cost_usd']:.2f}  (running ~${totals['cost_usd']:.2f})")
 
     _summarize(totals, out_path)
+    return 0
+
+
+def _estimate(args, config) -> int:
+    """Cost preview — assembles prompts locally and prices them; spends nothing."""
+    import main as app_main
+    _cards, lookup, err = app_main.load_scryfall_or_none()
+    if err or not lookup:
+        print(f"Cannot estimate: Scryfall data not loaded ({err}).")
+        return 0
+    decks = sorted(Path(args.decks_dir).glob("*.txt"))
+    if args.limit > 0:
+        decks = decks[: args.limit]
+    if not decks:
+        print(f"No .txt decklists found in {args.decks_dir}")
+        return 0
+    personas = [p.strip() for p in args.personas.split(",") if p.strip()] or ["balanced_unknown"]
+
+    print(f"COST PREVIEW (no API call, nothing spent) — {len(decks)} deck(s) x "
+          f"{len(personas)} persona(s) x {len(DEFAULT_PROMPT_PLAN)} prompts")
+    total = 0.0
+    n = 0
+    for deck in decks:
+        for persona in personas:
+            try:
+                cost, count = estimate_for_deck(
+                    deck, config=config, scryfall_lookup=lookup,
+                    persona=persona, prompt_plan=DEFAULT_PROMPT_PLAN,
+                )
+                total += cost
+                n += count
+            except Exception:  # noqa: BLE001 - skip un-estimable decks
+                continue
+    print(f"\nEstimated GOLD examples: ~{n}")
+    print(f"Estimated MAX cost: ~${total:.2f}  (conservative — real cost is usually lower)")
+    print(f"Per example: ~${(total / n):.3f}" if n else "")
+    print("\nThis is a CEILING estimate. To stay safe:")
+    print("  • Buy a small prepaid credit balance (e.g. $10) and leave auto-reload OFF —")
+    print("    you can never be charged more than you prepaid.")
+    print("  • Run a tiny batch first:  --limit 2")
+    print("  • Cap a run:  --max-cost 5")
     return 0
 
 
