@@ -68,6 +68,7 @@ try:
     from ui.pages.future_workspace_page import build_batch_reports_page
     from ui.pages.settings_page import build_settings_page
     from ui.pages.commander_ai_panel import build_commander_ai_page
+    from ui.pages.training_review_page import build_training_review_page
 except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
     from constants import (
         APP_VERSION, APP_PHASE, BACKEND_STATUS, LOCKED_BACKEND_VERSION,
@@ -95,6 +96,7 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
     from pages.future_workspace_page import build_batch_reports_page
     from pages.settings_page import build_settings_page
     from pages.commander_ai_panel import build_commander_ai_page
+    from pages.training_review_page import build_training_review_page
 
 
 try:
@@ -146,7 +148,7 @@ except NameError:
 
 
 class MainWindow(QMainWindow):
-    DECK_SELECTION, REVIEW_SETUP, PHILOSOPHY, RUN_ANALYSIS, REPORT, COMMANDER_DISCOVERY, COLLECTION, BATCH_REPORTS, SETTINGS, COMMANDER_GUIDE = range(10)
+    DECK_SELECTION, REVIEW_SETUP, PHILOSOPHY, RUN_ANALYSIS, REPORT, COMMANDER_DISCOVERY, COLLECTION, BATCH_REPORTS, SETTINGS, COMMANDER_GUIDE, TRAINING_REVIEW = range(11)
 
     # v0.6.7.1 shell aliases kept for low-risk page wiring during the first UI patch.
     DECK_INPUT = DECK_SELECTION
@@ -484,6 +486,9 @@ class MainWindow(QMainWindow):
             ("🐉  Commander Guide", self.COMMANDER_GUIDE),
             ("⚒  Settings", self.SETTINGS),
         ]
+        # Maintainer-only: curate AI training candidates. Hidden in user mode.
+        if self.is_dev_mode():
+            nav_items.append(("🛠  Training Review", self.TRAINING_REVIEW))
         group = QButtonGroup(self)
         group.setExclusive(True)
         for text, index in nav_items:
@@ -496,6 +501,8 @@ class MainWindow(QMainWindow):
                 btn.setToolTip("Ask the optional local AI guide about your selected deck. Off until enabled in Settings.")
             elif index == self.SETTINGS:
                 btn.setToolTip("App preferences and future utilities; not required for a normal run.")
+            elif index == self.TRAINING_REVIEW:
+                btn.setToolTip("Dev only: curate AI training candidates into approved data (Keep/Reject).")
             btn.clicked.connect(lambda checked=False, idx=index: self.go_to(idx))
             group.addButton(btn)
             self.nav_buttons.append(btn)
@@ -557,6 +564,7 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.page_batch_reports())
         self.stack.addWidget(self.page_settings())
         self.stack.addWidget(self.page_commander_guide())  # index 9 = COMMANDER_GUIDE (appended; no index shift)
+        self.stack.addWidget(self.page_training_review())   # index 10 = TRAINING_REVIEW (dev-only nav; page always in stack so indices stay stable)
 
     def apply_theme(self):
         self.root.setStyleSheet(self.qss(self.theme()))
@@ -2371,6 +2379,9 @@ class MainWindow(QMainWindow):
 
     def page_commander_guide(self):
         return build_commander_ai_page(self)
+
+    def page_training_review(self):
+        return build_training_review_page(self)
 
     def collection_settings_summary_text(self):
         if self.state.collection_source_mode == "Select collection files":
