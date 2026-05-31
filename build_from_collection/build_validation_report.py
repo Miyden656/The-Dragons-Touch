@@ -123,12 +123,21 @@ def _banned_cards_present(result: Any) -> bool:
 def compute_build_verdict(result: Any) -> str:
     """Pick the primary structural verdict from a Full100CardDraftResult.
 
-    Order of precedence (most severe first):
-      ILLEGAL (banned commander)
+    Order of precedence (most severe / most specific first):
+      ILLEGAL (banned commander, or deck size != 100)
       CUSTOM_MODE (allow_banned_cards was on)
-      LEGAL_BUT_WEAK (any role bucket below target)
-      COLLECTION_LIMITED (creature ceiling relaxed or below floor)
+      COLLECTION_LIMITED (creature ceiling relaxed or below band floor —
+        these are concrete diagnostic signals; if either fires, the
+        collection itself is the root cause and the missing-slots
+        below are likely symptoms)
+      LEGAL_BUT_WEAK (role bucket below target without the collection-
+        limited signal — usually means a specific role couldn't fill)
       LEGAL (clean)
+
+    The user's brief listed LEGAL_BUT_WEAK and COLLECTION_LIMITED as
+    separate states. We prefer COLLECTION_LIMITED when it applies because
+    it's the more specific explanation — "your collection was thin on X"
+    is more actionable than "a slot didn't fill."
     """
     if bool(getattr(result, "commander_is_banned", False)) and not bool(
         getattr(result, "allow_banned_cards", False)
@@ -144,10 +153,10 @@ def compute_build_verdict(result: Any) -> str:
         # in practice because the builder pads to 100, but we should catch
         # it if it does.
         return VERDICT_ILLEGAL
-    if _has_missing_slots(result):
-        return VERDICT_LEGAL_BUT_WEAK
     if _collection_limited(result):
         return VERDICT_COLLECTION_LIMITED
+    if _has_missing_slots(result):
+        return VERDICT_LEGAL_BUT_WEAK
     return VERDICT_LEGAL
 
 
