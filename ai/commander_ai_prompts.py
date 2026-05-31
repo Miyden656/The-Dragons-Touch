@@ -73,13 +73,23 @@ def build_system_prompt(context: CommanderAIContext) -> str:
     return "\n\n".join(p for p in parts if p and p.strip())
 
 
-def build_user_prompt(context: CommanderAIContext) -> str:
+def build_user_prompt(
+    context: CommanderAIContext,
+    *,
+    verified_card_facts: str = "",
+) -> str:
     parts: list[str] = [
         "## Verified deck context (engine-provided — treat as source of truth)",
         "```json",
         context.to_json(),
         "```",
     ]
+
+    # Grounding block: verified Scryfall facts for any card the user asked about
+    # (legality across formats, oracle text, mana value). Hand the model the
+    # answer rather than hoping it recalls ~30k cards correctly.
+    if verified_card_facts and verified_card_facts.strip():
+        parts.append(verified_card_facts.strip())
 
     if context.warnings:
         parts.append("## Engine warnings (verified facts to surface)")
@@ -140,10 +150,13 @@ def build_messages(
     context: CommanderAIContext,
     *,
     history: list[dict] | None = None,
+    verified_card_facts: str = "",
 ) -> list[dict]:
     """Assemble the full [system, ...history, user] message list for Ollama."""
     messages: list[dict] = [{"role": "system", "content": build_system_prompt(context)}]
     if history:
         messages.extend(history)
-    messages.append({"role": "user", "content": build_user_prompt(context)})
+    messages.append(
+        {"role": "user", "content": build_user_prompt(context, verified_card_facts=verified_card_facts)}
+    )
     return messages

@@ -20,6 +20,7 @@ from typing import Any, Callable
 from ai.commander_ai_config import CommanderAIConfig
 from ai.commander_ai_prompts import build_messages
 from ai.commander_ai_safety import verify_response
+from ai.commander_ai_tools import render_card_facts_block, resolve_facts_for_text
 from ai.commander_ai_sessions import ConversationSession
 from ai.context.context_serializer import serialize_context
 from ai.ollama_client import OllamaClient
@@ -55,8 +56,30 @@ class CommanderAIService:
             analysis, request, guide_style=self.config.guide_style, combo_summary=combo_summary
         )
         hist = history if history is not None else (session.history() if session else None)
-        messages = build_messages(ctx, history=hist)
+        facts_block = self._verified_card_facts(ctx, request)
+        messages = build_messages(ctx, history=hist, verified_card_facts=facts_block)
         return ctx, messages
+
+    def _verified_card_facts(
+        self, ctx: CommanderAIContext, request: CommanderAIRequest
+    ) -> str:
+        """Ground the prompt: look up any card the user named (question, pet
+        cards, constraints) in Scryfall and hand the model verified facts +
+        per-format legality.
+
+        We do NOT skip cards that are in the deck: the deck context carries only
+        name/count/roles/MV (no oracle text, no legality), so a legality or
+        rules question about a card the user runs still needs grounding here.
+        """
+        if not self.scryfall_lookup:
+            return ""
+        text = " ".join(
+            [request.user_text or ""]
+            + list(request.pet_cards or [])
+            + list(request.constraints or [])
+        )
+        facts = resolve_facts_for_text(text, self.scryfall_lookup)
+        return render_card_facts_block(facts)
 
     # -- the main entry point ---------------------------------------------
 

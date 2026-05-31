@@ -16,12 +16,62 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from ai.commander_ai_tools import (
+    BANNED,
+    LEGAL,
+    NOT_LEGAL,
+    RESTRICTED,
+    UNKNOWN,
+    legality_in,
+)
 from ai.schemas.ai_context import CommanderAIContext
 
 # claim kinds
 OWNERSHIP_UNVERIFIED = "ownership_unverified"
 BAN_UNVERIFIED = "ban_unverified"
+BAN_CONTRADICTED = "ban_contradicted"
+LEGALITY_CONTRADICTED = "legality_contradicted"
 COMBO_UNVERIFIED = "combo_unverified"
+
+# Format names a model might cite in a ban claim -> Scryfall legality key.
+_FORMAT_WORDS = {
+    "commander": "commander", "edh": "commander",
+    "oathbreaker": "oathbreaker",
+    "duel commander": "duel", "duel": "duel",
+    "brawl": "brawl",
+    "standard": "standard",
+    "pioneer": "pioneer",
+    "modern": "modern",
+    "legacy": "legacy",
+    "vintage": "vintage",
+    "pauper": "pauper",
+    "premodern": "premodern",
+    "historic": "historic",
+    "timeless": "timeless",
+    "alchemy": "alchemy",
+    "penny": "penny",
+}
+
+# Structured legality statement: "<...> is [currently/now] <status> in <format>".
+# We only act on the NON-banned statuses here ("banned" stays with _check_ban so
+# the two checks never double-flag the same sentence). The card name is taken as
+# the candidate name immediately preceding "is".
+_LEGALITY_STATUS_WORDS = {
+    "legal": LEGAL,
+    "playable": LEGAL,
+    "allowed": LEGAL,
+    "restricted": RESTRICTED,
+    "not legal": NOT_LEGAL,
+    "illegal": NOT_LEGAL,
+    "not allowed": NOT_LEGAL,
+}
+_LEGALITY_CLAIM = re.compile(
+    r"\bis\s+(?:currently\s+|now\s+)?"
+    r"(legal|playable|allowed|restricted|not\s+legal|illegal|not\s+allowed)\s+in\s+"
+    r"(" + "|".join(sorted((re.escape(w) for w in _FORMAT_WORDS), key=len, reverse=True)) + r")\b",
+    re.IGNORECASE,
+)
+_STATUS_DISPLAY = {LEGAL: "legal", NOT_LEGAL: "not legal", RESTRICTED: "restricted", BANNED: "banned"}
 
 # Ownership claims come in two shapes:
 #   - card AFTER the trigger:  "you own X", "you run X", "you've got X"
@@ -88,7 +138,8 @@ def verify_response(
     flags: list[FlaggedClaim] = []
     for sentence in _sentences(text):
         flags.extend(_check_ownership(sentence, owned, deck))
-        flags.extend(_check_ban(sentence, banned))
+        flags.extend(_check_ban(sentence, banned, scryfall_lookup))
+        flags.extend(_check_legality_claim(sentence, scryfall_lookup))
         flags.extend(_check_combo(sentence, combo_available))
 
     flags = _dedupe(flags)
@@ -128,24 +179,92 @@ def _check_ownership(sentence: str, owned: set[str], deck: set[str]) -> list[Fla
     return out
 
 
-def _check_ban(sentence: str, banned: set[str]) -> list[FlaggedClaim]:
+def _check_ban(
+    sentence: str, banned: set[str], scryfall_lookup: dict | None = None
+) -> list[FlaggedClaim]:
     m = _BAN_TRIGGER.search(sentence)
     if not m:
         return []
+    fmt = _detect_format(sentence)
     # "X is banned" -> the card name precedes the trigger.
     out: list[FlaggedClaim] = []
     for name in _candidate_names(sentence[: m.start()]):
-        if name.lower() in banned:
+        low = name.lower()
+        # 1) Engine already lists it as banned for this deck -> verified, skip.
+        if low in banned:
             continue
+        # 2) Cross-check the real Scryfall per-format legality when we can.
+        if scryfall_lookup:
+            status = legality_in(name, fmt, scryfall_lookup)
+            if status == BANNED:
+                continue  # verified banned in this format — accurate claim
+            if status != UNKNOWN:
+                # Card is real and Scryfall says it is NOT banned here.
+                out.append(
+                    FlaggedClaim(
+                        kind=BAN_CONTRADICTED,
+                        card=name,
+                        sentence=sentence.strip(),
+                        note=(
+                            f"Scryfall says \"{name}\" is {status.replace('_', ' ')} in "
+                            f"{fmt}, not banned."
+                        ),
+                    )
+                )
+                continue
+            # status == UNKNOWN -> not a recognized card; fall through to soft flag.
         out.append(
             FlaggedClaim(
                 kind=BAN_UNVERIFIED,
                 card=name,
                 sentence=sentence.strip(),
-                note=f"Ban status of \"{name}\" is not confirmed by the engine legality data.",
+                note=f"Ban status of \"{name}\" is not confirmed by the legality data.",
             )
         )
     return out
+
+
+def _check_legality_claim(sentence: str, scryfall_lookup: dict | None) -> list[FlaggedClaim]:
+    """Verify a structured 'X is <legal|restricted|not legal> in <format>' claim
+    against real Scryfall legality. Needs the lookup; 'banned' is left to
+    _check_ban so the two never double-flag the same sentence."""
+    if not scryfall_lookup:
+        return []
+    out: list[FlaggedClaim] = []
+    for m in _LEGALITY_CLAIM.finditer(sentence):
+        claimed = _LEGALITY_STATUS_WORDS.get(re.sub(r"\s+", " ", m.group(1).lower().strip()))
+        fmt = _FORMAT_WORDS.get(m.group(2).lower())
+        if not claimed or not fmt:
+            continue
+        names = _candidate_names(sentence[: m.start()])
+        if not names:
+            continue
+        name = names[-1]  # the card named right before "is ..."
+        actual = legality_in(name, fmt, scryfall_lookup)
+        if actual == UNKNOWN or actual == claimed:
+            continue  # unknown card -> don't guess; match -> accurate
+        out.append(
+            FlaggedClaim(
+                kind=LEGALITY_CONTRADICTED,
+                card=name,
+                sentence=sentence.strip(),
+                note=(
+                    f"Scryfall says \"{name}\" is {_STATUS_DISPLAY.get(actual, actual)} in "
+                    f"{fmt}, not {_STATUS_DISPLAY.get(claimed, claimed)}."
+                ),
+            )
+        )
+    return out
+
+
+def _detect_format(sentence: str) -> str:
+    """Which format a ban claim is about; defaults to commander (this app's focus)."""
+    low = sentence.lower()
+    # Check multi-word format names first so "duel commander" wins over "commander".
+    for word in sorted(_FORMAT_WORDS, key=len, reverse=True):
+        if word in low:
+            return _FORMAT_WORDS[word]
+    return "commander"
 
 
 def _check_combo(sentence: str, combo_available: bool) -> list[FlaggedClaim]:

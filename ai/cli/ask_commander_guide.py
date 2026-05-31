@@ -100,6 +100,25 @@ def _run_connectivity(client: OllamaClient, args: argparse.Namespace, config: Co
     return 0
 
 
+def _run_card(args: argparse.Namespace) -> int:
+    """Verified-facts lookup for one card — no Ollama, no deck. Proves the
+    grounding layer ('knows every card and every format's legality cold')."""
+    import main
+    from ai.commander_ai_tools import lookup_card_facts, render_card_facts
+
+    cards, lookup, err = main.load_scryfall_or_none()
+    if err or not lookup:
+        print(f"Cannot look up card: Scryfall data not loaded ({err}).")
+        return 0
+
+    facts = lookup_card_facts(args.card, lookup)
+    if facts is None:
+        print(f'"{args.card}" was not found in the local card database.')
+        return 0
+    print(render_card_facts(facts, max_oracle=10_000))
+    return 0
+
+
 def _run_deck(args: argparse.Namespace, config: CommanderAIConfig) -> int:
     # Heavy imports are deferred to the deck path so --check stays light.
     import main
@@ -152,10 +171,18 @@ def _run_deck(args: argparse.Namespace, config: CommanderAIConfig) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Card names + legality use unicode separators; force UTF-8 so a Windows
+    # cp1252 console doesn't render them as mojibake. Best-effort, never fatal.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
+    except Exception:  # noqa: BLE001
+        pass
+
     parser = argparse.ArgumentParser(description="Commander AI harness")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--prompt", type=str, default="")
     parser.add_argument("--deck", type=str, default="")
+    parser.add_argument("--card", type=str, default="", help="Print verified facts + per-format legality for one card.")
     parser.add_argument("--mode", type=str, default="commander_review", choices=ALL_MODES)
     parser.add_argument("--persona", type=str, default="balanced_unknown")
     parser.add_argument("--dry-run", action="store_true")
@@ -166,6 +193,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--stream", action="store_true")
     parser.add_argument("--guide-style", type=str, default="")
     args = parser.parse_args(argv)
+
+    # Card lookup needs no Ollama config — handle it before the config banner.
+    if args.card:
+        return _run_card(args)
 
     config = _apply_overrides(_load_config(), args)
     _print_config(config)
