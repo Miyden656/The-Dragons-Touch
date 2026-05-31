@@ -121,6 +121,42 @@ COMMANDER_TEXT_PATTERNS: tuple[tuple[str, set[str]], ...] = (
 
     # Group / politics.
     ("each opponent", {"group_slug", "table_damage", "lifedrain_payoff", "draw_punisher"}),
+
+    # v1.6.2 Phase B: Devotion commanders (mono-color and color-pip dense).
+    # Omnath Locus of All, Heliod, Thassa Deep-Dwelling, original Omnath
+    # Locus of Mana, Daxos of Meletis decks etc.
+    ("devotion to", {"devotion_payoff", "mana_source", "mana_doubler"}),
+    ("your devotion", {"devotion_payoff", "mana_source"}),
+
+    # v1.6.2 Phase B: Activated-ability commanders. Garth One-Eye, Shorikai
+    # Genesis Engine, Urza Lord High Artificer, Daretti Scrap Savant, Aisha
+    # of Sparks and Smoke, Krark's Other Thumb. These want untap engines,
+    # cost reducers, and repeat-activation enablers.
+    ("activate this ability only", {"untap_engine", "repeatable_activation", "activated_ability_synergy"}),
+    ("whenever you activate", {"untap_engine", "repeatable_activation", "activated_ability_synergy", "trigger_amplifier"}),
+    ("activate an ability of a", {"untap_engine", "repeatable_activation", "activated_ability_synergy", "trigger_amplifier"}),
+    ("you may activate", {"untap_engine", "repeatable_activation", "activated_ability_synergy"}),
+    # Garth-style commanders that grant tutor-like activated abilities.
+    ("you may exile this card from your library", {"tutor", "card_advantage", "synergy_piece"}),
+
+    # v1.6.2 Phase B: Token commanders. Baylen, Krenko, Adeline, Anim Pakal —
+    # specifically amplify token DOUBLERS (Doubling Season / Anointed
+    # Procession / Mondrak) rather than every token_maker. token_maker was
+    # already in earlier patterns; adding the doubler-specific signal here.
+    ("ten or more tokens", {"token_doubler", "token_maker", "go_wide_token_engine", "anthem"}),
+    ("for each creature token", {"token_doubler", "token_maker", "go_wide_token_engine"}),
+    ("for each token you control", {"token_doubler", "token_maker", "anthem"}),
+    ("create two", {"token_doubler", "token_maker", "go_wide_token_engine"}),
+    ("create three", {"token_doubler", "token_maker", "go_wide_token_engine"}),
+
+    # v1.6.2 Phase B: Stompy / Big-Creature commanders. Thrun, Goreclaw,
+    # Vaevictis, Yedora, Selvala Heart, Ghalta. Want can't-be-countered
+    # enablers, overrun finishers, ramp into big threats.
+    ("this spell can't be countered", {"uncounterable_enabler", "protection", "synergy_piece"}),
+    ("can't be countered", {"uncounterable_enabler", "protection"}),
+    ("trample", {"overrun_finisher", "combat_synergy"}),
+    ("indestructible", {"protection", "overrun_finisher"}),
+    ("creatures cost", {"cost_reducer", "ramp", "big_mana_payoff"}),
 )
 
 
@@ -257,6 +293,18 @@ def commander_amplifier_summary(commander_scryfall_card: dict[str, Any] | None) 
         "mana_sink": "mana sinks",
         "high_toughness": "high-toughness creatures",
         "protection": "protection",
+        # v1.6.2 Phase B: friendly labels for the new amplifier tags so the
+        # commander-amplifier summary line in the report makes sense.
+        "devotion_payoff": "devotion payoffs",
+        "token_doubler": "token doublers (Doubling Season etc.)",
+        "overrun_finisher": "overrun finishers (Craterhoof etc.)",
+        "untap_engine": "untap engines (Voltaic Key etc.)",
+        "repeatable_activation": "repeatable-activation enablers",
+        "uncounterable_enabler": "uncounterable enablers (Cavern, Allosaurus Shepherd)",
+        "activated_ability_synergy": "activated-ability synergy",
+        "go_wide_token_engine": "go-wide token engines",
+        "big_mana_payoff": "big-mana payoffs",
+        "cost_reducer": "cost reducers",
     }
     readable = [friendly_map.get(t, t.replace("_", " ")) for t in sorted(tags)]
     # Deduplicate while preserving order.
