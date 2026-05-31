@@ -383,6 +383,14 @@ def build_validation_report_lines(result: Any) -> list[str]:
     lines.append("### Bracket expectations")
     lines.append("")
     lines.append(f"- {compute_bracket_expectations_status(result)}")
+    # v1.6.2 Phase E: Game Changer count vs bracket limit.
+    gc_message = str(getattr(result, "game_changer_message", "") or "")
+    gc_count = int(getattr(result, "game_changer_count", 0) or 0)
+    gc_names = list(getattr(result, "game_changer_names", []) or [])
+    if gc_message:
+        lines.append(f"- Game Changers: {gc_message}")
+        if gc_count > 0:
+            lines.append(f"  - Cards: {', '.join(gc_names)}")
     lines.append("")
 
     # ---- Counter totals -----------------------------------------------

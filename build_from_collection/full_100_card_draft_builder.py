@@ -142,6 +142,12 @@ class Full100CardDraftResult:
     creature_band_ceiling: int = 0
     creatures_skipped_for_ceiling: int = 0
     creatures_added_past_ceiling: int = 0
+    # v1.6.2 Phase E: Game Changer count + bracket limit comparison.
+    game_changer_count: int = 0
+    game_changer_names: list[str] = field(default_factory=list)
+    game_changer_limit: int | None = None
+    game_changer_status: str = ""
+    game_changer_message: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -171,6 +177,11 @@ class Full100CardDraftResult:
             "creature_band_ceiling": self.creature_band_ceiling,
             "creatures_skipped_for_ceiling": self.creatures_skipped_for_ceiling,
             "creatures_added_past_ceiling": self.creatures_added_past_ceiling,
+            "game_changer_count": self.game_changer_count,
+            "game_changer_names": list(self.game_changer_names),
+            "game_changer_limit": self.game_changer_limit,
+            "game_changer_status": self.game_changer_status,
+            "game_changer_message": self.game_changer_message,
         }
 
 
@@ -870,6 +881,28 @@ def build_full_100_card_draft(
         else:
             final_noncreature_nonland_count += entry.quantity
 
+    # v1.6.2 Phase E: Game Changer tally + bracket limit check.
+    final_gc_count = 0
+    final_gc_names: list[str] = []
+    final_gc_limit: int | None = None
+    final_gc_status = ""
+    final_gc_message = ""
+    try:
+        from rules.game_changers import (
+            count_game_changers,
+            game_changer_status as _gc_status,
+            list_game_changers_in_deck,
+        )
+        from rules.bracket_definitions import get_bracket_definition
+        deck_names_for_gc = [e.card_name for e in entries]
+        final_gc_count = count_game_changers(deck_names_for_gc)
+        final_gc_names = list_game_changers_in_deck(deck_names_for_gc)
+        bracket = get_bracket_definition(bracket_preference)
+        final_gc_limit = bracket.game_changer_count_limit if bracket else None
+        final_gc_status, final_gc_message = _gc_status(final_gc_count, final_gc_limit)
+    except Exception:
+        pass
+
     notes: list[str] = []
     # v1.6.1 Phase 1: legality gate summary FIRST so users see this before
     # bracket / persona / combo notes. Banned-commander flag is loudest.
@@ -1007,6 +1040,11 @@ def build_full_100_card_draft(
         creature_band_ceiling=creature_band.ceiling if creature_band else 0,
         creatures_skipped_for_ceiling=creatures_skipped_for_ceiling,
         creatures_added_past_ceiling=creatures_added_past_ceiling,
+        game_changer_count=final_gc_count,
+        game_changer_names=final_gc_names,
+        game_changer_limit=final_gc_limit,
+        game_changer_status=final_gc_status,
+        game_changer_message=final_gc_message,
     )
 
 
