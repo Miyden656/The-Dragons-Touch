@@ -165,8 +165,18 @@ def _run_deck(args: argparse.Namespace, config: CommanderAIConfig) -> int:
     print("-" * 60)
     if not resp.ok:
         print(f"({resp.error_kind})")
-    elif not resp.safety_ok:
+        return 0
+    if not resp.safety_ok:
         print(f"[safety: {len(resp.safety_flags)} claim(s) flagged]")
+    if resp.structured is not None:
+        s = resp.structured
+        print("\n[structured] " + (f"confidence={s.confidence} " if s.confidence else "")
+              + f"cuts={len(s.possible_cuts)} protected={len(s.protected_cards)} "
+              + f"replacement_needs={len(s.replacement_needs)} follow_ups={len(s.follow_up_questions)}")
+        if s.summary:
+            print(f"  summary: {s.summary}")
+    elif resp.parse_failed:
+        print("[structured] a JSON block was present but could not be parsed (text shown as-is)")
     return 0
 
 

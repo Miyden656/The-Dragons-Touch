@@ -35,6 +35,38 @@ from ai.schemas.ai_context import (
 
 PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
 
+# Modes where a machine-readable JSON mirror is useful to the app. Conversational
+# modes (strategy_tutor, persona_coaching) stay prose-only — forcing JSON there
+# would only degrade the answer.
+STRUCTURED_MODES = frozenset(
+    {MODE_COMMANDER_REVIEW, MODE_CUT_REVIEW, MODE_REPLACEMENT, MODE_BUILD_FROM_COLLECTION}
+)
+
+# Appended to the system prompt for STRUCTURED_MODES. The prose stays primary;
+# the JSON only mirrors what was already said. Kept in code (not a .md asset) so
+# it stays in lockstep with the parser/schema.
+_OUTPUT_FORMAT_INSTRUCTION = """## Output format
+Write your normal answer first, in prose. Then, on a new line AFTER the prose,
+append a single fenced code block tagged `json` that mirrors your answer for the
+app to read. Use exactly this shape and omit any field that does not apply:
+
+```json
+{
+  "summary": "one or two sentence takeaway",
+  "primary_recommendation": "the single most important action",
+  "confidence": "low | medium | high",
+  "possible_cuts": [{"card": "", "reason": "", "confidence": "low | medium | high", "cut_type": "", "replacement_category": ""}],
+  "protected_cards": [{"card": "", "reason": ""}],
+  "replacement_needs": ["category or need"],
+  "warnings": ["verified concern"],
+  "follow_up_questions": ["a question that would sharpen the advice"]
+}
+```
+
+Rules for the JSON: only include cards you already named in the prose; never
+invent a card to fill a field; if you have nothing for a field, omit it. The
+prose above is what the user reads — keep it complete on its own."""
+
 _MODE_FILES: dict[str, str] = {
     MODE_COMMANDER_REVIEW: "mode_commander_review.md",
     MODE_BUILD_FROM_COLLECTION: "mode_build_from_collection.md",
@@ -126,6 +158,11 @@ def build_user_prompt(
 
     parts.append("## User request")
     parts.append(context.user_request or "(No specific question — give a review appropriate to the mode.)")
+
+    # Output-format instruction goes LAST so a small model actually obeys it —
+    # the same "what it sees most recently wins" lesson as the cut allow-list.
+    if context.mode in STRUCTURED_MODES:
+        parts.append(_OUTPUT_FORMAT_INSTRUCTION)
     return "\n\n".join(parts)
 
 

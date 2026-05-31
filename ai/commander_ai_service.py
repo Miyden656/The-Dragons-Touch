@@ -18,6 +18,7 @@ from __future__ import annotations
 from typing import Any, Callable
 
 from ai.commander_ai_config import CommanderAIConfig
+from ai.commander_ai_parsing import parse_structured_response
 from ai.commander_ai_prompts import build_messages
 from ai.commander_ai_safety import verify_response
 from ai.commander_ai_tools import render_card_facts_block, resolve_facts_for_text
@@ -110,8 +111,13 @@ class CommanderAIService:
                 model=result.model or self.config.model,
             )
 
+        # Split the trailing JSON block (if any) off the prose BEFORE safety, so
+        # the user sees clean prose and the fact-check footer lands after it, not
+        # after a raw JSON dump. Parsing never fails the response.
+        prose, structured, parse_failed = parse_structured_response(result.text)
+
         report = verify_response(
-            result.text,
+            prose,
             ctx,
             scryfall_lookup=self.scryfall_lookup,
             strict=self.config.strict_fact_check,
@@ -120,11 +126,11 @@ class CommanderAIService:
         # Record the turn for continuity (short text only — see sessions module).
         if session is not None:
             session.add_user(request.user_text)
-            session.add_assistant(result.text)
+            session.add_assistant(prose)
 
         return CommanderAIResponse(
             ok=True,
-            text=report.annotated_text or result.text,
+            text=report.annotated_text or prose,
             raw_text=result.text,
             mode=ctx.mode,
             guide_style=ctx.guide_style,
@@ -133,6 +139,8 @@ class CommanderAIService:
             safety_flags=tuple(
                 {"kind": f.kind, "card": f.card, "note": f.note} for f in report.flags
             ),
+            structured=structured,
+            parse_failed=parse_failed,
             meta=dict(ctx.meta),
         )
 
