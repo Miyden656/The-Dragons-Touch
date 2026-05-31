@@ -14,7 +14,7 @@ Guide Presentation is confirmed as an app-wide Settings control, not a Philosoph
 
 try:
     from PySide6.QtCore import Qt, QObject, QThread, Signal, Slot
-    from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QApplication, QMessageBox
+    from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QVBoxLayout, QApplication, QMessageBox
 
     from ui.constants import (
         INTERFACE_MODE_OPTIONS,
@@ -27,7 +27,7 @@ try:
     from data.data_setup_service import get_data_setup_status, download_scryfall_cards, download_commander_spellbook_combo_bulk
 except ImportError:
     from PySide6.QtCore import Qt, QObject, QThread, Signal, Slot
-    from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QApplication, QMessageBox
+    from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QVBoxLayout, QApplication, QMessageBox
 
     from constants import (
         INTERFACE_MODE_OPTIONS,
@@ -508,6 +508,177 @@ def _build_combo_index_guarded(status_widget):
             str(exc),
             error=True,
         )
+
+
+# --- Local Commander AI (v1.7 Phase 5a) -----------------------------------
+
+COMMANDER_AI_GUIDE_STYLE_DISPLAY = ["Adventurer", "Archivist", "Strategist", "Minimal"]
+COMMANDER_AI_TEMPERATURE_PRESETS = ["0.2", "0.4", "0.7", "1.0"]
+
+
+def _user_settings_module():
+    try:
+        from ui.services import user_settings
+    except ImportError:
+        from services import user_settings
+    return user_settings
+
+
+def _save_ai_setting(window, key, value):
+    """Persist one commander_ai_* setting into the shared app settings store."""
+    window.app_settings[key] = value
+    _user_settings_module().save_app_settings(window.app_settings)
+    window.state.status = f"Commander AI setting saved: {key}"
+
+
+def _current_ai_guide_style_display(window):
+    token = str(window.app_settings.get("commander_ai_guide_style", "adventurer")).strip().lower()
+    display = token.capitalize()
+    return display if display in COMMANDER_AI_GUIDE_STYLE_DISPLAY else "Adventurer"
+
+
+def _current_ai_temperature_display(window):
+    value = str(window.app_settings.get("commander_ai_temperature", "0.4")).strip()
+    return value if value in COMMANDER_AI_TEMPERATURE_PRESETS else "0.4"
+
+
+class _CommanderAITestBridge(QObject):
+    """Handle Commander AI connection-test completion on the Qt/UI side."""
+
+    def __init__(self, status_widget, button, original_text):
+        super().__init__()
+        self.status_widget = status_widget
+        self.button = button
+        self.original_text = original_text
+
+    def _restore(self):
+        if self.button is not None:
+            self.button.setEnabled(True)
+            self.button.setText(self.original_text)
+
+    @Slot(object)
+    def on_finished(self, availability):
+        ok = bool(getattr(availability, "ok", False))
+        message = getattr(availability, "message", "") or ""
+        prefix = "Connected. " if ok else "Not reachable. "
+        _set_text_widget_value(self.status_widget, prefix + message)
+        self._restore()
+
+    @Slot(str)
+    def on_failed(self, message):
+        _set_text_widget_value(self.status_widget, f"Test failed: {message}")
+        self._restore()
+
+    @Slot()
+    def release_refs(self):
+        if self.button is not None:
+            self.button._ai_test_thread = None
+            self.button._ai_test_worker = None
+            self.button._ai_test_bridge = None
+
+
+def _run_commander_ai_test(window, status_widget, button):
+    """Check Ollama availability in a background worker so Settings stays responsive."""
+    try:
+        from ai.commander_ai_config import from_settings
+        from ai.ollama_client import OllamaClient
+    except Exception as exc:  # noqa: BLE001 - never crash Settings.
+        _set_text_widget_value(status_widget, f"Commander AI module unavailable: {exc}")
+        return
+
+    config = from_settings(window.app_settings)
+    original_text = button.text()
+    button.setEnabled(False)
+    button.setText("Testing...")
+    _set_text_widget_value(
+        status_widget,
+        f"Contacting Ollama at {config.base_url} (model: {config.model})...",
+    )
+
+    thread = QThread()
+    worker = _DataSetupWorker(lambda: OllamaClient(config).is_available())
+    bridge = _CommanderAITestBridge(status_widget, button, original_text)
+    worker.moveToThread(thread)
+
+    worker.finished.connect(bridge.on_finished)
+    worker.failed.connect(bridge.on_failed)
+    worker.finished.connect(thread.quit)
+    worker.failed.connect(thread.quit)
+    thread.started.connect(worker.run)
+    thread.finished.connect(worker.deleteLater)
+    thread.finished.connect(bridge.release_refs)
+    thread.finished.connect(thread.deleteLater)
+
+    # Keep refs alive until the thread fully finishes.
+    button._ai_test_thread = thread
+    button._ai_test_worker = worker
+    button._ai_test_bridge = bridge
+    thread.start()
+
+
+def build_commander_ai_settings_card(window):
+    """Build the Local Commander AI settings card (Off by default, fully local)."""
+    card = ReportCard("Local Commander AI", window.theme, badges=[("Beta", "primary"), ("Local", "manual")])
+    card.body.addWidget(window.default_note(
+        "Optional local AI guide powered by Ollama. It runs entirely on your machine and is "
+        "off by default. When enabled, the Commander Guide can explain your deck, cuts, and "
+        "replacements using The Dragon's Touch analysis as the source of truth."
+    ))
+
+    enable_combo = _combo(window, ["Off", "On"], "On" if window.app_settings.get("commander_ai_enabled") else "Off")
+    enable_combo.currentTextChanged.connect(lambda v: _save_ai_setting(window, "commander_ai_enabled", v == "On"))
+    card.body.addLayout(_row("Enable local AI", enable_combo))
+
+    model_edit = QLineEdit(str(window.app_settings.get("commander_ai_model", "llama3.1")))
+    model_edit.setMinimumWidth(260)
+    model_edit.editingFinished.connect(
+        lambda: _save_ai_setting(window, "commander_ai_model", model_edit.text().strip() or "llama3.1")
+    )
+    card.body.addLayout(_row("Ollama model", model_edit))
+
+    url_edit = QLineEdit(str(window.app_settings.get("commander_ai_base_url", "http://localhost:11434")))
+    url_edit.setMinimumWidth(260)
+    url_edit.editingFinished.connect(
+        lambda: _save_ai_setting(window, "commander_ai_base_url", url_edit.text().strip() or "http://localhost:11434")
+    )
+    card.body.addLayout(_row("Ollama base URL", url_edit))
+
+    style_combo = _combo(window, COMMANDER_AI_GUIDE_STYLE_DISPLAY, _current_ai_guide_style_display(window))
+    style_combo.currentTextChanged.connect(
+        lambda v: _save_ai_setting(window, "commander_ai_guide_style", v.strip().lower())
+    )
+    card.body.addLayout(_row("Response style", style_combo))
+
+    temp_combo = _combo(window, COMMANDER_AI_TEMPERATURE_PRESETS, _current_ai_temperature_display(window))
+    temp_combo.currentTextChanged.connect(
+        lambda v: _save_ai_setting(window, "commander_ai_temperature", float(v))
+    )
+    card.body.addLayout(_row("Creativity (temperature)", temp_combo))
+
+    strict_combo = _combo(window, ["On", "Off"], "On" if window.app_settings.get("commander_ai_strict_fact_check", True) else "Off")
+    strict_combo.currentTextChanged.connect(
+        lambda v: _save_ai_setting(window, "commander_ai_strict_fact_check", v == "On")
+    )
+    card.body.addLayout(_row("Strict fact-check", strict_combo))
+
+    test_status = window.make_text(
+        "Click Test Connection to check whether Ollama is running and the selected model is installed.",
+        paper=True,
+    )
+    test_button = QPushButton("Test Connection")
+    test_button.setObjectName("utilityButton")
+    test_button.clicked.connect(lambda: _run_commander_ai_test(window, test_status, test_button))
+    card.body.addWidget(test_button)
+    card.body.addWidget(test_status)
+
+    card.body.addWidget(window.default_note(
+        "Response style sets the AI's tone (Adventurer / Archivist / Strategist / Minimal) and is "
+        "separate from the Guide Presentation voice above. Strict fact-check appends a transparent "
+        "note whenever the AI makes a card-ownership, ban-status, or combo claim the engine can't confirm."
+    ))
+    return card
+
+
 def build_settings_page(window):
     page, layout = window.page_container(
         "Settings",
@@ -579,6 +750,9 @@ def build_settings_page(window):
         "This controls the gendered or neutral guide voice used for Timmy/Tammy, Johnny/Jenny, and Spike-style guidance. It is independent from Philosophy Lens, so No Philosophy still keeps the selected guide presentation."
     ))
     b_layout.addWidget(guide_card)
+
+    # Local Commander AI (Ollama) — off by default; fully local.
+    b_layout.addWidget(build_commander_ai_settings_card(window))
 
     # Collection Defaults.
     collection_card = ReportCard("Collection Defaults", window.theme, badges=[("App default", "manual")])

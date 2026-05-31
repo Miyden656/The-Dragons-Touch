@@ -12,6 +12,15 @@ import json
 from pathlib import Path
 from typing import Any
 
+# Commander AI (v1.7.x) settings defaults live in the ai/ layer so they are
+# defined exactly once. This UI-services module only persists/normalizes them.
+# Importing ai.commander_ai_config pulls in NO PySide6 — it is pure stdlib.
+from ai.commander_ai_config import (
+    AI_SETTINGS_DEFAULTS,
+    from_settings as build_commander_ai_config,
+    to_settings as _commander_ai_to_settings,
+)
+
 
 SETTINGS_SCHEMA_VERSION = 1
 
@@ -64,6 +73,8 @@ def default_settings() -> dict[str, Any]:
         "theme": "Dragon Forge",
         "ui_density": "Normal",
         "developer_report_viewer_last_view": "User View",
+        # Commander AI (Local Ollama guide) — keys + defaults owned by ai/.
+        **AI_SETTINGS_DEFAULTS,
     }
 
 
@@ -113,6 +124,17 @@ def normalize_developer_report_view(value: Any) -> str:
     return text if text in {"User View", "Dev View"} else "User View"
 
 
+def normalize_commander_ai_settings(data: dict[str, Any]) -> None:
+    """Validate/clamp the commander_ai_* keys in-place.
+
+    Delegates all validation to ai/ (the single source of truth) so the rules
+    are never duplicated here: build a validated config, then write its
+    normalized values back over the flat settings dict.
+    """
+    normalized = _commander_ai_to_settings(build_commander_ai_config(data))
+    data.update(normalized)
+
+
 def load_app_settings() -> dict[str, Any]:
     path = settings_path()
     data = default_settings()
@@ -141,6 +163,7 @@ def load_app_settings() -> dict[str, Any]:
     data["theme"] = str(data.get("theme") or "Dragon Forge")
     data["ui_density"] = normalize_ui_density(data.get("ui_density"))
     data["developer_report_viewer_last_view"] = normalize_developer_report_view(data.get("developer_report_viewer_last_view"))
+    normalize_commander_ai_settings(data)
 
     save_app_settings(data)
     return data
@@ -158,6 +181,7 @@ def save_app_settings(data: dict[str, Any]) -> None:
     cleaned["collection_source_default"] = normalize_collection_source_default(cleaned.get("collection_source_default"))
     cleaned["ui_density"] = normalize_ui_density(cleaned.get("ui_density"))
     cleaned["developer_report_viewer_last_view"] = normalize_developer_report_view(cleaned.get("developer_report_viewer_last_view"))
+    normalize_commander_ai_settings(cleaned)
 
     path.write_text(json.dumps(cleaned, indent=2, sort_keys=True), encoding="utf-8")
 
