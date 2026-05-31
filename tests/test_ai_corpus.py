@@ -18,6 +18,7 @@ from ai.training.corpus import (
     dedupe,
     is_usable,
     load_corpus,
+    merge_records,
     record_key,
     validate_record,
     write_corpus,
@@ -109,6 +110,16 @@ def main() -> None:
     t.eq("approved-only kept 2", len(clean_app), 2)
     clean_all, _rep_all = clean_corpus(mixed, approved_only=False)
     t.eq("include-unapproved keeps all 3", len(clean_all), 3)
+
+    # --- merge_records: pool two people's corpora, dedupe overlap ---
+    mine = [_rec(question="Q1"), _rec(question="Q2")]
+    buddy = [_rec(question="Q2"), _rec(question="Q3")]  # Q2 overlaps
+    merged, mreport = merge_records([mine, buddy])
+    t.eq("merge inputs counted", mreport["inputs"], 2)
+    t.eq("merge total before dedupe", mreport["total"], 4)
+    t.eq("merge removed the overlap", mreport["removed_duplicate"], 1)
+    t.eq("merge kept 3 distinct", len(merged), 3)
+    t.eq("merge empty -> empty", merge_records([])[0], [])
 
     t.report_and_exit()
 

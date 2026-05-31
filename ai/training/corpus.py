@@ -241,6 +241,24 @@ def apply_review_decisions(records: list[dict], decisions: dict) -> tuple[list[d
     return out, {"kept": kept, "rejected": rejected, "remaining": len(out)}
 
 
+def merge_records(record_lists: list[list[dict]]) -> tuple[list[dict], dict]:
+    """Concatenate several record lists and de-duplicate (first occurrence wins).
+
+    For pooling corpora from multiple people (e.g. you + a collaborator who each
+    reviewed a different half of the decks). Pure + testable."""
+    combined: list[dict] = []
+    for lst in record_lists:
+        combined.extend(lst or [])
+    unique, removed = dedupe(combined)
+    report = {
+        "inputs": len(record_lists),
+        "total": len(combined),
+        "removed_duplicate": removed,
+        "merged": len(unique),
+    }
+    return unique, report
+
+
 def write_corpus(path: str | Path, records: list[dict]) -> Path:
     """Write records as JSONL (UTF-8). Returns the path written."""
     p = Path(path)
