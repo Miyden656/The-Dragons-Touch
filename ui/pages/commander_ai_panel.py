@@ -49,6 +49,36 @@ _MODE_BY_DISPLAY = {disp: tok for disp, tok in MODE_DISPLAY}
 _NO_DECK = "No deck file selected"
 
 
+def _persona_display() -> list[tuple[str, str]]:
+    """(display label, philosophy key) for the persona dropdown, built from the
+    engine's real 18+ profiles so the panel and engine never drift. Ordered:
+    Balanced first, then each archetype followed by its sub-personas (indented).
+    Falls back to just Balanced if the engine module can't be imported."""
+    try:
+        from analysis.deck_building_philosophies import PHILOSOPHY_PROFILES
+    except Exception:  # noqa: BLE001
+        return [("Balanced / Unknown", "balanced_unknown")]
+
+    profs = PHILOSOPHY_PROFILES
+    out: list[tuple[str, str]] = []
+    if "balanced_unknown" in profs:
+        out.append(("Balanced / Unknown", "balanced_unknown"))
+    archetypes = [
+        k for k, v in profs.items()
+        if getattr(v, "parent", None) is None and k != "balanced_unknown"
+    ]
+    for arch in archetypes:
+        out.append((str(getattr(profs[arch], "label", arch)), arch))
+        for k, v in profs.items():
+            if getattr(v, "parent", None) == arch:
+                out.append(("   " + str(getattr(v, "label", k)), k))
+    return out
+
+
+PERSONA_DISPLAY = _persona_display()
+_PERSONA_BY_DISPLAY = {disp: key for disp, key in PERSONA_DISPLAY}
+
+
 # --- background work ------------------------------------------------------
 
 @dataclass
@@ -76,7 +106,20 @@ def _philosophy_key(window) -> str:
     return "balanced_unknown"
 
 
-def _do_ask(window, question: str, mode: str) -> _AskResult:
+def _select_default_persona(window, persona_combo) -> None:
+    """Preselect the dropdown to the app's staged philosophy if it's a real key,
+    else leave it on the first entry (Balanced). Never raises."""
+    try:
+        staged = _philosophy_key(window)
+        for i, (_disp, key) in enumerate(PERSONA_DISPLAY):
+            if key == staged:
+                persona_combo.setCurrentIndex(i)
+                return
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _do_ask(window, question: str, mode: str, persona: str = "") -> _AskResult:
     """Full pipeline (runs on the worker thread): context -> service -> response."""
     from ai.commander_ai_config import from_settings
     from ai.commander_ai_service import CommanderAIService
@@ -107,7 +150,7 @@ def _do_ask(window, question: str, mode: str) -> _AskResult:
     runtime = RuntimeConfig(
         output_mode="normal", review_direction="both", build_up_config={},
         cut_depth_config={}, prompt_interaction_mode="guided",
-        philosophy_key=_philosophy_key(window), guide_preference="either",
+        philosophy_key=(persona.strip() or _philosophy_key(window)), guide_preference="either",
         intended_bracket=getattr(window.state, "bracket", "") or "Bracket 3",
         collection_mode="none",
     )
@@ -139,15 +182,16 @@ class _AskWorker(QObject):
     finished = Signal(object)  # _AskResult
     failed = Signal(str)
 
-    def __init__(self, window, question, mode):
+    def __init__(self, window, question, mode, persona=""):
         super().__init__()
         self._window = window
         self._question = question
         self._mode = mode
+        self._persona = persona
 
     def run(self):
         try:
-            self.finished.emit(_do_ask(self._window, self._question, self._mode))
+            self.finished.emit(_do_ask(self._window, self._question, self._mode, self._persona))
         except Exception as exc:  # noqa: BLE001 - surfaced to the panel, never crashes the app.
             self.failed.emit(str(exc))
 
@@ -190,12 +234,13 @@ class _AskBridge(QObject):
             self.ask_button._ai_ask_bridge = None
 
 
-def _run_ask(window, question_edit, mode_combo, output, status, ask_button, save_button, store):
+def _run_ask(window, question_edit, mode_combo, persona_combo, output, status, ask_button, save_button, store):
     question = question_edit.text().strip()
     if not question:
         status.setText("Type a question first.")
         return
     mode = _MODE_BY_DISPLAY.get(mode_combo.currentText(), "commander_review")
+    persona = _PERSONA_BY_DISPLAY.get(persona_combo.currentText(), "") if persona_combo is not None else ""
 
     ask_button.setEnabled(False)
     save_button.setEnabled(False)
@@ -203,7 +248,7 @@ def _run_ask(window, question_edit, mode_combo, output, status, ask_button, save
     status.setText("Contacting the local model...")
 
     thread = QThread()
-    worker = _AskWorker(window, question, mode)
+    worker = _AskWorker(window, question, mode, persona)
     bridge = _AskBridge(output, status, ask_button, save_button, store)
     worker.moveToThread(thread)
 
@@ -286,11 +331,27 @@ def _build_panel(window) -> QWidget:
     mode_combo = QComboBox()
     for disp, _tok in MODE_DISPLAY:
         mode_combo.addItem(disp)
-    mode_combo.setMinimumWidth(220)
+    mode_combo.setMinimumWidth(200)
     if hasattr(window, "configure_combo_popup"):
         window.configure_combo_popup(mode_combo)
     controls.addWidget(mode_label)
     controls.addWidget(mode_combo)
+
+    persona_label = QLabel("Persona")
+    persona_label.setObjectName("helperText")
+    persona_combo = QComboBox()
+    for disp, _key in PERSONA_DISPLAY:
+        persona_combo.addItem(disp)
+    persona_combo.setMinimumWidth(220)
+    persona_combo.setToolTip(
+        "The deck-building philosophy the Guide coaches from (protect/cut/replace priorities). "
+        "Defaults to your selected philosophy, or Balanced."
+    )
+    if hasattr(window, "configure_combo_popup"):
+        window.configure_combo_popup(persona_combo)
+    _select_default_persona(window, persona_combo)
+    controls.addWidget(persona_label)
+    controls.addWidget(persona_combo)
     controls.addStretch(1)
     card.body.addLayout(controls)
 
@@ -325,7 +386,7 @@ def _build_panel(window) -> QWidget:
     card.body.addWidget(status)
 
     def _ask():
-        _run_ask(window, question_edit, mode_combo, output, status, ask_button, save_button, store)
+        _run_ask(window, question_edit, mode_combo, persona_combo, output, status, ask_button, save_button, store)
 
     ask_button.clicked.connect(_ask)
     question_edit.returnPressed.connect(_ask)

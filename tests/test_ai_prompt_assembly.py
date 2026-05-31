@@ -99,6 +99,47 @@ def main() -> None:
     t.true("bare context still assembles a system prompt", "Dragon's Touch Commander Guide" in bare)
     t.true("bare context still has a guide style", "Guide style:" in bare)
 
+    # --- cut allow-list now carries the engine's own reasons (polish) ---
+    cut_ctx = CommanderAIContext(
+        mode="cut_review",
+        cuts={
+            "optional_cuts": [
+                {"card": "Sylvan Library", "confidence": "Medium", "reasons": ["off-plan low synergy"]}
+            ],
+            "manual_review": [{"card": "Yawgmoth's Will", "confidence": "Low", "reasons": []}],
+        },
+    )
+    cut_user = build_user_prompt(cut_ctx)
+    t.true("cut allow-list header present", "ONLY cards you may recommend cutting" in cut_user)
+    t.true("cut card listed", "Sylvan Library" in cut_user)
+    t.true("engine reason rendered", "off-plan low synergy" in cut_user)
+    t.true("engine confidence rendered", "engine confidence: Medium" in cut_user)
+    t.true("told to use engine's reason", "do not substitute a reason of your own" in cut_user)
+
+    # --- replacement: named verified candidates -> hard allow-list ---
+    repl_named = CommanderAIContext(
+        mode="replacement",
+        replacements={
+            "priority_categories": ["More ramp"],
+            "candidates": [{"card": "Cultivate", "replacement_category": "ramp", "why_it_fits": "fixes mana"}],
+        },
+    )
+    rn = build_user_prompt(repl_named)
+    t.true("replacement allow-list header", "ONLY specific cards you may recommend adding" in rn)
+    t.true("named candidate listed", "Cultivate" in rn)
+    t.true("must come from list", "MUST come from this exact list" in rn)
+
+    # --- replacement: categories only, no verified cards -> steer to categories ---
+    repl_cats = CommanderAIContext(
+        mode="replacement",
+        replacements={"priority_categories": ["More ramp"], "need_details": [
+            {"category": "More ramp", "reason": "low rock count"}]},
+    )
+    rc = build_user_prompt(repl_cats)
+    t.true("categories-only header", "no specific verified cards available" in rc)
+    t.true("category surfaced", "More ramp" in rc)
+    t.true("told not to name cards", "do NOT name specific cards" in rc)
+
     t.report_and_exit()
 
 

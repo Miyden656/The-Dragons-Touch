@@ -139,8 +139,9 @@ def build_user_prompt(
         parts.append("## User constraints")
         parts.extend(f"- {c}" for c in context.user_constraints)
 
-    # Cut Review: hand the model the exact candidate list and forbid going outside
-    # it. Small models otherwise roam the JSON and "cut" protected/strategy cards.
+    # Cut Review: hand the model the exact candidate list (with the engine's own
+    # reasons) and forbid going outside it. Small models otherwise roam the JSON,
+    # "cut" protected/strategy cards, and invent their own reasons.
     if context.mode == MODE_CUT_REVIEW:
         focus = _cut_candidate_focus(context.cuts)
         if focus:
@@ -148,12 +149,40 @@ def build_user_prompt(
                 "## The ONLY cards you may recommend cutting (the engine's candidates)\n"
                 + focus
                 + "\nRecommend cuts ONLY from this exact list. Any card not listed here — "
-                "including everything in `protected` and `replacements` — must NOT be called a cut."
+                "including everything in `protected` and `replacements` — must NOT be called a cut. "
+                "Lead with the engine's stated reason for each card; do not substitute a reason of your own."
             )
         else:
             parts.append(
                 "## Cut candidates\nThe engine found no clear cut candidates for this deck. "
                 "Say so plainly instead of inventing cuts."
+            )
+
+    # Replacement: same "hand it the verified list" discipline. The engine has
+    # already ranked legal, color-identity-valid candidates; the model must not
+    # name cards outside this set.
+    if context.mode == MODE_REPLACEMENT:
+        focus = _replacement_focus(context.replacements)
+        if _replacement_has_named_candidates(context.replacements):
+            parts.append(
+                "## The ONLY specific cards you may recommend adding (the engine's verified candidates)\n"
+                + focus
+                + "\nWhen you name a specific card to add, it MUST come from this exact list. "
+                "You may freely discuss the need CATEGORIES above, but do not invent or recall "
+                "specific card names outside this verified, color-identity-legal set."
+            )
+        elif focus:
+            parts.append(
+                "## Replacement needs (no specific verified cards available)\n"
+                + focus
+                + "\nThe engine surfaced these need CATEGORIES but no verified specific cards "
+                "for this deck/collection. Speak to the categories only — do NOT name specific "
+                "cards to add, since none have been engine-verified as legal in this color identity."
+            )
+        else:
+            parts.append(
+                "## Replacement candidates\nThe engine did not surface replacement needs or "
+                "candidates. Say so plainly; do not name specific cards to add."
             )
 
     parts.append("## User request")
@@ -167,7 +196,9 @@ def build_user_prompt(
 
 
 def _cut_candidate_focus(cuts: dict) -> str:
-    """Render the engine's actual cut candidates as an explicit allow-list."""
+    """Render the engine's actual cut candidates as an explicit allow-list, each
+    card paired with the engine's own reason so the model echoes it rather than
+    inventing one."""
     cuts = cuts or {}
     labels = [
         ("required_cuts", "Required (legality/size)"),
@@ -177,10 +208,59 @@ def _cut_candidate_focus(cuts: dict) -> str:
     ]
     lines: list[str] = []
     for key, label in labels:
-        names = [str(e.get("card", "")) for e in (cuts.get(key) or []) if isinstance(e, dict) and e.get("card")]
-        if names:
-            lines.append(f"- {label}: {', '.join(names)}")
+        entries = [e for e in (cuts.get(key) or []) if isinstance(e, dict) and e.get("card")]
+        if not entries:
+            continue
+        lines.append(f"- {label}:")
+        for e in entries:
+            reasons = [str(r) for r in (e.get("reasons") or []) if r]
+            reason = reasons[0] if reasons else ""
+            conf = str(e.get("confidence", "")).strip()
+            suffix = f" — {reason}" if reason else ""
+            if conf:
+                suffix += f" [engine confidence: {conf}]"
+            lines.append(f"    - {e['card']}{suffix}")
     return "\n".join(lines)
+
+
+def _replacement_focus(replacements: dict) -> str:
+    """Render the engine's verified add-candidates (and need categories) as an
+    explicit allow-list for replacement mode."""
+    replacements = replacements or {}
+    lines: list[str] = []
+
+    categories = [str(c) for c in (replacements.get("priority_categories") or []) if c]
+    needs = replacements.get("need_details") or []
+    if categories:
+        lines.append(f"- Priority need categories: {', '.join(categories)}")
+    for n in needs:
+        if isinstance(n, dict) and n.get("category"):
+            reason = str(n.get("reason", "")).strip()
+            lines.append(f"    - need: {n['category']}" + (f" — {reason}" if reason else ""))
+
+    def _add_cards(key: str, label: str, fit_key: str) -> None:
+        entries = [e for e in (replacements.get(key) or []) if isinstance(e, dict) and e.get("card")]
+        if not entries:
+            return
+        lines.append(f"- {label}:")
+        for e in entries:
+            cat = str(e.get("replacement_category", "")).strip()
+            fit = str(e.get(fit_key, "")).strip()
+            bits = " · ".join(b for b in (cat, fit) if b)
+            lines.append(f"    - {e['card']}" + (f" ({bits})" if bits else ""))
+
+    _add_cards("candidates", "Engine-ranked candidates", "why_it_fits")
+    _add_cards("collection_candidates", "From your collection", "reason")
+    return "\n".join(lines)
+
+
+def _replacement_has_named_candidates(replacements: dict) -> bool:
+    """True only if the engine surfaced specific add-cards (not just categories)."""
+    replacements = replacements or {}
+    for key in ("candidates", "collection_candidates"):
+        if any(isinstance(e, dict) and e.get("card") for e in (replacements.get(key) or [])):
+            return True
+    return False
 
 
 def build_messages(
