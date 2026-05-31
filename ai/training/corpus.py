@@ -221,6 +221,26 @@ def clean_corpus(records: list[dict], *, approved_only: bool = True) -> tuple[li
     return unique, report
 
 
+def apply_review_decisions(records: list[dict], decisions: dict) -> tuple[list[dict], dict]:
+    """Apply per-record review decisions (keyed by index into `records`).
+
+    action "keep" -> set approved=True; "reject" -> drop the record; anything
+    else (or absent) -> leave the record unchanged. Pure + testable; the
+    interactive CLI just collects the decisions dict and calls this."""
+    out: list[dict] = []
+    kept = rejected = 0
+    for i, rec in enumerate(records):
+        action = decisions.get(i)
+        if action == "reject":
+            rejected += 1
+            continue
+        if action == "keep":
+            rec = {**rec, "approved": True}
+            kept += 1
+        out.append(rec)
+    return out, {"kept": kept, "rejected": rejected, "remaining": len(out)}
+
+
 def write_corpus(path: str | Path, records: list[dict]) -> Path:
     """Write records as JSONL (UTF-8). Returns the path written."""
     p = Path(path)
