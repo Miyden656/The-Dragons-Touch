@@ -142,6 +142,7 @@ def main(argv: list[str] | None = None) -> int:
 
     parser = argparse.ArgumentParser(description="Inspect/curate the Commander AI training corpus")
     parser.add_argument("--path", type=str, default="", help="Corpus file (default: Outputs/commander_ai_training_data.jsonl)")
+    parser.add_argument("--stats", action="store_true", help="Show corpus statistics (this is also the default with no flags)")
     parser.add_argument("--validate", action="store_true", help="List parse errors and invalid records")
     parser.add_argument("--show", type=int, default=0, metavar="N", help="Print the first N records")
     parser.add_argument("--dedupe", action="store_true", help="Rewrite the file with duplicates removed (keeps a .bak)")
