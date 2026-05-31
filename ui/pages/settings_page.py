@@ -515,6 +515,33 @@ def _build_combo_index_guarded(status_widget):
 COMMANDER_AI_GUIDE_STYLE_DISPLAY = ["Adventurer", "Archivist", "Strategist", "Minimal"]
 COMMANDER_AI_TEMPERATURE_PRESETS = ["0.2", "0.4", "0.7", "1.0"]
 
+# Short, plain-English definitions shown under each dropdown so the user knows
+# what they picked (requested feedback).
+COMMANDER_AI_GUIDE_STYLE_NOTES = {
+    "Adventurer": "Warm, encouraging, story-flavored coaching — friendly and motivating.",
+    "Archivist": "Structured and thorough — headers, lists, and record-friendly detail.",
+    "Strategist": "Direct and analytical — prioritized, decision-focused advice.",
+    "Minimal": "Short and to the point — just the essentials, little elaboration.",
+}
+COMMANDER_AI_TEMPERATURE_NOTES = {
+    "0.2": "Most focused and consistent — sticks closely to the engine data, least creative.",
+    "0.4": "Balanced (recommended) — reliable, with a little flexibility in wording.",
+    "0.7": "More creative and varied phrasing — occasionally more speculative.",
+    "1.0": "Most free-wheeling — least predictable and more likely to wander off the data.",
+}
+
+
+def _installed_ollama_models(window) -> list:
+    """Best-effort list of installed Ollama models for the dropdown. Short
+    timeout + never raises so opening Settings can't hang if Ollama is down."""
+    try:
+        from ai.commander_ai_config import from_settings
+        from ai.ollama_client import OllamaClient
+
+        return list(OllamaClient(from_settings(window.app_settings)).list_models(timeout=2.0))
+    except Exception:  # noqa: BLE001 - Settings must always open.
+        return []
+
 
 def _user_settings_module():
     try:
@@ -629,12 +656,26 @@ def build_commander_ai_settings_card(window):
     enable_combo.currentTextChanged.connect(lambda v: _save_ai_setting(window, "commander_ai_enabled", v == "On"))
     card.body.addLayout(_row("Enable local AI", enable_combo))
 
-    model_edit = QLineEdit(str(window.app_settings.get("commander_ai_model", "llama3.1")))
-    model_edit.setMinimumWidth(260)
-    model_edit.editingFinished.connect(
-        lambda: _save_ai_setting(window, "commander_ai_model", model_edit.text().strip() or "llama3.1")
-    )
-    card.body.addLayout(_row("Ollama model", model_edit))
+    # Editable dropdown of installed models (still type-able for models not yet
+    # pulled or when Ollama is offline).
+    current_model = str(window.app_settings.get("commander_ai_model", "llama3.1"))
+    model_combo = QComboBox()
+    model_combo.setEditable(True)
+    model_combo.setMinimumWidth(260)
+    window.configure_combo_popup(model_combo)
+    model_items = [current_model] if current_model else []
+    for name in _installed_ollama_models(window):
+        if name not in model_items:
+            model_items.append(name)
+    model_combo.addItems(model_items)
+    model_combo.setCurrentText(current_model)
+
+    def _save_model():
+        _save_ai_setting(window, "commander_ai_model", model_combo.currentText().strip() or "llama3.1")
+
+    model_combo.lineEdit().editingFinished.connect(_save_model)
+    model_combo.activated.connect(lambda _i: _save_model())
+    card.body.addLayout(_row("Ollama model", model_combo))
 
     url_edit = QLineEdit(str(window.app_settings.get("commander_ai_base_url", "http://localhost:11434")))
     url_edit.setMinimumWidth(260)
@@ -643,17 +684,33 @@ def build_commander_ai_settings_card(window):
     )
     card.body.addLayout(_row("Ollama base URL", url_edit))
 
-    style_combo = _combo(window, COMMANDER_AI_GUIDE_STYLE_DISPLAY, _current_ai_guide_style_display(window))
+    current_style = _current_ai_guide_style_display(window)
+    style_combo = _combo(window, COMMANDER_AI_GUIDE_STYLE_DISPLAY, current_style)
+    style_note = QLabel(COMMANDER_AI_GUIDE_STYLE_NOTES.get(current_style, ""))
+    style_note.setObjectName("mutedText")
+    style_note.setWordWrap(True)
     style_combo.currentTextChanged.connect(
-        lambda v: _save_ai_setting(window, "commander_ai_guide_style", v.strip().lower())
+        lambda v: (
+            _save_ai_setting(window, "commander_ai_guide_style", v.strip().lower()),
+            style_note.setText(COMMANDER_AI_GUIDE_STYLE_NOTES.get(v, "")),
+        )
     )
     card.body.addLayout(_row("Response style", style_combo))
+    card.body.addWidget(style_note)
 
-    temp_combo = _combo(window, COMMANDER_AI_TEMPERATURE_PRESETS, _current_ai_temperature_display(window))
+    current_temp = _current_ai_temperature_display(window)
+    temp_combo = _combo(window, COMMANDER_AI_TEMPERATURE_PRESETS, current_temp)
+    temp_note = QLabel(COMMANDER_AI_TEMPERATURE_NOTES.get(current_temp, ""))
+    temp_note.setObjectName("mutedText")
+    temp_note.setWordWrap(True)
     temp_combo.currentTextChanged.connect(
-        lambda v: _save_ai_setting(window, "commander_ai_temperature", float(v))
+        lambda v: (
+            _save_ai_setting(window, "commander_ai_temperature", float(v)),
+            temp_note.setText(COMMANDER_AI_TEMPERATURE_NOTES.get(v, "")),
+        )
     )
     card.body.addLayout(_row("Creativity (temperature)", temp_combo))
+    card.body.addWidget(temp_note)
 
     strict_combo = _combo(window, ["On", "Off"], "On" if window.app_settings.get("commander_ai_strict_fact_check", True) else "Off")
     strict_combo.currentTextChanged.connect(

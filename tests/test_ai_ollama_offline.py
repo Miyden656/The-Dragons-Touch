@@ -60,6 +60,16 @@ def main() -> None:
         t.true("chat error mentions Ollama", "Ollama" in res.error, res.error)
         t.eq("chat text empty on failure", res.text, "")
 
+    # --- list_models never raises and returns an empty tuple when offline ---
+    raised = ""
+    models = None
+    try:
+        models = client.list_models(timeout=1.0)
+    except Exception as exc:  # noqa: BLE001
+        raised = repr(exc)
+    t.eq("list_models did not raise", raised, "")
+    t.eq("list_models empty when offline", models, ())
+
     # --- complete() (the convenience path) also fails safely ---
     raised = ""
     cres = None

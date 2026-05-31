@@ -107,6 +107,24 @@ class OllamaClient:
             kind="" if installed else "model_missing",
         )
 
+    def list_models(self, *, timeout: float | None = None) -> tuple[str, ...]:
+        """Names of models installed on the Ollama server, or () if unreachable.
+
+        Never raises. `timeout` overrides the configured timeout — callers that
+        run this on the UI thread (e.g. populating a dropdown) pass a short value
+        so a down server doesn't stall the window.
+        """
+        try:
+            body = self._get(self.config.tags_url, timeout=timeout)
+            data = json.loads(body)
+        except (_OllamaTransportError, json.JSONDecodeError, AttributeError, TypeError):
+            return ()
+        return tuple(
+            str(m.get("name", "")).strip()
+            for m in data.get("models", [])
+            if isinstance(m, dict) and m.get("name")
+        )
+
     # -- chat --------------------------------------------------------------
 
     def chat(
@@ -204,9 +222,9 @@ class OllamaClient:
             "options": {"temperature": temp},
         }
 
-    def _get(self, url: str) -> str:
+    def _get(self, url: str, *, timeout: float | None = None) -> str:
         req = urllib.request.Request(url, method="GET")
-        return self._open(req)
+        return self._open(req, timeout=timeout)
 
     def _post(self, url: str, payload: dict) -> str:
         data = json.dumps(payload).encode("utf-8")
@@ -215,9 +233,10 @@ class OllamaClient:
         )
         return self._open(req)
 
-    def _open(self, req: urllib.request.Request) -> str:
+    def _open(self, req: urllib.request.Request, *, timeout: float | None = None) -> str:
+        eff_timeout = self.config.timeout_seconds if timeout is None else timeout
         try:
-            with urllib.request.urlopen(req, timeout=self.config.timeout_seconds) as resp:
+            with urllib.request.urlopen(req, timeout=eff_timeout) as resp:
                 return resp.read().decode("utf-8", errors="replace")
         except Exception as exc:  # noqa: BLE001 - translate ALL transport failures
             raise self._translate(exc) from exc
