@@ -719,7 +719,24 @@ def build_full_100_card_draft(
                 break
 
     # Lands: take up to ~17 owned nonbasics, fill rest with basics.
-    nonbasic_land_pool.sort(key=lambda x: x[1]["name"])
+    # v1.6.2 Phase D: when the commander has 2+ colors, prefer premium fixing
+    # lands (Command Tower, triomes, shocks, fetches) ahead of alphabetical
+    # so the mana base is functional in multi-color decks. Mono-color decks
+    # still get alphabetical order — they don't need color fixing.
+    try:
+        from rules.multi_color_lands import (
+            fixer_priority,
+            prefers_premium_fixers,
+        )
+        _color_count = len([c for c in identity_set if c in "WUBRG"])
+        if prefers_premium_fixers(_color_count):
+            nonbasic_land_pool.sort(
+                key=lambda x: (fixer_priority(x[1]["name"]), x[1]["name"])
+            )
+        else:
+            nonbasic_land_pool.sort(key=lambda x: x[1]["name"])
+    except Exception:
+        nonbasic_land_pool.sort(key=lambda x: x[1]["name"])
     land_target = TARGET_COUNTS["Lands"]
     land_entries: list[DraftedCardEntry] = []
     nonbasic_take = min(len(nonbasic_land_pool), land_target - 10)  # leave at least 10 slots for basics
