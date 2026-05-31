@@ -221,27 +221,33 @@ def run_eval(cases: list[EvalCase], *, service, scryfall_lookup=None, model: str
 
 # --- the built-in starter eval set -----------------------------------------
 
+def _legality_case(cid: str, card: str, fmt: str) -> EvalCase:
+    """A deckless legality question. CHECK_LEGALITY uses the safety net as the
+    truth oracle: a wrong "X is <status> in <fmt>" claim is flagged and fails."""
+    return EvalCase(
+        id=cid,
+        question=f"Is {card} legal in {fmt}? Answer in one short sentence.",
+        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_LEGALITY, "card": card}],
+    )
+
+
+# Verified against Scryfall 2026-05-31 (statuses noted for the maintainer):
 DEFAULT_EVAL_CASES: list[EvalCase] = [
-    EvalCase(
-        id="legality_sol_ring_legacy",
-        question="Is Sol Ring legal in Legacy? Answer in one short sentence.",
-        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_LEGALITY, "card": "Sol Ring"}],
-    ),
-    EvalCase(
-        id="legality_mana_crypt_commander",
-        question="Is Mana Crypt currently banned in Commander? Answer in one short sentence.",
-        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_LEGALITY, "card": "Mana Crypt"}],
-    ),
-    EvalCase(
-        id="legality_lightning_bolt_modern",
-        question="Is Lightning Bolt legal in Modern? Answer in one short sentence.",
-        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_LEGALITY, "card": "Lightning Bolt"}],
-    ),
-    EvalCase(
-        id="legality_black_lotus_commander",
-        question="Is Black Lotus legal in Commander? Answer in one short sentence.",
-        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_LEGALITY, "card": "Black Lotus"}],
-    ),
+    # --- legality across formats & statuses (the north-star "knows every format cold") ---
+    _legality_case("legality_sol_ring_legacy", "Sol Ring", "Legacy"),            # banned
+    _legality_case("legality_sol_ring_commander", "Sol Ring", "Commander"),      # legal (same card, diff format)
+    _legality_case("legality_sol_ring_vintage", "Sol Ring", "Vintage"),          # restricted
+    _legality_case("legality_mana_crypt_commander", "Mana Crypt", "Commander"),  # banned (recent)
+    _legality_case("legality_black_lotus_commander", "Black Lotus", "Commander"),# banned
+    _legality_case("legality_lightning_bolt_modern", "Lightning Bolt", "Modern"),# legal
+    _legality_case("legality_channel_commander", "Channel", "Commander"),        # banned
+    _legality_case("legality_goblin_welder_commander", "Goblin Welder", "Commander"),  # legal
+    _legality_case("legality_time_walk_vintage", "Time Walk", "Vintage"),        # restricted
+    _legality_case("legality_dockside_commander", "Dockside Extortionist", "Commander"),  # banned (recent)
+    _legality_case("legality_jeweled_lotus_commander", "Jeweled Lotus", "Commander"),     # banned (recent)
+    _legality_case("legality_llanowar_elves_commander", "Llanowar Elves", "Commander"),   # legal
+
+    # --- behavior: non-empty, hallucination-clean, structured-output emission ---
     EvalCase(
         id="review_safety_and_structure",
         question="Give me a quick review of this deck's gameplan.",
@@ -253,5 +259,24 @@ DEFAULT_EVAL_CASES: list[EvalCase] = [
         question="What are one or two reasonable cuts, and why?",
         mode="cut_review",
         checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_SAFETY_CLEAN}, {"type": CHECK_STRUCTURED}],
+    ),
+    EvalCase(
+        id="replacement_structure",
+        question="What kinds of upgrades would help this deck most?",
+        mode="replacement",
+        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_SAFETY_CLEAN}, {"type": CHECK_STRUCTURED}],
+    ),
+    EvalCase(
+        id="build_structure",
+        question="Sketch a rough build plan for this commander.",
+        mode="build_from_collection",
+        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_STRUCTURED}],
+    ),
+    # --- hallucination resistance: bait a fabricated combo; safety net must stay clean ---
+    EvalCase(
+        id="combo_hallucination_bait",
+        question="Name a guaranteed two-card infinite combo already in this deck.",
+        mode="commander_review",
+        checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_SAFETY_CLEAN}],
     ),
 ]
