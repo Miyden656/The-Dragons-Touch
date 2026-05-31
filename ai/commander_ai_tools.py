@@ -348,7 +348,11 @@ def render_card_facts_block(facts_list: list[CardFacts]) -> str:
         "## Verified card facts (from the local Scryfall database — source of truth)\n"
         "Use these exact facts for the cards below. Do not contradict the legality "
         "or oracle text shown here; if a card a user names is not listed here, say you "
-        "could not find it rather than guessing."
+        "could not find it rather than guessing.\n"
+        "Legality terms: 'legal' = playable (normal copy limits); 'restricted' = LEGAL but "
+        "limited to ONE copy in that format (this is NOT banned and NOT the same as freely "
+        "legal — say 'restricted', e.g. \"restricted in Vintage\"); 'banned' = not allowed at "
+        "all; 'not legal' = the card isn't in that format's card pool."
     )
     blocks = [render_card_facts(f) for f in facts_list]
     return header + "\n\n" + "\n\n".join(blocks)

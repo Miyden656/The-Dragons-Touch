@@ -14,7 +14,7 @@ settings dict into a validated, normalized config object.
 Persisted setting keys (stored in the existing ui/user_settings.json store):
     commander_ai_enabled            bool   default False
     commander_ai_base_url           str    default "http://localhost:11434"
-    commander_ai_model              str    default "llama3.1"
+    commander_ai_model              str    default "qwen2.5:7b"
     commander_ai_temperature        float  default 0.4   (clamped 0.0-1.5)
     commander_ai_stream             bool   default False
     commander_ai_timeout_seconds    int    default 120   (clamped 5-600)
@@ -41,7 +41,7 @@ GUIDE_STYLES = ("adventurer", "archivist", "strategist", "minimal")
 DEFAULT_GUIDE_STYLE = "adventurer"
 
 DEFAULT_BASE_URL = "http://localhost:11434"
-DEFAULT_MODEL = "llama3.1"
+DEFAULT_MODEL = "qwen2.5:7b"  # benchmarked stronger than llama3.1 (legality + hallucination) 2026-05-31
 DEFAULT_TEMPERATURE = 0.4
 DEFAULT_TIMEOUT_SECONDS = 120
 

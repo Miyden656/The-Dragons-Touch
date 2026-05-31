@@ -8,6 +8,7 @@ from _test_helpers import TestRun
 
 from ai.commander_ai_config import (
     AI_SETTINGS_DEFAULTS,
+    DEFAULT_MODEL,
     CommanderAIConfig,
     from_settings,
     normalize_guide_style,
@@ -21,7 +22,7 @@ def main() -> None:
     # --- defaults from an empty dict ---
     d = from_settings({})
     t.eq("empty -> enabled False", d.enabled, False)
-    t.eq("empty -> model default", d.model, "llama3.1")
+    t.eq("empty -> model default", d.model, DEFAULT_MODEL)
     t.eq("empty -> base_url default", d.base_url, "http://localhost:11434")
     t.eq("empty -> temperature default", d.temperature, 0.4)
     t.eq("empty -> stream False", d.stream, False)
@@ -30,7 +31,7 @@ def main() -> None:
     t.eq("empty -> guide_style default", d.guide_style, "adventurer")
 
     # --- None is tolerated ---
-    t.eq("None input -> defaults", from_settings(None).model, "llama3.1")
+    t.eq("None input -> defaults", from_settings(None).model, DEFAULT_MODEL)
 
     # --- URL helpers ---
     t.eq("chat_url", d.chat_url, "http://localhost:11434/api/chat")
