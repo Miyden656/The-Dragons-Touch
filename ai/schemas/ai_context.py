@@ -69,8 +69,9 @@ class CommanderAIContext:
     decklist: list = field(default_factory=list)
     strategy: dict = field(default_factory=dict)
     bracket: dict = field(default_factory=dict)
-    cuts: dict = field(default_factory=dict)
-    replacements: dict = field(default_factory=dict)
+    cuts: dict = field(default_factory=dict)          # ONLY removable candidates
+    protected: dict = field(default_factory=dict)     # KEEPs — never cuttable
+    replacements: dict = field(default_factory=dict)  # ADDs — never cuttable
     collection: dict = field(default_factory=dict)
     combo: dict = field(default_factory=dict)
 
@@ -115,8 +116,8 @@ class CommanderAIContext:
                     elif isinstance(item, str):
                         names.add(item)
 
-        _collect(self.cuts, ("required_cuts", "optional_cuts", "manual_review",
-                             "playtest_first", "protected_from_cut", "protected_cards"))
+        _collect(self.cuts, ("required_cuts", "optional_cuts", "manual_review", "playtest_first"))
+        _collect(self.protected, ("protected_from_cut", "protected_cards"))
         _collect(self.replacements, ("candidates", "collection_candidates"))
         _collect(self.strategy, ("strong_synergy_cards", "possible_off_plan_cards"))
         _collect(self.bracket, ("pressure_cards",))

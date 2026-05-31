@@ -65,6 +65,13 @@ def serialize_context(
     truncation.update(d)
     cut_view, d = build_cut_view(possible_cuts, protected_cards)
     truncation.update(d)
+    # Move KEEP cards OUT of the `cuts` block into their own top-level `protected`
+    # section. Nesting protected cards under a key named "cuts" caused small models
+    # to list them (even the commander) as cuts. Now `cuts` holds only removables.
+    protected_view = {
+        "protected_from_cut": cut_view.pop("protected_from_cut", []),
+        "protected_cards": cut_view.pop("protected_cards", []),
+    }
     replacement_view, d = build_replacement_view(
         replacement_needs, replacement_candidates, collection_candidates
     )
@@ -86,6 +93,7 @@ def serialize_context(
         strategy=strategy_view,
         bracket=bracket_view,
         cuts=cut_view,
+        protected=protected_view,
         replacements=replacement_view,
         collection=collection_view,
         combo=combo_view,

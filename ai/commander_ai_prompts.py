@@ -97,9 +97,43 @@ def build_user_prompt(context: CommanderAIContext) -> str:
         parts.append("## User constraints")
         parts.extend(f"- {c}" for c in context.user_constraints)
 
+    # Cut Review: hand the model the exact candidate list and forbid going outside
+    # it. Small models otherwise roam the JSON and "cut" protected/strategy cards.
+    if context.mode == MODE_CUT_REVIEW:
+        focus = _cut_candidate_focus(context.cuts)
+        if focus:
+            parts.append(
+                "## The ONLY cards you may recommend cutting (the engine's candidates)\n"
+                + focus
+                + "\nRecommend cuts ONLY from this exact list. Any card not listed here — "
+                "including everything in `protected` and `replacements` — must NOT be called a cut."
+            )
+        else:
+            parts.append(
+                "## Cut candidates\nThe engine found no clear cut candidates for this deck. "
+                "Say so plainly instead of inventing cuts."
+            )
+
     parts.append("## User request")
     parts.append(context.user_request or "(No specific question — give a review appropriate to the mode.)")
     return "\n\n".join(parts)
+
+
+def _cut_candidate_focus(cuts: dict) -> str:
+    """Render the engine's actual cut candidates as an explicit allow-list."""
+    cuts = cuts or {}
+    labels = [
+        ("required_cuts", "Required (legality/size)"),
+        ("optional_cuts", "Optional (optimization)"),
+        ("manual_review", "Manual review"),
+        ("playtest_first", "Playtest before cutting"),
+    ]
+    lines: list[str] = []
+    for key, label in labels:
+        names = [str(e.get("card", "")) for e in (cuts.get(key) or []) if isinstance(e, dict) and e.get("card")]
+        if names:
+            lines.append(f"- {label}: {', '.join(names)}")
+    return "\n".join(lines)
 
 
 def build_messages(

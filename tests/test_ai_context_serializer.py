@@ -149,8 +149,11 @@ def main() -> None:
     # --- cuts ---
     t.eq("optional cut card", ctx.cuts["optional_cuts"][0]["card"], "Random Dragon")
     t.eq("optional cut reason kept", ctx.cuts["optional_cuts"][0]["reasons"], ["does not support goblins"])
-    t.eq("protected-from-cut card", ctx.cuts["protected_from_cut"][0]["card"], "Krenko, Mob Boss")
-    t.eq("protected card entry", ctx.cuts["protected_cards"][0]["card"], "Skullclamp")
+    # protected cards live in their OWN top-level section, NOT under cuts
+    t.eq("protected-from-cut card", ctx.protected["protected_from_cut"][0]["card"], "Krenko, Mob Boss")
+    t.eq("protected card entry", ctx.protected["protected_cards"][0]["card"], "Skullclamp")
+    t.true("cuts block has NO protected_from_cut key", "protected_from_cut" not in ctx.cuts)
+    t.true("cuts block has NO protected_cards key", "protected_cards" not in ctx.cuts)
 
     # --- replacements ---
     t.eq("priority category", ctx.replacements["priority_categories"], ["More targeted removal"])
