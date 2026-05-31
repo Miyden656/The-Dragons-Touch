@@ -93,6 +93,49 @@ class EvalReport:
         return self.checks_passed / self.checks_total if self.checks_total else 0.0
 
 
+@dataclass
+class AggregateReport:
+    """Consistency view across N repeated runs of the same case set (one model)."""
+
+    model: str
+    runs: int
+    checks_passed: int = 0          # summed across all runs
+    checks_total: int = 0
+    per_case: dict = field(default_factory=dict)  # case_id -> (fully_passed_runs, runs)
+
+    @property
+    def num_cases(self) -> int:
+        return len(self.per_case)
+
+    def overall_rate(self) -> float:
+        return self.checks_passed / self.checks_total if self.checks_total else 0.0
+
+    def consistent_cases(self) -> int:
+        """Cases that fully passed in EVERY run (the reliability metric)."""
+        return sum(1 for fp, n in self.per_case.values() if n > 0 and fp == n)
+
+    def flaky_cases(self) -> list[tuple[str, int, int]]:
+        """(case_id, fully_passed, runs) for cases that passed some-but-not-all runs."""
+        out = [(cid, fp, n) for cid, (fp, n) in self.per_case.items() if 0 < fp < n]
+        return sorted(out, key=lambda x: x[1] / x[2])  # least reliable first
+
+    def never_passed(self) -> list[str]:
+        return sorted(cid for cid, (fp, n) in self.per_case.items() if n > 0 and fp == 0)
+
+
+def aggregate_reports(reports: list[EvalReport]) -> AggregateReport:
+    """Combine N EvalReports of the same case set into a consistency report."""
+    model = reports[0].model if reports else "?"
+    agg = AggregateReport(model=model, runs=len(reports))
+    for r in reports:
+        agg.checks_passed += r.checks_passed
+        agg.checks_total += r.checks_total
+        for c in r.cases:
+            fp, n = agg.per_case.get(c.case_id, (0, 0))
+            agg.per_case[c.case_id] = (fp + (1 if c.all_passed else 0), n + 1)
+    return agg
+
+
 # --- scoring ---------------------------------------------------------------
 
 def score_response(

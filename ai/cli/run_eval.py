@@ -27,7 +27,13 @@ if str(_PROJECT_ROOT) not in sys.path:
 from ai.commander_ai_config import from_settings  # noqa: E402
 from ai.commander_ai_service import CommanderAIService  # noqa: E402
 from ai.ollama_client import OllamaClient  # noqa: E402
-from ai.training.eval import DEFAULT_EVAL_CASES, EvalReport, run_eval  # noqa: E402
+from ai.training.eval import (  # noqa: E402
+    DEFAULT_EVAL_CASES,
+    AggregateReport,
+    EvalReport,
+    aggregate_reports,
+    run_eval,
+)
 
 
 def _load_config():
@@ -59,6 +65,25 @@ def _print_report(report: EvalReport, *, verbose: bool) -> None:
                     print(f"        {cm} {chk.kind}{(' — ' + chk.detail) if chk.detail else ''}")
 
 
+def _print_aggregate(agg: AggregateReport) -> None:
+    print(f"\n=== {agg.model} (x{agg.runs} runs) ===")
+    print(f"  consistency  : {agg.consistent_cases()}/{agg.num_cases} cases passed in ALL runs")
+    print(f"  checks passed: {agg.checks_passed}/{agg.checks_total} "
+          f"({agg.overall_rate() * 100:.0f}% across runs)")
+    flaky = agg.flaky_cases()
+    if flaky:
+        print("  flaky (some runs failed):")
+        for cid, fp, n in flaky:
+            print(f"    ~ {cid}: passed {fp}/{n}")
+    never = agg.never_passed()
+    if never:
+        print("  never passed:")
+        for cid in never:
+            print(f"    ✗ {cid}")
+    if not flaky and not never:
+        print("  no flakiness — every case passed every run ✅")
+
+
 def main(argv: list[str] | None = None) -> int:
     try:
         sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
@@ -68,7 +93,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the Commander AI eval set")
     parser.add_argument("--models", type=str, default="", help="Comma-separated models to compare (default: configured model)")
     parser.add_argument("--verbose", action="store_true", help="Show every check, not just failures")
+    parser.add_argument("--repeat", type=int, default=1, metavar="N", help="Run each case N times and report consistency (default 1)")
     args = parser.parse_args(argv)
+    repeat = max(1, args.repeat)
 
     base_config = _load_config()
 
@@ -79,9 +106,11 @@ def main(argv: list[str] | None = None) -> int:
         lookup = lookup or {}
 
     models = [m.strip() for m in args.models.split(",") if m.strip()] or [base_config.model]
-    print(f"Running {len(DEFAULT_EVAL_CASES)} eval cases against: {', '.join(models)}")
+    suffix = f" (x{repeat} runs each)" if repeat > 1 else ""
+    print(f"Running {len(DEFAULT_EVAL_CASES)} eval cases against: {', '.join(models)}{suffix}")
 
-    reports: list[EvalReport] = []
+    single_reports: list[EvalReport] = []   # for the 1-run comparison summary
+    aggregates: list[AggregateReport] = []  # for the multi-run consistency summary
     for model in models:
         config = replace(base_config, model=model, enabled=True)
         client = OllamaClient(config)
@@ -90,15 +119,28 @@ def main(argv: list[str] | None = None) -> int:
             print(f"\n=== {model} === SKIPPED ({avail.message})")
             continue
         service = CommanderAIService(config, client=client, scryfall_lookup=lookup)
-        report = run_eval(DEFAULT_EVAL_CASES, service=service, scryfall_lookup=lookup, model=model)
-        reports.append(report)
-        _print_report(report, verbose=args.verbose)
+        runs = [
+            run_eval(DEFAULT_EVAL_CASES, service=service, scryfall_lookup=lookup, model=model)
+            for _ in range(repeat)
+        ]
+        if repeat == 1:
+            single_reports.append(runs[0])
+            _print_report(runs[0], verbose=args.verbose)
+        else:
+            agg = aggregate_reports(runs)
+            aggregates.append(agg)
+            _print_aggregate(agg)
 
-    if len(reports) > 1:
+    if len(single_reports) > 1:
         print("\n=== summary ===")
-        for r in sorted(reports, key=lambda r: r.pass_rate(), reverse=True):
+        for r in sorted(single_reports, key=lambda r: r.pass_rate(), reverse=True):
             print(f"  {r.pass_rate() * 100:5.0f}%  {r.checks_passed}/{r.checks_total}  "
                   f"avg {r.avg_latency_s:.1f}s  {r.model}")
+    if len(aggregates) > 1:
+        print("\n=== consistency summary ===")
+        for a in sorted(aggregates, key=lambda a: (a.consistent_cases(), a.overall_rate()), reverse=True):
+            print(f"  {a.consistent_cases()}/{a.num_cases} stable · "
+                  f"{a.overall_rate() * 100:.0f}% checks · {a.model}")
     return 0
 
 

@@ -137,6 +137,25 @@ def main() -> None:
     t.true("failed case marked not ok", not bad_report.cases[0].ok)
     t.true("failed case carries error", bool(bad_report.cases[0].error))
 
+    # --- aggregate_reports: consistency across repeated runs ---
+    from ai.training.eval import CaseResult, EvalReport, aggregate_reports
+
+    def _rep(c1_pass, c2_pass):
+        return EvalReport(model="m", cases=[
+            CaseResult("c1", ok=True, passed=2 if c1_pass else 1, total=2),
+            CaseResult("c2", ok=True, passed=1 if c2_pass else 0, total=1),
+        ])
+    # c1 passes 2/3 runs (flaky), c2 passes 3/3 (stable)
+    agg = aggregate_reports([_rep(True, True), _rep(False, True), _rep(True, True)])
+    t.eq("agg runs", agg.runs, 3)
+    t.eq("agg num_cases", agg.num_cases, 2)
+    t.eq("agg consistent cases (c2 only)", agg.consistent_cases(), 1)
+    t.eq("c1 flagged flaky 2/3", agg.flaky_cases(), [("c1", 2, 3)])
+    t.eq("nothing never-passed", agg.never_passed(), [])
+    # checks: run1 3/3, run2 2/3, run3 3/3 = 8/9
+    t.eq("agg checks_passed", agg.checks_passed, 8)
+    t.eq("agg checks_total", agg.checks_total, 9)
+
     # --- the built-in eval set is well-formed ---
     t.true("default eval set non-empty", len(DEFAULT_EVAL_CASES) >= 5)
     t.true("every default case has checks", all(c.checks for c in DEFAULT_EVAL_CASES))
