@@ -17,7 +17,6 @@ analysis/                     Card-level analysis primitives
   deck_building_philosophies.py Philosophy persona definitions
   strategy_scoring.py           Legacy archetype definitions (22 macros)
 
-analysis_pipeline/            Deck-run orchestration
 build_from_collection/        Commander's Call deck builder (Bin B)
 combo_awareness/              Spellbook combo index loader + matcher
 commander_discovery/          Commander candidate discovery

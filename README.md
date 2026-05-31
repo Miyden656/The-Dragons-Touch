@@ -144,8 +144,7 @@ If you don't have your collection digitized yet, you can still use the deck-revi
 
 ```text
 analysis\            Card-level analysis (role tagging, philosophy profiles, strategy scoring)
-analysis_pipeline\   Deck-run orchestration (context, deck runner, batch runner, resources)
-app_io\              Application IO helpers (paths, file handling)
+app_io\              Application IO helpers (paths, file handling, batch runner)
 build_from_collection\  Commander's Call deck-building (Bin B) — strategy filters, scorers, draft builder
 collection\          User collection files (your owned-cards text files)
 collection_services\ Collection loading + matching services
