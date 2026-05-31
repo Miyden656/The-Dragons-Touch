@@ -92,6 +92,17 @@ class CommanderAIContext:
     def to_json(self, *, indent: int | None = 2) -> str:
         return json.dumps(self.to_payload(), indent=indent, ensure_ascii=False, default=str)
 
+    @classmethod
+    def from_payload(cls, payload: dict) -> "CommanderAIContext":
+        """Rebuild a context from a to_payload()/to_json() dict (e.g. a stored
+        training record). Unknown keys are ignored; missing keys take defaults."""
+        import dataclasses
+
+        if not isinstance(payload, dict):
+            return cls()
+        valid = {f.name for f in dataclasses.fields(cls)}
+        return cls(**{k: v for k, v in payload.items() if k in valid})
+
     def all_card_names(self) -> set[str]:
         """Every card name that appears anywhere in this context.
 
