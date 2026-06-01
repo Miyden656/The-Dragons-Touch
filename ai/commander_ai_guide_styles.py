@@ -1,8 +1,13 @@
 """Guide styles — the NET-NEW tone/format axis for Commander AI responses.
 
 Guide style is orthogonal to persona:
-    persona  -> WHAT to prioritize (protect / cut / prefer)   [from the engine]
-    style    -> HOW to say it (tone, length, formatting)       [defined here]
+    persona  -> WHAT to prioritize (protect / cut / prefer) AND the VOICE/attitude
+                to speak in (each philosophy carries its own + a family tone)  [engine]
+    style    -> the LENGTH, STRUCTURE, and FORMAT of the answer                [here]
+
+So the two compose: the persona sets the voice (warm / analytical / decisive…),
+the guide style sets how long and how structured the answer is. Style blocks here
+deliberately avoid dictating tone so they don't fight the persona's voice.
 
 These four tokens (adventurer / archivist / strategist / minimal) are the single
 source of truth for response style. They are NOT the same as the engine's
@@ -15,33 +20,32 @@ from __future__ import annotations
 from ai.commander_ai_config import DEFAULT_GUIDE_STYLE, normalize_guide_style
 
 
+# NOTE: these govern LENGTH / STRUCTURE / FORMAT only. The persona block owns the
+# VOICE (tone/attitude). Keep tone words out of here so the two don't conflict —
+# e.g. a Pet Card persona in Strategist style = warm voice, lean structure.
 _GUIDE_STYLE_BLOCKS: dict[str, str] = {
     "adventurer": (
         "## Guide style: Adventurer\n"
-        "Warm, encouraging, and accessible. Talk like a friendly, knowledgeable "
-        "playgroup-mate. Keep jargon light and define a term the first time you use "
-        "it. Celebrate what the deck does well before suggesting changes. Favor short "
-        "paragraphs over dense lists. Good for newer or casual players."
+        "Format: accessible and flowing. Favor short paragraphs over dense lists. "
+        "Define a term the first time you use it. Lead with what the deck does well "
+        "before suggesting changes. Room to explain. (Speak it in the persona's voice.)"
     ),
     "archivist": (
         "## Guide style: Archivist\n"
-        "Structured, thorough, and record-friendly. Use clear headers and bullet "
-        "lists. Show your reasoning and cite the relevant CONTEXT field for each "
-        "claim. Be complete and organized so the answer reads well saved to a report. "
-        "Thoroughness over brevity, but never padding."
+        "Format: structured and thorough. Use clear headers and bullet lists. Cite the "
+        "relevant CONTEXT field for each claim. Complete and organized so it reads well "
+        "saved to a report. Thoroughness over brevity, but never padding."
     ),
     "strategist": (
         "## Guide style: Strategist\n"
-        "Direct, analytical, and optimization-focused. Assume Commander fluency — use "
-        "bracket, color identity, curve, ramp/draw/removal/protection, and "
-        "anchors/payoffs/enablers naturally. Lead with the call, then the reason. Cut "
-        "the warm-up. Prioritize the highest-leverage changes first."
+        "Format: lean and lead-with-the-call. State the call, then the reason; highest-"
+        "leverage changes first; minimal warm-up. Assume Commander fluency in vocabulary "
+        "(bracket, color identity, curve, anchors/payoffs/enablers)."
     ),
     "minimal": (
         "## Guide style: Minimal\n"
-        "Short, clean, low-fluff. Answer first, in as few words as the question allows. "
-        "Use compact lists. No preamble, no recap, no closing pleasantries. If a "
-        "one-line answer is correct, give one line."
+        "Format: as few words as the question allows. Answer first. Compact lists. No "
+        "preamble, no recap, no closing pleasantries. If one line is correct, give one line."
     ),
 }
 

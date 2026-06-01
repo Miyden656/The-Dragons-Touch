@@ -28,6 +28,9 @@ def _ctx(mode: str = "cut_review", guide_style: str = "strategist") -> Commander
             "key": "pet_card", "label": "Pet Card", "guide_name": "Mia",
             "guide_role": "The Pet Card Mentor", "core_question": "Which cards matter to you?",
             "rules_summary": "Protect beloved cards.",
+            "tone": "respectful, honest, and emotionally safe",
+            "family_tone": "warm, enthusiastic, emotionally validating, and honest about function",
+            "family_label": "Timmy / Tammy",
             "protect_bias": ["declared pet cards", "signature cards"],
             "review_bias": ["pure value cards"], "replacement_bias": ["synergy over power"],
         },
@@ -56,6 +59,12 @@ def main() -> None:
     t.true("persona protect bias rendered", "declared pet cards" in sys_prompt)
     t.true("persona guide name rendered", "Mia" in sys_prompt)
     t.true("guide style present (strategist)", "Guide style: Strategist" in sys_prompt)
+
+    # --- persona drives VOICE: blended family register + own tone ---
+    t.true("persona own voice rendered", "emotionally safe" in sys_prompt)
+    t.true("persona family register rendered", "Timmy / Tammy family register" in sys_prompt)
+    t.true("voice shapes both priorities and voice", "BOTH your priorities and your voice" in sys_prompt)
+    t.true("guide style no longer dictates tone", "Format:" in sys_prompt)
 
     # --- Layer 1: 4-player teaching is baked into the system + mode prompts ---
     t.true("multiplayer reality block present", "MULTIPLAYER REALITY" in sys_prompt)

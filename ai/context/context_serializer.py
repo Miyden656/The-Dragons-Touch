@@ -144,17 +144,53 @@ def serialize_to_payload(*args, **kwargs) -> dict:
 def _build_persona_view(philosophy_context: dict) -> dict:
     """Reuse the engine's persona bias lists — do not invent persona behavior."""
     pc = philosophy_context or {}
+    key = as_str(pc.get("key"), "balanced_unknown")
+    own_tone, family_tone, family_label = _persona_tones(key, pc)
     return {
-        "key": as_str(pc.get("key"), "balanced_unknown"),
+        "key": key,
         "label": as_str(pc.get("label"), "Balanced / Unknown"),
         "guide_name": as_str(pc.get("guide_name")),
         "guide_role": as_str(pc.get("guide_role"), "Guide"),
         "core_question": as_str(pc.get("core_question"), "What does this deck want to do?"),
         "rules_summary": as_str(pc.get("rules_summary")),
+        # Voice axis: the persona's OWN tone, layered over its family register, so
+        # picking a philosophy shifts how the guide speaks (see render_persona_block).
+        "tone": own_tone,
+        "family_tone": family_tone,
+        "family_label": family_label,
         "protect_bias": [as_str(x) for x in as_list(pc.get("protect_bias"))],
         "review_bias": [as_str(x) for x in as_list(pc.get("review_bias"))],
         "replacement_bias": [as_str(x) for x in as_list(pc.get("replacement_bias"))],
     }
+
+
+def _persona_tones(key: str, pc: dict) -> tuple[str, str, str]:
+    """(own_tone, family_tone, family_label) for a persona.
+
+    Each philosophy profile carries its own `tone`; sub-personas also inherit a
+    FAMILY register from their parent archetype (Timmy/Johnny/Spike). We surface
+    both so the voice blends "same family, own way of speaking". Prefers the
+    philosophy_context dict; falls back to the engine profile registry. Defensive
+    — any failure degrades to empty strings, never raises."""
+    own = as_str(pc.get("tone"))
+    family_tone = ""
+    family_label = ""
+    try:
+        from analysis.deck_building_philosophies import (
+            PHILOSOPHY_PROFILES,
+            get_philosophy_profile,
+        )
+        prof = get_philosophy_profile(key)
+        if not own:
+            own = as_str(getattr(prof, "tone", ""))
+        parent_key = getattr(prof, "parent", None)
+        if parent_key and parent_key in PHILOSOPHY_PROFILES:
+            parent = PHILOSOPHY_PROFILES[parent_key]
+            family_tone = as_str(getattr(parent, "tone", ""))
+            family_label = as_str(getattr(parent, "label", ""))
+    except Exception:  # noqa: BLE001 - tone is enrichment, never break serialization
+        pass
+    return own, family_tone, family_label
 
 
 # --- diagnostics ----------------------------------------------------------

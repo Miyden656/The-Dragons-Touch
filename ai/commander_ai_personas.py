@@ -26,6 +26,9 @@ def render_persona_block(persona: dict | None) -> str:
     guide_role = as_str(persona.get("guide_role"), "Guide")
     core_question = as_str(persona.get("core_question"), "What does this deck want to do?")
     rules = as_str(persona.get("rules_summary"))
+    own_tone = as_str(persona.get("tone"))
+    family_tone = as_str(persona.get("family_tone"))
+    family_label = as_str(persona.get("family_label"))
     protect = _bias_line(persona.get("protect_bias"))
     review = _bias_line(persona.get("review_bias"))
     prefer = _bias_line(persona.get("replacement_bias"))
@@ -40,8 +43,13 @@ def render_persona_block(persona: dict | None) -> str:
     ]
     if rules:
         lines.append(f"How to apply this lens: {rules}")
+
+    voice = _voice_line(own_tone, family_tone, family_label)
+    if voice:
+        lines.append(voice)
+
     lines.append("")
-    lines.append("Let this lens shape your priorities (not just your wording):")
+    lines.append("Let this lens shape BOTH your priorities and your voice:")
     if protect:
         lines.append(f"- Protect / lower cut pressure for: {protect}.")
     if review:
@@ -53,10 +61,25 @@ def render_persona_block(persona: dict | None) -> str:
         "this lens when they conflict."
     )
     lines.append(
-        "- Introduce the guide/lens briefly once, then act as a practical deck reviewer "
-        "— do not role-play the guide as a character."
+        "- Speak in this persona's voice (see Voice above) — let it color your wording and "
+        "attitude. Stay a practical deck reviewer; don't theatrically role-play a named character."
     )
     return "\n".join(lines)
+
+
+def _voice_line(own_tone: str, family_tone: str, family_label: str) -> str:
+    """Blend the family register with the persona's own tone: 'same family, own
+    way of speaking'. Falls back gracefully when either piece is missing."""
+    if own_tone and family_tone and family_label:
+        return (
+            f"Voice: speak in the {family_label} family register ({family_tone}); "
+            f"within that, this persona's own voice is {own_tone}."
+        )
+    if own_tone:
+        return f"Voice: speak in a register that is {own_tone}."
+    if family_tone:
+        return f"Voice: speak in a register that is {family_tone}."
+    return ""
 
 
 def _bias_line(values: Any, limit: int = 6) -> str:
