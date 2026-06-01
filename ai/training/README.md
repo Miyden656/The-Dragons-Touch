@@ -39,9 +39,11 @@ JSONL, one object per line:
 ```
 
 Train on the grounded prompt or the fine-tune won't transfer to the grounded
-inference path. Consequence: **examples are long** — the `user` turn is ~10–15k
-tokens because it carries the full deck context. Plan `max_seq_len` accordingly
-(≈16384) and size the GPU for it.
+inference path. Consequence: **examples are long** — the `user` turn carries the
+full deck context. MEASURED on the real corpus (`--with-facts`, after the 4-player
+pod grounding was added): ~14k tokens median per example, **~17.4k at the max**.
+Plan `max_seq_len` ≈ **20480** (NOT 16384 — that would truncate the longest
+examples and break grounding fidelity) and size the GPU for it.
 
 `--with-facts` reloads Scryfall and rebuilds the verified-card-facts block per
 example (closest to inference; recommended). Without it, that block is omitted.
@@ -60,8 +62,8 @@ example (closest to inference; recommended). Without it, that block is omitted.
   several runs, so budget for ~3–6 runs total for a first good model.
 - **Starting hyperparameters (tune, not gospel):** LoRA r=16–32, alpha=16–32,
   dropout=0.05; lr≈2e-4 cosine; 2–3 epochs; effective batch via gradient
-  accumulation; `max_seq_len`≈16384; bf16. Watch eval loss for overfit on a
-  small corpus.
+  accumulation; `max_seq_len`≈20480 (measured: longest examples ~17.4k tokens);
+  bf16. Watch eval loss for overfit on a small corpus.
 
 ## How much data
 
