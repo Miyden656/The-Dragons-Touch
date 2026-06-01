@@ -60,9 +60,12 @@ def main() -> None:
     t.true("persona guide name rendered", "Mia" in sys_prompt)
     t.true("guide style present (strategist)", "Guide style: Strategist" in sys_prompt)
 
-    # --- persona drives VOICE: blended family register + own tone ---
-    t.true("persona own voice rendered", "emotionally safe" in sys_prompt)
-    t.true("persona family register rendered", "Timmy / Tammy family register" in sys_prompt)
+    # --- persona drives VOICE: distilled per-guide voice profile blended over the
+    # family register (from ai/prompts/persona_voices.md; pet_card == Milo / Mia) ---
+    t.true("persona signature vocabulary rendered", "protected joy slot" in sys_prompt)
+    t.true("persona example sentence rendered", "Sounds like:" in sys_prompt)
+    t.true("persona phrases-to-avoid rendered", "Avoid sounding like:" in sys_prompt)
+    t.true("persona family register still blended", "Timmy / Tammy family" in sys_prompt)
     t.true("voice shapes both priorities and voice", "BOTH your priorities and your voice" in sys_prompt)
     t.true("guide style no longer dictates tone", "Format:" in sys_prompt)
 
