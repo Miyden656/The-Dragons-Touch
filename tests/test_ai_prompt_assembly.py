@@ -57,6 +57,15 @@ def main() -> None:
     t.true("persona guide name rendered", "Mia" in sys_prompt)
     t.true("guide style present (strategist)", "Guide style: Strategist" in sys_prompt)
 
+    # --- Layer 1: 4-player teaching is baked into the system + mode prompts ---
+    t.true("multiplayer reality block present", "MULTIPLAYER REALITY" in sys_prompt)
+    t.true("teaches sweeper-vs-spot value math", "answers three boards at once" in sys_prompt)
+    t.true("cut-review pod-value tiebreaker present", "Multiplayer value as a tiebreaker" in sys_prompt)
+    tutor_prompt = build_system_prompt(_ctx(mode="strategy_tutor"))
+    t.true("strategy tutor pod piloting guidance", "Piloting at a 4-player table" in tutor_prompt)
+    persona_prompt = build_system_prompt(_ctx(mode="persona_coaching"))
+    t.true("persona coaching pod framing", "Persona at the table" in persona_prompt)
+
     # --- mode switching ---
     review_prompt = build_system_prompt(_ctx(mode="commander_review"))
     t.true("commander review mode block", "Mode: Commander Review" in review_prompt)
@@ -151,12 +160,17 @@ def main() -> None:
                 "Board wipes: 2 - each can answer all three opponents' boards at once.",
                 "Archenemy / threat density: high - likely to attract focused removal.",
             ],
+            "example_cards": {"sweepers": ["Culling Ritual", "Damnation"], "threats": ["Sol Ring"]},
         },
     )
     mp_user = build_user_prompt(mp_ctx)
     t.true("pod-value header present (review)", "Verified pod facts (4-player reasoning" in mp_user)
     t.true("pod fact rendered", "each can answer all three opponents" in mp_user)
     t.true("pod grounding instruction", "do not invent" in mp_user.lower())
+    # The engine-identified card names ride in the focus block (needle), so a
+    # small model names the real sweepers instead of inventing them.
+    t.true("example sweeper names in focus", "Culling Ritual" in mp_user and "Damnation" in mp_user)
+    t.true("told to use exact engine names", "use these EXACT names" in mp_user)
 
     # --- pod-value focus is NOT injected for cut_review (has its own allow-list) ---
     cut_no_mp = build_user_prompt(CommanderAIContext(

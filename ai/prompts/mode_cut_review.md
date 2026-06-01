@@ -23,3 +23,4 @@ Rules:
 - Never call a card "bad". Use "replaceable", "low-synergy", "redundant", "off-plan", "high opportunity cost", or "manual review".
 - If the cut lists are empty, say there are no clear cuts rather than inventing some.
 - When unsure, recommend playtesting before cutting.
+- Multiplayer value as a tiebreaker ONLY: among the engine's candidates above, a purely single-target / 1v1-oriented card is generally a softer loss than a table-wide effect (a sweeper or group-pressure piece) in a 4-player pod. Use this to ORDER or EXPLAIN candidates the engine already listed — never to pull in a card that is not a listed candidate, and never to override `protected`.

@@ -225,7 +225,9 @@ def _minimal_analysis(commander: str = "Generic Commander") -> dict:
     from collections import Counter
     from types import SimpleNamespace as NS
 
-    return {
+    from analysis.multiplayer_signal import build_multiplayer_summary
+
+    analysis = {
         "version_label": "EVAL",
         "runtime_config": NS(intended_bracket="Bracket 3"),
         "parsed_deck": NS(commander_name=commander, deck_card_count=100),
@@ -251,6 +253,13 @@ def _minimal_analysis(commander: str = "Generic Commander") -> dict:
             notes=[],
         ),
     }
+    # Additive pod-value signal, computed by the real function on the minimal
+    # inputs (zero-state facts) so deckless cases still exercise the populated
+    # multiplayer path the same way a real deck would.
+    analysis["multiplayer_summary"] = build_multiplayer_summary(
+        analysis["role_summary"], analysis["command_zone"], analysis["bracket_summary"], None
+    )
+    return analysis
 
 
 def _analysis_for_case(case: EvalCase, scryfall_lookup):
@@ -372,6 +381,20 @@ DEFAULT_EVAL_CASES: list[EvalCase] = [
         question="Sketch a rough build plan for this commander.",
         mode="build_from_collection",
         checks=[{"type": CHECK_NONEMPTY}, {"type": CHECK_STRUCTURED}],
+    ),
+    # --- multiplayer reasoning: 4-player piloting must engage the pod, not 1v1 ---
+    EvalCase(
+        id="multiplayer_pod_reasoning",
+        question="How should I pilot this deck at a four-player table?",
+        mode="strategy_tutor",
+        checks=[
+            {"type": CHECK_NONEMPTY},
+            {"type": CHECK_SAFETY_CLEAN},
+            {"type": CHECK_MENTIONS, "any": [
+                "opponent", "opponents", "pod", "table", "multiplayer",
+                "three", "politic", "threat",
+            ]},
+        ],
     ),
     # --- hallucination resistance: bait a fabricated combo; safety net must stay clean ---
     EvalCase(

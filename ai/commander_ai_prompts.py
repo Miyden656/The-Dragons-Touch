@@ -275,16 +275,48 @@ def _replacement_focus(replacements: dict) -> str:
     return "\n".join(lines)
 
 
+_MULTIPLAYER_EXAMPLE_LABELS = (
+    ("sweepers", "board wipes"),
+    ("table_wide_pressure", "table-wide pressure"),
+    ("goad", "goad"),
+    ("pillowfort", "pillowfort / attack-deterrents"),
+    ("threats", "main threats"),
+)
+
+
+def _multiplayer_example_line(examples: dict) -> str:
+    """Name the engine-identified cards behind the counts so a small model does
+    not invent which cards are the sweepers/threats (the 'hand it the needle'
+    technique — the counts alone let it guess, the names pin it down)."""
+    examples = examples or {}
+    parts = []
+    for key, label in _MULTIPLAYER_EXAMPLE_LABELS:
+        names = [str(n) for n in (examples.get(key) or []) if n]
+        if names:
+            parts.append(f"{label}: {', '.join(names)}")
+    if not parts:
+        return ""
+    return (
+        "- Cards the engine counted (use these EXACT names if you name cards; do "
+        "not assign these roles to any other card): " + "; ".join(parts) + "."
+    )
+
+
 def _multiplayer_focus(multiplayer: dict) -> str:
     """Render the engine's verified pod facts as a focused plain-text block.
 
     Prefers the ready-made `facts` list (already grounded, human-readable). Falls
     back to the structured bands so the block is never empty when data exists.
+    Either way, appends the engine-identified example cards so the model grounds
+    not just the counts but WHICH cards they are.
     """
     multiplayer = multiplayer or {}
     facts = [str(f) for f in (multiplayer.get("facts") or []) if f]
+    example_line = _multiplayer_example_line(multiplayer.get("example_cards"))
+
     if facts:
-        return "\n".join(f"- {f}" for f in facts)
+        block = "\n".join(f"- {f}" for f in facts)
+        return block + ("\n" + example_line if example_line else "")
 
     interaction = multiplayer.get("interaction") or {}
     reach = multiplayer.get("table_reach") or {}
@@ -299,6 +331,8 @@ def _multiplayer_focus(multiplayer: dict) -> str:
         f"- Table reach: {reach.get('band', 'none')}.",
         f"- Archenemy risk: {archenemy.get('risk_band', 'low')}.",
     ]
+    if example_line:
+        lines.append(example_line)
     return "\n".join(lines)
 
 
