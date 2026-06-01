@@ -19,6 +19,7 @@ from ai.training.corpus import (
     is_usable,
     load_corpus,
     merge_records,
+    persona_coverage,
     record_key,
     validate_record,
     write_corpus,
@@ -120,6 +121,20 @@ def main() -> None:
     t.eq("merge removed the overlap", mreport["removed_duplicate"], 1)
     t.eq("merge kept 3 distinct", len(merged), 3)
     t.eq("merge empty -> empty", merge_records([])[0], [])
+
+    # --- persona_coverage: shows zeros for unused personas, flags below-target ---
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d) / "cov.jsonl"
+        recs = [_rec(persona="pet_card"), _rec(persona="pet_card", question="Q2?"),
+                _rec(persona="spike", question="Q3?")]
+        write_corpus(p, recs)
+        cov = persona_coverage(load_corpus(p), target=3)
+        t.eq("pet_card counted twice", cov["counts"].get("pet_card"), 2)
+        t.eq("spike counted once", cov["counts"].get("spike"), 1)
+        t.true("an unused persona is shown as zero", cov["counts"].get("balanced_unknown") == 0)
+        t.true("below-target includes the unused baseline", "balanced_unknown" in cov["below_target"])
+        t.true("below-target includes pet_card (2 < 3)", "pet_card" in cov["below_target"])
+        t.true("coverage spans all known personas", len(cov["counts"]) >= 22)
 
     t.report_and_exit()
 

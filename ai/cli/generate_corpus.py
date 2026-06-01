@@ -36,7 +36,13 @@ from ai.training.corpus import default_corpus_path  # noqa: E402
 from ai.training.generate import (  # noqa: E402
     DEFAULT_PROMPT_PLAN,
     append_candidates,
+    build_deck_analysis,
     generate_for_deck,
+)
+from ai.training.persona_affinity import (  # noqa: E402
+    INTENT_PERSONAS,
+    derive_personas_for_deck,
+    intent_persona_sample,
 )
 
 
@@ -57,7 +63,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate training candidates from decklists")
     parser.add_argument("--decks-dir", type=str, default="Decklists", help="Folder of .txt decklists")
     parser.add_argument("--limit", type=int, default=0, metavar="N", help="Only process the first N decks (0 = all)")
-    parser.add_argument("--personas", type=str, default="balanced_unknown", help="Comma-separated philosophy keys")
+    parser.add_argument("--personas", type=str, default="balanced_unknown", help="Comma-separated philosophy keys (ignored when --deck-derived)")
+    parser.add_argument("--deck-derived", action="store_true",
+                        help="Pick each deck's personas from its engine analysis (Balanced + top 2 fit) instead of --personas")
+    parser.add_argument("--intent-sample", type=int, default=12, metavar="N",
+                        help="With --deck-derived: also run the 4 intent personas across N sampled decks (0 = off)")
     parser.add_argument("--model", type=str, default="", help="Override the model (default: configured)")
     parser.add_argument("--out", type=str, default="", help="Corpus file to append to (default: Outputs/commander_ai_training_data.jsonl)")
     args = parser.parse_args(argv)
@@ -90,31 +100,63 @@ def main(argv: list[str] | None = None) -> int:
     personas = [p.strip() for p in args.personas.split(",") if p.strip()] or ["balanced_unknown"]
     out_path = Path(args.out) if args.out else default_corpus_path()
 
-    total_plan = len(decks) * len(personas) * len(DEFAULT_PROMPT_PLAN)
-    print(f"Generating from {len(decks)} deck(s) x {len(personas)} persona(s) x "
-          f"{len(DEFAULT_PROMPT_PLAN)} prompts = up to {total_plan} candidates")
-    print(f"Model: {config.model} | output: {out_path}")
-    print("(safety-flagged answers are auto-dropped; survivors saved as unapproved candidates)\n")
-
     totals = {"generated": 0, "kept": 0, "dropped": 0, "errors": 0, "decks": 0}
-    for i, deck in enumerate(decks, start=1):
-        for persona in personas:
+
+    def _run(deck, persona, label_idx):
+        """Generate + gate one (deck, persona) pair; tally and print. Never aborts."""
+        try:
+            kept, stats = generate_for_deck(
+                deck, service=service, scryfall_lookup=lookup,
+                persona=persona, prompt_plan=DEFAULT_PROMPT_PLAN,
+            )
+        except Exception as exc:  # noqa: BLE001 - a bad deck must not abort the batch
+            totals["errors"] += 1
+            print(f"  {label_idx} {deck.name} ({persona}) — ERROR: {exc}")
+            return
+        if kept:
+            append_candidates(out_path, kept)
+        totals["generated"] += stats["generated"]
+        totals["kept"] += stats["kept"]
+        totals["dropped"] += stats["dropped"]
+        print(f"  {label_idx} {deck.name} ({persona}) — kept {stats['kept']}, dropped {stats['dropped']}")
+
+    if args.deck_derived:
+        sample = intent_persona_sample(decks, args.intent_sample)
+        est = len(decks) * 3 + len(sample) * len(INTENT_PERSONAS)
+        print(f"DECK-DERIVED: {len(decks)} deck(s) x (Balanced + top 2 fit) "
+              f"+ {len(INTENT_PERSONAS)} intent persona(s) x {len(sample)} sampled deck(s)")
+        print(f"  ≈ {est} (deck, persona) pairs x {len(DEFAULT_PROMPT_PLAN)} prompts")
+        print(f"Model: {config.model} | output: {out_path}")
+        print("(safety-flagged answers are auto-dropped; survivors saved as unapproved candidates)\n")
+
+        for i, deck in enumerate(decks, start=1):
             try:
-                kept, stats = generate_for_deck(
-                    deck, service=service, scryfall_lookup=lookup,
-                    persona=persona, prompt_plan=DEFAULT_PROMPT_PLAN,
-                )
-            except Exception as exc:  # noqa: BLE001 - a bad deck must not abort the batch
-                totals["errors"] += 1
-                print(f"  [{i}/{len(decks)}] {deck.name} ({persona}) — ERROR: {exc}")
-                continue
-            if kept:
-                append_candidates(out_path, kept)
-            totals["generated"] += stats["generated"]
-            totals["kept"] += stats["kept"]
-            totals["dropped"] += stats["dropped"]
-            print(f"  [{i}/{len(decks)}] {deck.name} ({persona}) — kept {stats['kept']}, dropped {stats['dropped']}")
-        totals["decks"] += 1
+                analysis = build_deck_analysis(deck, persona="balanced_unknown", scryfall_lookup=lookup)
+                picks = derive_personas_for_deck(analysis)
+            except Exception as exc:  # noqa: BLE001 - fall back to baseline rather than skip
+                print(f"  [{i}/{len(decks)}] {deck.name} — derive failed ({exc}); using balanced_unknown")
+                from ai.training.persona_affinity import PersonaPick
+                picks = [PersonaPick("balanced_unknown", "derive fallback")]
+            print(f"  [{i}/{len(decks)}] {deck.name} -> {', '.join(p.key for p in picks)}")
+            for p in picks:
+                _run(deck, p.key, f"[{i}/{len(decks)}]")
+            totals["decks"] += 1
+
+        if sample:
+            print(f"\nIntent-persona pass ({len(INTENT_PERSONAS)} voices x {len(sample)} sampled deck(s)):")
+            for j, deck in enumerate(sample, start=1):
+                for persona in INTENT_PERSONAS:
+                    _run(deck, persona, f"[intent {j}/{len(sample)}]")
+    else:
+        total_plan = len(decks) * len(personas) * len(DEFAULT_PROMPT_PLAN)
+        print(f"Generating from {len(decks)} deck(s) x {len(personas)} persona(s) x "
+              f"{len(DEFAULT_PROMPT_PLAN)} prompts = up to {total_plan} candidates")
+        print(f"Model: {config.model} | output: {out_path}")
+        print("(safety-flagged answers are auto-dropped; survivors saved as unapproved candidates)\n")
+        for i, deck in enumerate(decks, start=1):
+            for persona in personas:
+                _run(deck, persona, f"[{i}/{len(decks)}]")
+            totals["decks"] += 1
 
     print(f"\nDone. {totals['kept']} candidate(s) kept, {totals['dropped']} dropped, "
           f"{totals['errors']} deck error(s).")

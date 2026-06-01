@@ -63,6 +63,26 @@ def candidate_record(*, commander, mode, persona, guide_style, question, answer,
     }
 
 
+def build_deck_analysis(deck_path, *, persona: str, scryfall_lookup):
+    """Parse a decklist and run the full engine analysis under one persona lens.
+
+    Factored out so both generate_for_deck and the deck-derived persona picker
+    (which needs a neutral analysis to read strategy/bracket/pod facts) share one
+    code path."""
+    import main
+    from config import RuntimeConfig
+    from parsing.deck_parser import parse_deck_file
+
+    parsed = parse_deck_file(Path(deck_path), scryfall_lookup=scryfall_lookup)
+    runtime = RuntimeConfig(
+        output_mode="normal", review_direction="both", build_up_config={},
+        cut_depth_config={}, prompt_interaction_mode="guided",
+        philosophy_key=persona, guide_preference="either",
+        intended_bracket="Bracket 3", collection_mode="none",
+    )
+    return main.build_analysis_context(parsed, runtime, scryfall_lookup, None)
+
+
 def generate_for_deck(
     deck_path,
     *,
@@ -76,19 +96,9 @@ def generate_for_deck(
 
     Returns (kept_records, stats). Never raises for a single bad prompt; a deck
     that can't be parsed/analyzed raises to the caller to record as an error."""
-    import main
-    from config import RuntimeConfig
-    from parsing.deck_parser import parse_deck_file
     from ai.schemas.ai_context import CommanderAIRequest
 
-    parsed = parse_deck_file(Path(deck_path), scryfall_lookup=scryfall_lookup)
-    runtime = RuntimeConfig(
-        output_mode="normal", review_direction="both", build_up_config={},
-        cut_depth_config={}, prompt_interaction_mode="guided",
-        philosophy_key=persona, guide_preference="either",
-        intended_bracket="Bracket 3", collection_mode="none",
-    )
-    analysis = main.build_analysis_context(parsed, runtime, scryfall_lookup, None)
+    analysis = build_deck_analysis(deck_path, persona=persona, scryfall_lookup=scryfall_lookup)
 
     kept: list[dict] = []
     stats = {"generated": 0, "kept": 0, "dropped": 0}

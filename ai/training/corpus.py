@@ -201,6 +201,33 @@ def corpus_stats(loaded: LoadedCorpus) -> dict:
     }
 
 
+def persona_coverage(loaded: LoadedCorpus, *, target: int = 3, approved_only: bool = False) -> dict:
+    """Per-persona example counts across ALL known philosophy keys, INCLUDING
+    zeros — so a missing voice is visible instead of silently absent.
+
+    This is the safety the deck-derived generator needs: intent personas
+    (pet card, theme, etc.) are never deck-derived, so without this you could
+    ship a corpus that has zero examples of a whole philosophy and not notice.
+    `below_target` is the to-do list."""
+    records = loaded.records
+    if approved_only:
+        records = [r for r in records if r.get("approved") is True]
+    counts: dict[str, int] = {}
+    for r in records:
+        key = str(r.get("persona", "")).strip()
+        if key:
+            counts[key] = counts.get(key, 0) + 1
+    known = _valid_personas()
+    keys = sorted(known | set(counts))
+    return {
+        "target": target,
+        "approved_only": approved_only,
+        "counts": {k: counts.get(k, 0) for k in keys},
+        "below_target": sorted(k for k in known if counts.get(k, 0) < target) if known else [],
+        "unknown_personas": sorted(k for k in counts if known and k not in known),
+    }
+
+
 def clean_corpus(records: list[dict], *, approved_only: bool = True) -> tuple[list[dict], dict]:
     """Produce a training-ready subset: valid, de-duplicated, (optionally) approved.
 

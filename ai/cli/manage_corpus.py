@@ -28,9 +28,11 @@ from ai.training.corpus import (  # noqa: E402
     dedupe,
     default_corpus_path,
     load_corpus,
+    persona_coverage,
     validate_record,
     write_corpus,
 )
+from ai.training.persona_affinity import INTENT_PERSONAS  # noqa: E402
 
 
 def _truncate(text: str, width: int = 70) -> str:
@@ -134,6 +136,29 @@ def _cmd_export_clean(loaded, out_path: str, approved_only: bool) -> int:
     return 0
 
 
+def _cmd_coverage(loaded, target: int, approved_only: bool) -> int:
+    cov = persona_coverage(loaded, target=target, approved_only=approved_only)
+    scope = "approved" if approved_only else "all"
+    print(f"Persona coverage ({scope} records, target {target} each):\n")
+    intent = set(INTENT_PERSONAS)
+    for key, n in cov["counts"].items():
+        mark = "  ⚠" if n < target else "   "
+        tag = " [intent — not deck-derivable]" if key in intent else ""
+        print(f"  {mark} {n:>4}  {key}{tag}")
+    below = cov["below_target"]
+    if below:
+        print(f"\n  Below target ({len(below)}): {', '.join(below)}")
+        intent_below = [k for k in below if k in intent]
+        if intent_below:
+            print(f"  Intent voices still thin: {', '.join(intent_below)} "
+                  f"— generate with:  py -3 -m ai.cli.generate_corpus --personas {','.join(intent_below)} --limit 6")
+    else:
+        print(f"\n  Every persona meets the target. ✅")
+    if cov["unknown_personas"]:
+        print(f"  ⚠ unknown persona keys present: {', '.join(cov['unknown_personas'])}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     try:
         sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
@@ -148,6 +173,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dedupe", action="store_true", help="Rewrite the file with duplicates removed (keeps a .bak)")
     parser.add_argument("--export-clean", type=str, default="", metavar="OUT", help="Write valid+deduped+approved records to OUT")
     parser.add_argument("--include-unapproved", action="store_true", help="With --export-clean, keep unapproved records too")
+    parser.add_argument("--coverage", action="store_true", help="Show per-persona example counts (incl. zeros) vs a target")
+    parser.add_argument("--target", type=int, default=3, metavar="N", help="With --coverage: minimum examples per persona (default 3)")
+    parser.add_argument("--approved-only", action="store_true", help="With --coverage: count only approved records")
     args = parser.parse_args(argv)
 
     path = Path(args.path) if args.path else default_corpus_path()
@@ -156,6 +184,8 @@ def main(argv: list[str] | None = None) -> int:
     if not loaded.exists and not args.export_clean:
         return _cmd_stats(loaded)
 
+    if args.coverage:
+        return _cmd_coverage(loaded, target=args.target, approved_only=args.approved_only)
     if args.validate:
         return _cmd_validate(loaded)
     if args.show:
