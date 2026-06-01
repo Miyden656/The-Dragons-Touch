@@ -8,8 +8,10 @@ from __future__ import annotations
 from _test_helpers import TestRun
 
 from ai.commander_ai_safety import (
+    BAN_CONTRADICTED,
     BAN_UNVERIFIED,
     COMBO_UNVERIFIED,
+    LEGALITY_CONTRADICTED,
     OWNERSHIP_UNVERIFIED,
     verify_response,
 )
@@ -88,6 +90,28 @@ def main() -> None:
 
     # --- empty text is ok ---
     t.eq("empty text ok", verify_response("", ctx).ok, True)
+
+    # --- precision fixes (Scryfall-grounded path): reduce false positives only ---
+    scry = {
+        "sol ring": {"name": "Sol Ring",
+                     "legalities": {"legacy": "banned", "commander": "legal", "vintage": "restricted"}},
+        "lightning bolt": {"name": "Lightning Bolt",
+                           "legalities": {"modern": "legal", "commander": "legal"}},
+    }
+    # 1) a mis-extracted common word ("Now") is NOT flagged as an unverified ban,
+    #    and the correct "Sol Ring is banned in Legacy" stays clean.
+    r = verify_response("Now, Sol Ring is banned in Legacy.", ctx, scryfall_lookup=scry)
+    t.not_in_set("common word 'Now' not ban-flagged", BAN_UNVERIFIED, r.kinds())
+    t.eq("correct banned claim is clean", r.ok, True)
+    # 2) "not legal" is true for a banned card -> not a contradiction.
+    r = verify_response("Sol Ring is not legal in Legacy.", ctx, scryfall_lookup=scry)
+    t.not_in_set("'not legal' for banned card not flagged", LEGALITY_CONTRADICTED, r.kinds())
+    # 3) regression: calling a banned card "legal" IS still flagged (dangerous direction).
+    r = verify_response("Sol Ring is legal in Legacy.", ctx, scryfall_lookup=scry)
+    t.in_set("'legal' claim for banned card still flagged", LEGALITY_CONTRADICTED, r.kinds())
+    # 4) regression: a real card wrongly called banned is still flagged.
+    r = verify_response("Lightning Bolt is banned in Modern.", ctx, scryfall_lookup=scry)
+    t.in_set("real card wrongly called banned still flagged", BAN_CONTRADICTED, r.kinds())
 
     t.report_and_exit()
 

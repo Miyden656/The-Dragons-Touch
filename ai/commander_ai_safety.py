@@ -99,6 +99,11 @@ _STOPWORD_NAMES = {
     "commander", "magic", "gathering", "edh", "and", "but", "or", "so", "because",
     "when", "while", "with", "without", "note", "also", "however", "here", "there",
     "i", "a", "an", "they", "them", "we", "in", "on", "for", "to", "of",
+    # Sentence-leading discourse words that get capitalized and mis-read as cards.
+    "now", "given", "sure", "lastly", "overall", "additionally", "importantly",
+    "first", "firstly", "second", "secondly", "third", "finally", "next", "then",
+    "yes", "no", "let", "key", "honestly", "basically", "essentially", "remember",
+    "consider", "instead", "since", "though", "although", "regarding", "addressing",
 }
 
 
@@ -212,7 +217,13 @@ def _check_ban(
                     )
                 )
                 continue
-            # status == UNKNOWN -> not a recognized card; fall through to soft flag.
+            # status == UNKNOWN with the Scryfall oracle present: the token isn't a
+            # real card, so it is almost certainly a mis-extracted common word
+            # (e.g. "Now, ... Sol Ring is banned"), NOT a real ban claim. Skip it
+            # rather than emit a noisy "Ban status of 'Now' is not confirmed" flag.
+            # Real wrong claims about real cards are still caught above (BAN_CONTRADICTED).
+            continue
+        # No Scryfall lookup available -> keep the legacy soft "unverified" flag.
         out.append(
             FlaggedClaim(
                 kind=BAN_UNVERIFIED,
@@ -243,6 +254,11 @@ def _check_legality_claim(sentence: str, scryfall_lookup: dict | None) -> list[F
         actual = legality_in(name, fmt, scryfall_lookup)
         if actual == UNKNOWN or actual == claimed:
             continue  # unknown card -> don't guess; match -> accurate
+        # A banned card is genuinely "not legal" to play, so a "not legal" claim
+        # about a banned card is TRUE — don't flag it. (The dangerous direction,
+        # e.g. calling a banned card "legal", is still flagged below.)
+        if claimed == NOT_LEGAL and actual == BANNED:
+            continue
         out.append(
             FlaggedClaim(
                 kind=LEGALITY_CONTRADICTED,
