@@ -15,8 +15,10 @@ This module fills that gap WITHOUT touching the v1.6 chain. It is purely additiv
 
 - It does NOT add tags to ``analysis/role_tags.py`` (that would perturb strategy
   scoring, e.g. ``pillowfort`` already feeds the Control archetype). It reads the
-  existing ``role_counts`` and does its own small, self-contained oracle scans for
-  the few multiplayer concepts the role engine does not already surface.
+  existing ``role_counts`` plus the shared political signal profile.
+- The political signals (goad / pillowfort / instant-speed) come from the single
+  shared scanner ``analysis/political_signals.py`` — this module does NOT scan
+  oracle text itself, so there is one source of truth for political detection.
 - It runs AFTER the existing chain and only reads its outputs, so the engine's
   pre-existing analysis is byte-identical with or without this module.
 
@@ -31,7 +33,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from data.card_lookup import get_full_oracle_text, normalize_text
+from analysis.political_signals import build_political_signal_profile
 
 # Existing role tags this module reads (all produced by role_tags.py today).
 _INTERACTION_ROLES = {"targeted_removal", "counterspell", "board_wipe"}
@@ -99,48 +101,9 @@ def _count(role_counts: Any, tag: str) -> int:
         return 0
 
 
-def _is_instant_speed(entry: Any, oracle: str) -> bool:
-    type_line = (getattr(entry, "type_line", "") or "").lower()
-    if "instant" in type_line:
-        return True
-    return "flash" in oracle
-
-
-def _oracle_for(entry: Any, scryfall_lookup: dict | None) -> str:
-    """Best-effort normalized oracle text for a CardRoleEntry. Empty on miss."""
-    if not scryfall_lookup:
-        return ""
-    name = getattr(entry, "card_name", "") or ""
-    card = scryfall_lookup.get(name.lower())
-    if not card:
-        return ""
-    try:
-        return normalize_text(get_full_oracle_text(card))
-    except Exception:
-        return ""
-
-
-def _has_any(text: str, needles: tuple[str, ...]) -> bool:
-    return any(n in text for n in needles)
-
-
-# Pillowfort / attack-deterrent oracle patterns. Self-contained here so we do not
-# touch the shared role engine (where a `pillowfort` tag would change Control scoring).
-_PILLOWFORT_PATTERNS = (
-    "can't attack you",
-    "cant attack you",
-    "can't be attacked",
-    "creatures can't attack",
-    "can't attack you or planeswalkers you control",
-    "attacks you or a planeswalker you control",
-    "for each creature attacking you",
-    "whenever a creature attacks you",
-    "costs {1} more to attack",
-    "costs {2} more to attack",
-    "more to attack you",
-    "prevent all combat damage",
-    "creatures can't attack you unless",
-)
+# Political signal tags (from analysis/political_signals.py) that together mean
+# "this card deters attacks on the pilot" — i.e. pillowfort presence.
+_PILLOWFORT_TAGS = {"attack_tax", "combat_prevention", "fort_protection"}
 
 
 def _band_interaction(sweepers: int, spot: int, counters: int) -> str:
@@ -209,8 +172,14 @@ def build_multiplayer_summary(
     command_zone: Any = None,
     bracket_summary: Any = None,
     scryfall_lookup: dict | None = None,
+    *,
+    political_profile: Any = None,
 ) -> MultiplayerValueSummary:
     """Compute verified 4-player pod facts from existing engine outputs.
+
+    Political signals (goad / pillowfort / instant-speed) are read from the shared
+    ``political_signals`` profile — passed in by build_analysis_context so it is
+    computed once, or built here on demand so this function still stands alone.
 
     All arguments are read defensively: missing / None inputs degrade to safe
     defaults rather than raising, mirroring the ai/context safe-access posture.
@@ -219,19 +188,26 @@ def build_multiplayer_summary(
     type_counts = getattr(role_summary, "type_counts", None) or {}
     card_roles = list(getattr(role_summary, "card_roles", None) or [])
 
+    if political_profile is None:
+        political_profile = build_political_signal_profile(role_summary, command_zone, scryfall_lookup)
+    pol_counts = getattr(political_profile, "counts", None) or {}
+    pol_by_card = getattr(political_profile, "signals_by_card", None) or {}
+
     sweepers = _count(role_counts, "board_wipe")
     spot = _count(role_counts, "targeted_removal")
     counters = _count(role_counts, "counterspell")
     total_interaction = sweepers + spot + counters
 
+    # goad comes straight from the shared political scanner (quantity-weighted).
+    goad = _count(pol_counts, "goad")
+
     # Single pass over card entries for the things role_counts can't tell us:
     # instant-speed interaction, table-wide vs single-target clocks, distinct
-    # threat cards, and the internal goad / pillowfort oracle scans.
+    # threat cards, and pillowfort (via the shared political signals per card).
     instant_speed = 0
     table_wide_cards: dict[str, int] = {}
     single_target_cards: dict[str, int] = {}
     threat_cards: dict[str, int] = {}
-    goad = 0
     pillowfort = 0
     examples: dict[str, list[str]] = {
         "sweepers": [],
@@ -245,14 +221,13 @@ def build_multiplayer_summary(
         roles = set(getattr(entry, "detected_roles", None) or [])
         name = getattr(entry, "card_name", "") or ""
         qty = int(getattr(entry, "quantity", 1) or 1)
+        type_line = (getattr(entry, "type_line", "") or "").lower()
+        pol_sigs = set(pol_by_card.get(name, ()))
 
-        # Scan oracle for instant-speed / goad / pillowfort on every found card.
-        oracle = ""
-        if getattr(entry, "found_in_scryfall", False):
-            oracle = _oracle_for(entry, scryfall_lookup)
-
+        # Instant-speed interaction: an interaction card that can act on others'
+        # turns — Instant by type, or flagged instant-speed by the shared scanner.
         if roles & _INTERACTION_ROLES:
-            if _is_instant_speed(entry, oracle):
+            if "instant" in type_line or "instant_speed_interaction" in pol_sigs:
                 instant_speed += qty
 
         if "board_wipe" in roles and len(examples["sweepers"]) < 6:
@@ -270,15 +245,12 @@ def build_multiplayer_summary(
             if len(examples["threats"]) < 6:
                 examples["threats"].append(name)
 
-        if oracle:
-            if "goad" in oracle:
-                goad += qty
-                if len(examples["goad"]) < 6:
-                    examples["goad"].append(name)
-            if _has_any(oracle, _PILLOWFORT_PATTERNS):
-                pillowfort += qty
-                if len(examples["pillowfort"]) < 6:
-                    examples["pillowfort"].append(name)
+        if "goad" in pol_sigs and len(examples["goad"]) < 6:
+            examples["goad"].append(name)
+        if pol_sigs & _PILLOWFORT_TAGS:
+            pillowfort += qty
+            if len(examples["pillowfort"]) < 6:
+                examples["pillowfort"].append(name)
 
     table_wide_count = sum(table_wide_cards.values())
     single_target_count = sum(single_target_cards.values())

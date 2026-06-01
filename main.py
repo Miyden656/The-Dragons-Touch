@@ -15,6 +15,8 @@ from typing import Any
 from analysis.bracket_analysis import build_bracket_analysis
 from analysis.deck_building_philosophies import build_philosophy_context
 from analysis.multiplayer_signal import build_multiplayer_summary
+from analysis.political_archetypes import classify_political_archetypes
+from analysis.political_signals import build_political_signal_profile
 from analysis.plan_fit import build_plan_fit_summary
 from analysis.role_tag_cleanup import apply_role_tag_cleanup
 from analysis.role_tags import build_role_analysis
@@ -84,9 +86,17 @@ def build_analysis_context(
     bracket_summary = build_bracket_analysis(role_summary)
     # Additive 4-player pod-value signal. Reads existing outputs only; does NOT
     # feed back into the v1.6 scoring chain above (role/strategy/bracket unchanged).
+    # Shared political signal profile — computed ONCE, consumed by both the
+    # multiplayer pod-value signal (goad/pillowfort/instant-speed) and the
+    # Section-3 political-archetype classifier. Single source of political truth.
+    political_profile = build_political_signal_profile(role_summary, command_zone, scryfall_lookup)
     multiplayer_summary = build_multiplayer_summary(
-        role_summary, command_zone, bracket_summary, scryfall_lookup
+        role_summary, command_zone, bracket_summary, scryfall_lookup,
+        political_profile=political_profile,
     )
+    # Additive Section-3 political-archetype classification. Parallel to the v1.6
+    # strategy read (does not modify it); reads existing outputs + the profile.
+    political_summary = classify_political_archetypes(political_profile)
     philosophy_context = build_philosophy_context(
         key=resolved_config.philosophy_key,
         guide_preference=resolved_config.guide_preference,
@@ -131,6 +141,7 @@ def build_analysis_context(
         "plan_fit_summary": plan_fit_summary,
         "bracket_summary": bracket_summary,
         "multiplayer_summary": multiplayer_summary,
+        "political_summary": political_summary,
         "protected_cards": protected_cards,
         "replaceability": replaceability,
         "cut_pressure": cut_pressure,

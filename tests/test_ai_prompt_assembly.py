@@ -191,6 +191,35 @@ def main() -> None:
     mp_empty = build_user_prompt(CommanderAIContext(mode="commander_review", multiplayer={}))
     t.true("empty multiplayer -> no pod block", "Verified pod facts (4-player reasoning" not in mp_empty)
 
+    # --- political focus: surfaced for review/strategy/persona when is_political ---
+    pol_ctx = CommanderAIContext(
+        mode="commander_review",
+        political={
+            "is_political": True,
+            "primary": {"name": "Group Slug", "axis": "punish normal game actions",
+                        "confidence": "medium", "commander_support": "strong",
+                        "example_cards": ["Nekusar, the Mindrazer"]},
+            "secondary": None,
+            "table_dependency": "low", "salt_risk": "medium", "reputation_modifier": "none",
+            "warnings": ["Salt risk: long games may frustrate the table."],
+        },
+    )
+    pol_user = build_user_prompt(pol_ctx)
+    t.true("political header present", "Verified political read (Section-3 archetypes" in pol_user)
+    t.true("political primary named", "Group Slug" in pol_user)
+    t.true("political example card surfaced", "Nekusar, the Mindrazer" in pol_user)
+    t.true("political grounding instruction", "do not invent a political archetype" in pol_user)
+
+    # --- NON-political deck -> no political block ---
+    non_pol = build_user_prompt(CommanderAIContext(
+        mode="commander_review", political={"is_political": False, "primary": None}))
+    t.true("non-political -> no political block", "Verified political read (Section-3" not in non_pol)
+
+    # --- political focus NOT injected for cut_review ---
+    cut_no_pol = build_user_prompt(CommanderAIContext(
+        mode="cut_review", political={"is_political": True, "primary": {"name": "Group Slug"}}))
+    t.true("no political block in cut_review", "Verified political read (Section-3" not in cut_no_pol)
+
     t.report_and_exit()
 
 

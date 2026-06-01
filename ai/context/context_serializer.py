@@ -24,6 +24,7 @@ from ai.context.deck_context import (
     win_conditions_from_roles,
 )
 from ai.context.multiplayer_context import build_multiplayer_view
+from ai.context.political_context import build_political_view
 from ai.context.replacement_context import build_replacement_view
 from ai.context.safe_access import as_list, as_str, attr
 from ai.context.strategy_context import build_strategy_view
@@ -48,6 +49,7 @@ def serialize_context(
     plan_fit_summary = analysis.get("plan_fit_summary")
     bracket_summary = analysis.get("bracket_summary")
     multiplayer_summary = analysis.get("multiplayer_summary")
+    political_summary = analysis.get("political_summary")
     possible_cuts = analysis.get("possible_cuts")
     protected_cards = analysis.get("protected_cards")
     replacement_needs = analysis.get("replacement_needs")
@@ -66,6 +68,8 @@ def serialize_context(
     bracket_view, d = build_bracket_view(bracket_summary, runtime_config)
     truncation.update(d)
     multiplayer_view, d = build_multiplayer_view(multiplayer_summary)
+    truncation.update(d)
+    political_view, d = build_political_view(political_summary)
     truncation.update(d)
     cut_view, d = build_cut_view(possible_cuts, protected_cards)
     truncation.update(d)
@@ -97,6 +101,7 @@ def serialize_context(
         strategy=strategy_view,
         bracket=bracket_view,
         multiplayer=multiplayer_view,
+        political=political_view,
         cuts=cut_view,
         protected=protected_view,
         replacements=replacement_view,

@@ -17,6 +17,7 @@ from _test_helpers import TestRun
 from ai.context.context_serializer import serialize_context
 from ai.schemas.ai_context import CommanderAIRequest
 from analysis.multiplayer_signal import MultiplayerValueSummary
+from analysis.political_archetypes import DetectedPoliticalArchetype, PoliticalArchetypeSummary
 
 
 def _sample_analysis() -> dict:
@@ -80,6 +81,20 @@ def _sample_analysis() -> dict:
             facts=["Board wipes: 1 - each can answer all three opponents' boards at once."],
             example_cards={"sweepers": ["Goblin Bombardment"], "threats": ["Mana Crypt"]},
             confidence="medium",
+        ),
+        "political_summary": PoliticalArchetypeSummary(
+            is_political=True,
+            primary=DetectedPoliticalArchetype(
+                key="group_slug", name="Group Slug", section="3.8", axis="punish normal game actions",
+                role="primary", confidence="medium", score=70, commander_support="strong",
+                gate_passed=True, incentive_present=True, protection_present=True,
+                payoff_present=True, inevitability_present=True,
+                evidence=["5 core political signal(s)"], example_cards=["Goblin Bombardment"],
+            ),
+            secondary=None, detected=[],
+            reputation_modifier="none", table_dependency="low", salt_risk="medium",
+            political_density=7, confidence="medium",
+            warnings=["Salt risk: this deck uses effects that may create table frustration."],
         ),
         "possible_cuts": NS(
             required_cut_candidates=[],
@@ -171,6 +186,18 @@ def main() -> None:
     t.eq("mp wipe resilience", ctx.multiplayer["resilience"]["wipe_resilience"], "fragile")
     t.true("mp facts surfaced", len(ctx.multiplayer["facts"]) >= 1)
     t.eq("mp example cards grouped", ctx.multiplayer["example_cards"]["sweepers"], ["Goblin Bombardment"])
+
+    # --- political archetypes (the additive Section-3 classifier) ---
+    t.eq("political is_political", ctx.political["is_political"], True)
+    t.eq("political primary name", ctx.political["primary"]["name"], "Group Slug")
+    t.eq("political primary role", ctx.political["primary"]["role"], "primary")
+    t.eq("political primary section", ctx.political["primary"]["section"], "3.8")
+    t.eq("political no secondary", ctx.political["secondary"], None)
+    t.eq("political table dependency", ctx.political["table_dependency"], "low")
+    t.eq("political salt risk", ctx.political["salt_risk"], "medium")
+    t.eq("political density carried", ctx.political["political_density"], 7)
+    t.true("political warnings surfaced", len(ctx.political["warnings"]) >= 1)
+    t.eq("political example card", ctx.political["primary"]["example_cards"], ["Goblin Bombardment"])
 
     # --- cuts ---
     t.eq("optional cut card", ctx.cuts["optional_cuts"][0]["card"], "Random Dragon")

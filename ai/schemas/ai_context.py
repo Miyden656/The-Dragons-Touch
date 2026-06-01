@@ -70,6 +70,7 @@ class CommanderAIContext:
     strategy: dict = field(default_factory=dict)
     bracket: dict = field(default_factory=dict)
     multiplayer: dict = field(default_factory=dict)   # 4-player pod value facts
+    political: dict = field(default_factory=dict)     # Section-3 political archetypes
     cuts: dict = field(default_factory=dict)          # ONLY removable candidates
     protected: dict = field(default_factory=dict)     # KEEPs — never cuttable
     replacements: dict = field(default_factory=dict)  # ADDs — never cuttable
@@ -139,6 +140,17 @@ class CommanderAIContext:
             for n in example_list or []:
                 if n:
                     names.add(str(n))
+        # Political archetype example cards (per detected archetype) are engine
+        # card names too — include them so the no-invention guard holds.
+        def _political_examples(block: dict) -> None:
+            if isinstance(block, dict):
+                for n in block.get("example_cards", []) or []:
+                    if n:
+                        names.add(str(n))
+        _political_examples(self.political.get("primary") or {})
+        _political_examples(self.political.get("secondary") or {})
+        for d in self.political.get("detected", []) or []:
+            _political_examples(d if isinstance(d, dict) else {})
         for n in self.win_conditions:
             if n:
                 names.add(str(n))

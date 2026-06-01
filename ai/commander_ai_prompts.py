@@ -160,6 +160,19 @@ def build_user_prompt(
                 "interaction counts, table reach, or threat level."
             )
 
+    # Political focus: when the engine detected a political archetype, hand the
+    # model the verified political read so it coaches the deck as a political plan
+    # (incentive / deterrence / payoff / inevitability) instead of guessing.
+    if context.mode in MULTIPLAYER_FOCUS_MODES:
+        focus = _political_focus(context.political)
+        if focus:
+            parts.append(
+                "## Verified political read (Section-3 archetypes - ground political claims here)\n"
+                + focus
+                + "\nUse this engine-verified political read; do not invent a political archetype "
+                "the engine did not detect, and do not call the deck political if it is not."
+            )
+
     # Cut Review: hand the model the exact candidate list (with the engine's own
     # reasons) and forbid going outside it. Small models otherwise roam the JSON,
     # "cut" protected/strategy cards, and invent their own reasons.
@@ -334,6 +347,46 @@ def _multiplayer_focus(multiplayer: dict) -> str:
     if example_line:
         lines.append(example_line)
     return "\n".join(lines)
+
+
+def _political_focus(political: dict) -> str:
+    """Render the engine's verified political read as a focused plain-text block.
+
+    Returns '' when the deck is not political, so the block only appears when the
+    engine actually detected a political archetype.
+    """
+    political = political or {}
+    if not political.get("is_political"):
+        return ""
+
+    def _line(block: dict, label: str) -> str:
+        if not isinstance(block, dict) or not block.get("name"):
+            return ""
+        name = block.get("name", "")
+        axis = block.get("axis", "")
+        conf = block.get("confidence", "low")
+        support = block.get("commander_support", "none")
+        examples = [e for e in (block.get("example_cards") or []) if e][:4]
+        ex = f" (e.g. {', '.join(examples)})" if examples else ""
+        axis_txt = f" - {axis}" if axis else ""
+        return f"- {label}: {name}{axis_txt} [confidence: {conf}, commander support: {support}]{ex}"
+
+    lines: list[str] = []
+    primary_line = _line(political.get("primary") or {}, "Primary political axis")
+    if primary_line:
+        lines.append(primary_line)
+    secondary_line = _line(political.get("secondary") or {}, "Secondary political package")
+    if secondary_line:
+        lines.append(secondary_line)
+    lines.append(
+        f"- Table dependency: {political.get('table_dependency', 'low')}; "
+        f"salt risk: {political.get('salt_risk', 'low')}; "
+        f"reputation: {political.get('reputation_modifier', 'none')}."
+    )
+    for w in (political.get("warnings") or [])[:4]:
+        if w:
+            lines.append(f"- Watch: {w}")
+    return "\n".join(lines) if lines else ""
 
 
 def _replacement_has_named_candidates(replacements: dict) -> bool:

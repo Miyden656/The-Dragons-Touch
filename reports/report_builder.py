@@ -18,6 +18,7 @@ from typing import Any, Iterable
 from app_io.output_writer import get_unique_output_path, write_text_file
 from reports.strategy_knowledge_sections import build_strategy_knowledge_report_section  # v1.4.13 Strategy Knowledge report handoff
 from reports.sections.multiplayer_section import build_multiplayer_report_section  # additive 4-player pod-value section
+from reports.sections.political_section import build_political_report_section  # additive Section-3 political archetypes
 from analysis.deck_building_philosophies import render_philosophy_guide_section as _legacy_render_philosophy_guide_section  # fallback only after v1.1.18
 from philosophy.report_section import format_philosophy_guide_section_from_runtime_config  # v1.1.18 live report guide section
 # v1.1.22.3 manual-context review clarity: off-plan/manual review examples are context flags, not automatic cuts.
@@ -2565,6 +2566,13 @@ def build_normal_report(context: dict[str, Any]) -> str:
     if multiplayer_section:
         lines.append("")
         lines.append(multiplayer_section.rstrip())
+
+    # Additive Section-3 political-archetype section. Self-contained and defensive:
+    # returns '' if the deck is not political, so it can never break the report.
+    political_section = build_political_report_section(context)
+    if political_section:
+        lines.append("")
+        lines.append(political_section.rstrip())
 
     lines += _section("Cut Pressure Review")
     lines.extend([
