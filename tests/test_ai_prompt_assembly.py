@@ -140,6 +140,43 @@ def main() -> None:
     t.true("category surfaced", "More ramp" in rc)
     t.true("told not to name cards", "do NOT name specific cards" in rc)
 
+    # --- multiplayer pod-value focus: surfaced for review/strategy/persona modes ---
+    mp_ctx = CommanderAIContext(
+        mode="commander_review",
+        multiplayer={
+            "interaction": {"sweepers": 2, "spot_removal": 5, "counterspells": 1, "reach_band": "balanced"},
+            "table_reach": {"band": "table_wide"},
+            "archenemy": {"risk_band": "high"},
+            "facts": [
+                "Board wipes: 2 - each can answer all three opponents' boards at once.",
+                "Archenemy / threat density: high - likely to attract focused removal.",
+            ],
+        },
+    )
+    mp_user = build_user_prompt(mp_ctx)
+    t.true("pod-value header present (review)", "Verified pod facts (4-player reasoning" in mp_user)
+    t.true("pod fact rendered", "each can answer all three opponents" in mp_user)
+    t.true("pod grounding instruction", "do not invent" in mp_user.lower())
+
+    # --- pod-value focus is NOT injected for cut_review (has its own allow-list) ---
+    cut_no_mp = build_user_prompt(CommanderAIContext(
+        mode="cut_review",
+        multiplayer={"facts": ["Board wipes: 2 - sweepers scale up."]},
+    ))
+    t.true("no pod-focus block in cut_review", "Verified pod facts (4-player reasoning" not in cut_no_mp)
+
+    # --- focus falls back to bands when no facts list is present ---
+    mp_bands = build_user_prompt(CommanderAIContext(
+        mode="strategy_tutor",
+        multiplayer={"interaction": {"sweepers": 0, "spot_removal": 3, "counterspells": 0, "reach_band": "narrow"},
+                     "table_reach": {"band": "single_target"}, "archenemy": {"risk_band": "low"}},
+    ))
+    t.true("pod-focus falls back to bands", "Archenemy risk: low" in mp_bands)
+
+    # --- empty multiplayer -> no block, no crash ---
+    mp_empty = build_user_prompt(CommanderAIContext(mode="commander_review", multiplayer={}))
+    t.true("empty multiplayer -> no pod block", "Verified pod facts (4-player reasoning" not in mp_empty)
+
     t.report_and_exit()
 
 

@@ -69,6 +69,7 @@ class CommanderAIContext:
     decklist: list = field(default_factory=list)
     strategy: dict = field(default_factory=dict)
     bracket: dict = field(default_factory=dict)
+    multiplayer: dict = field(default_factory=dict)   # 4-player pod value facts
     cuts: dict = field(default_factory=dict)          # ONLY removable candidates
     protected: dict = field(default_factory=dict)     # KEEPs — never cuttable
     replacements: dict = field(default_factory=dict)  # ADDs — never cuttable
@@ -132,6 +133,12 @@ class CommanderAIContext:
         _collect(self.replacements, ("candidates", "collection_candidates"))
         _collect(self.strategy, ("strong_synergy_cards", "possible_off_plan_cards"))
         _collect(self.bracket, ("pressure_cards",))
+        # Multiplayer example cards are grouped by dimension (a dict of name-lists);
+        # every entry is an engine card name, so include them in the guard set.
+        for example_list in (self.multiplayer.get("example_cards") or {}).values():
+            for n in example_list or []:
+                if n:
+                    names.add(str(n))
         for n in self.win_conditions:
             if n:
                 names.add(str(n))

@@ -22,6 +22,7 @@ from ai.commander_ai_service import CommanderAIService
 from ai.ollama_client import OllamaChatResult
 from ai.schemas.ai_context import ALL_MODES, CommanderAIRequest
 from ai.schemas.ai_response import CommanderAIResponse, CommanderAIStructured
+from analysis.multiplayer_signal import MultiplayerValueSummary
 
 
 class FakeClient:
@@ -72,6 +73,12 @@ def _analysis(*, banned=False, collection=False, philosophy="balanced_unknown") 
                                warnings=[], core_synergy_packages=[], candidates=[]),
         "plan_fit_summary": NS(strong_synergy_cards=[], possible_off_plan_cards=[]),
         "bracket_summary": NS(estimated_bracket="Bracket 3", pressure_level="low", pressure_cards=[], notes=[]),
+        "multiplayer_summary": MultiplayerValueSummary(
+            sweeper_count=2, spot_removal_count=5, counterspell_count=1, total_interaction=8,
+            instant_speed_interaction_count=3, interaction_reach_band="balanced",
+            table_wide_pressure_count=2, reach_band="table_wide", archenemy_risk_band="medium",
+            facts=["Board wipes: 2 - each can answer all three opponents' boards at once."],
+        ),
         "possible_cuts": NS(required_cut_candidates=[],
                             optional_cut_candidates=[NS(card_name="Mind Stone", cut_confidence="Medium",
                                                         cut_type="optional", reasons=["redundant ramp"])],
@@ -143,6 +150,19 @@ def main() -> None:
     pet_sys = pet_msgs[0]["content"]
     t.true("pet_card label in prompt", "Pet Card" in pet_sys)
     t.true("pet_card protect bias rendered", "pet card" in pet_sys.lower())
+
+    # === 3b. multiplayer pod facts flow into context + prompt (review modes) ===
+    mp_ctx, mp_msgs = _service().build(
+        CommanderAIRequest(user_text="how's the pod matchup?", mode="commander_review"), analysis
+    )
+    t.eq("multiplayer view populated in context", mp_ctx.multiplayer["interaction"]["sweepers"], 2)
+    t.eq("multiplayer reach band carried", mp_ctx.multiplayer["table_reach"]["band"], "table_wide")
+    t.true("pod-value focus block in review prompt",
+           "Verified pod facts (4-player reasoning" in mp_msgs[-1]["content"])
+    # cut_review keeps its own allow-list, no pod block
+    _, cut_msgs = _service().build(CommanderAIRequest(user_text="cuts?", mode="cut_review"), analysis)
+    t.true("pod-value focus absent in cut_review",
+           "Verified pod facts (4-player reasoning" not in cut_msgs[-1]["content"])
 
     # === 4. scenario battery ===
     # banned card -> surfaced as a warning; engine-echoed ban not false-flagged

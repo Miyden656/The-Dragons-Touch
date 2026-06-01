@@ -14,6 +14,7 @@ from typing import Any
 
 from analysis.bracket_analysis import build_bracket_analysis
 from analysis.deck_building_philosophies import build_philosophy_context
+from analysis.multiplayer_signal import build_multiplayer_summary
 from analysis.plan_fit import build_plan_fit_summary
 from analysis.role_tag_cleanup import apply_role_tag_cleanup
 from analysis.role_tags import build_role_analysis
@@ -81,6 +82,11 @@ def build_analysis_context(
     strategy_summary = build_strategy_summary(role_summary.role_counts, role_summary.type_counts, command_zone.commander_cards_scryfall)
     plan_fit_summary = build_plan_fit_summary(role_summary.card_roles, strategy_summary, command_zone.commander_names)
     bracket_summary = build_bracket_analysis(role_summary)
+    # Additive 4-player pod-value signal. Reads existing outputs only; does NOT
+    # feed back into the v1.6 scoring chain above (role/strategy/bracket unchanged).
+    multiplayer_summary = build_multiplayer_summary(
+        role_summary, command_zone, bracket_summary, scryfall_lookup
+    )
     philosophy_context = build_philosophy_context(
         key=resolved_config.philosophy_key,
         guide_preference=resolved_config.guide_preference,
@@ -124,6 +130,7 @@ def build_analysis_context(
         "strategy_summary": strategy_summary,
         "plan_fit_summary": plan_fit_summary,
         "bracket_summary": bracket_summary,
+        "multiplayer_summary": multiplayer_summary,
         "protected_cards": protected_cards,
         "replaceability": replaceability,
         "cut_pressure": cut_pressure,

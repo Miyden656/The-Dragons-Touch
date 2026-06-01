@@ -16,6 +16,7 @@ from _test_helpers import TestRun
 
 from ai.context.context_serializer import serialize_context
 from ai.schemas.ai_context import CommanderAIRequest
+from analysis.multiplayer_signal import MultiplayerValueSummary
 
 
 def _sample_analysis() -> dict:
@@ -65,6 +66,20 @@ def _sample_analysis() -> dict:
             pressure_cards=[NS(card_name="Mana Crypt", pressure_type="fast_mana",
                                reason="adds bracket pressure")],
             notes=["Some pressure cards present"],
+        ),
+        "multiplayer_summary": MultiplayerValueSummary(
+            sweeper_count=1, spot_removal_count=4, counterspell_count=2,
+            total_interaction=7, instant_speed_interaction_count=3,
+            interaction_reach_band="balanced",
+            table_wide_pressure_count=3, single_target_pressure_count=1,
+            reach_band="table_wide",
+            goad_count=2, pillowfort_count=1, political_presence_band="moderate",
+            threat_density=8, archenemy_risk_band="high",
+            creature_count=30, recursion_count=2, protection_count=3,
+            creature_reliance_band="high", wipe_resilience_band="fragile",
+            facts=["Board wipes: 1 - each can answer all three opponents' boards at once."],
+            example_cards={"sweepers": ["Goblin Bombardment"], "threats": ["Mana Crypt"]},
+            confidence="medium",
         ),
         "possible_cuts": NS(
             required_cut_candidates=[],
@@ -145,6 +160,17 @@ def main() -> None:
     t.eq("estimated bracket", ctx.bracket.get("estimated_bracket"), "Bracket 3")
     t.eq("intended bracket from runtime_config", ctx.bracket.get("intended_bracket"), "Bracket 3 - Strong Casual")
     t.eq("pressure card", ctx.bracket["pressure_cards"][0]["card"], "Mana Crypt")
+
+    # --- multiplayer / pod value (the additive 4-player signal) ---
+    t.eq("mp sweepers", ctx.multiplayer["interaction"]["sweepers"], 1)
+    t.eq("mp spot removal", ctx.multiplayer["interaction"]["spot_removal"], 4)
+    t.eq("mp interaction band", ctx.multiplayer["interaction"]["reach_band"], "balanced")
+    t.eq("mp table reach band", ctx.multiplayer["table_reach"]["band"], "table_wide")
+    t.eq("mp goad count", ctx.multiplayer["politics"]["goad"], 2)
+    t.eq("mp archenemy risk", ctx.multiplayer["archenemy"]["risk_band"], "high")
+    t.eq("mp wipe resilience", ctx.multiplayer["resilience"]["wipe_resilience"], "fragile")
+    t.true("mp facts surfaced", len(ctx.multiplayer["facts"]) >= 1)
+    t.eq("mp example cards grouped", ctx.multiplayer["example_cards"]["sweepers"], ["Goblin Bombardment"])
 
     # --- cuts ---
     t.eq("optional cut card", ctx.cuts["optional_cuts"][0]["card"], "Random Dragon")

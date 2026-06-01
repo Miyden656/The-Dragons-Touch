@@ -42,6 +42,14 @@ STRUCTURED_MODES = frozenset(
     {MODE_COMMANDER_REVIEW, MODE_CUT_REVIEW, MODE_REPLACEMENT, MODE_BUILD_FROM_COLLECTION}
 )
 
+# Modes where 4-player pod reasoning is central to a good answer. For these we
+# hand the model a focused, plain-text mirror of the engine's verified pod facts
+# (the same "hand it the needle" technique as the cut/replacement allow-lists) so
+# a small model actually grounds its multiplayer claims instead of guessing.
+MULTIPLAYER_FOCUS_MODES = frozenset(
+    {MODE_COMMANDER_REVIEW, MODE_STRATEGY_TUTOR, MODE_PERSONA_COACHING}
+)
+
 # Appended to the system prompt for STRUCTURED_MODES. The prose stays primary;
 # the JSON only mirrors what was already said. Kept in code (not a .md asset) so
 # it stays in lockstep with the parser/schema.
@@ -138,6 +146,19 @@ def build_user_prompt(
     if context.user_constraints:
         parts.append("## User constraints")
         parts.extend(f"- {c}" for c in context.user_constraints)
+
+    # Pod-value focus: surface the engine's verified 4-player facts as plain text
+    # for the modes where multiplayer reasoning matters most. Grounds claims about
+    # sweeper value, single-target trades, table reach, and archenemy risk.
+    if context.mode in MULTIPLAYER_FOCUS_MODES:
+        focus = _multiplayer_focus(context.multiplayer)
+        if focus:
+            parts.append(
+                "## Verified pod facts (4-player reasoning — ground multiplayer claims here)\n"
+                + focus
+                + "\nReason about the pod from these engine-verified numbers; do not invent "
+                "interaction counts, table reach, or threat level."
+            )
 
     # Cut Review: hand the model the exact candidate list (with the engine's own
     # reasons) and forbid going outside it. Small models otherwise roam the JSON,
@@ -251,6 +272,33 @@ def _replacement_focus(replacements: dict) -> str:
 
     _add_cards("candidates", "Engine-ranked candidates", "why_it_fits")
     _add_cards("collection_candidates", "From your collection", "reason")
+    return "\n".join(lines)
+
+
+def _multiplayer_focus(multiplayer: dict) -> str:
+    """Render the engine's verified pod facts as a focused plain-text block.
+
+    Prefers the ready-made `facts` list (already grounded, human-readable). Falls
+    back to the structured bands so the block is never empty when data exists.
+    """
+    multiplayer = multiplayer or {}
+    facts = [str(f) for f in (multiplayer.get("facts") or []) if f]
+    if facts:
+        return "\n".join(f"- {f}" for f in facts)
+
+    interaction = multiplayer.get("interaction") or {}
+    reach = multiplayer.get("table_reach") or {}
+    archenemy = multiplayer.get("archenemy") or {}
+    if not (interaction or reach or archenemy):
+        return ""
+    lines = [
+        f"- Interaction: {interaction.get('sweepers', 0)} sweepers, "
+        f"{interaction.get('spot_removal', 0)} single-target, "
+        f"{interaction.get('counterspells', 0)} counters "
+        f"(reach: {interaction.get('reach_band', 'none')}).",
+        f"- Table reach: {reach.get('band', 'none')}.",
+        f"- Archenemy risk: {archenemy.get('risk_band', 'low')}.",
+    ]
     return "\n".join(lines)
 
 
