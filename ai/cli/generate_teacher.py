@@ -28,13 +28,46 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 from ai.commander_ai_config import from_settings  # noqa: E402
 from ai.training.corpus import default_corpus_path  # noqa: E402
-from ai.training.generate import DEFAULT_PROMPT_PLAN, append_candidates  # noqa: E402
+from ai.training.generate import (  # noqa: E402
+    DEFAULT_PROMPT_PLAN,
+    append_candidates,
+    build_deck_analysis,
+)
+from ai.training.persona_affinity import (  # noqa: E402
+    INTENT_PERSONAS,
+    derive_personas_for_deck,
+    intent_persona_sample,
+)
 from ai.training.teacher import (  # noqa: E402
     TEACHER_MODEL,
     TeacherClient,
     estimate_for_deck,
     generate_teacher_for_deck,
 )
+
+
+def _plan_items(decks, lookup, args) -> list[tuple]:
+    """Build the (deck, persona) work list, honoring --deck-derived.
+
+    Deck-derived: each deck contributes Balanced + its top 2 fit personas, plus
+    the 4 intent personas across a sampled subset. Otherwise the flat --personas
+    list. Derivation is engine-only (no API cost), so it is safe to run before
+    the --estimate preview too."""
+    if not args.deck_derived:
+        flat = [p.strip() for p in args.personas.split(",") if p.strip()] or ["balanced_unknown"]
+        return [(d, p) for d in decks for p in flat]
+
+    items: list[tuple] = []
+    for d in decks:
+        try:
+            analysis = build_deck_analysis(d, persona="balanced_unknown", scryfall_lookup=lookup)
+            picks = [p.key for p in derive_personas_for_deck(analysis)]
+        except Exception:  # noqa: BLE001 - fall back to baseline rather than skip the deck
+            picks = ["balanced_unknown"]
+        items += [(d, p) for p in picks]
+    for d in intent_persona_sample(decks, args.intent_sample):
+        items += [(d, p) for p in INTENT_PERSONAS]
+    return items
 
 
 def _load_config():
@@ -54,7 +87,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate gold training examples with a teacher model")
     parser.add_argument("--decks-dir", type=str, default="Decklists")
     parser.add_argument("--limit", type=int, default=0, metavar="N", help="Only the first N decks (0 = all)")
-    parser.add_argument("--personas", type=str, default="balanced_unknown", help="Comma-separated philosophy keys")
+    parser.add_argument("--personas", type=str, default="balanced_unknown", help="Comma-separated philosophy keys (ignored when --deck-derived)")
+    parser.add_argument("--deck-derived", action="store_true",
+                        help="Pick each deck's personas from its engine analysis (Balanced + top 2 fit) instead of --personas")
+    parser.add_argument("--intent-sample", type=int, default=12, metavar="N",
+                        help="With --deck-derived: also run the 4 intent personas across N sampled decks (0 = off)")
     parser.add_argument("--model", type=str, default=TEACHER_MODEL, help=f"Teacher model (default {TEACHER_MODEL})")
     parser.add_argument("--out", type=str, default="", help="Corpus file to append to")
     parser.add_argument("--max-cost", type=float, default=0.0, metavar="USD", help="Stop once estimated spend exceeds this (0 = no cap)")
@@ -88,36 +125,40 @@ def main(argv: list[str] | None = None) -> int:
         print(f"No .txt decklists found in {args.decks_dir}")
         return 0
 
-    personas = [p.strip() for p in args.personas.split(",") if p.strip()] or ["balanced_unknown"]
     out_path = Path(args.out) if args.out else default_corpus_path()
+    work = _plan_items(decks, lookup, args)
 
-    total_plan = len(decks) * len(personas) * len(DEFAULT_PROMPT_PLAN)
-    print(f"TEACHER: {args.model} | {len(decks)} deck(s) x {len(personas)} persona(s) x "
-          f"{len(DEFAULT_PROMPT_PLAN)} prompts = up to {total_plan} gold examples")
+    if args.deck_derived:
+        sample = intent_persona_sample(decks, args.intent_sample)
+        print(f"TEACHER (deck-derived): {args.model} | {len(decks)} deck(s) x (Balanced + top 2 fit) "
+              f"+ {len(INTENT_PERSONAS)} intent x {len(sample)} sampled = {len(work)} (deck, persona) "
+              f"pairs x {len(DEFAULT_PROMPT_PLAN)} prompts")
+    else:
+        print(f"TEACHER: {args.model} | {len(work)} (deck, persona) pair(s) x "
+              f"{len(DEFAULT_PROMPT_PLAN)} prompts = up to {len(work) * len(DEFAULT_PROMPT_PLAN)} gold examples")
     print(f"Output: {out_path}  (gold answers saved approved=True, safety-verified)\n")
 
     totals = {"generated": 0, "kept": 0, "dropped": 0, "cost_usd": 0.0, "errors": 0}
-    for i, deck in enumerate(decks, start=1):
-        for persona in personas:
-            if args.max_cost and totals["cost_usd"] >= args.max_cost:
-                print(f"\nReached --max-cost ${args.max_cost:.2f} (spent ~${totals['cost_usd']:.2f}); stopping.")
-                _summarize(totals, out_path)
-                return 0
-            try:
-                kept, stats = generate_teacher_for_deck(
-                    deck, teacher=teacher, config=config, scryfall_lookup=lookup,
-                    persona=persona, prompt_plan=DEFAULT_PROMPT_PLAN,
-                )
-            except Exception as exc:  # noqa: BLE001
-                totals["errors"] += 1
-                print(f"  [{i}/{len(decks)}] {deck.name} ({persona}) — ERROR: {exc}")
-                continue
-            if kept:
-                append_candidates(out_path, kept)
-            for k in ("generated", "kept", "dropped", "cost_usd"):
-                totals[k] += stats[k]
-            print(f"  [{i}/{len(decks)}] {deck.name} ({persona}) — kept {stats['kept']}, "
-                  f"dropped {stats['dropped']}, ~${stats['cost_usd']:.2f}  (running ~${totals['cost_usd']:.2f})")
+    for deck, persona in work:
+        if args.max_cost and totals["cost_usd"] >= args.max_cost:
+            print(f"\nReached --max-cost ${args.max_cost:.2f} (spent ~${totals['cost_usd']:.2f}); stopping.")
+            _summarize(totals, out_path)
+            return 0
+        try:
+            kept, stats = generate_teacher_for_deck(
+                deck, teacher=teacher, config=config, scryfall_lookup=lookup,
+                persona=persona, prompt_plan=DEFAULT_PROMPT_PLAN,
+            )
+        except Exception as exc:  # noqa: BLE001
+            totals["errors"] += 1
+            print(f"  {deck.name} ({persona}) — ERROR: {exc}")
+            continue
+        if kept:
+            append_candidates(out_path, kept)
+        for k in ("generated", "kept", "dropped", "cost_usd"):
+            totals[k] += stats[k]
+        print(f"  {deck.name} ({persona}) — kept {stats['kept']}, "
+              f"dropped {stats['dropped']}, ~${stats['cost_usd']:.2f}  (running ~${totals['cost_usd']:.2f})")
 
     _summarize(totals, out_path)
     return 0
@@ -136,23 +177,23 @@ def _estimate(args, config) -> int:
     if not decks:
         print(f"No .txt decklists found in {args.decks_dir}")
         return 0
-    personas = [p.strip() for p in args.personas.split(",") if p.strip()] or ["balanced_unknown"]
+    work = _plan_items(decks, lookup, args)
 
-    print(f"COST PREVIEW (no API call, nothing spent) — {len(decks)} deck(s) x "
-          f"{len(personas)} persona(s) x {len(DEFAULT_PROMPT_PLAN)} prompts")
+    mode = "deck-derived" if args.deck_derived else "flat personas"
+    print(f"COST PREVIEW (no API call, nothing spent) — {mode}: {len(work)} (deck, persona) "
+          f"pair(s) x {len(DEFAULT_PROMPT_PLAN)} prompts")
     total = 0.0
     n = 0
-    for deck in decks:
-        for persona in personas:
-            try:
-                cost, count = estimate_for_deck(
-                    deck, config=config, scryfall_lookup=lookup,
-                    persona=persona, prompt_plan=DEFAULT_PROMPT_PLAN,
-                )
-                total += cost
-                n += count
-            except Exception:  # noqa: BLE001 - skip un-estimable decks
-                continue
+    for deck, persona in work:
+        try:
+            cost, count = estimate_for_deck(
+                deck, config=config, scryfall_lookup=lookup,
+                persona=persona, prompt_plan=DEFAULT_PROMPT_PLAN,
+            )
+            total += cost
+            n += count
+        except Exception:  # noqa: BLE001 - skip un-estimable decks
+            continue
     print(f"\nEstimated GOLD examples: ~{n}")
     print(f"Estimated MAX cost: ~${total:.2f}  (conservative — real cost is usually lower)")
     print(f"Per example: ~${(total / n):.3f}" if n else "")
