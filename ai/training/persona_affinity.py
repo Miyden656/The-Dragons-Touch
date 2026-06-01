@@ -4,10 +4,16 @@ WHY THIS EXISTS
 ---------------
 Candidate generation used to pair every deck with a hand-typed persona list (the
 caller's `--personas` flag). That guesses. This module instead reads the engine's
-OWN verified read of a deck — its detected strategy, bracket/power level, and the
-multiplayer pod signal — and maps that to the 1-2 deck-building philosophies the
-deck actually fits, plus the neutral baseline. So each deck's training candidates
-reflect what the deck is trying to do, not an arbitrary lens.
+OWN verified read of a deck — its detected strategy, bracket/power level, the
+multiplayer pod signal, and the Section-3 POLITICAL archetype — and maps that to
+the 1-2 deck-building philosophies the deck actually fits, plus the neutral
+baseline. So each deck's training candidates reflect what the deck is trying to
+do (including how it manipulates the table), not an arbitrary lens.
+
+Axes, in priority order for the two non-baseline slots: strategy (what the deck
+builds) -> political (how it manipulates the table, when political) -> power (how
+hard/casual it plays). The political axis is absent for non-political decks, so
+their picks are unchanged.
 
 TWO KINDS OF PERSONA
 --------------------
@@ -100,6 +106,62 @@ _STRATEGY_AFFINITY: tuple[tuple[str, str], ...] = (
 # Tried in order to backfill if the strategy/power axes collapse to one pick.
 _FALLBACK_FITS: tuple[str, ...] = ("engine_builder", "consistency_maximizer", "big_moment")
 
+# Section-3 political archetype KEY -> best-fit deck-derivable persona. The engine's
+# political classifier (analysis/political_archetypes.py) detects HOW a deck
+# manipulates the table; this maps that table plan onto the closest existing
+# coaching lens. There is no dedicated "politician" philosophy, so:
+#   - table-control / punishment / deterrence / combat-direction -> interaction_controller
+#   - social incentive ENGINES (give resources, votes, deals, bounties) -> engine_builder
+#   - plus a few specials (secret combo, chaos spectacle, hidden info, villain, theft).
+# Modifier-only archetypes (social_contract, reputation) are never a primary, so
+# they are intentionally omitted (no political pick fires for them).
+_POLITICAL_AFFINITY: dict[str, str] = {
+    # table control / punishment / deterrence
+    "group_slug": "interaction_controller",
+    "punisher": "interaction_controller",
+    "aikido": "interaction_controller",
+    "rattlesnake": "interaction_controller",
+    "table_police": "interaction_controller",
+    "anti_combo": "interaction_controller",
+    "goad_control": "interaction_controller",
+    "negotiated_removal": "interaction_controller",
+    "combo_deterrence": "interaction_controller",
+    "pillowfort": "interaction_controller",
+    "turbo_fog": "interaction_controller",
+    "do_not_touch_me": "interaction_controller",
+    "soft_lock": "interaction_controller",
+    "sandbag_control": "interaction_controller",
+    "board_reset_politics": "interaction_controller",
+    "retaliation": "interaction_controller",
+    "fairness": "interaction_controller",
+    "monarch": "interaction_controller",
+    "curses": "interaction_controller",
+    # combat direction
+    "forced_combat": "interaction_controller",
+    "combat_manipulation": "interaction_controller",
+    "shared_combat": "interaction_controller",
+    "threat_redistribution": "interaction_controller",
+    "attack_elsewhere": "interaction_controller",
+    # social incentive engines
+    "group_hug": "engine_builder",
+    "deal_politics": "engine_builder",
+    "voting": "engine_builder",
+    "bounty": "engine_builder",
+    "resource_redistribution": "engine_builder",
+    "gift_politics": "engine_builder",
+    "table_balancer": "engine_builder",
+    "shared_enemy": "engine_builder",
+    "hidden_asymmetry": "engine_builder",
+    "tablewide_acceleration": "engine_builder",
+    "life_politics": "engine_builder",
+    # specials
+    "secret_combo": "combo_builder",
+    "information_politics": "johnny_jenny",
+    "theft": "commander_exploiter",
+    "chaos": "battlecruiser",
+    "villain": "competitive_closer",
+}
+
 
 def _strategy_persona(strategy_label: str) -> tuple[str, str] | None:
     low = (strategy_label or "").lower()
@@ -107,6 +169,28 @@ def _strategy_persona(strategy_label: str) -> tuple[str, str] | None:
         if needle in low:
             return persona, f"primary strategy '{strategy_label}' fits the {persona} lens"
     return None
+
+
+def _political_persona(political_summary: Any) -> tuple[str, str] | None:
+    """Map a detected political archetype to its best-fit coaching lens.
+
+    Returns None when the deck is not political (so non-political decks are
+    unaffected). The political read is a SPECIFIC table-plan signal, so callers
+    weight it ahead of the generic power lens.
+    """
+    if not political_summary:
+        return None
+    if not _attr(political_summary, "is_political", False):
+        return None
+    primary = _attr(political_summary, "primary")
+    if primary is None:
+        return None
+    key = _attr(primary, "key", "") or ""
+    persona = _POLITICAL_AFFINITY.get(key)
+    if not persona:
+        return None
+    name = _attr(primary, "name", key) or key
+    return persona, f"political archetype '{name}' fits the {persona} lens"
 
 
 def _power_persona(bracket: str, threat_band: str, pressure: str) -> tuple[str, str]:
@@ -142,6 +226,7 @@ def derive_personas_for_deck(analysis: Any) -> list[PersonaPick]:
     strat = _attr(analysis, "strategy_summary")
     bracket = _attr(analysis, "bracket_summary")
     mp = _attr(analysis, "multiplayer_summary")
+    pol = _attr(analysis, "political_summary")
 
     primary = _attr(strat, "primary_strategy", "") or ""
     secondary = _attr(strat, "secondary_strategy", "") or ""
@@ -162,6 +247,14 @@ def derive_personas_for_deck(analysis: Any) -> list[PersonaPick]:
     if sp and sp[0] not in chosen and _ok(sp[0]):
         picks.append(PersonaPick(*sp))
         chosen.add(sp[0])
+
+    # Political axis: HOW does the deck manipulate the table? This is a specific,
+    # high-signal table-plan lens, so it is weighted ahead of the generic power
+    # lens for political decks (and is simply absent for non-political decks).
+    polp = _political_persona(pol)
+    if polp and len(picks) < 3 and polp[0] not in chosen and _ok(polp[0]):
+        picks.append(PersonaPick(*polp))
+        chosen.add(polp[0])
 
     # Power axis: how hard / casual is it meant to play?
     pp = _power_persona(est_bracket, threat_band, pressure)

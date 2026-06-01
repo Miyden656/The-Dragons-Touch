@@ -19,12 +19,18 @@ from ai.training.persona_affinity import (
 from analysis.deck_building_philosophies import PHILOSOPHY_PROFILES
 
 
-def _analysis(primary="Midrange / Value", bracket="Bracket 3", threat="low", pressure="low"):
+def _analysis(primary="Midrange / Value", bracket="Bracket 3", threat="low", pressure="low",
+              political=None):
     return {
         "strategy_summary": NS(primary_strategy=primary, secondary_strategy=""),
         "bracket_summary": NS(estimated_bracket=bracket, pressure_level=pressure),
         "multiplayer_summary": NS(archenemy_risk_band=threat),
+        "political_summary": political,
     }
+
+
+def _political(key, name="", is_political=True):
+    return NS(is_political=is_political, primary=NS(key=key, name=name or key))
 
 
 def _keys(picks):
@@ -63,6 +69,31 @@ def main() -> None:
     low = _keys(derive_personas_for_deck(_analysis(primary="Big Creature / Stompy",
                                                    bracket="Bracket 2", threat="low", pressure="low")))
     t.true("low power -> battlecruiser", "battlecruiser" in low)
+
+    # --- political axis: maps the table plan to a lens ---
+    # A Voltron deck (strategy -> big_creature_stompy) that is also Pillowfort
+    # gains the interaction_controller lens from its political read.
+    fort = _keys(derive_personas_for_deck(_analysis(
+        primary="Voltron / Commander Damage", political=_political("pillowfort", "Pillowfort"))))
+    t.true("political pillowfort adds interaction_controller", "interaction_controller" in fort)
+    t.true("strategy lens still present", "big_creature_stompy" in fort)
+    # Group Hug -> engine_builder via the political axis.
+    hug = _keys(derive_personas_for_deck(_analysis(
+        primary="Midrange / Value", political=_political("group_hug", "Group Hug"))))
+    t.true("political group hug -> engine_builder", "engine_builder" in hug)
+    # Secret Combo -> combo_builder.
+    sc = _keys(derive_personas_for_deck(_analysis(
+        primary="Midrange / Value", political=_political("secret_combo", "Secret Combo"))))
+    t.true("political secret combo -> combo_builder", "combo_builder" in sc)
+    # A non-political summary changes nothing (no political pick).
+    nonpol = _keys(derive_personas_for_deck(_analysis(
+        primary="Big Creature / Stompy", bracket="Bracket 2",
+        political=NS(is_political=False, primary=None))))
+    t.true("non-political deck unchanged (still battlecruiser)", "battlecruiser" in nonpol)
+    # Political picks are still real, non-intent keys and baseline-first.
+    t.true("political picks are valid keys", all(k in valid for k in fort))
+    t.true("political picks exclude intent", not (set(fort) & set(INTENT_PERSONAS)))
+    t.eq("political still baseline-first", fort[0], BASELINE_PERSONA)
 
     # --- robustness: empty / garbage analysis still yields a valid set ---
     empty = derive_personas_for_deck({})
