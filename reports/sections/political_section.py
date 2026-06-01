@@ -23,14 +23,17 @@ def _g(obj: Any, name: str, default: Any = None) -> Any:
 
 
 def _archetype_line(d: Any) -> str:
+    # NOTE: do NOT render "commander support: X" here. The normal report's
+    # user-facing postprocessor (user_report_candidate_combo_cleanup) strips that
+    # exact phrase as internal scoring jargon, which would leave a dangling comma.
+    # Commander support still flows to the AI context via political_context.py.
     name = _g(d, "name", "Unknown")
     section = _g(d, "section", "")
     axis = _g(d, "axis", "")
     conf = _g(d, "confidence", "low")
-    support = _g(d, "commander_support", "none")
     bits = f"{name} (sec {section})" if section else f"{name}"
     extra = f" - {axis}" if axis else ""
-    return f"{bits}{extra} [confidence: {conf}, commander support: {support}]"
+    return f"{bits}{extra} [confidence: {conf}]"
 
 
 def build_political_report_section(context: dict[str, Any]) -> str:
