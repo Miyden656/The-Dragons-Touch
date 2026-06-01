@@ -7,8 +7,17 @@ v1.1.4 added safe runtime config mapping.
 v1.1.5 added the reusable Philosophy Guide report section formatter.
 v1.1.6 adds reusable philosophy-aware cut-language helpers.
 
-These modules do not wire philosophy into deck analysis, cut logic, report
-generation, UI behavior, or runtime scoring yet.
+As of v1.1.18/v1.1.19 these modules ARE wired live into deterministic report
+generation: reports/report_builder.py and reports/sections/cut_sections.py use
+philosophy.report_section (the live Philosophy Guide section) and the
+cut/protected/replacement explanation_wiring helpers for persona-aware report
+wording.
+
+What they do NOT change: the runtime SCORING hierarchy. Philosophy's effect on
+scoring is the capped philosophy/persona bias that lives in
+analysis/deck_building_philosophies.py (the canonical profiles + build_philosophy_context
+that main.build_analysis_context calls) and cuts/replaceability. This package
+shapes report LANGUAGE/presentation, not card scores.
 """
 
 from .philosophy_profile import (
