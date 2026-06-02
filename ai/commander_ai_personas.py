@@ -20,7 +20,7 @@ from typing import Any
 from ai.context.safe_access import as_list, as_str
 
 _VOICE_ASSET_PATH = Path(__file__).resolve().parent / "prompts" / "persona_voices.md"
-_VOICE_CACHE: dict[str, dict[str, str]] | None = None
+_VOICE_CACHE: dict[str, dict[str, Any]] | None = None
 
 
 def render_persona_block(persona: dict | None) -> str:
@@ -75,7 +75,7 @@ def render_persona_block(persona: dict | None) -> str:
     return "\n".join(lines)
 
 
-def _load_voice_profiles() -> dict[str, dict[str, str]]:
+def _load_voice_profiles() -> dict[str, dict[str, Any]]:
     """Parse ai/prompts/persona_voices.md into {key: {field: value}}.
 
     Blocks start with `### key: <key>`; within a block each `Field: value` line is
@@ -87,7 +87,8 @@ def _load_voice_profiles() -> dict[str, dict[str, str]]:
     if _VOICE_CACHE is not None:
         return _VOICE_CACHE
 
-    profiles: dict[str, dict[str, str]] = {}
+    # Values are mostly str fields, plus an optional "examples" list[tuple[str, str]].
+    profiles: dict[str, dict[str, Any]] = {}
     field_map = {
         "guide": "guide",
         "essence": "essence",
@@ -102,23 +103,45 @@ def _load_voice_profiles() -> dict[str, dict[str, str]]:
         return profiles
 
     current_key: str | None = None
-    current: dict[str, str] = {}
+    current: dict[str, Any] = {}
+    examples: list[tuple[str, str]] = []
+    pending_q: str | None = None
+
+    def _flush() -> None:
+        if current_key:
+            if examples:
+                current["examples"] = list(examples)
+            profiles[current_key] = current
+
     for raw in text.splitlines():
         line = raw.strip()
         if line.startswith("### key:"):
-            if current_key:
-                profiles[current_key] = current
+            _flush()
             current_key = line[len("### key:"):].strip()
             current = {}
+            examples = []
+            pending_q = None
             continue
         if current_key is None or ":" not in line:
             continue
         label, _, value = line.partition(":")
-        field = field_map.get(label.strip().lower())
+        label_norm = label.strip().lower()
+        value = value.strip()
+        # Few-shot exemplars: paired "Example Q" / "Example A" lines. A Q is held
+        # until its following A so the pair stays together; an A without a pending Q
+        # is ignored rather than allowed to corrupt the list.
+        if label_norm == "example q":
+            pending_q = value
+            continue
+        if label_norm == "example a":
+            if pending_q:
+                examples.append((pending_q, value))
+                pending_q = None
+            continue
+        field = field_map.get(label_norm)
         if field:
-            current[field] = value.strip()
-    if current_key:
-        profiles[current_key] = current
+            current[field] = value
+    _flush()
 
     _VOICE_CACHE = profiles
     return profiles
@@ -139,6 +162,7 @@ def _voice_block(key: str, own_tone: str, family_tone: str, family_label: str) -
     vocabulary = voice.get("vocabulary", "")
     sounds_like = voice.get("sounds_like", "")
     avoid = voice.get("avoid", "")
+    examples = voice.get("examples") or []
 
     lines = ["Voice — how this guide speaks:"]
     if family_tone and family_label and essence:
@@ -158,6 +182,17 @@ def _voice_block(key: str, own_tone: str, family_tone: str, family_label: str) -
         lines.append(f"- Sounds like: {sounds_like}")
     if avoid:
         lines.append(f"- Avoid sounding like: {avoid}")
+    if examples:
+        # Few-shot exemplars: small local models imitate concrete examples far better
+        # than they follow descriptions. Match the REGISTER, not the exact wording, and
+        # never copy any card facts from them — ground every claim in the actual deck.
+        lines.append(
+            "- In-voice examples (copy the register and phrasing energy, not the words "
+            "or any card details):"
+        )
+        for question, answer in examples[:3]:
+            lines.append(f'  - Player: "{question}"')
+            lines.append(f'    You: "{answer}"')
     return lines
 
 

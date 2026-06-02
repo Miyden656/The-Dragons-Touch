@@ -113,7 +113,7 @@ def _definition(
 CUT_LANGUAGE_DEFINITIONS = (
     _definition(
         "Balanced / Unknown",
-        standard="This card has cut pressure because its role is unclear compared to the deck's clearest visible plan.",
+        standard="This card has cut pressure because its role is unclear against the deck's clearest visible trail signs.",
         strong="This is one of the stronger cut candidates because it does not clearly support the commander, the primary strategy, or any visible secondary package.",
         low_confidence="I would not cut this blindly. Its role is unclear, but it may have theme, meta, combo, or personal value that is not visible from the list alone.",
         manual_review="Review this manually because its value depends on user intent. It may belong for theme, personal preference, meta reasons, or a hidden package.",
@@ -129,7 +129,7 @@ CUT_LANGUAGE_DEFINITIONS = (
     ),
     _definition(
         "Johnny / Jenny",
-        standard="This card has cut pressure because it does not clearly connect to the deck's idea, engine, interaction, constraint, or experiment.",
+        standard="This card has cut pressure because it does not clearly connect to the machine the deck is trying to prove — its idea, engine, interaction, constraint, or experiment.",
         strong="This is one of the stronger cut candidates because it looks disconnected from the machine the deck is trying to prove.",
         low_confidence="I would review this carefully. If it is a weak-looking connector piece in a real engine or combo line, it may deserve protection.",
         manual_review="Review this manually because the card may have a hidden role as fuel, outlet, converter, bridge, combo piece, or constraint-compliant role-filler.",

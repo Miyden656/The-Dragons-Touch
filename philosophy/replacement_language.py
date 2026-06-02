@@ -138,7 +138,7 @@ def _definition(
 _REPLACEMENT_ROWS = [
     (
         "Balanced / Unknown",
-        "Look for a replacement that fills a clear missing role without assuming a stronger philosophy than the pilot has chosen.",
+        "Look for a replacement that fills a clear missing role along the deck's clearest path, without assuming a stronger philosophy than the pilot has chosen.",
         "Prefer practical ramp or fixing that helps the deck execute its visible plan more reliably.",
         "Prefer card draw or selection that helps the deck find its main pieces without pushing it into a different identity.",
         "Prefer flexible interaction that answers common problems while preserving the deck's proactive plan.",
@@ -215,7 +215,7 @@ _REPLACEMENT_ROWS = [
     ),
     (
         "Pet Card",
-        "Look for a replacement that reduces the performance cost of keeping the cards the pilot personally cares about.",
+        "Look for a replacement that reduces the performance cost of keeping a protected joy slot — the cards the pilot personally cares about.",
         "Prefer ramp that helps the pet card or its package become castable and relevant.",
         "Prefer draw or selection that helps the pilot find the protected card without overbuilding around it.",
         "Prefer interaction that buys time for the pet card plan without consuming too many slots.",
@@ -314,7 +314,7 @@ _REPLACEMENT_ROWS = [
     ),
     (
         "Consistency Maximizer",
-        "Look for a replacement that helps the deck do its intended thing more often.",
+        "Look for a replacement that raises the deck's floor so it does its intended thing more often.",
         "Prefer reliable ramp and fixing that improves opening hands.",
         "Prefer draw or selection that reduces dead draws and finds key effects.",
         "Prefer flexible interaction that avoids narrow cards and bad-from-behind situations.",
@@ -336,7 +336,7 @@ _REPLACEMENT_ROWS = [
     ),
     (
         "Curve and Mana Discipline",
-        "Look for a replacement that improves mana, curve, color requirements, or sequencing.",
+        "Look for a replacement that improves castability — mana, curve, color requirements, or sequencing.",
         "Prefer ramp and fixing that matches the deck's actual curve and color needs.",
         "Prefer draw that fits into turns where the deck can realistically spend mana.",
         "Prefer interaction that is cheap enough to hold up while advancing the plan.",
@@ -347,7 +347,7 @@ _REPLACEMENT_ROWS = [
     ),
     (
         "Competitive Closer",
-        "Look for a replacement that helps the deck convert advantage into a decisive win.",
+        "Look for a replacement that gives the deck a finish line — converting advantage into a decisive win instead of another lap.",
         "Prefer ramp only if it accelerates toward a real closing turn.",
         "Prefer draw that finds payoff pieces instead of adding endless setup.",
         "Prefer interaction that clears the way for the win or protects the closing line.",
@@ -358,7 +358,7 @@ _REPLACEMENT_ROWS = [
     ),
     (
         "Power-Level Calibrator",
-        "Look for a replacement that fits the intended table, bracket, budget, and combo tolerance.",
+        "Look for a replacement that lands at the correct strength for the intended table, bracket, budget, and combo tolerance — not the maximum.",
         "Prefer ramp that improves the deck without overshooting the pod's speed.",
         "Prefer draw that matches the table's expected power and resource pace.",
         "Prefer interaction that is appropriate for the threats the pod actually presents.",
@@ -369,7 +369,7 @@ _REPLACEMENT_ROWS = [
     ),
     (
         "Interaction Controller",
-        "Look for a replacement that answers the problems the deck currently cannot answer or protects the plan from common failure points.",
+        "Look for a replacement that closes a coverage gap the deck currently cannot answer, or protects the plan from common failure points.",
         "Prefer ramp only if the deck already has enough answers or the ramp helps hold up interaction later.",
         "Prefer draw that finds answers while still supporting the proactive plan.",
         "Prefer flexible removal, protection, wipes, graveyard hate, or stack interaction based on the deck's weak points.",

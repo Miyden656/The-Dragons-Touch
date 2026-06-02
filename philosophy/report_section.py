@@ -19,6 +19,7 @@ from __future__ import annotations
 from typing import Any, Mapping, Optional
 
 from .philosophy_profile import PhilosophyProfile
+from .persona_opening import get_persona_opening_mission
 from .runtime_config_mapping import (
     RuntimePhilosophyContext,
     context_from_profile,
@@ -79,6 +80,70 @@ def _guidance_paragraph(context: RuntimePhilosophyContext) -> str:
         f"This review uses the {selected_lens} lens without a named guide. "
         f"The parent philosophy is {parent}, and the main question is: {primary_question} "
         f"The review should still preserve legality, strategy, user constraints, budget, bracket, and combo tolerance."
+    )
+
+
+def format_persona_opening(
+    context: RuntimePhilosophyContext,
+    *,
+    include_pilot_authority: bool = True,
+) -> str:
+    """Format the player-facing persona opening greeting.
+
+    This is the "Hey, I'm <guide>, let me guide you through your deck" line the
+    normal report opens with. It is deterministic and presentation-only: the guide
+    name/role come from the persona registry, the voiced mission line from
+    persona_opening, and the pilot-authority reassurance is a fixed reminder that
+    the user's intent — not the lens — has the final say.
+
+    When the named-guide toggle is off, the greeting falls back to a lens-framed
+    intro ("I'll guide this review through the <lens> lens.") so it still reads as a
+    first-person guide rather than a developer banner.
+    """
+    persona = context.persona_context
+    lens = _clean_text(context.profile.selected_lens, "Balanced / Unknown")
+    mission = get_persona_opening_mission(lens)
+
+    guide_name = _clean_text(persona.get("guide_name"))
+    guide_role = _clean_text(persona.get("guide_role"))
+
+    if guide_name:
+        role_phrase = f"your {guide_role}" if guide_role else "your guide"
+        intro = f"Hey, I'm {guide_name}, {role_phrase} for this review."
+    else:
+        intro = f"I'll guide this review through the {lens} lens."
+
+    lines = [f"{intro} {mission}".strip()]
+    if include_pilot_authority:
+        lines.append("")
+        lines.append(
+            "> You stay in charge here — everything below is a review suggestion, and "
+            "your stated intent and pet cards win whenever they conflict with this lens."
+        )
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def format_persona_opening_from_profile(
+    profile: PhilosophyProfile,
+    *,
+    include_pilot_authority: bool = True,
+) -> str:
+    """Format the persona opening from an existing PhilosophyProfile."""
+    return format_persona_opening(
+        context_from_profile(profile),
+        include_pilot_authority=include_pilot_authority,
+    )
+
+
+def format_persona_opening_from_runtime_config(
+    config: Optional[Mapping[str, Any]],
+    *,
+    include_pilot_authority: bool = True,
+) -> str:
+    """Format the persona opening directly from runtime/UI config data."""
+    return format_persona_opening(
+        context_from_runtime_config(config),
+        include_pilot_authority=include_pilot_authority,
     )
 
 

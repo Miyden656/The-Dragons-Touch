@@ -66,6 +66,10 @@ def main() -> None:
     t.true("persona example sentence rendered", "Sounds like:" in sys_prompt)
     t.true("persona phrases-to-avoid rendered", "Avoid sounding like:" in sys_prompt)
     t.true("persona family register still blended", "Timmy / Tammy family" in sys_prompt)
+    # --- few-shot in-voice exemplars (the lever that moves a small local model) ---
+    t.true("persona few-shot examples rendered", "In-voice examples" in sys_prompt)
+    t.true("few-shot shows a player question", 'Player: "Should I cut my favorite card' in sys_prompt)
+    t.true("few-shot shows an in-voice answer", "protected joy slot" in sys_prompt)
     t.true("voice shapes both priorities and voice", "BOTH your priorities and your voice" in sys_prompt)
     t.true("guide style no longer dictates tone", "Format:" in sys_prompt)
 

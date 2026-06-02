@@ -12,6 +12,7 @@ from reports.player_facing_status_cleanup import clean_player_facing_status_text
 from reports.user_report_cleanup import clean_developer_noise_from_user_report
 from reports.user_report_detail_suppression import clean_normal_report_user_details
 from reports.user_report_candidate_combo_cleanup import clean_candidate_combo_user_wording
+from reports.report_readability_cleanup import reframe_developer_report_framing
 
 
 def _v0954_card_pressure_tags(card_name: str) -> list[str]:
@@ -265,6 +266,7 @@ def apply_normal_report_postprocessors(report_text: str) -> str:
     report_text = clean_developer_noise_from_user_report(report_text)
     report_text = clean_normal_report_user_details(report_text)
     report_text = clean_candidate_combo_user_wording(report_text)
+    report_text = reframe_developer_report_framing(report_text)
     return report_text
 
 # v1.5.24 — Safe text-in/text-out postprocessor batch extracted from reports/report_builder.py
