@@ -96,14 +96,65 @@ class _AskResult:
     error: str = ""
 
 
+def _subtype_label_to_key() -> dict:
+    """Map the Philosophy Lens subtype dropdown LABELS ("Milo / Mia — Pet Card")
+    to canonical philosophy keys, using the same ordered key list the engine and
+    CLI run use. Returns {} on import failure so the panel still builds."""
+    try:
+        from analysis.deck_building_philosophies import SUBTYPE_KEYS
+        try:
+            from ui.constants import PHILOSOPHY_SUBTYPE_OPTIONS
+        except ImportError:  # running from inside ui/
+            from constants import PHILOSOPHY_SUBTYPE_OPTIONS
+    except Exception:  # noqa: BLE001
+        return {}
+    # PHILOSOPHY_SUBTYPE_OPTIONS[0] is "None / top-level only"; the remaining
+    # labels are 1:1 with SUBTYPE_KEYS in the order the CLI bridge numbers them.
+    return dict(zip(PHILOSOPHY_SUBTYPE_OPTIONS[1:], SUBTYPE_KEYS))
+
+
+_SUBTYPE_LABEL_TO_KEY = _subtype_label_to_key()
+
+# Guide-presentation display label -> engine GuidePreference token. So the Guide
+# coaches in the SAME masculine/feminine/neither voice the user staged before
+# analysis (the AI voice layer reads this off the persona context).
+_GUIDE_PRESENTATION_TO_TOKEN = {
+    "Masculine guide": "masculine",
+    "Feminine guide": "feminine",
+    "Either / random": "either",
+    "Neither / no named guide": "none",
+}
+
+
 def _philosophy_key(window) -> str:
-    """Best-effort: use the staged philosophy if it looks like a key; else balanced."""
+    """The canonical philosophy key for the persona the user staged BEFORE running
+    analysis. A specific subtype (Philosophy Lens dropdown) wins over the top-level
+    lens — mirroring how the engine run resolves the same selection — so the Guide
+    inherits the pilot's chosen lens instead of resetting to Balanced. Returns a real
+    key or 'balanced_unknown'; never raises."""
+    try:
+        from analysis.deck_building_philosophies import normalize_philosophy_key
+    except Exception:  # noqa: BLE001
+        normalize_philosophy_key = None
     state = getattr(window, "state", None)
-    for attr in ("philosophy_key", "philosophy_subtype", "selected_philosophy"):
-        val = getattr(state, attr, None)
-        if isinstance(val, str) and val.strip():
-            return val.strip()
-    return "balanced_unknown"
+    subtype = str(getattr(state, "philosophy_subtype", "") or "").strip()
+    if subtype and subtype != "None / top-level only":
+        key = _SUBTYPE_LABEL_TO_KEY.get(subtype)
+        if key:
+            return key
+    lens = str(getattr(state, "selected_philosophy", "") or "").strip()
+    if normalize_philosophy_key is not None:
+        return normalize_philosophy_key(lens)
+    return lens or "balanced_unknown"
+
+
+def _guide_preference(window) -> str:
+    """The engine guide-preference token (masculine/feminine/either/none) for the
+    presentation the user picked in Settings, so the Guide's named voice matches the
+    pre-analysis persona. Defaults to 'either'; never raises."""
+    state = getattr(window, "state", None)
+    label = str(getattr(state, "guide_presentation", "") or "").strip()
+    return _GUIDE_PRESENTATION_TO_TOKEN.get(label, "either")
 
 
 def _select_default_persona(window, persona_combo) -> None:
@@ -150,7 +201,8 @@ def _do_ask(window, question: str, mode: str, persona: str = "") -> _AskResult:
     runtime = RuntimeConfig(
         output_mode="normal", review_direction="both", build_up_config={},
         cut_depth_config={}, prompt_interaction_mode="guided",
-        philosophy_key=(persona.strip() or _philosophy_key(window)), guide_preference="either",
+        philosophy_key=(persona.strip() or _philosophy_key(window)),
+        guide_preference=_guide_preference(window),
         intended_bracket=getattr(window.state, "bracket", "") or "Bracket 3",
         collection_mode="none",
     )

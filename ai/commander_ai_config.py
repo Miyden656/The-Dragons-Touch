@@ -41,7 +41,7 @@ GUIDE_STYLES = ("adventurer", "archivist", "strategist", "minimal")
 DEFAULT_GUIDE_STYLE = "adventurer"
 
 DEFAULT_BASE_URL = "http://localhost:11434"
-DEFAULT_MODEL = "qwen2.5:7b"  # benchmarked stronger than llama3.1 (legality + hallucination) 2026-05-31
+DEFAULT_MODEL = "qwen3:8b"  # bake-off 2026-06-03: 20/22 stable vs qwen2.5:7b 17/22 (equal 96% checks), newer + Apache-2.0; gemma3:4b lost at 4/22. qwen2.5:7b remains the proven fallback.
 DEFAULT_TEMPERATURE = 0.4
 DEFAULT_TIMEOUT_SECONDS = 120
 

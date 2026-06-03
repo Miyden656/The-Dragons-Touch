@@ -22,7 +22,9 @@ from ai.commander_ai_tools import (
     NOT_LEGAL,
     RESTRICTED,
     UNKNOWN,
+    find_known_card_names,
     legality_in,
+    lookup_card_facts,
 )
 from ai.schemas.ai_context import CommanderAIContext
 
@@ -32,6 +34,7 @@ BAN_UNVERIFIED = "ban_unverified"
 BAN_CONTRADICTED = "ban_contradicted"
 LEGALITY_CONTRADICTED = "legality_contradicted"
 COMBO_UNVERIFIED = "combo_unverified"
+CARD_NOT_FOUND = "card_not_found"
 
 # Format names a model might cite in a ban claim -> Scryfall legality key.
 _FORMAT_WORDS = {
@@ -94,6 +97,30 @@ _COMBO_TRIGGER = re.compile(
 # conservative: we only act when a claim trigger is also present.
 _NAME = re.compile(r"[A-Z][a-zA-Z'’]+(?:[ -][A-Z][a-zA-Z'’]+)*")
 
+# Invented-card detection (free-form modes). The model presents card suggestions
+# in markdown emphasis or quotes (e.g. "swap it for *Sundering Blade*"). We only
+# look inside emphasis/quotes AND only in a recommendation sentence, then flag a
+# card-shaped phrase that resolves to NO real card — high precision, never touches
+# plain prose or section headers.
+_EMPHASIS = re.compile(
+    r"\*\*(?P<b>[^*\n]+?)\*\*"     # **bold**
+    r"|\*(?P<i>[^*\n]+?)\*"        # *italic*
+    r"|“(?P<dq>[^”\n]+?)”"        # “smart quotes”
+    r"|\"(?P<q>[^\"\n]+?)\""      # "straight quotes"
+)
+_SUGGEST_CUE = re.compile(
+    r"\b(add|adds|adding|swap|swapping|replace|replacing|replaced|consider|"
+    r"include|including|run|play|try|upgrade|slot in|instead of|such as|like|e\.?g\.?)\b",
+    re.IGNORECASE,
+)
+# First-word discourse/header words that produce Title-Case phrases but are never cards.
+_NON_CARD_LEAD = {
+    "final", "key", "answer", "example", "note", "summary", "takeaway", "overall",
+    "conclusion", "important", "remember", "trade", "trade-offs", "tradeoffs",
+    "step", "tip", "tips", "pros", "cons", "verdict", "caveat", "reminder",
+}
+_CONNECTOR_TOKENS = {"of", "the", "and", "to", "in", "a", "an", "for", "on", "//", "the,"}
+
 _STOPWORD_NAMES = {
     "the", "this", "that", "your", "you", "it", "if", "based", "use", "do", "don",
     "commander", "magic", "gathering", "edh", "and", "but", "or", "so", "because",
@@ -146,6 +173,7 @@ def verify_response(
         flags.extend(_check_ban(sentence, banned, scryfall_lookup))
         flags.extend(_check_legality_claim(sentence, scryfall_lookup))
         flags.extend(_check_combo(sentence, combo_available))
+        flags.extend(_check_unverified_cards(sentence, scryfall_lookup))
 
     flags = _dedupe(flags)
     annotated = text
@@ -294,6 +322,63 @@ def _check_combo(sentence: str, combo_available: bool) -> list[FlaggedClaim]:
             note="Combo awareness was not run for this deck, so this combo claim is unverified.",
         )
     ]
+
+
+def _looks_like_card_name(phrase: str) -> bool:
+    """A conservative 'this emphasized phrase is shaped like a card name' gate:
+    multi-word, Title-Case, no digits/colons, not a section-header lead word."""
+    p = phrase.strip()
+    if not p or len(p) > 40 or ":" in p or any(ch.isdigit() for ch in p):
+        return False
+    tokens = p.split()
+    if len(tokens) < 2:  # require multi-word — single emphasized words are usually prose (*great*)
+        return False
+    if tokens[0].strip(",.").lower() in _NON_CARD_LEAD:
+        return False
+    # At least two "real" tokens must be capitalized (connectors like of/the don't count).
+    capitalized = sum(
+        1 for t in tokens
+        if t.lower() not in _CONNECTOR_TOKENS and t[:1].isupper()
+    )
+    return capitalized >= 2
+
+
+def _check_unverified_cards(sentence: str, scryfall_lookup: dict | None) -> list[FlaggedClaim]:
+    """Flag a card SUGGESTION that names no real card. Only fires inside markdown
+    emphasis / quotes within a recommendation sentence, so plain prose and headers
+    are never touched. Catches the free-form-mode failure where the model invents a
+    plausible-sounding card (e.g. *Sundering Blade*) the rest of the net misses."""
+    if not scryfall_lookup or not _SUGGEST_CUE.search(sentence):
+        return []
+    out: list[FlaggedClaim] = []
+    seen: set[str] = set()
+    for m in _EMPHASIS.finditer(sentence):
+        phrase = next((g for g in m.groups() if g), "").strip(" *\"'“”.,;:")
+        low = phrase.lower()
+        if not phrase or low in seen or not _looks_like_card_name(phrase):
+            continue
+        seen.add(low)
+        try:
+            real = (
+                lookup_card_facts(phrase, scryfall_lookup) is not None
+                or bool(find_known_card_names(phrase, scryfall_lookup))
+            )
+        except Exception:  # noqa: BLE001 - a lookup error must never produce a false flag
+            real = True
+        if real:
+            continue
+        out.append(
+            FlaggedClaim(
+                kind=CARD_NOT_FOUND,
+                card=phrase,
+                sentence=sentence.strip(),
+                note=(
+                    f"\"{phrase}\" doesn't match any real card in the local database — it may "
+                    f"not exist. Verify it before adding it to the deck."
+                ),
+            )
+        )
+    return out
 
 
 # --- helpers --------------------------------------------------------------

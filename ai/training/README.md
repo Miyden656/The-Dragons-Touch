@@ -50,8 +50,26 @@ example (closest to inference; recommended). Without it, that block is omitted.
 
 ## Recommended setup (spend the budget here)
 
-- **Base model:** `qwen2.5:7b`. Benchmarked stronger than llama3.1:8b on this
-  task (legality accuracy + hallucination resistance) — see `eval.py`.
+- **Base model:** **Qwen3 8B (`qwen3:8b`) is the recommended base** — the newest
+  in the Qwen family, still **Apache 2.0** (so the fine-tuned derivative is yours
+  to name, run, and redistribute — important for a free community release), and
+  best-in-class small-model tool-calling / structured-output reliability, which
+  directly helps the cut-review + JSON-emission tasks. It supersedes `qwen2.5:7b`,
+  which benchmarked stronger than llama3.1:8b here (legality accuracy +
+  hallucination resistance — see `eval.py`) and stays the proven fallback.
+  - **Pick the base BEFORE the fine-tune, by measuring — the dataset is
+    base-agnostic.** `prepare_training_data` emits grounded prompt→answer pairs
+    that don't depend on the base, so you can eval candidate bases for free, pick
+    the winner, and fine-tune that one WITHOUT re-buying teacher data. Run e.g.
+    `py -3 -m ai.cli.run_eval --models qwen3:8b,qwen2.5:7b --repeat 3` and keep
+    whichever beats the 17/21 baseline on YOUR legality / structured / allow-list
+    checks.
+  - **Other permissive bake-off options:** DeepSeek small (MIT) and Mistral Small
+    (Apache 2.0, but larger — heavier to run on an 8 GB card). Gemma 3 is very
+    RAM-efficient but **verify its license before redistributing** — it has
+    historically shipped under Google's custom *Gemma Terms*, not Apache 2.0.
+    Avoid Llama as the base for a *redistributed* model: its community license adds
+    naming/usage conditions Apache 2.0 doesn't.
 - **Method:** QLoRA (4-bit) LoRA adapters. Tooling options, easiest first:
   **Unsloth** (single-GPU, memory-efficient, qwen2.5 supported) → Axolotl →
   LLaMA-Factory. Follow the chosen tool's chat-format dataset docs; this JSONL
@@ -75,14 +93,16 @@ Quality and diversity beat raw count.
 
 ## Measuring success
 
-The eval harness is the yardstick. Today's **baseline to beat (qwen2.5:7b + layer):
-17/21 cases stable over 3 runs, 97% checks** (`run_eval --repeat 3`). After a
-fine-tune, register the model in Ollama (build a Modelfile from the
-merged/adapter weights per Ollama's import docs), point `commander_ai_model` at
-it, and run `run_eval --models <new>,qwen2.5:7b --repeat 3`. A successful
-fine-tune should match or beat the baseline **and** harden the known-flaky cases
-(restricted legality, combo/ownership hallucination, structured emission) — while
-still relying on the grounding + safety layer underneath.
+The eval harness is the yardstick. Today's **baseline to beat (qwen3:8b + layer):
+20/22 cases stable over 3 runs, 96% checks** (`run_eval --repeat 3`; bake-off
+2026-06-03 — qwen3:8b 20/22 beat qwen2.5:7b 17/22 at equal 96% checks, and
+gemma3:4b lost badly at 4/22). After a fine-tune, register the model in Ollama
+(build a Modelfile from the merged/adapter weights per Ollama's import docs),
+point `commander_ai_model` at it, and run `run_eval --models <new>,qwen3:8b
+--repeat 3`. A successful fine-tune should match or beat the baseline **and**
+harden qwen3:8b's two remaining misses (combo-hallucination bait,
+commander-eligibility) plus any flaky legality/structured cases — while still
+relying on the grounding + safety layer underneath.
 
 ## Files
 
