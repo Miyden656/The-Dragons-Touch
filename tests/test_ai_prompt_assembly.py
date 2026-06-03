@@ -82,6 +82,22 @@ def main() -> None:
     persona_prompt = build_system_prompt(_ctx(mode="persona_coaching"))
     t.true("persona coaching pod framing", "Persona at the table" in persona_prompt)
 
+    # --- bracket-tiered calibration: same persona scales advice by power level ---
+    b1 = build_system_prompt(CommanderAIContext(mode="commander_review", bracket={"intended_bracket": "Bracket 1"}))
+    b5 = build_system_prompt(CommanderAIContext(mode="commander_review", bracket={"intended_bracket": "Bracket 5"}))
+    t.true("bracket block present", "Power bracket calibration" in b1)
+    t.true("bracket 1 is ultra-casual", "Exhibition" in b1 and "Do NOT recommend tutors" in b1)
+    t.true("bracket 5 is cEDH", "cEDH" in b5)
+    t.true("brackets give different calibration", b1 != b5)
+    t.true("bracket respects pilot intent", "does NOT override the pilot's stated intent" in b1)
+    # falls back to the engine's estimate when intent is unspecified
+    bEst = build_system_prompt(CommanderAIContext(mode="commander_review",
+                              bracket={"intended_bracket": "Not specified", "estimated_bracket": "Bracket 4"}))
+    t.true("falls back to estimated bracket", "Optimized" in bEst and "current read" in bEst)
+    # no bracket info -> no block, no crash
+    bNone = build_system_prompt(CommanderAIContext(mode="commander_review", bracket={}))
+    t.true("no bracket -> no calibration block", "Power bracket calibration" not in bNone)
+
     # --- mode switching ---
     review_prompt = build_system_prompt(_ctx(mode="commander_review"))
     t.true("commander review mode block", "Mode: Commander Review" in review_prompt)
@@ -164,6 +180,23 @@ def main() -> None:
     t.true("categories-only header", "no specific verified cards available" in rc)
     t.true("category surfaced", "More ramp" in rc)
     t.true("told not to name cards", "do NOT name specific cards" in rc)
+
+    # --- internal detection-source tags must NOT leak into the serialized context ---
+    # The engine bakes tags into need reasons ("... detected from role_count_gap.");
+    # the replacement serializer must translate them before the model ever sees them.
+    from ai.context.replacement_context import build_replacement_view
+    from types import SimpleNamespace as _NS
+    _needs = _NS(priority_categories=["More board protection"], need_details=[
+        _NS(category="More board protection", priority="High",
+            reason="More board protection was detected from primary_or_secondary_strategy."),
+        _NS(category="More interaction", priority="Medium",
+            reason="More interaction was detected from role_count_gap."),
+    ])
+    _view, _ = build_replacement_view(_needs, None, None)
+    _reasons = " ".join(d["reason"] for d in _view["need_details"])
+    t.true("internal source tags stripped", "primary_or_secondary_strategy" not in _reasons and "role_count_gap" not in _reasons)
+    t.true("source tags translated to plain language",
+           "your deck's main strategy" in _reasons and "role coverage" in _reasons)
 
     # --- multiplayer pod-value focus: surfaced for review/strategy/persona modes ---
     mp_ctx = CommanderAIContext(

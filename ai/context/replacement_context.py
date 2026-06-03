@@ -10,6 +10,7 @@ not promote category advice into named cards on its own.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from ai.context.safe_access import as_list, as_str, attr, card_name_of, truncate
@@ -17,6 +18,30 @@ from ai.context.safe_access import as_list, as_str, attr, card_name_of, truncate
 _CANDIDATE_LIMIT = 12
 _COLLECTION_LIMIT = 12
 _NEED_DETAIL_LIMIT = 12
+
+# The engine bakes internal detection-source tags into free-text reasons
+# (e.g. "More X was detected from role_count_gap."). Translate them to plain
+# language so the local model can't parrot internal field names back to the user.
+# Presentation-only: this never changes what is recommended, only how it reads.
+_INTERNAL_SOURCE_PLAIN = {
+    "primary_or_secondary_strategy": "your deck's main strategy",
+    "strategy_specific_need": "your deck's specific strategy",
+    "role_count_gap": "a gap in this deck's role coverage",
+    "generic_role_gap": "a general role gap",
+    "heuristic": "the deck's overall profile",
+}
+# Safety net for any other snake_case tag that slips through after "from <tag>".
+_SNAKE_SOURCE = re.compile(r"\bfrom\s+([a-z]+_[a-z0-9_]+)\b")
+
+
+def _clean_reason(text: str) -> str:
+    """Strip internal detection-source tags from a user-facing reason string."""
+    if not text:
+        return text
+    for tag, plain in _INTERNAL_SOURCE_PLAIN.items():
+        text = text.replace(tag, plain)
+    text = _SNAKE_SOURCE.sub("from the deck's overall profile", text)
+    return text
 
 
 def build_replacement_view(
@@ -59,7 +84,7 @@ def _need(n: Any) -> dict:
     return {
         "category": as_str(attr(n, "category")),
         "priority": as_str(attr(n, "priority")),
-        "reason": as_str(attr(n, "reason")),
+        "reason": _clean_reason(as_str(attr(n, "reason"))),
     }
 
 
@@ -70,8 +95,8 @@ def _candidate(c: Any) -> dict:
         "matched_needs": [as_str(m) for m in as_list(attr(c, "matched_needs"))],
         "owned_status": as_str(attr(c, "owned_status")),
         "confidence": as_str(attr(c, "confidence")),
-        "why_it_fits": as_str(attr(c, "why_it_fits")),
-        "why_to_be_careful": as_str(attr(c, "why_to_be_careful")),
+        "why_it_fits": _clean_reason(as_str(attr(c, "why_it_fits"))),
+        "why_to_be_careful": _clean_reason(as_str(attr(c, "why_to_be_careful"))),
     }
 
 
@@ -81,5 +106,5 @@ def _collection(c: Any) -> dict:
         "quantity_owned": attr(c, "quantity_owned"),
         "confidence": as_str(attr(c, "confidence")),
         "matched_needs": [as_str(m) for m in as_list(attr(c, "matched_needs"))],
-        "reason": as_str(attr(c, "reason")),
+        "reason": _clean_reason(as_str(attr(c, "reason"))),
     }

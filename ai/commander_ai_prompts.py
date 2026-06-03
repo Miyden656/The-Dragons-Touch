@@ -21,6 +21,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from ai.commander_ai_bracket import render_bracket_block
 from ai.commander_ai_guide_styles import render_guide_style_block
 from ai.commander_ai_personas import render_persona_block
 from ai.schemas.ai_context import (
@@ -108,6 +109,7 @@ def build_system_prompt(context: CommanderAIContext) -> str:
         load_prompt_asset("hallucination_guardrails.md"),
         load_prompt_asset(mode_file),
         render_persona_block(context.persona),
+        render_bracket_block(context.bracket),
         render_guide_style_block(context.guide_style),
     ]
     return "\n\n".join(p for p in parts if p and p.strip())

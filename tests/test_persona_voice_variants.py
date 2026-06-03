@@ -65,13 +65,22 @@ def main() -> None:
     finally:
         personas._VOICE_CACHE = saved
 
-    # --- backward compatibility against the REAL asset (no variants authored yet) ---
-    # pet_card currently has only a general block, so masculine must still render its
-    # general voice (the distinctive 'protected joy slot' vocab) and never crash.
-    real = render_persona_block(_persona("masculine"))
-    t.true("real asset: masculine falls back to general voice today",
-           "protected joy slot" in real)
-    t.true("real asset: still renders a Voice block", "Voice — how this guide speaks:" in real)
+    # --- against the REAL asset: pet_card now HAS Milo/Mia variants ---
+    real_m = render_persona_block(_persona("masculine"))
+    real_f = render_persona_block(_persona("feminine"))
+    real_g = render_persona_block(_persona("either"))
+    t.true("real asset: masculine pet_card uses Milo's voice",
+           "keep your buddy" in real_m or "no guilt" in real_m)
+    t.true("real asset: feminine pet_card uses Mia's voice", "what it means to you" in real_f)
+    t.true("real asset: either uses the general voice",
+           "protected joy slot" in real_g and "keep your buddy" not in real_g)
+    t.true("real asset: masc and fem genuinely differ", real_m != real_f)
+    t.true("real asset: still renders a Voice block", "Voice — how this guide speaks:" in real_g)
+
+    # a guide WITHOUT variants (spike is neutral, no pair) still falls back cleanly
+    spike_m = render_persona_block({"key": "spike", "label": "Spike", "guide_name": "Spike",
+                                    "family_label": "Spike", "guide_presentation": "masculine"})
+    t.true("neutral guide with no variant still renders", "Voice — how this guide speaks:" in spike_m)
 
     t.report_and_exit()
 
