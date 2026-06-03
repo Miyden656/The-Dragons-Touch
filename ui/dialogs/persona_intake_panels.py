@@ -143,7 +143,16 @@ def _card_picker_panel(window, field: str, title: str, blurb: str) -> QWidget:
 
     listw = QListWidget()
     listw.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
-    listw.setMinimumHeight(260)
+    listw.setMinimumHeight(420)  # ~15 card rows visible; the page scrolls for the rest
+    # High-contrast list styling — the default rendered nearly invisible (light text
+    # on the cream card). Dark text on a light list bg; clear selected-row highlight.
+    listw.setStyleSheet(
+        "QListWidget { background: #efe0c0; color: #2a1a0c; border: 1px solid #8a6a3a;"
+        " border-radius: 6px; font-size: 14px; }"
+        "QListWidget::item { padding: 5px 8px; }"
+        "QListWidget::item:selected { background: #a85d1e; color: #fdf3df; }"
+        "QListWidget::item:hover { background: #e2c894; }"
+    )
     ordered = list(names)
     for name in current:
         if name not in ordered:
@@ -207,8 +216,14 @@ def _hybrid_panel(window) -> QWidget:
 
     combo_a.currentTextChanged.connect(lambda _=None: _sync())
     combo_b.currentTextChanged.connect(lambda _=None: _sync())
+    try:
+        card.body.setSpacing(8)
+    except Exception:
+        pass
+    card.body.addSpacing(6)
     card.body.addWidget(_text_widget(window, "Theme A"))
     card.body.addWidget(combo_a)
+    card.body.addSpacing(12)
     card.body.addWidget(_text_widget(window, "Theme B"))
     card.body.addWidget(combo_b)
     return card

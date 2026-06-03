@@ -10,7 +10,9 @@ state, Run Analysis refreshes, backend handoff, and CLI/main.py execution.
 """
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QComboBox, QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget,
+)
 
 try:
     from ui.constants import PHILOSOPHY_SUBTYPE_OPTIONS, PHILOSOPHY_LENS_HELP_TEXT
@@ -110,6 +112,14 @@ def build_philosophy_lens_page(window):
     subtype_combo.currentTextChanged.connect(_refresh_intake)
     _refresh_intake(window.state.philosophy_subtype)  # show the panel for the current pick
 
-    body_layout.addStretch(1)
-    layout.addWidget(body, stretch=1)
+    # The page itself has no scroll (page_container/wrap_flow_page don't add one), so
+    # a tall intake panel would compress and overlap the philosophy cards. Wrap the
+    # body in a scroll area so the whole page scrolls instead. No addStretch here —
+    # the content must take its natural height for the scrollbar to engage.
+    scroll = QScrollArea()
+    scroll.setWidgetResizable(True)
+    scroll.setFrameShape(QFrame.NoFrame)
+    scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    scroll.setWidget(body)
+    layout.addWidget(scroll, stretch=1)
     return page
