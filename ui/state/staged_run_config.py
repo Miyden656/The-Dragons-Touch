@@ -32,6 +32,14 @@ class AppState:
     selected_philosophy: str = DEFAULT_SELECTED_PHILOSOPHY
     philosophy_subtype: str = DEFAULT_PHILOSOPHY_SUBTYPE
     guide_presentation: str = DEFAULT_GUIDE_PRESENTATION
+    # Pilot-intent intake captured by the per-guide windows (Pet Card / Constraint /
+    # Weird Card Rescuer / Theme Mechanic Inventor / Theme-Vibe). Flow to the backend
+    # via backend_runner.environment_values -> config.get_runtime_config.
+    pet_cards: list[str] = field(default_factory=list)
+    declared_constraints: str = ""
+    rescue_cards: list[str] = field(default_factory=list)
+    hybrid_themes: list[str] = field(default_factory=list)
+    theme_intent: str = ""
     deck_name: str = "No deck selected"
     commander: str = "No commander detected"
     deck_size: int = 0
