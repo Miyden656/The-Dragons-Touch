@@ -105,6 +105,73 @@ def pilot_intent_from_runtime_config(runtime_config: Any) -> PilotIntent:
     )
 
 
+def _entry_card_name(entry: Any) -> str:
+    for attr_name in ("card_name", "name", "card"):
+        value = getattr(entry, attr_name, None)
+        if value:
+            return str(value).strip()
+    return ""
+
+
+def apply_pilot_protection_to_cuts(possible_cuts: Any, protected_names: Any) -> Any:
+    """Move pilot-protected cards out of the cut buckets into protected_from_cut.
+
+    Presentation/intent-honoring only: it respects the pilot's explicit "never cut"
+    declaration (pet + rescue cards). It does NOT change any cut/replaceability score
+    — it only re-buckets already-scored entries so a protected card is shown as
+    protected instead of as a cut candidate. Returns a new summary (never mutates the
+    input); returns the input unchanged when there's nothing to move.
+    """
+    if possible_cuts is None:
+        return possible_cuts
+    wanted = {str(n).strip().lower() for n in (protected_names or ()) if str(n).strip()}
+    if not wanted:
+        return possible_cuts
+
+    cut_buckets = (
+        "required_cut_candidates", "optional_cut_candidates",
+        "manual_review_candidates", "playtest_first_candidates",
+    )
+    new_buckets: dict[str, list] = {}
+    moved: list = []
+    for bucket in cut_buckets:
+        keep, removed = [], []
+        for entry in (getattr(possible_cuts, bucket, None) or []):
+            (removed if _entry_card_name(entry).lower() in wanted else keep).append(entry)
+        new_buckets[bucket] = keep
+        moved.extend(removed)
+
+    if not moved:
+        return possible_cuts
+
+    protected = list(getattr(possible_cuts, "protected_from_cut", None) or [])
+    seen = {_entry_card_name(e).lower() for e in protected}
+    for entry in moved:
+        key = _entry_card_name(entry).lower()
+        if key and key not in seen:
+            protected.append(entry)
+            seen.add(key)
+    notes = list(getattr(possible_cuts, "notes", None) or [])
+    moved_names = sorted({_entry_card_name(e) for e in moved if _entry_card_name(e)})
+    if moved_names:
+        notes.append(
+            "Pilot-protected (never cut): " + ", ".join(moved_names)
+            + " — moved out of cut candidates by pilot request."
+        )
+
+    import dataclasses
+    try:
+        return dataclasses.replace(
+            possible_cuts, protected_from_cut=protected, notes=notes, **new_buckets
+        )
+    except Exception:  # noqa: BLE001 - last-resort in-place fallback
+        for bucket, value in new_buckets.items():
+            setattr(possible_cuts, bucket, value)
+        setattr(possible_cuts, "protected_from_cut", protected)
+        setattr(possible_cuts, "notes", notes)
+        return possible_cuts
+
+
 def render_pilot_intent_report_block(intent: PilotIntent) -> str:
     """Render the Pilot Intent section for the deck report. Returns '' when empty."""
     if intent is None or intent.is_empty:

@@ -76,7 +76,36 @@ def main() -> None:
     t.true("empty runtime config -> empty intent",
            pilot_intent_from_runtime_config(None).is_empty)
 
+    # --- never-cut enforcement: pilot-protected cards move out of cut buckets ---
+    from analysis.pilot_intent import apply_pilot_protection_to_cuts
+    cuts_obj = NS(
+        required_cut_candidates=[NS(card_name="Sol Ring")],
+        optional_cut_candidates=[NS(card_name="Goblin Bombardment"), NS(card_name="Divination")],
+        manual_review_candidates=[],
+        playtest_first_candidates=[NS(card_name="Coat of Arms")],
+        protected_from_cut=[NS(card_name="Krenko, Mob Boss")],
+        notes=[],
+    )
+    filtered = apply_pilot_protection_to_cuts(cuts_obj, ("Goblin Bombardment", "Coat of Arms"))
+    opt_names = [_entry_name(e) for e in filtered.optional_cut_candidates]
+    pt_names = [_entry_name(e) for e in filtered.playtest_first_candidates]
+    prot_names = [_entry_name(e) for e in filtered.protected_from_cut]
+    t.true("protected card removed from optional cuts", "Goblin Bombardment" not in opt_names)
+    t.true("non-protected card stays in optional cuts", "Divination" in opt_names)
+    t.true("protected card removed from playtest cuts", "Coat of Arms" not in pt_names)
+    t.true("moved cards now appear as protected",
+           "Goblin Bombardment" in prot_names and "Coat of Arms" in prot_names)
+    t.true("a 'pilot-protected' note was added",
+           any("Pilot-protected" in n for n in filtered.notes))
+    # nothing to move -> same object back
+    t.true("no protected names -> unchanged",
+           apply_pilot_protection_to_cuts(cuts_obj, ()) is cuts_obj)
+
     t.report_and_exit()
+
+
+def _entry_name(e) -> str:
+    return str(getattr(e, "card_name", "") or "")
 
 
 if __name__ == "__main__":

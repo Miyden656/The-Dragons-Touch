@@ -105,6 +105,17 @@ def build_analysis_context(
     replaceability = build_replaceability_review(role_summary.card_roles, plan_fit_summary, protected_cards, philosophy_context)
     cut_pressure = build_cut_pressure_summary(parsed_deck.deck_card_count, resolved_config, replaceability)
     possible_cuts = build_possible_cut_review(cut_pressure, replaceability)
+    # Presentation/intent-honoring: respect the pilot's never-cut declaration (pet +
+    # rescue cards from the intake windows) by moving any such card out of the cut
+    # candidates into protected. Does NOT change any cut/replaceability score. Fixes
+    # both the report and the AI guide at once (both read this possible_cuts).
+    from analysis.pilot_intent import (
+        apply_pilot_protection_to_cuts,
+        pilot_intent_from_runtime_config,
+    )
+    _pilot_protected = pilot_intent_from_runtime_config(runtime_config).protected_cards
+    if _pilot_protected:
+        possible_cuts = apply_pilot_protection_to_cuts(possible_cuts, _pilot_protected)
     replacement_needs = build_replacement_need_summary(role_summary.role_counts, strategy_summary, parsed_deck.deck_card_count)
     deck_completion = build_deck_completion_summary(parsed_deck, resolved_config, strategy_summary, replacement_needs)
     collection_candidates = build_collection_candidate_summary(
