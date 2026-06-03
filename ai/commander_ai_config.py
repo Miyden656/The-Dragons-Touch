@@ -51,6 +51,16 @@ TEMPERATURE_MAX = 1.5
 TIMEOUT_MIN_SECONDS = 5
 TIMEOUT_MAX_SECONDS = 600
 
+# Context window the model is told to use. The grounded prompt is LARGE (~15-18k
+# tokens for a full deck); Ollama's default (~4096) silently truncates it, dropping
+# the deck context the model needs to answer well — measured root cause of generic
+# "what is this deck doing" answers. Size this to hold the prompt. Larger = more
+# VRAM (KV cache grows with context); on an 8 GB card very large windows may spill
+# to CPU (slower but correct). Tunable in Settings.
+DEFAULT_NUM_CTX = 20480  # measured: a full-deck commander_review prompt is ~16.9k tokens; 16384 still truncated it (→ empty/degenerate output). 20480 holds it with headroom.
+NUM_CTX_MIN = 2048
+NUM_CTX_MAX = 32768
+
 
 # --- Persisted defaults (single source of truth) --------------------------
 # ui/services/user_settings.py imports this so default values are defined once.
@@ -63,6 +73,7 @@ AI_SETTINGS_DEFAULTS: dict[str, object] = {
     "commander_ai_timeout_seconds": DEFAULT_TIMEOUT_SECONDS,
     "commander_ai_strict_fact_check": True,
     "commander_ai_guide_style": DEFAULT_GUIDE_STYLE,
+    "commander_ai_num_ctx": DEFAULT_NUM_CTX,
 }
 
 
@@ -78,6 +89,7 @@ class CommanderAIConfig:
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS
     strict_fact_check: bool = True
     guide_style: str = DEFAULT_GUIDE_STYLE
+    num_ctx: int = DEFAULT_NUM_CTX
 
     @property
     def chat_url(self) -> str:
@@ -163,6 +175,7 @@ def from_settings(data: dict | None) -> CommanderAIConfig:
         ),
         strict_fact_check=_as_bool(data.get("commander_ai_strict_fact_check"), True),
         guide_style=normalize_guide_style(data.get("commander_ai_guide_style")),
+        num_ctx=_as_int(data.get("commander_ai_num_ctx"), DEFAULT_NUM_CTX, NUM_CTX_MIN, NUM_CTX_MAX),
     )
 
 
@@ -177,4 +190,5 @@ def to_settings(config: CommanderAIConfig) -> dict[str, object]:
         "commander_ai_timeout_seconds": config.timeout_seconds,
         "commander_ai_strict_fact_check": config.strict_fact_check,
         "commander_ai_guide_style": config.guide_style,
+        "commander_ai_num_ctx": config.num_ctx,
     }

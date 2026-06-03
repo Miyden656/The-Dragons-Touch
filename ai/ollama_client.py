@@ -215,11 +215,20 @@ class OllamaClient:
         stream: bool,
     ) -> dict:
         temp = self.config.temperature if temperature is None else temperature
+        # num_ctx: the grounded prompt is large (~15-18k tokens for a full deck).
+        # Ollama defaults to ~4096 and SILENTLY TRUNCATES, dropping the deck context
+        # (and even system guardrails) the model needs. Send the configured window so
+        # the model actually receives the grounding the engine produced.
+        # think=False: reasoning models (e.g. qwen3) otherwise route their output into
+        # a separate "thinking" channel and can leave message.content EMPTY on a large
+        # grounded prompt — and the chain-of-thought is wasted tokens + latency here.
+        # We want a direct grounded answer; harmless no-op for non-reasoning models.
         return {
             "model": self.config.model,
             "messages": list(messages),
             "stream": stream,
-            "options": {"temperature": temp},
+            "think": False,
+            "options": {"temperature": temp, "num_ctx": self.config.num_ctx},
         }
 
     def _get(self, url: str, *, timeout: float | None = None) -> str:

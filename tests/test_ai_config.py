@@ -62,12 +62,21 @@ def main() -> None:
     t.eq("guide None -> adventurer", normalize_guide_style(None), "adventurer")
     t.eq("guide 'minimal' -> minimal", from_settings({"commander_ai_guide_style": "minimal"}).guide_style, "minimal")
 
+    # num_ctx: defaults large enough to hold the grounded prompt, and clamps.
+    from ai.commander_ai_config import DEFAULT_NUM_CTX, NUM_CTX_MAX, NUM_CTX_MIN
+    t.eq("num_ctx defaults to DEFAULT_NUM_CTX", from_settings({}).num_ctx, DEFAULT_NUM_CTX)
+    t.true("default num_ctx holds a large grounded prompt (>=8192)", DEFAULT_NUM_CTX >= 8192)
+    t.eq("num_ctx parsed from settings", from_settings({"commander_ai_num_ctx": 12000}).num_ctx, 12000)
+    t.eq("num_ctx clamps high", from_settings({"commander_ai_num_ctx": 999999}).num_ctx, NUM_CTX_MAX)
+    t.eq("num_ctx clamps low", from_settings({"commander_ai_num_ctx": 1}).num_ctx, NUM_CTX_MIN)
+    t.eq("num_ctx round-trips", to_settings(CommanderAIConfig())["commander_ai_num_ctx"], DEFAULT_NUM_CTX)
+
     # --- defaults dict shape / round-trip ---
     expected_keys = {
         "commander_ai_enabled", "commander_ai_base_url", "commander_ai_model",
         "commander_ai_temperature", "commander_ai_stream",
         "commander_ai_timeout_seconds", "commander_ai_strict_fact_check",
-        "commander_ai_guide_style",
+        "commander_ai_guide_style", "commander_ai_num_ctx",
     }
     t.eq("AI_SETTINGS_DEFAULTS has exactly the expected keys", set(AI_SETTINGS_DEFAULTS), expected_keys)
     t.eq("to_settings keys round-trip", set(to_settings(CommanderAIConfig())), expected_keys)
