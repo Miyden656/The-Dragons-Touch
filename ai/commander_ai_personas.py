@@ -39,6 +39,7 @@ def render_persona_block(persona: dict | None) -> str:
     own_tone = as_str(persona.get("tone"))
     family_tone = as_str(persona.get("family_tone"))
     family_label = as_str(persona.get("family_label"))
+    presentation = as_str(persona.get("guide_presentation"), "either")
     protect = _bias_line(persona.get("protect_bias"))
     review = _bias_line(persona.get("review_bias"))
     prefer = _bias_line(persona.get("replacement_bias"))
@@ -54,7 +55,7 @@ def render_persona_block(persona: dict | None) -> str:
     if rules:
         lines.append(f"How to apply this lens: {rules}")
 
-    lines.extend(_voice_block(key, own_tone, family_tone, family_label))
+    lines.extend(_voice_block(key, own_tone, family_tone, family_label, presentation))
 
     lines.append("")
     lines.append("Let this lens shape BOTH your priorities and your voice:")
@@ -147,13 +148,36 @@ def _load_voice_profiles() -> dict[str, dict[str, Any]]:
     return profiles
 
 
-def _voice_block(key: str, own_tone: str, family_tone: str, family_label: str) -> list[str]:
+def _voice_variant_suffix(presentation: str) -> str:
+    """Map a guide-presentation choice to a voice-variant suffix.
+
+    masculine/feminine pick a gendered voice variant; everything else (either /
+    no-named-guide / unknown) uses the general voice (empty suffix).
+    """
+    p = str(presentation or "").strip().lower().replace("-", "_").replace(" ", "_")
+    if p in ("masculine", "masc", "male", "m"):
+        return "masculine"
+    if p in ("feminine", "fem", "female", "f"):
+        return "feminine"
+    return ""
+
+
+def _voice_block(
+    key: str,
+    own_tone: str,
+    family_tone: str,
+    family_label: str,
+    presentation: str = "either",
+) -> list[str]:
     """Render the Voice lines for the persona block.
 
-    Prefers the distilled voice profile (lexicon + example + avoid) from the asset,
-    blended over the family register the engine supplies. Falls back to the thin
-    engine tone-blend when no profile exists for this key."""
-    voice = _load_voice_profiles().get(key)
+    Prefers a gendered voice variant (asset block `### key: <key>:masculine` /
+    `:feminine`) when the user picked that named guide, then the general voice
+    (`### key: <key>`), then the thin engine tone-blend. So a guide with no variant
+    written yet simply falls back to its general voice — nothing breaks."""
+    profiles = _load_voice_profiles()
+    suffix = _voice_variant_suffix(presentation)
+    voice = (profiles.get(f"{key}:{suffix}") if suffix else None) or profiles.get(key)
     if not voice:
         line = _voice_line(own_tone, family_tone, family_label)
         return [line] if line else []

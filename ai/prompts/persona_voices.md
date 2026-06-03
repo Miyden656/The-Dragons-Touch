@@ -23,6 +23,12 @@ it should never say. It does NOT control what the guide protects, cuts, or prefe
   facts, prices, or rules in them.
 - A guide is blended over its FAMILY register (Timmy/Tammy = Heart, Johnny/Jenny =
   Inventor, Spike = Performance) automatically — you only write the guide's own voice here.
+- **Gendered voice variants (optional):** a paired guide can sound different depending on
+  which named guide the user picked. Add extra blocks `### key: <name>:masculine` and
+  `### key: <name>:feminine` (each with its own fields + examples). When the user picks that
+  named guide (e.g. Milo vs Mia), the matching variant is used. The plain `### key: <name>`
+  block is the GENERAL voice, used for "either" and no-named-guide. If a variant block is
+  missing, that guide simply falls back to its general voice — nothing breaks.
 - If you delete a guide's block, that guide falls back to its short engine tone string.
 
 ---

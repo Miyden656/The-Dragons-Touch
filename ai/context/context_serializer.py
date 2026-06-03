@@ -150,6 +150,9 @@ def _build_persona_view(philosophy_context: dict) -> dict:
         "key": key,
         "label": as_str(pc.get("label"), "Balanced / Unknown"),
         "guide_name": as_str(pc.get("guide_name")),
+        # Which named-guide variant the user picked; the voice layer uses this to
+        # select a gendered voice variant (falls back to the general voice).
+        "guide_presentation": as_str(pc.get("guide_presentation"), "either"),
         "guide_role": as_str(pc.get("guide_role"), "Guide"),
         "core_question": as_str(pc.get("core_question"), "What does this deck want to do?"),
         "rules_summary": as_str(pc.get("rules_summary")),

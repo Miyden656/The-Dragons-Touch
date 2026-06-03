@@ -740,6 +740,10 @@ def build_philosophy_context(
         "parent_key": profile.parent,
         "parent_label": parent_label,
         "guide_name": guide_name,
+        # Presentation-only passthrough: which named-guide variant the user picked
+        # (masculine/feminine/either/none). Lets the AI voice layer select a
+        # gendered voice variant. Does NOT affect scoring, cuts, or the report system.
+        "guide_presentation": guide_preference,
         "guide_role": profile.persona.role,
         "core_question": profile.persona.core_question,
         "core_philosophy": profile.core_philosophy,
