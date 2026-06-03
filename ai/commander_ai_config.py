@@ -57,7 +57,7 @@ TIMEOUT_MAX_SECONDS = 600
 # "what is this deck doing" answers. Size this to hold the prompt. Larger = more
 # VRAM (KV cache grows with context); on an 8 GB card very large windows may spill
 # to CPU (slower but correct). Tunable in Settings.
-DEFAULT_NUM_CTX = 20480  # measured: a full-deck commander_review prompt is ~16.9k tokens; 16384 still truncated it (→ empty/degenerate output). 20480 holds it with headroom.
+DEFAULT_NUM_CTX = 16384  # full-deck prompts measure ~10-11.4k tokens after prompt compaction (compact JSON + trimmed protected/types); 16384 holds the largest mode (+card-facts, big decks) with ~5k headroom while spilling less to CPU than 20480 on an 8GB card.
 NUM_CTX_MIN = 2048
 NUM_CTX_MAX = 32768
 

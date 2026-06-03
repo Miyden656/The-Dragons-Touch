@@ -78,9 +78,11 @@ def _build_decklist(role_summary: Any) -> list[dict]:
             {
                 "name": name,
                 "count": as_int(attr(entry, "quantity", 1)),
+                # roles already encode card function (incl. "creature"/"land"/etc.) and the
+                # deck-level type_counts carry the type breakdown, so a per-card "types"
+                # array is redundant prompt bloat across ~70+ cards — omitted.
                 "roles": [as_str(r) for r in as_list(attr(entry, "detected_roles"))],
                 "mana_value": attr(entry, "mana_value"),
-                "types": [as_str(t) for t in as_list(attr(entry, "card_types"))],
             }
         )
     return out

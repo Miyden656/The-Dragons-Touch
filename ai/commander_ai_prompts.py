@@ -19,6 +19,7 @@ data-driven persona/guide-style blocks are generated from the context.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from ai.commander_ai_bracket import render_bracket_block
@@ -120,10 +121,13 @@ def build_user_prompt(
     *,
     verified_card_facts: str = "",
 ) -> str:
+    # Compact (not pretty-printed) JSON: identical information, ~32% fewer tokens.
+    # The grounded prompt is large and the model's context window is finite on an
+    # 8 GB card — every token of indentation is a token of grounding we can't fit.
     parts: list[str] = [
         "## Verified deck context (engine-provided — treat as source of truth)",
         "```json",
-        context.to_json(),
+        json.dumps(context.to_payload(), ensure_ascii=False, separators=(",", ":")),
         "```",
     ]
 
