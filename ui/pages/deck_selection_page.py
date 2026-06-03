@@ -612,21 +612,18 @@ def build_deck_selection_page(window):
 
     shell_layout.addWidget(tabs)
 
-    # First-run polish: clear "where to next" guidance for the two main flows.
-    next_steps_card = ReportCard("Where to Next?", window.theme, badges=[("Quick Start", "primary")])
-    next_steps_card.body.addWidget(window.make_text(
-        "Two ways to use The Dragon's Touch:\n\n"
-        "• Deck review — pick or paste a decklist above, then go to Run Analysis to generate a "
-        "cut/protect/replacement report. Open it from Report Viewer.\n\n"
-        "• Commander's Call — build a deck FROM your card collection. Open Settings → Collection Source "
-        "first to point at your collection folder, then go to The Commander's Call to scan for possible commanders.\n\n"
-        "Both flows need Scryfall data. If you haven't downloaded it yet, Settings has a one-click Data Setup button.",
-        paper=True,
-    ))
-    shell_layout.addWidget(next_steps_card)
+    # The "Where to Next?" first-run guidance was removed from this page to
+    # reduce scrolling (tester feedback). The same guidance already lives in
+    # README.md under "Two ways to use it", "Quick start", and
+    # "First-time data setup".
 
     content.layout().addWidget(shell)
     layout.addWidget(scroll, stretch=1)
+
+    # Lightweight refresh hook so load_deck_file_preview can update just the
+    # preview + status instead of rebuilding the whole shell (tester: deck-file
+    # selection felt slow — the cause was a full rebuild_shell on every load).
+    window.refresh_deck_selection_preview = lambda: _update_deck_selection_preview(window)
 
     _update_deck_selection_preview(window)
     return page

@@ -91,6 +91,10 @@ class CommanderCandidate:
     mana_value: float | None = None
     type_line: str = ""
     oracle_text_preview: str = ""
+    # Full, untruncated combined oracle text (incl. card faces). The preview
+    # above stays 240-char for the text report; this feeds the UI detail panel
+    # so the selected commander's complete rules text is always visible.
+    full_oracle_text: str = ""
     source_files: list[str] = field(default_factory=list)
     commander_eligibility_reason: str = ""
     eligibility_status: str = "eligible"
@@ -139,6 +143,7 @@ class CommanderCandidate:
             mana_value=_coerce_mana_value(card.get("cmc")),
             type_line=str(card.get("type_line") or ""),
             oracle_text_preview=preview,
+            full_oracle_text=oracle_text,
             source_files=sorted(set(source_files or [])),
             commander_eligibility_reason=reason,
             eligibility_status=classification.status,
@@ -162,6 +167,7 @@ class CommanderCandidate:
             "mana_value": self.mana_value,
             "type_line": self.type_line,
             "oracle_text_preview": self.oracle_text_preview,
+            "full_oracle_text": self.full_oracle_text,
             "source_files": list(self.source_files),
             "commander_eligibility_reason": self.commander_eligibility_reason,
             "eligibility_status": self.eligibility_status,

@@ -20,6 +20,9 @@ uses a simple scan-then-ready flow; Developer Mode keeps implementation boundari
 
 from pathlib import Path
 import random
+import json
+import os
+import tempfile
 
 # v1.3.1 marker: Selected Commander Build-Start UI Preview is display-only.
 # v1.3.10 marker: Shell Skeleton UI Preview is display-only.
@@ -28,7 +31,7 @@ import random
 # v1.3.14 marker: Strategy Selection / Override Preview UI is selection-only; no deck generation.
 
 try:
-    from PySide6.QtCore import Qt, QUrl, QTimer
+    from PySide6.QtCore import Qt, QUrl, QTimer, QObject, QThread, QProcess, Signal, Slot
     from PySide6.QtGui import QDesktopServices
     from PySide6.QtWidgets import (
         QApplication,
@@ -45,7 +48,7 @@ try:
 
     from ui.widgets import add_shadow, ReportCard, SmallStat, TexturedPanel
 except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
-    from PySide6.QtCore import Qt, QUrl, QTimer
+    from PySide6.QtCore import Qt, QUrl, QTimer, QObject, QThread, QProcess, Signal, Slot
     from PySide6.QtGui import QDesktopServices
     from PySide6.QtWidgets import (
         QApplication,
@@ -430,10 +433,13 @@ def _candidate_detail_text(candidate):
             lines.append(f"  - {_P(str(source)).name}")
         if len(source_files) > 6:
             lines.append(f"  - ...and {len(source_files) - 6} more")
-    if candidate.get("oracle_text_preview"):
-        lines.append("")
-        lines.append("Oracle text preview:")
-        lines.append(str(candidate.get("oracle_text_preview")))
+    # Always show the FULL oracle text (tester feedback): prefer the untruncated
+    # field, fall back to the 240-char preview, and always render the heading so
+    # the section is never silently hidden.
+    oracle_full = str(candidate.get("full_oracle_text") or candidate.get("oracle_text_preview") or "").strip()
+    lines.append("")
+    lines.append("Oracle text:")
+    lines.append(oracle_full if oracle_full else "No oracle text available for this card.")
     return "\n".join(lines)
 
 
@@ -941,83 +947,10 @@ def _format_owned_cards_by_role_write_result(result, output):
     ])
 
 def _load_full_owned_collection_for_role_bucketing(window):
-    """v1.5.35: Load the real user collection for Owned Cards by Role.
-
-    Returns a list of card dicts shaped like:
-        {
-            "name": <card_name>,
-            "owned_quantity": <int>,
-            "oracle_text": <str>,
-            "type_line": <str>,
-            "source_files": [<filename>, ...]
-        }
-
-    Falls back to a small sample if the collection or Scryfall data can't be
-    loaded so the UI handler can still produce something useful.
-    """
-    try:
-        from commander_discovery.ui_scan_path import resolve_commander_discovery_collection_files
-        from data.scryfall_loader import load_scryfall_lookup
-        from data.collection_loader import load_collection_sources
-        from pathlib import Path as _P
-    except Exception:
-        return _sample_owned_cards_by_role_candidates_fallback()
-
-    state = getattr(window, "state", None)
-    if state is None:
-        return _sample_owned_cards_by_role_candidates_fallback()
-
-    try:
-        collection_files = resolve_commander_discovery_collection_files(state)
-        if not collection_files:
-            return _sample_owned_cards_by_role_candidates_fallback()
-
-        scryfall_cards, scryfall_lookup = load_scryfall_lookup()
-        summary = load_collection_sources(
-            collection_files,
-            mode="prefer",
-            scryfall_lookup=scryfall_lookup,
-            source_mode=str(getattr(state, "collection_source_mode", "selected_files") or "selected_files"),
-            collection_folder=getattr(state, "collection_folder", None),
-            scryfall_cards=scryfall_cards,
-        )
-    except Exception:
-        return _sample_owned_cards_by_role_candidates_fallback()
-
-    cards: list[dict] = []
-    seen_names: set[str] = set()
-    for entry in summary.entries:
-        name = entry.scryfall_name or entry.card_name
-        if not name or name in seen_names:
-            continue
-        seen_names.add(name)
-        scry = scryfall_lookup.get(name.lower(), {}) or {}
-        # Pull oracle text and type line for the role inference; fall back to whatever
-        # the collection entry already has if Scryfall didn't find it.
-        oracle_text = str(scry.get("oracle_text", "") or scry.get("card_faces", [{}])[0].get("oracle_text", "")) if scry else ""
-        type_line = str(scry.get("type_line", "") or "")
-        sources_for_card = summary.card_sources.get(name, []) or summary.card_sources.get(entry.card_name, [])
-        if not sources_for_card and entry.source_file:
-            sources_for_card = [entry.source_file]
-        cards.append({
-            "name": name,
-            "owned_quantity": int(summary.card_quantities.get(name, entry.quantity)),
-            "oracle_text": oracle_text,
-            "type_line": type_line,
-            "source_files": [_P(str(p)).name for p in sources_for_card if p],
-        })
-    if not cards:
-        return _sample_owned_cards_by_role_candidates_fallback()
-    return cards
-
-
-def _sample_owned_cards_by_role_candidates_fallback():
-    """Tiny safety-net sample for when the real collection load fails."""
-    return [
-        {"name": "Sol Ring", "owned_quantity": 1, "oracle_text": "Add two colorless mana.", "type_line": "Artifact", "source_files": []},
-        {"name": "Arcane Signet", "owned_quantity": 1, "oracle_text": "Add one mana of any color in your commander's color identity.", "type_line": "Artifact", "source_files": []},
-        {"name": "Command Tower", "owned_quantity": 1, "oracle_text": "Add one mana of any color in your commander's color identity.", "type_line": "Land", "source_files": []},
-    ]
+    """Delegate to the non-Qt loader (moved to commander_discovery.ui_scan_path so
+    the Commander Discovery CLI subprocess can reuse it without importing PySide6)."""
+    from commander_discovery.ui_scan_path import load_owned_collection_for_role_bucketing
+    return load_owned_collection_for_role_bucketing(getattr(window, "state", None))
 
 
 def _sample_owned_cards_by_role_candidates(window):
@@ -1050,70 +983,25 @@ def _preview_write_owned_cards_by_role_output(window):
 
     button = getattr(window, "commander_discovery_owned_cards_by_role_output_button", None)
     box = getattr(window, "commander_discovery_owned_cards_by_role_output_box", None)
-    original_button_text = "Write Owned Cards By Role Output"
-    if button is not None:
-        try:
-            original_button_text = button.text()
-            button.setEnabled(False)
-            button.setText("Working…")
-        except Exception:
-            pass
+    original_button_text = button.text() if button is not None else "Write Owned Cards By Role Output"
     if box is not None:
         try:
             box.setPlainText(
                 "Building Owned Cards By Role report…\n\n"
                 "This loads your Scryfall data and walks every card in your collection,\n"
                 "so it can take 20-60 seconds depending on collection size.\n\n"
-                "The button will re-enable when the report is ready."
+                "It now runs in the background — the window stays responsive."
             )
         except Exception:
             pass
-    # Force the UI to repaint before the heavy work begins.
-    try:
-        QApplication.processEvents()
-    except Exception:
-        pass
-
-    try:
-        from build_from_collection.owned_cards_by_role_output import create_owned_cards_by_role_output
-        from build_from_collection.owned_cards_by_role_report_writer import write_owned_cards_by_role_output
-
-        commander_name = candidate.get("commander_name") if isinstance(candidate, dict) else getattr(candidate, "commander_name", None)
-        if not commander_name:
-            commander_name = candidate.get("card_name", "Selected commander") if isinstance(candidate, dict) else getattr(candidate, "card_name", "Selected commander")
-
-        prefs = getattr(window, "commander_discovery_build_preferences", None)
-        primary_strategy = (prefs.primary_strategy if prefs and prefs.primary_strategy else "Not selected yet")
-        secondary_strategy = (prefs.secondary_strategy if prefs and prefs.secondary_strategy else "None")
-
-        owned_cards = _load_full_owned_collection_for_role_bucketing(window)
-        output = create_owned_cards_by_role_output(
-            owned_cards=owned_cards,
-            selected_commander=commander_name,
-            primary_strategy=primary_strategy,
-            secondary_strategy=secondary_strategy,
-        )
-        output_root = getattr(getattr(window, "state", None), "report_output_folder", "Outputs") or "Outputs"
-        result = write_owned_cards_by_role_output(output, output_root=output_root)
-        window.commander_discovery_owned_cards_by_role_output = output.to_dict()
-        window.commander_discovery_owned_cards_by_role_write_result = result.to_dict()
-        preview_text = _format_owned_cards_by_role_write_result(result, output)
-    except Exception as exc:
-        window.commander_discovery_owned_cards_by_role_output = {}
-        window.commander_discovery_owned_cards_by_role_write_result = {}
-        preview_text = f"Owned Cards By Role Output failed before completion.\n- Error detail: {exc}"
-        # Category D (popup removal): error already in preview_text.
-    finally:
-        if button is not None:
-            try:
-                button.setText(original_button_text)
-                button.setEnabled(True)
-            except Exception:
-                pass
-
-    if box is not None:
-        box.setPlainText(preview_text)
-    _refresh_build_start_preview_controls(window)
+    _launch_cd_generator(
+        window, "owned_by_role",
+        "commander_discovery_owned_cards_by_role_output_button",
+        "commander_discovery_owned_cards_by_role_output_box",
+        busy_text="Working…",
+        original_text=original_button_text,
+        fail_prefix="Owned Cards By Role Output failed before completion.",
+    )
 # END v1.3.21 Owned Cards By Role UI / Report Write Hook helpers
 
 def _format_build_from_collection_setup_summary_preview(preview):
@@ -1687,13 +1575,159 @@ def _populate_commander_discovery_selector(window, result):
     window.commander_discovery_all_candidate_summaries = candidates
     _apply_commander_discovery_filters(window)
 
-def _run_guarded_commander_discovery_scan(window):
-    """Run the Commander Discovery UI scan path.
+# --- Subprocess runner (scan + generators) -------------------------------------
+# The scan and the three generators load Scryfall + build decks — CPU-bound pure
+# Python that holds the GIL, so a QThread still froze the UI. We run them in a
+# SEPARATE PROCESS (its own interpreter/GIL) via tools/commander_discovery_cli.py,
+# so the UI stays responsive. Inputs/results are passed as temp JSON files.
 
-    Category A (popup removal 2026-05-29): the user clicked the Scan button,
-    just scan. The "this will not modify your deck" disclaimers are preserved
-    in the inline status text so the boundary is still surfaced — just not
-    as a Yes/No interruption.
+def _cd_cli_path() -> str:
+    # repo root = .../ui/pages/commander_discovery_page.py -> parents[2]
+    return str(Path(__file__).resolve().parents[2] / "tools" / "commander_discovery_cli.py")
+
+
+def _cd_cli_input(window, op):
+    """Gather the plain (JSON-safe) inputs the CLI needs for this op."""
+    s = getattr(window, "state", None)
+    prefs = getattr(window, "commander_discovery_build_preferences", None)
+    candidate = _current_selected_commander_candidate(window) or {}
+    return {
+        "op": op,
+        "collection_source_mode": getattr(s, "collection_source_mode", "") if s else "",
+        "selected_collection_files": list(getattr(s, "selected_collection_files", []) or []) if s else [],
+        "collection_folder": getattr(s, "collection_folder", "") if s else "",
+        "report_output_folder": getattr(s, "report_output_folder", "Outputs") if s else "Outputs",
+        "commander_candidate": candidate if isinstance(candidate, dict) else {},
+        "prefs": {
+            "primary_strategy": getattr(prefs, "primary_strategy", "") if prefs else "",
+            "secondary_strategy": getattr(prefs, "secondary_strategy", "") if prefs else "",
+            "main_philosophy": getattr(prefs, "main_philosophy", "") if prefs else "",
+            "sub_philosophy": getattr(prefs, "sub_philosophy", "") if prefs else "",
+            "bracket_preference": getattr(prefs, "bracket_preference", "") if prefs else "",
+            "collection_first_preference": getattr(prefs, "collection_first_preference", "") if prefs else "",
+        },
+    }
+
+
+def _launch_cd_cli(window, op, on_result, button_attr, busy_text, original_text):
+    """Run the Commander Discovery CLI for `op` in a subprocess; call on_result(data) on finish.
+
+    on_result receives the parsed JSON dict (kind: scan|generator|error). The UI
+    stays responsive throughout. Re-entry per op is guarded.
+
+    button_attr is the window attribute NAME of the trigger button (re-fetched at
+    busy/restore time) — NOT the widget — because a page rebuild between launch and
+    completion can destroy the original widget (the window attr points at the live one).
+    """
+    proc_attr = f"_cd_proc_{op}"
+    if getattr(window, proc_attr, None) is not None:
+        return  # already running
+
+    def _button():
+        return getattr(window, button_attr, None) if button_attr else None
+
+    try:
+        in_fd, in_path = tempfile.mkstemp(suffix=".json", prefix="tdt_cd_in_")
+        out_fd, out_path = tempfile.mkstemp(suffix=".json", prefix="tdt_cd_out_")
+        os.close(in_fd)
+        os.close(out_fd)
+        Path(in_path).write_text(json.dumps(_cd_cli_input(window, op)), encoding="utf-8")
+    except Exception as exc:
+        on_result({"kind": "error", "error": f"Could not stage subprocess input: {exc}"})
+        return
+
+    _b = _button()
+    if _b is not None:
+        _b.setEnabled(False)
+        _b.setText(busy_text)
+
+    proc = QProcess(window)
+    proc.setProgram("py")
+    proc.setArguments([_cd_cli_path(), "--op", op, "--input", in_path, "--output", out_path])
+    state = {"done": False}
+
+    def _cleanup():
+        for p in (in_path, out_path):
+            try:
+                os.remove(p)
+            except Exception:
+                pass
+        setattr(window, proc_attr, None)
+
+    def _restore():
+        b = _button()
+        if b is not None:
+            try:
+                b.setEnabled(True)
+                b.setText(original_text)
+            except Exception:
+                pass
+
+    def _complete(data):
+        if state["done"]:
+            return
+        state["done"] = True
+        _restore()
+        try:
+            on_result(data)
+        finally:
+            _cleanup()
+
+    def _on_finished(_code=0, _status=None):
+        try:
+            data = json.loads(Path(out_path).read_text(encoding="utf-8-sig"))
+        except Exception as exc:
+            data = {"kind": "error", "error": f"Could not read subprocess result: {exc}"}
+        _complete(data)
+
+    def _on_error(_err=None):
+        # Only matters if the process never produced a result (e.g. failed to start).
+        if not state["done"]:
+            _complete({"kind": "error", "error": "The subprocess could not be started (is Python 'py' available?)."})
+
+    proc.finished.connect(_on_finished)
+    proc.errorOccurred.connect(_on_error)
+    setattr(window, proc_attr, proc)
+    proc.start()
+
+
+def _launch_cd_generator(window, op, button_attr, box_attr, busy_text, original_text, fail_prefix):
+    """Run one generator op in a subprocess and apply its result to the UI.
+
+    button_attr/box_attr are window attribute NAMES (re-fetched at completion) so a
+    page rebuild mid-run can't leave us writing to a deleted widget.
+    """
+    def _on_result(data):
+        box = getattr(window, box_attr, None) if box_attr else None
+        if data.get("kind") == "generator":
+            for key, value in (data.get("outputs") or {}).items():
+                setattr(window, key, value)
+            if box is not None:
+                try:
+                    box.setPlainText(data.get("preview_text", ""))
+                except Exception:
+                    pass
+        else:
+            if box is not None:
+                try:
+                    box.setPlainText(f"{fail_prefix}\n- Error detail: {data.get('error', 'unknown error')}")
+                except Exception:
+                    pass
+        _refresh_build_start_preview_controls(window)
+
+    _launch_cd_cli(window, op, _on_result, button_attr, busy_text, original_text)
+
+
+def _run_guarded_commander_discovery_scan(window):
+    """Launch the Commander Discovery scan in a SUBPROCESS (so the UI never freezes).
+
+    The scan loads the full Scryfall DB + the collection — CPU-bound pure Python
+    that holds the GIL, so a thread still froze the UI. Running it as a separate
+    process keeps the window responsive. Shows an immediate busy state; the result
+    is applied on completion in _finish_commander_discovery_scan.
+
+    Category A (popup removal): the user clicked Scan, just scan. The
+    "this will not modify your deck" disclaimers stay in the inline status text.
     """
     _set_commander_discovery_status(
         window,
@@ -1705,21 +1739,34 @@ def _run_guarded_commander_discovery_scan(window):
         "- Preparing Commander Result List\n\n"
         "This scan does not run normal deck review, modify your deck, generate a 100-card shell, or make network/API calls.",
     )
-    if getattr(window, "commander_discovery_scan_button", None) is not None:
-        window.commander_discovery_scan_button.setEnabled(False)
+    _refresh_commander_discovery_buttons(window)
 
-    try:
-        from commander_discovery.ui_scan_path import run_guarded_commander_discovery_scan
+    def _on_result(data):
+        if data.get("kind") == "scan":
+            from commander_discovery.ui_scan_path import CommanderDiscoveryUiScanResult
+            try:
+                result = CommanderDiscoveryUiScanResult(**data["result"])
+            except Exception as exc:
+                _set_commander_discovery_status(window, f"Commander Discovery scan result could not be read.\n- {exc}")
+                _refresh_commander_discovery_buttons(window)
+                return
+            _finish_commander_discovery_scan(window, result)
+        else:
+            _set_commander_discovery_status(
+                window,
+                f"Commander Discovery scan failed before completion.\n- Error detail: {data.get('error', 'unknown error')}",
+            )
+            _refresh_commander_discovery_buttons(window)
 
-        result = run_guarded_commander_discovery_scan(window.state)
-    except Exception as exc:  # Defensive UI boundary.
-        result = None
-        _set_commander_discovery_status(window, f"Commander Discovery scan failed before completion.\n- Error detail: {exc}")
-        # Category D (popup removal): error already in status box.
-    finally:
-        if getattr(window, "commander_discovery_scan_button", None) is not None:
-            window.commander_discovery_scan_button.setEnabled(True)
+    _launch_cd_cli(
+        window, "scan", _on_result, "commander_discovery_scan_button",
+        busy_text="Scanning Collection...",
+        original_text="Scan Collection and Write Report",
+    )
 
+
+def _finish_commander_discovery_scan(window, result):
+    """UI-thread post-processing after the background scan completes."""
     if result is None:
         _refresh_commander_discovery_buttons(window)
         return
@@ -1808,20 +1855,20 @@ def _offer_jump_to_settings(window, problem: str, full_message: str) -> None:
     intent (run a scan) clearly maps to "I need to set this up first," so we
     just take them there with a clear status banner.
     """
-    if hasattr(window, "go_to") and hasattr(window, "SETTINGS"):
-        # Set status before navigating so the right-side context panel
-        # explains why the page changed.
-        try:
-            window.state.status = (
-                f"Commander's Call needs {problem}. Open Data Setup or Collection Source below to set it up, "
-                "then return to The Commander's Call."
-            )
-            if hasattr(window, "refresh_context_panel_values"):
-                window.refresh_context_panel_values()
-        except Exception:
-            pass
-        window.go_to(window.SETTINGS)
-    if hasattr(window, "refresh_context_panel_values"):
+    # Settings is now a slide-over overlay — open it over the current page so the
+    # user can fix Data Setup / Collection Source and close back to where they were.
+    try:
+        window.state.status = (
+            f"Commander's Call needs {problem}. Open Data Setup or Collection Source in Settings to set it up, "
+            "then return to The Commander's Call."
+        )
+        if hasattr(window, "refresh_context_panel_values"):
+            window.refresh_context_panel_values()
+    except Exception:
+        pass
+    if hasattr(window, "open_settings_drawer"):
+        window.open_settings_drawer()
+    elif hasattr(window, "refresh_context_panel_values"):
         window.refresh_context_panel_values()
 
 
@@ -1953,105 +2000,20 @@ def _preview_write_rough_shell_output(window):
 
     button = getattr(window, "commander_discovery_rough_shell_output_button", None)
     box = getattr(window, "commander_discovery_rough_shell_output_box", None)
-    original_button_text = "Write Rough Shell Output"
-    if button is not None:
-        try:
-            original_button_text = button.text()
-            button.setEnabled(False)
-            button.setText("Working…")
-        except Exception:
-            pass
+    original_button_text = button.text() if button is not None else "Write Rough Shell Output"
     if box is not None:
         try:
-            box.setPlainText("Building Rough Shell guidance from your strategy + commander selection…")
+            box.setPlainText("Building Rough Shell guidance from your strategy + commander selection… (runs in the background)")
         except Exception:
             pass
-    try:
-        QApplication.processEvents()
-    except Exception:
-        pass
-
-    try:
-        from build_from_collection.rough_shell_output import create_rough_shell_output_model
-        from build_from_collection.rough_shell_report_writer import write_rough_shell_output
-        from build_from_collection.rough_shell_guidance import build_rough_shell_markdown
-        from pathlib import Path as _P
-
-        if isinstance(candidate, dict):
-            commander_name = candidate.get("commander_name") or candidate.get("card_name") or "Selected commander"
-            color_identity = _format_color_identity_for_user(candidate)
-        else:
-            commander_name = getattr(candidate, "commander_name", None) or getattr(candidate, "card_name", "Selected commander")
-            color_identity = "Unknown"
-
-        prefs = getattr(window, "commander_discovery_build_preferences", None)
-        primary_strategy = (prefs.primary_strategy if prefs and prefs.primary_strategy else "")
-        secondary_strategy = (prefs.secondary_strategy if prefs and prefs.secondary_strategy else "")
-        main_philosophy = (prefs.main_philosophy if prefs else "") or ""
-        sub_philosophy = (prefs.sub_philosophy if prefs else "") or ""
-        bracket_preference = (prefs.bracket_preference if prefs else "") or ""
-        collection_first_preference = (
-            prefs.collection_first_preference if prefs and prefs.collection_first_preference
-            else _COLLECTION_FIRST_TOGGLE_LABEL_ON
-        )
-
-        # Use the legacy writer to get the output folder + write the model file
-        # (preserves existing tooling/manifest paths). We then add our richer
-        # guidance markdown into the same folder as the human-readable report.
-        model = create_rough_shell_output_model()
-        output_root = getattr(getattr(window, "state", None), "report_output_folder", "Outputs") or "Outputs"
-        result = write_rough_shell_output(model, selected_commander=commander_name, output_root=output_root)
-
-        # Overwrite the human report with the real strategy-driven guidance.
-        guidance_md = build_rough_shell_markdown(
-            commander_name=commander_name,
-            color_identity=color_identity,
-            primary_strategy=primary_strategy,
-            secondary_strategy=secondary_strategy,
-            main_philosophy=main_philosophy,
-            sub_philosophy=sub_philosophy,
-            bracket_preference=bracket_preference,
-            collection_first_preference=collection_first_preference,
-        )
-        result_data = result.to_dict() if hasattr(result, "to_dict") else {}
-        human_report_path = result_data.get("human_report_path")
-        if human_report_path:
-            try:
-                _P(str(human_report_path)).write_text(guidance_md, encoding="utf-8")
-            except Exception:
-                pass
-
-        window.commander_discovery_rough_shell_output = model.to_dict()
-        window.commander_discovery_rough_shell_write_result = result_data
-        preview_text = (
-            f"Rough Shell guidance written for {commander_name}.\n"
-            f"\nStrategy: {primary_strategy or '(not selected)'}"
-            f" + {secondary_strategy or 'no secondary'}"
-            f"\nPhilosophy: {main_philosophy or '(not selected)'}"
-            f" — {sub_philosophy or '(none)'}"
-            f"\nBracket: {bracket_preference or '(not selected)'}"
-            f"\n\nFiles written:\n"
-            f"- Human-readable report: {result_data.get('human_report_path')}\n"
-            f"- AI handoff prompt: {result_data.get('ai_handoff_prompt_path')}\n"
-            f"- Manifest: {result_data.get('manifest_path')}\n"
-            f"\nThis is guidance only. No exact card selection, no deck generation."
-        )
-    except Exception as exc:
-        window.commander_discovery_rough_shell_output = {}
-        window.commander_discovery_rough_shell_write_result = {}
-        preview_text = f"Rough Shell Output failed before completion.\n- Error detail: {exc}"
-        # Category D (popup removal): error already in preview_text.
-    finally:
-        if button is not None:
-            try:
-                button.setText(original_button_text)
-                button.setEnabled(True)
-            except Exception:
-                pass
-
-    if box is not None:
-        box.setPlainText(preview_text)
-    _refresh_build_start_preview_controls(window)
+    _launch_cd_generator(
+        window, "rough_shell",
+        "commander_discovery_rough_shell_output_button",
+        "commander_discovery_rough_shell_output_box",
+        busy_text="Working…",
+        original_text=original_button_text,
+        fail_prefix="Rough Shell Output failed before completion.",
+    )
 # END v1.3.23 Rough Shell UI / Report Write Hook helpers
 
 # BEGIN v1.3.25 Full 100-Card Draft UI / Report Write Hook helpers
@@ -2103,14 +2065,7 @@ def _preview_write_full_100_card_draft_output(window):
 
     button = getattr(window, "commander_discovery_full_100_card_draft_output_button", None)
     box = getattr(window, "commander_discovery_full_100_card_draft_output_box", None)
-    original_button_text = "Write Full 100-Card Draft Output"
-    if button is not None:
-        try:
-            original_button_text = button.text()
-            button.setEnabled(False)
-            button.setText("Generating deck…")
-        except Exception:
-            pass
+    original_button_text = button.text() if button is not None else "Write Full 100-Card Draft Output"
     if box is not None:
         try:
             box.setPlainText(
@@ -2118,111 +2073,18 @@ def _preview_write_full_100_card_draft_output(window):
                 "Loading Scryfall, walking your collection, role-tagging every card,\n"
                 "and assembling a color-identity-legal 100-card draft.\n\n"
                 "This takes 30-90 seconds depending on collection size.\n"
-                "The button will re-enable when the draft is ready."
+                "It now runs in the background — the window stays responsive."
             )
         except Exception:
             pass
-    try:
-        QApplication.processEvents()
-    except Exception:
-        pass
-
-    try:
-        from build_from_collection.full_100_card_draft_output import create_full_100_card_draft_output_model
-        from build_from_collection.full_100_card_draft_report_writer import write_full_100_card_draft_output
-        from build_from_collection.full_100_card_draft_builder import (
-            build_full_100_card_draft,
-            render_full_100_card_draft_markdown,
-        )
-        from commander_discovery.ui_scan_path import resolve_commander_discovery_collection_files
-        from data.scryfall_loader import load_scryfall_lookup
-        from data.collection_loader import load_collection_sources
-        from pathlib import Path as _P
-
-        commander_payload = candidate if isinstance(candidate, dict) else {}
-        commander_name = commander_payload.get("commander_name") or commander_payload.get("card_name") or "Selected commander"
-
-        prefs = getattr(window, "commander_discovery_build_preferences", None)
-        primary_strategy = (prefs.primary_strategy if prefs and prefs.primary_strategy else "")
-        secondary_strategy = (prefs.secondary_strategy if prefs and prefs.secondary_strategy else "")
-        bracket_preference = (prefs.bracket_preference if prefs and prefs.bracket_preference else "")
-        sub_philosophy = (prefs.sub_philosophy if prefs and prefs.sub_philosophy else "")
-
-        # Reuse the same loader path the Owned Cards by Role feature uses so the
-        # collection comes in with source_files attached.
-        owned_cards = _load_full_owned_collection_for_role_bucketing(window)
-
-        # We also need scryfall_lookup directly for the builder (which inspects
-        # color identity and oracle text per card).
-        state = getattr(window, "state", None)
-        scryfall_cards, scryfall_lookup = load_scryfall_lookup()
-
-        result = build_full_100_card_draft(
-            commander_candidate=commander_payload,
-            owned_cards=owned_cards,
-            scryfall_lookup=scryfall_lookup,
-            primary_strategy=primary_strategy,
-            secondary_strategy=secondary_strategy,
-            bracket_preference=bracket_preference,
-            sub_philosophy=sub_philosophy,
-        )
-        markdown = render_full_100_card_draft_markdown(result)
-
-        # Use the existing writer to get a manifest + folder structure, then
-        # overwrite the human-readable report file with the real decklist.
-        model = create_full_100_card_draft_output_model(selected_commander=commander_name)
-        output_root = getattr(getattr(window, "state", None), "report_output_folder", "Outputs") or "Outputs"
-        write_result = write_full_100_card_draft_output(
-            model, selected_commander=commander_name, output_root=output_root
-        )
-        write_result_data = write_result.to_dict() if hasattr(write_result, "to_dict") else {}
-        human_report_path = write_result_data.get("human_report_path")
-        if human_report_path:
-            try:
-                _P(str(human_report_path)).write_text(markdown, encoding="utf-8")
-            except Exception:
-                pass
-
-        window.commander_discovery_full_100_card_draft_output = result.to_dict()
-        window.commander_discovery_full_100_card_draft_write_result = write_result_data
-
-        # Preview text in the box: brief summary + the copy-paste decklist preview.
-        from build_from_collection.full_100_card_draft_builder import render_full_100_card_draft_plain_decklist
-        plain_decklist = render_full_100_card_draft_plain_decklist(result)
-        preview_text = (
-            f"Full 100-Card Draft written for {commander_name}.\n"
-            f"\nStrategy: {primary_strategy or '(not selected)'}"
-            f" + {secondary_strategy or 'no secondary'}"
-            f"\nTotal cards: {result.total_cards}/100"
-            f"\nColor identity: {'/'.join(result.color_identity) if result.color_identity else 'Colorless'}"
-            f"\n\nFiles written:\n"
-            f"- Human-readable + copy-paste decklist: {write_result_data.get('human_report_path')}\n"
-            f"- AI handoff prompt: {write_result_data.get('ai_handoff_prompt_path')}\n"
-            f"- Manifest: {write_result_data.get('manifest_path')}\n"
-            f"\n--- Copy-paste decklist (also in the human-readable file) ---\n\n"
-            f"{plain_decklist}\n"
-        )
-    except Exception as exc:
-        import traceback as _tb
-        window.commander_discovery_full_100_card_draft_output = {}
-        window.commander_discovery_full_100_card_draft_write_result = {}
-        preview_text = (
-            f"Full 100-Card Draft failed before completion.\n"
-            f"- Error detail: {exc}\n\n"
-            f"Traceback:\n{_tb.format_exc()}"
-        )
-        # Category D (popup removal): error + traceback already in preview_text.
-    finally:
-        if button is not None:
-            try:
-                button.setText(original_button_text)
-                button.setEnabled(True)
-            except Exception:
-                pass
-
-    if box is not None:
-        box.setPlainText(preview_text)
-    _refresh_build_start_preview_controls(window)
+    _launch_cd_generator(
+        window, "full_draft",
+        "commander_discovery_full_100_card_draft_output_button",
+        "commander_discovery_full_100_card_draft_output_box",
+        busy_text="Generating deck…",
+        original_text=original_button_text,
+        fail_prefix="Full 100-Card Draft failed before completion.",
+    )
 # END v1.3.25 Full 100-Card Draft UI / Report Write Hook helpers
 
 def build_commander_discovery_page(window):
@@ -3025,6 +2887,12 @@ def build_commander_discovery_page(window):
         _apply_commander_discovery_filters(window)
     _refresh_commander_discovery_buttons(window)
     _refresh_build_start_preview_controls(window)
+
+    # Ask the local AI guide about commanders / this build (slide-in drawer or
+    # embedded panel per Settings).
+    if hasattr(window, "add_commander_ai_trigger"):
+        window.add_commander_ai_trigger(b_layout, context_label="commander")
+
     content.addWidget(body)
     content.addStretch(1)
     layout.addWidget(scroll, stretch=1)

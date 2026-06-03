@@ -51,6 +51,12 @@ UI_DENSITY_OPTIONS = [
     "Compact",
 ]
 
+# How the local Commander AI guide is presented on Report Viewer / Commander's Call.
+COMMANDER_AI_DISPLAY_OPTIONS = [
+    "Slide-in panel",
+    "Embedded panel",
+]
+
 
 def settings_path() -> Path:
     """Return the local settings path.
@@ -72,6 +78,7 @@ def default_settings() -> dict[str, Any]:
         "report_output_folder": "Outputs",
         "theme": "Dragon Forge",
         "ui_density": "Normal",
+        "commander_ai_display_mode": "Slide-in panel",
         "developer_report_viewer_last_view": "User View",
         # Commander AI (Local Ollama guide) — keys + defaults owned by ai/.
         **AI_SETTINGS_DEFAULTS,
@@ -119,6 +126,11 @@ def normalize_ui_density(value: Any) -> str:
     return text if text in UI_DENSITY_OPTIONS else "Normal"
 
 
+def normalize_commander_ai_display_mode(value: Any) -> str:
+    text = str(value or "").strip()
+    return text if text in COMMANDER_AI_DISPLAY_OPTIONS else "Slide-in panel"
+
+
 def normalize_developer_report_view(value: Any) -> str:
     text = str(value or "").strip()
     return text if text in {"User View", "Dev View"} else "User View"
@@ -162,6 +174,7 @@ def load_app_settings() -> dict[str, Any]:
     data["report_output_folder"] = str(data.get("report_output_folder") or "Outputs")
     data["theme"] = str(data.get("theme") or "Dragon Forge")
     data["ui_density"] = normalize_ui_density(data.get("ui_density"))
+    data["commander_ai_display_mode"] = normalize_commander_ai_display_mode(data.get("commander_ai_display_mode"))
     data["developer_report_viewer_last_view"] = normalize_developer_report_view(data.get("developer_report_viewer_last_view"))
     normalize_commander_ai_settings(data)
 
@@ -180,6 +193,7 @@ def save_app_settings(data: dict[str, Any]) -> None:
     cleaned["guide_presentation"] = normalize_guide_presentation(cleaned.get("guide_presentation"))
     cleaned["collection_source_default"] = normalize_collection_source_default(cleaned.get("collection_source_default"))
     cleaned["ui_density"] = normalize_ui_density(cleaned.get("ui_density"))
+    cleaned["commander_ai_display_mode"] = normalize_commander_ai_display_mode(cleaned.get("commander_ai_display_mode"))
     cleaned["developer_report_viewer_last_view"] = normalize_developer_report_view(cleaned.get("developer_report_viewer_last_view"))
     normalize_commander_ai_settings(cleaned)
 

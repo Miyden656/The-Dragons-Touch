@@ -35,8 +35,8 @@ import re
 from PySide6.QtCore import Qt, QTimer, QSignalBlocker, QProcess, QProcessEnvironment, QUrl
 from PySide6.QtGui import QFont, QDesktopServices, QTextCursor
 from PySide6.QtWidgets import (
-    QApplication, QButtonGroup, QComboBox, QFileDialog, QFrame,
-    QHBoxLayout, QLabel, QListView, QMainWindow, QMessageBox,
+    QApplication, QComboBox, QFileDialog, QFrame,
+    QHBoxLayout, QLabel, QListView, QMainWindow, QMenu, QMessageBox,
     QPlainTextEdit, QPushButton, QScrollArea, QSizePolicy,
     QStackedWidget, QVBoxLayout, QWidget
 )
@@ -54,7 +54,7 @@ try:
     )
     from ui.styles.theme import DRAGON_FORGE, ADVENTURERS_MAP, build_main_qss
     from ui.widgets import (
-        add_shadow, TexturedPanel, ForgeOrb, SidebarButton, Badge, ReportCard, SmallStat, PillButton
+        add_shadow, TexturedPanel, ForgeOrb, Badge, ReportCard, SmallStat, PillButton
     )
     from ui.state import AppState
     from ui.services import report_detector, cli_bridge, backend_runner, user_settings
@@ -66,8 +66,8 @@ try:
     from ui.pages.run_analysis_page import build_run_analysis_page
     from ui.pages.report_viewer_page import build_report_viewer_page
     from ui.pages.future_workspace_page import build_batch_reports_page
-    from ui.pages.settings_page import build_settings_page
-    from ui.pages.commander_ai_panel import build_commander_ai_page
+    from ui.pages.settings_page import build_settings_content
+    from ui.pages.commander_ai_panel import build_commander_ai_panel
     from ui.pages.training_review_page import build_training_review_page
 except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
     from constants import (
@@ -82,7 +82,7 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
     )
     from styles.theme import DRAGON_FORGE, ADVENTURERS_MAP, build_main_qss
     from widgets import (
-        add_shadow, TexturedPanel, ForgeOrb, SidebarButton, Badge, ReportCard, SmallStat, PillButton
+        add_shadow, TexturedPanel, ForgeOrb, Badge, ReportCard, SmallStat, PillButton
     )
     from state import AppState
     from services import report_detector, cli_bridge, backend_runner, user_settings
@@ -94,8 +94,8 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
     from pages.run_analysis_page import build_run_analysis_page
     from pages.report_viewer_page import build_report_viewer_page
     from pages.future_workspace_page import build_batch_reports_page
-    from pages.settings_page import build_settings_page
-    from pages.commander_ai_panel import build_commander_ai_page
+    from pages.settings_page import build_settings_content
+    from pages.commander_ai_panel import build_commander_ai_panel
     from pages.training_review_page import build_training_review_page
 
 
@@ -148,7 +148,11 @@ except NameError:
 
 
 class MainWindow(QMainWindow):
-    DECK_SELECTION, REVIEW_SETUP, PHILOSOPHY, RUN_ANALYSIS, REPORT, COMMANDER_DISCOVERY, COLLECTION, BATCH_REPORTS, SETTINGS, COMMANDER_GUIDE, TRAINING_REVIEW = range(11)
+    # COMMANDER_GUIDE removed: the local AI guide is now hosted as a slide-in
+    # drawer / embedded panel on Report Viewer + Commander's Call (no standalone page).
+    # SETTINGS removed as a stack page — it is now a slide-over overlay drawer
+    # (open_settings_drawer) so closing returns to the exact prior page.
+    DECK_SELECTION, REVIEW_SETUP, PHILOSOPHY, RUN_ANALYSIS, REPORT, COMMANDER_DISCOVERY, COLLECTION, BATCH_REPORTS, TRAINING_REVIEW = range(9)
 
     # v0.6.7.1 shell aliases kept for low-risk page wiring during the first UI patch.
     DECK_INPUT = DECK_SELECTION
@@ -162,9 +166,34 @@ class MainWindow(QMainWindow):
         self.app_settings = user_settings.load_app_settings()
         user_settings.apply_settings_to_state(self.state, self.app_settings, DRAGON_FORGE, ADVENTURERS_MAP)
         self.nav_buttons = []
+        # Header navigation (replaces the old Forge sidebar). The "+" New menu and
+        # cog Settings button live in build_header; the stepper strip and per-page
+        # Continue/Back footers thread the linear workflow now that the sidebar is gone.
+        self.new_menu_button = None
+        self.new_menu = None
+        self.dev_mode_badge = None
+        self.settings_nav_button = None
+        self.stepper_panel = None
+        self.stepper_labels = {}
+        # Overlay drawers (free children of root; lazily populated).
+        self.ai_drawer = None
+        self._ai_drawer_body = None
+        self._ai_drawer_panel = None
+        self.settings_drawer = None
+        self._settings_drawer_body = None
+        self._settings_drawer_content = None
+        # Gated "Continue to Report Viewer" button on the Run Analysis footer.
+        self.run_to_report_btn = None
+        # Which entry the user started from ("analysis" = paste/select a decklist,
+        # "commander" = The Commander's Call). Drives Back targets and "Start New".
+        self.entry_mode = "analysis"
         self.progress_bars = []
         self.progress_tick = 0
         self.context_value_labels = {}
+        self.context_run_settings_label = None
+        self.warnings_detail_label = None
+        self.view_warnings_button = None
+        self.run_user_summary_label = None
         self.theme_button = None
         self.settings_theme_buttons = []
         self.interface_mode_combo = None
@@ -219,8 +248,10 @@ class MainWindow(QMainWindow):
         self.root = QWidget()
         self.setCentralWidget(self.root)
         self.root_layout = QVBoxLayout(self.root)
-        self.root_layout.setContentsMargins(16, 14, 16, 14)
-        self.root_layout.setSpacing(12)
+        # Tightened to reclaim the vertical space the stepper + flow footer now
+        # consume, so page bodies scroll less and feel less cramped.
+        self.root_layout.setContentsMargins(16, 12, 16, 12)
+        self.root_layout.setSpacing(10)
         self.stack = QStackedWidget()
         self.build_shell()
         self.apply_theme()
@@ -286,17 +317,33 @@ class MainWindow(QMainWindow):
             del blocker
         if getattr(self, "run_advanced_details_toggle", None) is not None:
             self.run_advanced_details_toggle.setChecked(self.is_dev_mode())
+        # Live-toggle the header "Developer Mode Enabled" badge.
+        if getattr(self, "dev_mode_badge", None) is not None:
+            self.dev_mode_badge.setVisible(self.is_dev_mode())
         self.refresh_context_panel_values()
         self.refresh_run_analysis_previews()
         self.refresh_report_viewer_mode_controls()
         self.refresh_report_viewer_file_list()
-        # Show/hide the dev-only Training Review nav button live on mode change
-        # (no full page rebuild needed — just toggle the button's visibility).
-        btn = getattr(self, "_training_review_nav_btn", None)
-        if btn is not None:
-            btn.setVisible(self.is_dev_mode())
+        # Show/hide the dev-only Training Review entry live on mode change
+        # (no full page rebuild needed — just toggle the header menu action).
+        act = getattr(self, "_training_review_menu_action", None)
+        if act is not None:
+            act.setVisible(self.is_dev_mode())
+            sep = getattr(self, "_training_review_separator", None)
+            if sep is not None:
+                sep.setVisible(self.is_dev_mode())
             if not self.is_dev_mode() and self.stack.currentIndex() == self.TRAINING_REVIEW:
                 self.go_to(self.DECK_SELECTION)  # don't strand the user on a now-hidden page
+        # Settings drawer content bakes its dev/user gates at build time, so a mode
+        # change after it was first opened would leave stale dev content showing.
+        # Drop the cached content so it rebuilds with the new mode (reopen if visible).
+        if getattr(self, "_settings_drawer_content", None) is not None:
+            was_visible = self.settings_drawer is not None and self.settings_drawer.isVisible()
+            self._settings_drawer_content.setParent(None)
+            self._settings_drawer_content.deleteLater()
+            self._settings_drawer_content = None
+            if was_visible:
+                self.open_settings_drawer()
         # v0.10.5.1.1: Do not rebuild the current page during combo-box mode changes.
         # Rebuilding while the Settings combo popup is closing creates a visible flash.
         # The new mode is persisted immediately; page-specific visibility will update
@@ -345,7 +392,10 @@ class MainWindow(QMainWindow):
         self.app_settings = user_settings.reset_app_settings()
         user_settings.apply_settings_to_state(self.state, self.app_settings, DRAGON_FORGE, ADVENTURERS_MAP)
         self.state.status = "Settings reset to defaults"
-        self.rebuild_shell(self.SETTINGS)
+        # Rebuild the shell to apply defaults, then re-open the Settings drawer so
+        # the user stays in Settings (it's an overlay now, not a stack page).
+        self.rebuild_shell()
+        self.open_settings_drawer()
 
     def interface_mode_summary_text(self):
         """Small user-readable summary of current interface mode behavior."""
@@ -368,16 +418,21 @@ class MainWindow(QMainWindow):
 
     def build_shell(self):
         self.build_header()
+        # Slim step indicator replaces the old sidebar's sense of "where am I".
+        self.root_layout.addWidget(self.build_stepper())
         app_body = QWidget()
         body_layout = QHBoxLayout(app_body)
         body_layout.setContentsMargins(0, 0, 0, 0)
         body_layout.setSpacing(12)
-        body_layout.addWidget(self.build_sidebar())
         self.build_pages()
         body_layout.addWidget(self.stack, stretch=1)
         body_layout.addWidget(self.build_context_panel())
         self.root_layout.addWidget(app_body, stretch=1)
         self.build_footer()
+        # Overlay drawers float over the body (free children of root, not in a
+        # layout), hidden until summoned. Closing them returns to the same page.
+        self.build_ai_drawer()
+        self.build_settings_drawer()
 
     def rebuild_shell(self, page_index=None):
         page_index = self.stack.currentIndex() if page_index is None and self.stack else page_index
@@ -386,7 +441,29 @@ class MainWindow(QMainWindow):
             w = item.widget()
             if w:
                 w.deleteLater()
+        # The overlay drawers are free children of self.root (not in root_layout),
+        # so the teardown loop above does not catch them — delete explicitly.
+        for _attr in ("ai_drawer", "settings_drawer"):
+            _d = getattr(self, _attr, None)
+            if _d is not None:
+                _d.setParent(None)
+                _d.deleteLater()
+        self.ai_drawer = None
+        self._ai_drawer_body = None
+        self._ai_drawer_panel = None
+        self.settings_drawer = None
+        self._settings_drawer_body = None
+        self._settings_drawer_content = None
         self.nav_buttons = []
+        # Header nav + stepper handles are recreated by build_shell below; clear
+        # them so a teardown never leaves references to deleted widgets.
+        self.new_menu_button = None
+        self.new_menu = None
+        self.dev_mode_badge = None
+        self.settings_nav_button = None
+        self.stepper_panel = None
+        self.stepper_labels = {}
+        self.run_to_report_btn = None
         self.progress_bars = []
         self.settings_theme_buttons = []
         self.interface_mode_combo = None
@@ -445,19 +522,102 @@ class MainWindow(QMainWindow):
         title_box.addWidget(title)
         title_box.addWidget(tagline)
         layout.addLayout(title_box, stretch=1)
-        if self.is_dev_mode():
-            dev_badge = QLabel("Developer Mode Enabled")
-            dev_badge.setObjectName("warningText")
-            layout.addWidget(dev_badge)
+        # Always create the dev badge; toggle visibility live on mode change so it
+        # never lingers as "Developer Mode Enabled" after switching to User Mode.
+        dev_badge = QLabel("Developer Mode Enabled")
+        dev_badge.setObjectName("warningText")
+        dev_badge.setVisible(self.is_dev_mode())
+        self.dev_mode_badge = dev_badge
+        layout.addWidget(dev_badge)
+        # "+" New — opens a small themed menu to start a flow. Replaces the old
+        # Forge sidebar's Deck Selection / Commander's Call entry points.
+        new_btn = QPushButton("＋  New")
+        new_btn.setObjectName("utilityButton")
+        new_btn.setCursor(Qt.PointingHandCursor)
+        new_btn.setToolTip("Start a new deck review or Commander's Call")
+        menu = QMenu(new_btn)
+        act_analysis = menu.addAction("🃏  Analysis (deck review)")
+        act_analysis.triggered.connect(lambda checked=False: self.start_new_flow("analysis"))
+        act_call = menu.addAction("📣  The Commander's Call")
+        act_call.triggered.connect(lambda checked=False: self.start_new_flow("commander"))
+        # Jump back to the current report from anywhere (enabled once a report
+        # exists), so leaving the flow no longer forces a re-run.
+        menu.addSeparator()
+        act_view_report = menu.addAction("📜  View current report")
+        act_view_report.triggered.connect(lambda checked=False: self.go_to(self.REPORT))
+        self._view_report_menu_action = act_view_report
+        # Dev-only Training Review (re-homes the old sidebar entry). The action
+        # always exists so Settings' interface-mode toggle can show/hide it live.
+        self._training_review_separator = menu.addSeparator()
+        act_training = menu.addAction("🛠  Training Review (dev)")
+        act_training.triggered.connect(lambda checked=False: self.go_to(self.TRAINING_REVIEW))
+        self._training_review_menu_action = act_training
+        act_training.setVisible(self.is_dev_mode())
+        self._training_review_separator.setVisible(self.is_dev_mode())
+        # The menu is a top-level popup and does NOT inherit self.root's stylesheet,
+        # so re-theme it every time it opens (mirrors configure_combo_popup). Also
+        # refresh the "View current report" enabled state on open.
+        def _on_menu_show():
+            menu.setStyleSheet(self.menu_qss())
+            act_view_report.setEnabled(self.report_is_available())
+        menu.aboutToShow.connect(_on_menu_show)
+        new_btn.setMenu(menu)
+        self.new_menu_button = new_btn
+        self.new_menu = menu
+        layout.addWidget(new_btn)
         theme_btn = QPushButton(f"Theme: {self.theme()['name']}")
         self.theme_button = theme_btn
         theme_btn.setObjectName("utilityButton")
         theme_btn.clicked.connect(self.toggle_theme)
         layout.addWidget(theme_btn)
+        # Cog — Settings. Consolidated into the header per tester feedback.
+        settings_btn = QPushButton("⚙")
+        settings_btn.setObjectName("utilityButton")
+        settings_btn.setCursor(Qt.PointingHandCursor)
+        settings_btn.setToolTip("Settings")
+        settings_btn.clicked.connect(lambda checked=False: self.toggle_settings_drawer())
+        self.settings_nav_button = settings_btn
+        layout.addWidget(settings_btn)
         mascot = QLabel("☕🐲")
         mascot.setObjectName("mascotHeader")
         layout.addWidget(mascot)
         self.root_layout.addWidget(header)
+
+    def menu_qss(self):
+        """Themed stylesheet for header QMenu popups.
+
+        A QMenu opens as its own top-level window, so it does not inherit the
+        stylesheet applied to self.root. Build one from the active palette using
+        the same combo-popup color keys the combo dropdowns use, so the menu
+        matches in both Dragon Forge and Adventurer's Map.
+        """
+        t = self.theme()
+        bg = t.get("combo_popup_bg", t["iron_2"])
+        text = t.get("combo_popup_text", t.get("input_text", t["text"]))
+        border = t.get("combo_popup_border", t["border"])
+        item_bg = t.get("combo_popup_item_bg", bg)
+        sel_bg = t.get("combo_popup_selected_bg", t["accent"])
+        sel_text = t.get("combo_popup_selected_text", t.get("button_pressed_text", t["bg"]))
+        sep = t.get("accent_2", border)
+        return f'''
+        QMenu {{ background-color: {bg}; color: {text}; border: 1px solid {border}; padding: 4px; }}
+        QMenu::item {{ background-color: {item_bg}; color: {text}; padding: 7px 18px; min-height: 24px; border-radius: 6px; }}
+        QMenu::item:selected {{ background-color: {sel_bg}; color: {sel_text}; }}
+        QMenu::separator {{ height: 1px; background: {sep}; margin: 4px 8px; }}
+        '''
+
+    def start_new_flow(self, mode):
+        """Begin a workflow from the header "+" menu.
+
+        mode == "analysis"  -> land on Deck Selection (paste/select a decklist).
+        mode == "commander" -> land on The Commander's Call.
+        The chosen mode drives Back targets and the Report Viewer "Start New" button.
+        """
+        self.entry_mode = "commander" if mode == "commander" else "analysis"
+        # New flow: re-gate the Continue-to-Report button so the prior run's
+        # report no longer counts as "available" until this flow runs.
+        self.state.last_report_detection_mode = "not_attempted"
+        self.go_to(self.COMMANDER_DISCOVERY if self.entry_mode == "commander" else self.DECK_SELECTION)
 
     def build_footer(self):
         footer = TexturedPanel(self.theme, kind="outer", glow=False, corners=False)
@@ -472,69 +632,256 @@ class MainWindow(QMainWindow):
         layout.addWidget(right)
         self.root_layout.addWidget(footer)
 
-    def build_sidebar(self):
-        sidebar = TexturedPanel(self.theme, kind="sidebar", glow=False, corners=True)
-        sidebar.setFixedWidth(270)
-        add_shadow(sidebar, blur=25, y=8)
-        layout = QVBoxLayout(sidebar)
-        layout.setContentsMargins(16, 18, 16, 18)
-        layout.setSpacing(9)
-        title = QLabel("FORGE NAVIGATION")
-        title.setObjectName("sidebarSectionTitle")
-        layout.addWidget(title)
-        # v0.10.5.2: Collection Source and Batch Tools are removed from visible navigation.
-        # Collection defaults now live in Settings; Collection Mode moves to Review Setup later.
-        # Batch and stress testing remain outside the UI.
-        nav_items = [
-            ("🃏  Deck Selection", self.DECK_SELECTION), ("⚙  Review Setup", self.REVIEW_SETUP),
-            ("🧠  Philosophy Lens", self.PHILOSOPHY),
-            ("🔥  Run Analysis", self.RUN_ANALYSIS), ("📜  Report Viewer", self.REPORT),
-            ("📣  The Commander's Call", self.COMMANDER_DISCOVERY),
-            ("🐉  Commander Guide", self.COMMANDER_GUIDE),
-            ("⚒  Settings", self.SETTINGS),
-            # Maintainer-only: curate AI training candidates. Always created so the
-            # mode toggle can show/hide it live; visibility set below + on mode change.
-            ("🛠  Training Review", self.TRAINING_REVIEW),
+    # Ordered linear workflow. The old Forge sidebar exposed these as buttons;
+    # now the header "+" menu enters the flow and per-page Continue/Back footers
+    # plus this stepper move between them. Order is unchanged from the sidebar.
+    def build_stepper(self):
+        """Slim step indicator above the workflow content.
+
+        Replaces the removed sidebar's sense of "where am I". Hidden on
+        non-flow pages (Settings, Commander's Call entry, Commander Guide,
+        Training Review) by refresh_stepper.
+        """
+        panel = TexturedPanel(self.theme, kind="iron", glow=False, corners=True)
+        row = QHBoxLayout(panel)
+        row.setContentsMargins(18, 6, 18, 6)
+        row.setSpacing(6)
+        self.stepper_labels = {}
+        self._stepper_seps = []
+        steps = [
+            (self.DECK_SELECTION, "Deck"),
+            (self.REVIEW_SETUP, "Review Setup"),
+            (self.PHILOSOPHY, "Philosophy"),
+            (self.RUN_ANALYSIS, "Run Analysis"),
+            (self.REPORT, "Report"),
         ]
-        group = QButtonGroup(self)
-        group.setExclusive(True)
-        for text, index in nav_items:
-            btn = SidebarButton(text, index)
-            if index == self.PHILOSOPHY:
-                btn.setToolTip("Optional playstyle guidance; does not override legality or strategy.")
-            elif index == self.COMMANDER_DISCOVERY:
-                btn.setToolTip("Scan owned collection candidates for future commander build paths.")
-            elif index == self.COMMANDER_GUIDE:
-                btn.setToolTip("Ask the optional local AI guide about your selected deck. Off until enabled in Settings.")
-            elif index == self.SETTINGS:
-                btn.setToolTip("App preferences and future utilities; not required for a normal run.")
-            elif index == self.TRAINING_REVIEW:
-                btn.setToolTip("Dev only: curate AI training candidates into approved data (Keep/Reject).")
-            btn.clicked.connect(lambda checked=False, idx=index: self.go_to(idx))
-            group.addButton(btn)
-            self.nav_buttons.append(btn)
-            layout.addWidget(btn)
-            if index == self.TRAINING_REVIEW:
-                # Dev-only: keep a handle and gate visibility by interface mode.
-                self._training_review_nav_btn = btn
-                btn.setVisible(self.is_dev_mode())
-        layout.addSpacing(10)
-        line = QFrame(); line.setObjectName("goldDivider"); line.setFixedHeight(1); layout.addWidget(line)
-        quick = QLabel("QUICK ACTIONS"); quick.setObjectName("sidebarSectionTitle"); layout.addWidget(quick)
-        # Category E (popup removal): placeholder Quick Actions hidden in user mode
-        # (was: "Save UI Session Placeholder", "Open Output Folder Later", "Export Placeholder").
-        # These buttons were dev-mode stubs that fired a "UI Foundation Placeholder" modal.
-        # For community release they're hidden; restore them by setting a dev-mode flag.
-        if self.is_dev_mode() if hasattr(self, "is_dev_mode") else False:
-            for label in ["Save UI Session Placeholder", "Open Output Folder Later", "Export Placeholder"]:
-                b = QPushButton(label); b.setObjectName("utilityButton"); b.clicked.connect(self.placeholder_message); layout.addWidget(b)
-        layout.addStretch(1)
-        dragon_note = TexturedPanel(self.theme, kind="iron_2", glow=True, corners=False)
-        note_layout = QVBoxLayout(dragon_note); note_layout.setContentsMargins(12, 10, 12, 10)
-        icon = QLabel("☕🐲"); icon.setObjectName("sidebarMascot"); icon.setAlignment(Qt.AlignCenter)
-        txt = QLabel("The helper dragon watches the forge."); txt.setObjectName("mutedText"); txt.setWordWrap(True); txt.setAlignment(Qt.AlignCenter)
-        note_layout.addWidget(icon); note_layout.addWidget(txt); layout.addWidget(dragon_note)
-        return sidebar
+        row.addStretch(1)
+        for i, (index, label) in enumerate(steps):
+            # Clickable flat step (tester: reach any step — esp. Report — directly).
+            btn = QPushButton(label)
+            btn.setObjectName("stepperStep")
+            btn.setFlat(True)
+            btn.setCursor(Qt.PointingHandCursor)
+            btn.clicked.connect(lambda checked=False, idx=index: self._stepper_go(idx))
+            self.stepper_labels[index] = btn
+            row.addWidget(btn)
+            if i < len(steps) - 1:
+                sep = QLabel("›")
+                sep.setObjectName("stepperSep")
+                self._stepper_seps.append(sep)
+                row.addWidget(sep)
+        row.addStretch(1)
+        self.stepper_panel = panel
+        return panel
+
+    def _stepper_go(self, index):
+        """Navigate from a clicked stepper step (Report gated on a report existing)."""
+        if index == self.REPORT and not self.report_is_available():
+            return
+        if index == self.DECK_SELECTION and self.entry_mode == "commander":
+            self.go_to(self.COMMANDER_DISCOVERY)
+            return
+        self.go_to(index)
+
+    def stepper_flow_pages(self):
+        return (self.DECK_SELECTION, self.REVIEW_SETUP, self.PHILOSOPHY, self.RUN_ANALYSIS, self.REPORT)
+
+    def refresh_stepper(self, index):
+        """Show the stepper on flow pages only and highlight the current step."""
+        if self.stepper_panel is None:
+            return
+        show = index in self.stepper_flow_pages()
+        self.stepper_panel.setVisible(show)
+        if not show:
+            return
+        t = self.theme()
+        active_color = t.get("accent_2", t["accent"])
+        muted_color = t.get("muted", t["text"])
+        # The first step is the deck OR the commander, depending on how the
+        # user entered the flow.
+        first = self.stepper_labels.get(self.DECK_SELECTION)
+        if first is not None:
+            first.setText("Commander" if self.entry_mode == "commander" else "Deck")
+        disabled_color = t.get("muted_2", muted_color)
+        for idx, lbl in self.stepper_labels.items():
+            is_active = (idx == index)
+            # The Report step is only reachable once a report exists.
+            reachable = (idx != self.REPORT) or self.report_is_available()
+            lbl.setEnabled(reachable)
+            lbl.setCursor(Qt.PointingHandCursor if reachable else Qt.ArrowCursor)
+            weight = "900" if is_active else "700"
+            color = active_color if is_active else (muted_color if reachable else disabled_color)
+            lbl.setStyleSheet(
+                "QPushButton { background: transparent; border: none; text-align: center; "
+                f"color: {color}; font-size: 12px; font-weight: {weight}; letter-spacing: 0.5px; padding: 4px 6px; }}"
+                f"QPushButton:hover {{ color: {active_color}; }}"
+            )
+        for sep in getattr(self, "_stepper_seps", []):
+            sep.setStyleSheet(f"color: {muted_color}; font-size: 12px;")
+
+    # ---- Commander AI guide hosting (slide-in drawer / embedded panel) -----
+    # The local Ollama guide no longer has its own page. It is hosted as a
+    # slide-in drawer (default) or an embedded collapsible panel on Report
+    # Viewer + Commander's Call. The user picks which in Settings.
+
+    def commander_ai_display_mode(self):
+        return user_settings.normalize_commander_ai_display_mode(
+            self.app_settings.get("commander_ai_display_mode")
+        )
+
+    def _make_overlay_drawer(self, title, on_close):
+        """Build a hidden right-side overlay drawer (free child of root).
+
+        Shared by the Commander AI guide and the Settings slide-over so both
+        behave identically: open over the current page, close returns you to
+        the exact page you were on. Returns (drawer, body_layout).
+        """
+        drawer = TexturedPanel(self.theme, kind="outer", glow=True, corners=True)
+        drawer.setParent(self.root)
+        add_shadow(drawer, blur=34, y=0)
+        v = QVBoxLayout(drawer)
+        v.setContentsMargins(16, 16, 16, 16)
+        v.setSpacing(10)
+        header = QHBoxLayout()
+        ttl = QLabel(title)
+        ttl.setObjectName("sectionTitle")
+        close_btn = QPushButton("✕  Close")
+        close_btn.setObjectName("utilityButton")
+        close_btn.setCursor(Qt.PointingHandCursor)
+        close_btn.clicked.connect(on_close)
+        header.addWidget(ttl, stretch=1)
+        header.addWidget(close_btn)
+        v.addLayout(header)
+        body = QVBoxLayout()
+        v.addLayout(body, stretch=1)
+        drawer.hide()
+        return drawer, body
+
+    def _position_drawer(self, drawer, frac, min_w, max_w):
+        if drawer is None:
+            return
+        w = self.root.width()
+        h = self.root.height()
+        dw = min(max_w, max(min_w, int(w * frac)))
+        drawer.setGeometry(w - dw, 0, dw, h)
+
+    # --- Commander AI drawer ---
+    def build_ai_drawer(self):
+        drawer, body = self._make_overlay_drawer("Ask the Commander Guide", self.close_ai_drawer)
+        self.ai_drawer = drawer
+        self._ai_drawer_body = body
+        self._ai_drawer_panel = None
+        return drawer
+
+    def _position_ai_drawer(self):
+        # ~1/3 of the window, clamped 360–460px (tester: old drawer too big).
+        self._position_drawer(getattr(self, "ai_drawer", None), 0.33, 360, 460)
+
+    def open_ai_drawer(self):
+        if getattr(self, "ai_drawer", None) is None:
+            return
+        if self._ai_drawer_panel is None:
+            self._ai_drawer_panel = build_commander_ai_panel(self, compact=True)
+            self._ai_drawer_body.addWidget(self._ai_drawer_panel, stretch=1)
+        self._position_ai_drawer()
+        self.ai_drawer.show()
+        self.ai_drawer.raise_()
+
+    def close_ai_drawer(self):
+        if getattr(self, "ai_drawer", None) is not None:
+            self.ai_drawer.hide()
+
+    def toggle_ai_drawer(self):
+        if getattr(self, "ai_drawer", None) is None:
+            return
+        self.close_ai_drawer() if self.ai_drawer.isVisible() else self.open_ai_drawer()
+
+    # --- Settings drawer (slide-over; replaces the old Settings stack page) ---
+    def build_settings_drawer(self):
+        drawer, body = self._make_overlay_drawer("Settings", self.close_settings_drawer)
+        self.settings_drawer = drawer
+        self._settings_drawer_body = body
+        self._settings_drawer_content = None
+        return drawer
+
+    def _position_settings_drawer(self):
+        # Settings is dense — wider than the AI drawer (~half, clamped 480–760px).
+        self._position_drawer(getattr(self, "settings_drawer", None), 0.5, 480, 760)
+
+    def open_settings_drawer(self):
+        if getattr(self, "settings_drawer", None) is None:
+            return
+        if self._settings_drawer_content is None:
+            self._settings_drawer_content = build_settings_content(self)
+            self._settings_drawer_body.addWidget(self._settings_drawer_content, stretch=1)
+        self.close_ai_drawer()  # never stack the two overlays
+        self._position_settings_drawer()
+        self.settings_drawer.show()
+        self.settings_drawer.raise_()
+
+    def close_settings_drawer(self):
+        if getattr(self, "settings_drawer", None) is not None:
+            self.settings_drawer.hide()
+
+    def toggle_settings_drawer(self):
+        if getattr(self, "settings_drawer", None) is None:
+            return
+        self.close_settings_drawer() if self.settings_drawer.isVisible() else self.open_settings_drawer()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if getattr(self, "ai_drawer", None) is not None and self.ai_drawer.isVisible():
+            self._position_ai_drawer()
+        if getattr(self, "settings_drawer", None) is not None and self.settings_drawer.isVisible():
+            self._position_settings_drawer()
+
+    def add_commander_ai_trigger(self, layout, context_label=""):
+        """Add an 'Ask the Commander Guide' control to a host page layout.
+
+        Behavior follows the Settings preference, read at click time:
+        - Slide-in panel: opens the shared drawer over the page.
+        - Embedded panel: toggles an inline collapsible panel hosted right here.
+        Returns the trigger button.
+        """
+        row = QHBoxLayout()
+        btn = QPushButton("🐉  Ask the Commander Guide")
+        btn.setObjectName("utilityButton")
+        btn.setCursor(Qt.PointingHandCursor)
+        btn.setToolTip(
+            "Ask the optional local AI guide about your deck. "
+            "Enable it in Settings → Local Commander AI."
+        )
+        row.addWidget(btn)
+        row.addStretch(1)
+        layout.addLayout(row)
+
+        # Embedded host: a scroll area so the panel is never cramped/clipped
+        # (tester: embedded panel "so small I can't see anything", couldn't scroll).
+        container = QScrollArea()
+        container.setWidgetResizable(True)
+        container.setFrameShape(QFrame.NoFrame)
+        container.setMinimumHeight(420)
+        container.setMinimumWidth(520)  # keep the persona/mode dropdowns from compressing
+        container.setVisible(False)
+        layout.addWidget(container)
+        holder = {"panel": None}
+
+        def _on_click():
+            if self.commander_ai_display_mode() == "Embedded panel":
+                # Clean transition: make sure the slide-in drawer isn't left open
+                # from a previous mode (tester: toggle "didn't change back").
+                self.close_ai_drawer()
+                if holder["panel"] is None:
+                    holder["panel"] = build_commander_ai_panel(self, compact=True)
+                    container.setWidget(holder["panel"])
+                container.setVisible(not container.isVisible())
+            else:
+                # Slide-in mode: keep any inline panel collapsed, use the drawer.
+                container.setVisible(False)
+                self.toggle_ai_drawer()
+
+        btn.clicked.connect(lambda checked=False: _on_click())
+        return btn
 
     def build_context_panel(self):
         panel = TexturedPanel(self.theme, kind="iron", glow=False, corners=True)
@@ -552,10 +899,24 @@ class MainWindow(QMainWindow):
             stat = SmallStat(label, value, self.theme)
             self.context_value_labels[label] = stat.value_label
             layout.addWidget(stat)
+        # Clickable warnings detail (tester: wanted to see what the warnings are).
+        view_warnings_btn = QPushButton("View warnings")
+        view_warnings_btn.setObjectName("utilityButton")
+        view_warnings_btn.setCursor(Qt.PointingHandCursor)
+        view_warnings_btn.clicked.connect(self.toggle_warnings_detail)
+        self.view_warnings_button = view_warnings_btn
+        layout.addWidget(view_warnings_btn)
+        warn_detail = QLabel(""); warn_detail.setObjectName("mutedText"); warn_detail.setWordWrap(True); warn_detail.setVisible(False)
+        self.warnings_detail_label = warn_detail
+        layout.addWidget(warn_detail)
         line = QFrame(); line.setObjectName("goldDivider"); line.setFixedHeight(1); layout.addWidget(line)
-        notes_title = QLabel("QUICK NOTES"); notes_title.setObjectName("sidebarSectionTitle"); layout.addWidget(notes_title)
-        notes = QLabel("• Single-deck alpha review only\n• Use guarded confirmation before analysis\n• Report Viewer loads plain text\n• Collection Source and Batch Tools are hidden for v0.10.5 cleanup\n• Interface Mode controls user-facing vs dev-facing visibility")
-        notes.setObjectName("mutedText"); notes.setWordWrap(True); layout.addWidget(notes)
+        # Run Setting Summary folded into the deck context (replaces the obsolete
+        # "Quick Notes" block per tester feedback).
+        run_title = QLabel("RUN SETTINGS"); run_title.setObjectName("sidebarSectionTitle"); layout.addWidget(run_title)
+        run_summary = QLabel(self.context_run_settings_text())
+        run_summary.setObjectName("mutedText"); run_summary.setWordWrap(True)
+        self.context_run_settings_label = run_summary
+        layout.addWidget(run_summary)
         layout.addStretch(1)
         mascot = TexturedPanel(self.theme, kind="iron_2", glow=True, corners=False)
         mascot_layout = QVBoxLayout(mascot); mascot_layout.setContentsMargins(12, 12, 12, 12)
@@ -573,9 +934,8 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.page_commander_discovery())
         self.stack.addWidget(self.page_collection_tools())
         self.stack.addWidget(self.page_batch_reports())
-        self.stack.addWidget(self.page_settings())
-        self.stack.addWidget(self.page_commander_guide())  # index 9 = COMMANDER_GUIDE (appended; no index shift)
-        self.stack.addWidget(self.page_training_review())   # index 10 = TRAINING_REVIEW (dev-only nav; page always in stack so indices stay stable)
+        # Settings is no longer a stack page — it's the slide-over drawer.
+        self.stack.addWidget(self.page_training_review())   # index 8 = TRAINING_REVIEW (dev-only nav; page always in stack so indices stay stable)
 
     def apply_theme(self):
         self.root.setStyleSheet(self.qss(self.theme()))
@@ -650,6 +1010,9 @@ class MainWindow(QMainWindow):
             button.style().polish(button)
         for combo in self.findChildren(QComboBox):
             self.configure_combo_popup(combo)
+        # Stepper labels use inline (theme-derived) colors, so re-tint them on toggle.
+        if self.stack is not None:
+            self.refresh_stepper(self.stack.currentIndex())
         self.refresh_context_panel_values()
         self.root.update()
 
@@ -678,8 +1041,11 @@ class MainWindow(QMainWindow):
         # v0.10.5.2 removed-page navigation guard:
         # Collection Source and Batch Tools are no longer visible navigation pages.
         if index == self.COLLECTION:
+            # Collection Source lives in the Settings drawer now; open it and
+            # keep the user on their current page underneath.
             self.state.status = "Collection Source moved to Settings / Review Setup"
-            index = self.SETTINGS
+            self.open_settings_drawer()
+            return
         elif index == self.BATCH_REPORTS:
             self.state.status = "Batch Tools removed from UI navigation"
             index = self.REPORT
@@ -690,8 +1056,12 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentIndex(index)
         for btn in self.nav_buttons:
             btn.setChecked(btn.index == index)
+        self.refresh_stepper(index)
         if index == self.RUN_ANALYSIS:
             self.refresh_run_analysis_previews()
+            # Re-evaluate the gated Continue-to-Report button on every visit.
+            if getattr(self, "run_to_report_btn", None) is not None:
+                self.run_to_report_btn.setEnabled(self.report_is_available())
         if index == self.REPORT:
             self.refresh_report_viewer_mode_controls()
             self.refresh_report_viewer_file_list()
@@ -714,6 +1084,17 @@ class MainWindow(QMainWindow):
 
         if getattr(self, "run_latest_output_card", None) is not None:
             self.run_latest_output_card.setVisible(is_dev)
+
+        # Dev-only Run Analysis clutter (tester feedback): User Mode shows only
+        # the Run button + guarded confirmation note. These panels remain in
+        # Developer Mode for diagnostics.
+        for attr in (
+            "run_readiness_card", "run_summary_card",
+            "run_data_readiness_card", "run_data_warning_card",
+        ):
+            card = getattr(self, attr, None)
+            if card is not None:
+                card.setVisible(is_dev)
 
         if getattr(self, "run_advanced_details_toggle", None) is not None:
             self.run_advanced_details_toggle.setVisible(is_dev)
@@ -739,6 +1120,8 @@ class MainWindow(QMainWindow):
     def refresh_run_analysis_previews(self):
         """Refresh Run Analysis preview text from current staged UI state without rebuilding pages."""
         self.refresh_run_analysis_mode_controls()
+        if getattr(self, "run_user_summary_label", None) is not None:
+            self.run_user_summary_label.setText(self.run_compact_summary_text())
         if getattr(self, "run_readiness_box", None) is not None:
             self.run_readiness_box.setPlainText(self.run_readiness_text())
         if self.run_config_preview_box is not None:
@@ -786,6 +1169,49 @@ class MainWindow(QMainWindow):
             label = self.context_value_labels.get(key)
             if label is not None:
                 label.setText(value)
+        if getattr(self, "context_run_settings_label", None) is not None:
+            self.context_run_settings_label.setText(self.context_run_settings_text())
+        warn_label = getattr(self, "warnings_detail_label", None)
+        if warn_label is not None and warn_label.isVisible():
+            warn_label.setText(self.warnings_detail_text())
+
+    def warnings_detail_text(self):
+        details = getattr(self.state, "warning_details", []) or []
+        if not details:
+            return "No warnings for the current deck preview."
+        return "\n".join(f"• {d}" for d in details)
+
+    def toggle_warnings_detail(self):
+        """Show/hide the warning details under the context panel."""
+        label = getattr(self, "warnings_detail_label", None)
+        button = getattr(self, "view_warnings_button", None)
+        if label is None:
+            return
+        now_visible = not label.isVisible()
+        label.setText(self.warnings_detail_text())
+        label.setVisible(now_visible)
+        if button is not None:
+            button.setText("Hide warnings" if now_visible else "View warnings")
+
+    def run_compact_summary_text(self):
+        """Short 'what will run' summary for the Run Analysis page (User Mode)."""
+        s = self.state
+        return (
+            f"Deck: {s.deck_name}\n"
+            f"Commander: {s.commander}\n"
+            f"Lens: {s.selected_philosophy} · Intended bracket: {s.intended_bracket}"
+        )
+
+    def context_run_settings_text(self):
+        """Compact run-setting summary folded into the deck context panel."""
+        s = self.state
+        return (
+            f"Lens: {s.selected_philosophy}\n"
+            f"Subtype: {s.philosophy_subtype}\n"
+            f"Intended bracket: {s.intended_bracket}\n"
+            f"Review: {s.review_direction} · {s.cut_depth}\n"
+            f"Output: {s.output_mode}"
+        )
 
     def rebuild_then_message(self, page_index, title, message):
         """Rebuild the shell, then post `title: message` to state.status.
@@ -858,8 +1284,123 @@ class MainWindow(QMainWindow):
         box.setFrameShape(QFrame.NoFrame)
         return box
 
+    # ---- Linear-workflow in-page navigation -------------------------------
+    # The old Forge sidebar was the only way to move between flow pages. With it
+    # gone, each flow page gets a pinned Continue/Back footer. Targets are keyed
+    # by page-index constant (not "next index") so the stack order never changes.
+
+    def flow_back_target(self, index):
+        """Return the page a Back button should go to, or None for no Back."""
+        if index == self.REVIEW_SETUP:
+            # Review Setup is the join point: in Commander's Call mode Back returns
+            # to the discovery page; otherwise to Deck Selection.
+            return self.COMMANDER_DISCOVERY if self.entry_mode == "commander" else self.DECK_SELECTION
+        if index == self.PHILOSOPHY:
+            return self.REVIEW_SETUP
+        if index == self.RUN_ANALYSIS:
+            return self.PHILOSOPHY
+        if index == self.REPORT:
+            return self.RUN_ANALYSIS
+        return None
+
+    def flow_continue_target(self, index):
+        """Return (target_index, label) for a Continue button, or None."""
+        if index == self.DECK_SELECTION:
+            return (self.REVIEW_SETUP, "Continue to Review Setup  →")
+        if index == self.COMMANDER_DISCOVERY:
+            return (self.REVIEW_SETUP, "Continue to Review Setup  →")
+        if index == self.REVIEW_SETUP:
+            return (self.PHILOSOPHY, "Continue to Philosophy Lens  →")
+        if index == self.PHILOSOPHY:
+            # Tester: this should RUN the analysis directly (handled specially in
+            # build_flow_footer), not just navigate. Label reflects that.
+            return (self.RUN_ANALYSIS, "Run Analysis  →")
+        if index == self.RUN_ANALYSIS:
+            # Forward to the report. The button is gated (disabled until a run
+            # has produced a report) in build_flow_footer / refresh, so Report
+            # stays unreachable before the first run but is freely revisitable
+            # afterward — both tester wishes honored.
+            return (self.REPORT, "Continue to Report Viewer  →")
+        return None
+
+    def report_is_available(self):
+        """True once a guarded run has attempted report detection."""
+        return getattr(self.state, "last_report_detection_mode", "not_attempted") != "not_attempted"
+
+    def _run_from_philosophy(self):
+        """Philosophy's primary button: go to Run Analysis (for the animation),
+        then start the guarded backend run in the same gesture (tester request)."""
+        self.go_to(self.RUN_ANALYSIS)
+        if hasattr(self, "start_guarded_backend_run"):
+            self.start_guarded_backend_run()
+
+    def build_flow_footer(self, index):
+        """Pinned Back / Continue bar for a linear-workflow page."""
+        bar = TexturedPanel(self.theme, kind="iron", glow=False, corners=True)
+        row = QHBoxLayout(bar)
+        row.setContentsMargins(18, 9, 18, 9)
+        row.setSpacing(12)
+
+        if self.flow_back_target(index) is not None:
+            back_btn = QPushButton("←  Back")
+            back_btn.setObjectName("utilityButton")
+            back_btn.setCursor(Qt.PointingHandCursor)
+            # Recompute the target on click so it honors the current entry mode.
+            back_btn.clicked.connect(lambda checked=False, i=index: self.go_to(self.flow_back_target(i)))
+            row.addWidget(back_btn)
+
+        row.addStretch(1)
+
+        if index == self.REPORT:
+            # End of the flow: offer a clean restart into the same entry mode.
+            restart_btn = QPushButton("✦  Start New")
+            restart_btn.setObjectName("primaryButton")
+            restart_btn.setMinimumHeight(40)
+            restart_btn.setCursor(Qt.PointingHandCursor)
+            restart_btn.clicked.connect(lambda checked=False: self.start_new_flow(self.entry_mode))
+            row.addWidget(restart_btn)
+            return bar
+
+        cont = self.flow_continue_target(index)
+        if cont is not None:
+            cont_index, cont_label = cont
+            cont_btn = QPushButton(cont_label)
+            cont_btn.setObjectName("primaryButton")
+            cont_btn.setMinimumHeight(40)
+            cont_btn.setCursor(Qt.PointingHandCursor)
+            if index == self.PHILOSOPHY:
+                # Run the analysis straight from Philosophy (tester): jump to the
+                # Run Analysis page for the animation, then start the guarded run.
+                cont_btn.clicked.connect(lambda checked=False: self._run_from_philosophy())
+            else:
+                cont_btn.clicked.connect(lambda checked=False, i=cont_index: self.go_to(i))
+            if index == self.RUN_ANALYSIS:
+                # Gated: only usable once a report exists. Keep a handle so go_to
+                # can refresh the enabled state (footers are built once at init).
+                self.run_to_report_btn = cont_btn
+                cont_btn.setEnabled(self.report_is_available())
+                cont_btn.setToolTip(
+                    "Available after you run an analysis and a report is generated."
+                )
+            row.addWidget(cont_btn)
+        return bar
+
+    def wrap_flow_page(self, page, index):
+        """Wrap a flow page with its pinned Continue/Back footer.
+
+        The wrapper keeps the page's stack index unchanged; only the visible
+        widget tree gains a footer below the (possibly scrolling) page body.
+        """
+        wrapper = QWidget()
+        v = QVBoxLayout(wrapper)
+        v.setContentsMargins(0, 0, 0, 0)
+        v.setSpacing(8)
+        v.addWidget(page, stretch=1)
+        v.addWidget(self.build_flow_footer(index))
+        return wrapper
+
     def page_deck_input(self):
-        return build_deck_selection_page(self)
+        return self.wrap_flow_page(build_deck_selection_page(self), self.DECK_SELECTION)
 
     def default_deck_folder(self):
         """Return a sensible starting folder for deck-file selection without requiring project config."""
@@ -999,9 +1540,20 @@ class MainWindow(QMainWindow):
         self.state.companion_detected = summary.get("companion_detected", False)
         self.state.companion_count = summary.get("companion_count", 0)
         self.state.warnings = summary["warnings"]
+        self.state.warning_details = summary.get("warning_details", [])
         self.state.status = "Deck preview loaded"
         self.state.deck_preview_note = summary["note"]
-        self.rebuild_shell(self.DECK_SELECTION)
+        # Targeted refresh instead of a full rebuild_shell (tester: deck load felt
+        # slow). Update the deck preview + context panel + run summary in place;
+        # other pages refresh when navigated to. Fall back to a rebuild only if the
+        # lightweight hook isn't available.
+        hook = getattr(self, "refresh_deck_selection_preview", None)
+        if hook is not None:
+            hook()
+            self.refresh_context_panel_values()
+            self.refresh_run_analysis_previews()
+        else:
+            self.rebuild_shell(self.DECK_SELECTION)
 
     def summarize_deck_preview(self, text, fallback_name):
         """Lightweight UI preview only. The locked backend remains the source of truth.
@@ -1014,7 +1566,7 @@ class MainWindow(QMainWindow):
         commander_names = []
         companion_names = []
         main_count = 0
-        warnings = 0
+        warning_details = []
         ignored_sections = {"sideboard", "maybeboard", "tokens", "token", "attractions", "stickers", "reference", "references"}
         commander_sections = {"commander", "commanders", "command zone", "command-zone"}
         companion_sections = {"companion", "companions"}
@@ -1072,11 +1624,12 @@ class MainWindow(QMainWindow):
         total_count = main_count + commander_count
 
         if main_count == 0:
-            warnings += 1
+            warning_details.append("No counted main-deck card lines were detected by the lightweight preview.")
         if total_count and total_count != 100:
-            warnings += 1
+            warning_details.append(f"Card total is {total_count}, not 100 (Commander decks are 100 cards including the commander).")
         if not commander_detected:
-            warnings += 1
+            warning_details.append("No commander was detected. Add a 'Commander:' section, or the backend will need to infer it.")
+        warnings = len(warning_details)
 
         companion_note = f" Companion detected separately: {companion_name}. Backend validates companion restriction." if companion_detected else ""
         if total_count == 100 and commander_detected:
@@ -1097,6 +1650,7 @@ class MainWindow(QMainWindow):
             "companion_detected": companion_detected,
             "companion_count": companion_count,
             "warnings": warnings,
+            "warning_details": warning_details,
             "note": note,
         }
 
@@ -1201,13 +1755,13 @@ class MainWindow(QMainWindow):
         self.refresh_run_analysis_previews()
 
     def page_analysis_setup(self):
-        return build_review_setup_page(self)
+        return self.wrap_flow_page(build_review_setup_page(self), self.REVIEW_SETUP)
 
     def page_philosophy(self):
-        return build_philosophy_lens_page(self)
+        return self.wrap_flow_page(build_philosophy_lens_page(self), self.PHILOSOPHY)
 
     def page_commander_discovery(self):
-        return build_commander_discovery_page(self)
+        return self.wrap_flow_page(build_commander_discovery_page(self), self.COMMANDER_DISCOVERY)
 
     def stage_guide_presentation(self, text):
         """Save guide presentation as an app-wide setting."""
@@ -2040,7 +2594,7 @@ class MainWindow(QMainWindow):
         pass
 
     def page_run_review(self):
-        return build_run_analysis_page(self)
+        return self.wrap_flow_page(build_run_analysis_page(self), self.RUN_ANALYSIS)
 
     def update_progress_mock(self):
         if not self.progress_bars or self.stack.currentIndex() != self.RUN_REVIEW: return
@@ -2398,10 +2952,7 @@ class MainWindow(QMainWindow):
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(path.parent)))
 
     def page_report_viewer(self):
-        return build_report_viewer_page(self)
-
-    def page_commander_guide(self):
-        return build_commander_ai_page(self)
+        return self.wrap_flow_page(build_report_viewer_page(self), self.REPORT)
 
     def page_training_review(self):
         return build_training_review_page(self)
@@ -2534,9 +3085,6 @@ class MainWindow(QMainWindow):
 
     def page_batch_reports(self):
         return build_batch_reports_page(self)
-
-    def page_settings(self):
-        return build_settings_page(self)
 
 
 def main():

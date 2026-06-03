@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 import subprocess
+from datetime import datetime
 """Settings page for The Dragon's Touch.
 
 v0.10.5.1-dev:
@@ -172,6 +173,62 @@ def _format_data_file_status(item):
     return f"{mark} — {label} ({size_text})\n  {path}"
 
 
+def _human_size(num_bytes):
+    """Human-readable file size for the Data Setup checklist."""
+    n = float(num_bytes or 0)
+    for unit in ("B", "KB", "MB", "GB"):
+        if n < 1024 or unit == "GB":
+            return f"{int(n)} {unit}" if unit == "B" else f"{n:.1f} {unit}"
+        n /= 1024
+    return f"{n:.1f} GB"
+
+
+def _data_setup_checklist_line(item, optional=False):
+    """One checklist row: ✓/—/•  Label — size — ready DATE (or a 'missing' hint)."""
+    ready = bool(getattr(item, "exists", False))
+    label = getattr(item, "label", "Data file")
+    if ready:
+        size = _human_size(getattr(item, "size_bytes", 0))
+        mtime = getattr(item, "last_modified", 0.0) or 0.0
+        try:
+            when = datetime.fromtimestamp(mtime).strftime("%b %d, %Y") if mtime else "ready"
+        except Exception:
+            when = "ready"
+        return f"✓  {label} — {size} — ready {when}"
+    if optional:
+        return f"•  {label} — optional (developer validation), not built"
+    return f"—  {label} — not downloaded yet"
+
+
+def _format_data_setup_checklist(dev_mode=False):
+    """Compact, user-friendly Data Setup checklist.
+
+    In User Mode the dev-only parity combo index row is hidden (it's optional
+    developer validation and only confused testers).
+    """
+    try:
+        status = get_data_setup_status()
+    except Exception as exc:
+        return f"Data setup status could not be loaded.\nError: {exc}"
+    lines = [
+        "Data files",
+        "----------",
+        _data_setup_checklist_line(status.scryfall_cards),
+        _data_setup_checklist_line(status.commander_spellbook_bulk),
+        _data_setup_checklist_line(status.combo_index),
+    ]
+    if dev_mode:
+        lines.append(_data_setup_checklist_line(status.combo_index_parity, optional=True))
+    lines.extend([
+        "",
+        ("✓  Ready for deck analysis" if status.ready_for_basic_analysis
+         else "—  Deck analysis needs Scryfall card data"),
+        ("✓  Ready for combo analysis" if status.ready_for_combo_analysis
+         else "—  Combo analysis needs combo data + combo index"),
+    ])
+    return "\n".join(lines)
+
+
 def _format_data_setup_first_run_guidance(status):
     """Return first-run guidance for missing runtime data."""
     guidance = ["", "First-run setup guidance:"]
@@ -289,6 +346,29 @@ def _set_text_widget_value(widget, text):
 def _refresh_data_setup_status_widget(widget):
     """Refresh the Settings Data Setup status text."""
     return _set_text_widget_value(widget, _format_data_setup_status_text())
+
+
+class _DataSetupRefreshProxy:
+    """A stand-in 'widget' for the guarded data actions.
+
+    The guarded download/build helpers push verbose status text into whatever
+    widget they're handed. We don't want that dumped into the compact checklist,
+    so this proxy treats any text update as a signal to re-render the checklist
+    (and dev details) from fresh on-disk status — which is exactly what we want
+    after a download/build completes (fixes the 'combo index didn't update').
+    """
+
+    def __init__(self, on_refresh):
+        self._on_refresh = on_refresh
+
+    def setPlainText(self, _text=""):
+        try:
+            self._on_refresh()
+        except Exception:
+            pass
+
+    def setText(self, _text=""):
+        self.setPlainText(_text)
 
 
 def _open_runtime_data_folder():
@@ -656,6 +736,18 @@ def build_commander_ai_settings_card(window):
     enable_combo.currentTextChanged.connect(lambda v: _save_ai_setting(window, "commander_ai_enabled", v == "On"))
     card.body.addLayout(_row("Enable local AI", enable_combo))
 
+    # How the guide appears on Report Viewer / The Commander's Call (read live by
+    # the "Ask the Commander Guide" trigger — no restart needed).
+    _us = _user_settings_module()
+    display_mode_current = _us.normalize_commander_ai_display_mode(window.app_settings.get("commander_ai_display_mode"))
+    display_mode_combo = _combo(window, _us.COMMANDER_AI_DISPLAY_OPTIONS, display_mode_current)
+    display_mode_combo.currentTextChanged.connect(lambda v: _save_ai_setting(window, "commander_ai_display_mode", v))
+    card.body.addLayout(_row("Guide display", display_mode_combo))
+    card.body.addWidget(window.default_note(
+        "Slide-in panel opens the guide over the page; Embedded panel shows it inline "
+        "below the 'Ask the Commander Guide' button."
+    ))
+
     # Editable dropdown of installed models (still type-able for models not yet
     # pulled or when Ollama is offline).
     current_model = str(window.app_settings.get("commander_ai_model", "llama3.1"))
@@ -736,12 +828,12 @@ def build_commander_ai_settings_card(window):
     return card
 
 
-def build_settings_page(window):
-    page, layout = window.page_container(
-        "Settings",
-        "App-wide preferences for The Dragon's Touch. Settings persist across restarts; Review Setup remains for the current run."
-    )
+def build_settings_content(window):
+    """Build the Settings content (scroll area) for hosting in the slide-over drawer.
 
+    Returns the scroll widget only — the drawer provides its own title + Close
+    header, so there's no page_container wrapper here.
+    """
     scroll, content = window.scroll_content()
     body = TexturedPanel(window.theme, kind="iron", glow=False)
     add_shadow(body, blur=24, y=8)
@@ -865,74 +957,82 @@ def build_settings_page(window):
     b_layout.addWidget(report_card)
 
 
-    # Data Setup.
-    data_setup_card = ReportCard("Data Setup", window.theme, badges=[("Beta", "primary"), ("Runtime", "manual")])
+    # Data Setup — compact checklist (both modes); verbose details dev-only.
+    data_setup_card = ReportCard("Data Setup", window.theme, badges=[("Runtime", "manual")])
     data_setup_card.body.addWidget(window.default_note(
-        "Shows whether this install has the local runtime data needed for full analysis and combo awareness. "
-        "Safe actions are local; download/build actions are guarded and require confirmation."
+        "Local data this install needs. ✓ = ready (with size + date); — = still needed."
     ))
-    data_setup_status_widget = window.make_text(_format_data_setup_status_text(), paper=True)
-    data_setup_card.body.addWidget(data_setup_status_widget)
 
-    safe_actions_label = QLabel("Safe local actions")
-    safe_actions_label.setObjectName("helperText")
-    data_setup_card.body.addWidget(safe_actions_label)
+    # Compact checklist — the user-facing view (parity row only in Developer Mode).
+    _dev = window.is_dev_mode()
+    data_setup_checklist_widget = window.make_text(_format_data_setup_checklist(dev_mode=_dev), paper=True)
+    data_setup_card.body.addWidget(data_setup_checklist_widget)
+
+    # Verbose folders / next-steps / first-run guidance / PowerShell — Developer Mode only.
+    data_setup_details_widget = None
+    if window.is_dev_mode():
+        details_label = QLabel("Developer details")
+        details_label.setObjectName("helperText")
+        data_setup_card.body.addWidget(details_label)
+        data_setup_details_widget = window.make_text(_format_data_setup_status_text(), paper=True)
+        data_setup_card.body.addWidget(data_setup_details_widget)
+
+    def _refresh_data_setup_views():
+        _set_text_widget_value(data_setup_checklist_widget, _format_data_setup_checklist(dev_mode=_dev))
+        if data_setup_details_widget is not None:
+            _set_text_widget_value(data_setup_details_widget, _format_data_setup_status_text())
 
     data_setup_safe_actions = QHBoxLayout()
     data_setup_safe_actions.addWidget(_make_data_setup_button(
-        "Refresh Data Status",
-        lambda: _refresh_data_setup_status_widget(data_setup_status_widget),
+        "Refresh Status",
+        _refresh_data_setup_views,
     ))
     data_setup_safe_actions.addWidget(_make_data_setup_button(
         "Open Data Folder",
         _open_runtime_data_folder,
     ))
-    data_setup_safe_actions.addWidget(_make_data_setup_button(
-        "Copy Setup Commands",
-        _copy_data_setup_commands_to_clipboard,
-    ))
+    if window.is_dev_mode():
+        data_setup_safe_actions.addWidget(_make_data_setup_button(
+            "Copy Setup Commands",
+            _copy_data_setup_commands_to_clipboard,
+        ))
     data_setup_card.body.addLayout(data_setup_safe_actions)
 
-    guarded_actions_label = QLabel("Guarded data actions")
-    guarded_actions_label.setObjectName("helperText")
-    data_setup_card.body.addWidget(guarded_actions_label)
-
+    # The guarded download/build actions refresh the checklist on completion, so
+    # the "✓ ready" line and date/size update without a manual Refresh click.
     data_setup_guarded_actions = QHBoxLayout()
-    scryfall_download_button = _make_data_setup_button(
-        "Download / Update Scryfall",
-        lambda: None,
-    )
+    scryfall_download_button = _make_data_setup_button("Download / Update Scryfall", lambda: None)
     scryfall_download_button.clicked.connect(
-        lambda: _download_scryfall_data_guarded(data_setup_status_widget, scryfall_download_button)
+        lambda: _download_scryfall_data_guarded(_DataSetupRefreshProxy(_refresh_data_setup_views), scryfall_download_button)
     )
     data_setup_guarded_actions.addWidget(scryfall_download_button)
     data_setup_guarded_actions.addWidget(_make_data_setup_button(
         "Download / Update Combo Data",
-        lambda: _download_combo_data_guarded(data_setup_status_widget),
+        lambda: _download_combo_data_guarded(_DataSetupRefreshProxy(_refresh_data_setup_views)),
     ))
     data_setup_guarded_actions.addWidget(_make_data_setup_button(
         "Build Combo Index",
-        lambda: _build_combo_index_guarded(data_setup_status_widget),
+        lambda: _build_combo_index_guarded(_DataSetupRefreshProxy(_refresh_data_setup_views)),
     ))
     data_setup_card.body.addLayout(data_setup_guarded_actions)
     b_layout.addWidget(data_setup_card)
 
-    # Developer settings status.
-    dev_card = ReportCard("Developer Settings", window.theme, badges=[("Settings only", "manual")])
-    dev_card.body.addWidget(window.make_text(
-        "Developer Mode is intentionally controlled from Settings only. No quick switch should be added elsewhere.\n\n"
-        f"Current mode: {window.interface_mode_display_text()}\n"
-        f"Developer Report Viewer last view: {getattr(window.state, 'developer_report_viewer_last_view', 'User View')}\n"
-        f"Settings file: {window.user_settings_path_text()}",
-        paper=True,
-    ))
-    reset_btn = QPushButton("Reset Settings to Defaults")
-    reset_btn.setObjectName("utilityButton")
-    reset_btn.clicked.connect(window.reset_user_settings_to_defaults)
-    dev_card.body.addWidget(reset_btn)
-    b_layout.addWidget(dev_card)
+    # Developer settings status — Developer Mode only (tester: keep dev-only).
+    if window.is_dev_mode():
+        dev_card = ReportCard("Developer Settings", window.theme, badges=[("Settings only", "manual")])
+        dev_card.body.addWidget(window.make_text(
+            "Developer Mode is intentionally controlled from Settings only. No quick switch should be added elsewhere.\n\n"
+            f"Current mode: {window.interface_mode_display_text()}\n"
+            f"Developer Report Viewer last view: {getattr(window.state, 'developer_report_viewer_last_view', 'User View')}\n"
+            f"Settings file: {window.user_settings_path_text()}",
+            paper=True,
+        ))
+        reset_btn = QPushButton("Reset Settings to Defaults")
+        reset_btn.setObjectName("utilityButton")
+        reset_btn.clicked.connect(window.reset_user_settings_to_defaults)
+        dev_card.body.addWidget(reset_btn)
+        b_layout.addWidget(dev_card)
 
     b_layout.addStretch(1)
     content.layout().addWidget(body)
-    layout.addWidget(scroll, stretch=1)
-    return page
+    return scroll

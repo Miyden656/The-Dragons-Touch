@@ -199,6 +199,11 @@ def build_run_analysis_page(window):
     )
     window.run_analysis_mode_note_label = run_mode_note
     run_card.body.addWidget(run_mode_note)
+    # Compact "what will run" summary so the page isn't empty in User Mode
+    # (tester feedback). Updated live by refresh_run_analysis_previews.
+    run_user_summary = window.make_text(window.run_compact_summary_text(), paper=True)
+    window.run_user_summary_label = run_user_summary
+    run_card.body.addWidget(run_user_summary)
     run_guarded_btn = QPushButton("Run Analysis")
     run_guarded_btn.setMinimumHeight(58)
     run_guarded_btn.clicked.connect(window.start_guarded_backend_run)
@@ -213,7 +218,12 @@ def build_run_analysis_page(window):
     readiness_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
     window.run_readiness_box = readiness_box
     readiness.body.addWidget(readiness_box)
+    window.run_readiness_card = readiness
+    # Dev-only (tester feedback): User Mode keeps Run Analysis focused on the
+    # Run button + guarded confirmation. setVisible AFTER addWidget to avoid the
+    # parentless-top-level-window flash documented elsewhere in this file.
     l_layout.addWidget(readiness, stretch=0)
+    readiness.setVisible(window.is_dev_mode())
 
     result_card = ReportCard("Latest Run Output", window.theme, badges=[("Developer", "manual"), ("Captured", "protected")])
     result_box = QPlainTextEdit()
@@ -248,7 +258,9 @@ def build_run_analysis_page(window):
     run_summary_mode_note = window.default_note(window.interface_mode_summary_text())
     window.run_analysis_summary_mode_note_label = run_summary_mode_note
     summary_card.body.addWidget(run_summary_mode_note)
+    window.run_summary_card = summary_card
     r_layout.addWidget(summary_card, stretch=0)
+    summary_card.setVisible(window.is_dev_mode())  # dev-only (tester feedback)
 
     advanced_toggle = QPushButton("Show Advanced Run Details")
     advanced_toggle.setCheckable(True)
@@ -506,10 +518,14 @@ def build_run_analysis_page(window):
     # Runtime Data Readiness guidance.
     data_readiness_card = ReportCard("Runtime Data Readiness", window.theme, badges=[("Data Setup", "manual")])
     data_readiness_card.body.addWidget(window.make_text(_format_run_analysis_data_readiness_guidance(), paper=True))
+    window.run_data_readiness_card = data_readiness_card
     l_layout.addWidget(data_readiness_card)
+    data_readiness_card.setVisible(window.is_dev_mode())  # dev-only (tester feedback)
 
     # Soft warning for missing runtime data.
     data_soft_warning_card = ReportCard("Run Analysis Data Warning", window.theme, badges=[("Soft Warning", "manual")])
     data_soft_warning_card.body.addWidget(window.make_text(_format_run_analysis_soft_warning(), paper=True))
+    window.run_data_warning_card = data_soft_warning_card
     l_layout.addWidget(data_soft_warning_card)
+    data_soft_warning_card.setVisible(window.is_dev_mode())  # dev-only (tester feedback)
     return page

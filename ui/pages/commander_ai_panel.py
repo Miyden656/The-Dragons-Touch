@@ -294,33 +294,37 @@ def _save_training_example(window, result, status):
 
 # --- panel construction ---------------------------------------------------
 
-def build_commander_ai_page(window) -> QWidget:
-    """Full, scrollable Commander Guide page. Never raises — returns a fallback on error."""
-    page, layout = window.page_container(
-        "Commander Guide",
-        "Ask the local AI about your selected deck. It uses The Dragon's Touch analysis as the "
-        "source of truth and runs entirely on your machine. Enable it in Settings -> Local "
-        "Commander AI, then pick a deck in Deck Selection.",
-    )
-    scroll, content = window.scroll_content()
+def build_commander_ai_panel(window, compact: bool = False) -> QWidget:
+    """Reusable "Ask the Commander Guide" widget.
+
+    Hosted in a slide-in drawer (default) or an embedded collapsible section on
+    the Report Viewer and Commander's Call pages — the user picks which in
+    Settings. Self-contained and async; never raises (returns a fallback label
+    on construction error) so a host page can drop it in safely.
+
+    compact=True drops the long descriptive note so the panel fits a narrow
+    drawer / small embedded area without wasting vertical space.
+    """
     try:
-        content.addWidget(_build_panel(window))
-    except Exception as exc:  # noqa: BLE001 - the page must always render.
+        return _build_panel(window, compact=compact)
+    except Exception as exc:  # noqa: BLE001 - hosts must always render.
         label = QLabel(f"Commander AI panel unavailable: {exc}")
         label.setWordWrap(True)
-        content.addWidget(label)
-    content.addStretch(1)
-    layout.addWidget(scroll, stretch=1)
-    return page
+        return label
 
 
-def _build_panel(window) -> QWidget:
-    card = ReportCard("Ask the Commander Guide", window.theme, badges=[("Local AI", "primary"), ("Beta", "manual")])
-    card.body.addWidget(window.default_note(
-        "Ask the local AI about the selected deck. It uses The Dragon's Touch analysis as the "
-        "source of truth and runs entirely on your machine. Enable it in Settings -> Local "
-        "Commander AI, then pick a deck in Deck Selection."
-    ))
+def _build_panel(window, compact: bool = False) -> QWidget:
+    # Compact (embedded/drawer) hosting drops the "Local AI"/"Beta" badges —
+    # tester found them noisy/cut-off. Full-page hosting could keep them, but
+    # there's no full-page host anymore.
+    badges = [] if compact else [("Local AI", "primary"), ("Beta", "manual")]
+    card = ReportCard("Ask the Commander Guide", window.theme, badges=badges)
+    if not compact:
+        card.body.addWidget(window.default_note(
+            "Ask the local AI about the selected deck. It uses The Dragon's Touch analysis as the "
+            "source of truth and runs entirely on your machine. Enable it in Settings -> Local "
+            "Commander AI, then pick a deck in Deck Selection."
+        ))
 
     store: dict = {}  # holds the last successful _AskResult for the Save button
 

@@ -159,6 +159,7 @@ def _candidate_to_ui_summary(candidate: CommanderCandidate) -> dict[str, Any]:
         "mana_value_text": mana_value_text,
         "type_line": candidate.type_line,
         "oracle_text_preview": candidate.oracle_text_preview,
+        "full_oracle_text": candidate.full_oracle_text,
         "source_files": list(candidate.source_files),
         "commander_eligibility_reason": candidate.commander_eligibility_reason,
         "eligibility_status": candidate.eligibility_status,
@@ -190,6 +191,67 @@ def resolve_commander_discovery_collection_files(state: Any) -> list[str]:
         return []
     files = sorted([*folder.glob("*.txt"), *folder.glob("*.csv")], key=lambda path: path.name.lower())
     return [str(path) for path in files if path.is_file()]
+
+
+def _sample_owned_collection_fallback() -> list[dict]:
+    """Tiny safety-net sample for when the real collection load fails."""
+    return [
+        {"name": "Sol Ring", "owned_quantity": 1, "oracle_text": "Add two colorless mana.", "type_line": "Artifact", "source_files": []},
+        {"name": "Arcane Signet", "owned_quantity": 1, "oracle_text": "Add one mana of any color in your commander's color identity.", "type_line": "Artifact", "source_files": []},
+        {"name": "Command Tower", "owned_quantity": 1, "oracle_text": "Add one mana of any color in your commander's color identity.", "type_line": "Land", "source_files": []},
+    ]
+
+
+def load_owned_collection_for_role_bucketing(state: Any) -> list[dict]:
+    """Load the real user collection as role-bucketing input dicts.
+
+    Non-Qt (moved out of the UI module) so the Commander Discovery CLI runner can
+    reuse it without importing PySide6. Takes a duck-typed state exposing
+    collection_source_mode / selected_collection_files / collection_folder.
+    Returns dicts: {name, owned_quantity, oracle_text, type_line, source_files}.
+    Falls back to a tiny sample if the collection/Scryfall data can't load.
+    """
+    if state is None:
+        return _sample_owned_collection_fallback()
+    try:
+        collection_files = resolve_commander_discovery_collection_files(state)
+        if not collection_files:
+            return _sample_owned_collection_fallback()
+        scryfall_cards, scryfall_lookup = load_scryfall_lookup()
+        summary = load_collection_sources(
+            collection_files,
+            mode="prefer",
+            scryfall_lookup=scryfall_lookup,
+            source_mode=str(getattr(state, "collection_source_mode", "selected_files") or "selected_files"),
+            collection_folder=getattr(state, "collection_folder", None),
+            scryfall_cards=scryfall_cards,
+        )
+    except Exception:
+        return _sample_owned_collection_fallback()
+
+    cards: list[dict] = []
+    seen_names: set[str] = set()
+    for entry in summary.entries:
+        name = entry.scryfall_name or entry.card_name
+        if not name or name in seen_names:
+            continue
+        seen_names.add(name)
+        scry = scryfall_lookup.get(name.lower(), {}) or {}
+        oracle_text = str(scry.get("oracle_text", "") or scry.get("card_faces", [{}])[0].get("oracle_text", "")) if scry else ""
+        type_line = str(scry.get("type_line", "") or "")
+        sources_for_card = summary.card_sources.get(name, []) or summary.card_sources.get(entry.card_name, [])
+        if not sources_for_card and entry.source_file:
+            sources_for_card = [entry.source_file]
+        cards.append({
+            "name": name,
+            "owned_quantity": int(summary.card_quantities.get(name, entry.quantity)),
+            "oracle_text": oracle_text,
+            "type_line": type_line,
+            "source_files": [Path(str(p)).name for p in sources_for_card if p],
+        })
+    if not cards:
+        return _sample_owned_collection_fallback()
+    return cards
 
 
 def commander_discovery_output_folder(state: Any, *, now_slug: str | None = None, output_root: str | Path | None = None) -> Path:

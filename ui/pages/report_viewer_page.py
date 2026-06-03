@@ -42,11 +42,11 @@ logic, report parsing, candidate ranking, or automatic swaps.
 from pathlib import Path
 import re
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSignalBlocker
 from PySide6.QtWidgets import (
     QApplication,
+    QComboBox,
     QFrame,
-    QGridLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -72,7 +72,9 @@ def _make_simple_view_detail_box():
     box = QPlainTextEdit()
     box.setReadOnly(True)
     box.setObjectName("simpleViewUserDetail")
-    box.setMinimumHeight(240)
+    # Low floor so the Expanding box shrinks to fit on shorter windows instead
+    # of pushing the card past the page footer (it still grows to 420 + scrolls).
+    box.setMinimumHeight(120)
     box.setMaximumHeight(420)
     box.setFrameShape(QFrame.NoFrame)
     box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -1443,7 +1445,7 @@ def build_report_viewer_page(window):
     handoff_card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     handoff_intro = QLabel(
-        "Copy the User Prompt first, then copy the Deck Report when the prompt asks for it. Use the section buttons below for readable snippets."
+        "Copy the User Prompt first, then copy the Deck Report when the prompt asks for it. Use the section picker below for readable snippets."
     )
     handoff_intro.setObjectName("defaultNote")
     handoff_intro.setWordWrap(True)
@@ -1476,37 +1478,13 @@ def build_report_viewer_page(window):
     handoff_action_row.addWidget(load_report_btn)
     handoff_card.body.addLayout(handoff_action_row)
 
-    export_action_row = QHBoxLayout()
-    export_action_row.setSpacing(8)
+    # (The "Ask the Commander Guide" trigger is added as its OWN section below the
+    # handoff card — see after user_layout.addWidget(handoff_card) — so the embedded
+    # panel isn't cramped inside the handoff card. Tester wanted it like Commander's Call.)
 
-    copy_current_section_btn = QPushButton("Copy Current Section")
-    copy_current_section_btn.setObjectName("utilityButton")
-    copy_current_section_btn.setMinimumHeight(38)
-    copy_current_section_btn.setToolTip("Copy the currently selected User View section.")
-
-    copy_all_summary_btn = QPushButton("Copy All User View Summary")
-    copy_all_summary_btn.setObjectName("utilityButton")
-    copy_all_summary_btn.setMinimumHeight(38)
-    copy_all_summary_btn.setToolTip("Copy the readable User View summary sections.")
-
-    copy_ai_package_btn = QPushButton("Copy AI Handoff Package")
-    copy_ai_package_btn.setObjectName("primaryButton")
-    copy_ai_package_btn.setMinimumHeight(38)
-    copy_ai_package_btn.setToolTip("Copy a complete handoff package for AI chat or notes.")
-
-    copy_current_section_btn.clicked.connect(lambda checked=False: _copy_current_simple_view_section())
-    copy_all_summary_btn.clicked.connect(lambda checked=False: _copy_all_user_view_summary())
-    copy_ai_package_btn.clicked.connect(lambda checked=False: _copy_ai_handoff_package())
-
-    export_action_row.addWidget(copy_current_section_btn)
-    export_action_row.addWidget(copy_all_summary_btn)
-    export_action_row.addWidget(copy_ai_package_btn)
-    handoff_card.body.addLayout(export_action_row)
-
-
-    simple_view_button_grid = QGridLayout()
-    simple_view_button_grid.setSpacing(8)
-    simple_view_button_grid.setContentsMargins(0, 2, 0, 2)
+    # (Removed redundant Copy Current Section / Copy All Summary / Copy AI Package
+    # buttons per tester feedback — the 4 prompt/report buttons above cover handoff,
+    # and the section picker below replaces the cramped section-button grid.)
 
     simple_view_detail_box = _make_simple_view_detail_box()
 
@@ -1567,76 +1545,6 @@ def build_report_viewer_page(window):
     def _simple_view_section_text(section_name):
         value = simple_view_details.get(section_name)
         return value() if callable(value) else str(value or "")
-
-    def _copy_text_to_clipboard(title, text_value):
-        # Category B (popup removal): clipboard works silently like every
-        # other desktop app. User verifies by pasting. The "There is no
-        # text to copy yet" nudge stays as a status update on the status
-        # label (handled by category C in a later pass).
-        if not text_value or not str(text_value).strip():
-            return
-        QApplication.clipboard().setText(str(text_value).strip())
-
-    def _copy_current_simple_view_section():
-        section_name = current_simple_view_section.get("name", "Handoff")
-        _copy_text_to_clipboard(
-            f"Copied {section_name}",
-            _simple_view_section_text(section_name),
-        )
-
-    def _build_all_user_view_summary_text():
-        ordered_sections = ["Handoff", "Summary", "Strategy Brain", "Owned", "Examples", "Review", "Combos", "Safety"]
-        chunks = []
-        seen = set()
-
-        for section_name in ordered_sections:
-            if section_name in seen:
-                continue
-            seen.add(section_name)
-            section_text = _simple_view_section_text(section_name).strip()
-            if not section_text:
-                continue
-            chunks.append(section_text)
-
-        if not chunks:
-            return ""
-
-        return ("\n\n" + ("-" * 72) + "\n\n").join(chunks)
-
-    def _build_ai_handoff_package_text():
-        prompt_path = _find_report_role_path(window, "user_prompt")
-        report_path = _find_report_role_path(window, "deck_report")
-        prompt_name = Path(prompt_path).name if prompt_path else "Not detected"
-        report_name = Path(report_path).name if report_path else "Not detected"
-
-        package_intro = (
-            "The Dragon's Touch — AI Handoff Package\n"
-            "========================================\n\n"
-            "Use this package to start or continue an AI-assisted Commander deck review.\n\n"
-            f"User Prompt file: {prompt_name}\n"
-            f"Deck Report file: {report_name}\n\n"
-            "Workflow:\n"
-            "1. Paste the User Prompt into the AI chat first.\n"
-            "2. When the prompt asks for the deck report, paste the Deck Report.\n"
-            "3. Use the summary sections below as a quick player-facing reference.\n\n"
-            "Boundaries:\n"
-            "- No automatic swaps.\n"
-            "- Collection-first remains primary.\n"
-            "- Full-pool examples are not confirmed owned.\n"
-            "- Budget is not checked unless the report says otherwise.\n"
-            "- Combo findings are informational unless combo optimization is explicitly enabled.\n"
-        )
-
-        summary = _build_all_user_view_summary_text().strip()
-        if summary:
-            return package_intro + "\n\n" + ("=" * 72) + "\n\n" + summary
-        return package_intro
-
-    def _copy_all_user_view_summary():
-        _copy_text_to_clipboard("Copied User View Summary", _build_all_user_view_summary_text())
-
-    def _copy_ai_handoff_package():
-        _copy_text_to_clipboard("Copied AI Handoff Package", _build_ai_handoff_package_text())
 
 
     def _copy_report_role(role):
@@ -1767,53 +1675,65 @@ def build_report_viewer_page(window):
     load_report_btn.clicked.connect(lambda checked=False: _show_report_role_in_user_view("deck_report"))
 
     visible_user_view_sections = ("Handoff", "Summary", "Strategy Brain", "Owned", "Examples", "Review", "Combos", "Safety")
-    # v1.5.32: Buttons that only matter when their section has real content for the
-    # current report. We probe content after the row is built and hide buttons whose
-    # section is empty / shows only the "no content" fallback.
+    # Sections that only matter when they have real content for the current report;
+    # they are dropped from the picker when empty (was: hidden grid buttons).
     _hideable_when_empty = {"Examples", "Review"}
-    simple_view_buttons: dict[str, QPushButton] = {}
-    for index, simple_view_name in enumerate(visible_user_view_sections):
-        simple_view_button = QPushButton(simple_view_name)
-        simple_view_button.setObjectName("smallActionButton")
-        simple_view_button.setMinimumHeight(38)
-        simple_view_button.setMinimumWidth(132)
-        simple_view_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        simple_view_button.setToolTip(f"Show User View section: {simple_view_name}")
-        simple_view_button.clicked.connect(lambda checked=False, name=simple_view_name: _show_simple_view_section(name))
-        simple_view_button_grid.addWidget(simple_view_button, index // 4, index % 4)
-        simple_view_buttons[simple_view_name] = simple_view_button
 
-    for column_index in range(4):
-        simple_view_button_grid.setColumnStretch(column_index, 1)
+    def _section_has_content(name):
+        try:
+            content = (_simple_view_section_text(name) or "").strip()
+        except Exception:
+            content = ""
+        return not (
+            not content
+            or "will appear here when present" in content
+            or "will appear here when the deck report identifies" in content
+        )
+
+    # Replaced the cramped 8-button grid with a single themed section picker
+    # (tester feedback). It feeds the same detail box via _show_simple_view_section.
+    section_row = QHBoxLayout()
+    section_row.setSpacing(10)
+    section_label = QLabel("Section:")
+    section_label.setObjectName("defaultNote")
+    section_combo = QComboBox()
+    section_combo.setMinimumHeight(40)
+    section_combo.setToolTip("Choose which User View section to show below.")
+    window.configure_combo_popup(section_combo)
+    section_row.addWidget(section_label)
+    section_row.addWidget(section_combo, stretch=1)
 
     def _refresh_user_view_button_visibility():
-        """Hide buttons whose section has no real content for the loaded report."""
-        for name, button in simple_view_buttons.items():
-            if name not in _hideable_when_empty:
-                button.setVisible(True)
-                continue
-            try:
-                content = _simple_view_section_text(name) or ""
-            except Exception:
-                content = ""
-            stripped = content.strip()
-            # The compact-snippet builder always includes the title + source line plus
-            # the fallback message. We treat the section as "empty" if it contains the
-            # fallback message AND no other substantive content beyond the header.
-            is_empty = (
-                not stripped
-                or "will appear here when present" in stripped
-                or "will appear here when the deck report identifies" in stripped
-            )
-            button.setVisible(not is_empty)
+        """Repopulate the section picker, dropping empty optional sections."""
+        items = [
+            name for name in visible_user_view_sections
+            if name not in _hideable_when_empty or _section_has_content(name)
+        ]
+        current = section_combo.currentText() if section_combo.count() else "Handoff"
+        blocker = QSignalBlocker(section_combo)
+        section_combo.clear()
+        section_combo.addItems(items)
+        idx = section_combo.findText(current)
+        section_combo.setCurrentIndex(idx if idx >= 0 else 0)
+        del blocker
+        _show_simple_view_section(section_combo.currentText() or "Handoff")
 
-    handoff_card.body.addLayout(simple_view_button_grid)
-    _show_simple_view_section("Handoff")
+    section_combo.currentTextChanged.connect(
+        lambda name: _show_simple_view_section(name) if name else None
+    )
+
+    handoff_card.body.addLayout(section_row)
     _refresh_user_view_button_visibility()
+    # Public hook kept valid (callers refresh section availability per report).
     window.refresh_user_view_button_visibility = _refresh_user_view_button_visibility
     window.simple_view_user_detail_box = simple_view_detail_box
     handoff_card.body.addWidget(simple_view_detail_box, stretch=1)
     user_layout.addWidget(handoff_card, stretch=1)
+
+    # Ask the local AI guide as its OWN box BELOW the handoff card (not nested
+    # inside it) so the embedded panel has room and answers are visible.
+    if hasattr(window, "add_commander_ai_trigger"):
+        window.add_commander_ai_trigger(user_layout, context_label="report")
 
     report_mode_stack.addWidget(user_view)
 

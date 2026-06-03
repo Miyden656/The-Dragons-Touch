@@ -37,6 +37,7 @@ class AppState:
     deck_size: int = 0
     bracket: str = "Not estimated"
     warnings: int = 0
+    warning_details: list[str] = field(default_factory=list)
     status: str = "Ready — select a deck or start with Commander's Call"
     selected_deck_path: str = "No deck file selected"
     deck_preview_text: str = "Choose a deck file to preview it here. The backend is still disconnected; this page only loads and summarizes the local file."

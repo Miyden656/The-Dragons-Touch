@@ -46,6 +46,7 @@ class RuntimeDataFileStatus:
     exists: bool
     size_bytes: int
     required_for: str
+    last_modified: float = 0.0  # epoch seconds of the file's mtime (0 when missing)
 
 
 @dataclass(frozen=True)
@@ -63,12 +64,14 @@ class RuntimeDataSetupStatus:
 
 def _file_status(label: str, path: Path, required_for: str) -> RuntimeDataFileStatus:
     exists = path.exists() and path.is_file()
+    stat = path.stat() if exists else None
     return RuntimeDataFileStatus(
         label=label,
         path=str(path),
         exists=exists,
-        size_bytes=path.stat().st_size if exists else 0,
+        size_bytes=stat.st_size if stat else 0,
         required_for=required_for,
+        last_modified=stat.st_mtime if stat else 0.0,
     )
 
 

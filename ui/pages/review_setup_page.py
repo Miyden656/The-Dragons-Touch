@@ -144,15 +144,14 @@ def build_review_setup_page(window):
     budget_input.setMinimumHeight(30)
 
     collection_mode_combo = _make_combo(window, COLLECTION_MODE_OPTIONS, window.state.collection_mode)
+    # Combo awareness is always on; the engine reads this. The user-facing
+    # "Combo analysis: Always included" row was removed (tester: redundant — the
+    # user just receives the benefit, no need to be told it's always on).
     window.state.combo_awareness_mode = "Always included"
-    combo_awareness_label = QLabel("Always included")
-    combo_awareness_label.setObjectName("defaultNote")
-    combo_awareness_label.setWordWrap(True)
 
     boundaries_card.body.addWidget(_compact_row(window, "Intended bracket", intended_bracket_combo, "Used as table-fit guidance, not legality."))
     boundaries_card.body.addWidget(_compact_row(window, "Budget note", budget_input, "Optional note such as $25/card."))
     boundaries_card.body.addWidget(_compact_row(window, "Collection mode", collection_mode_combo, "Current-run replacement source behavior."))
-    boundaries_card.body.addWidget(_compact_row(window, "Combo analysis", combo_awareness_label, "Always included when combo data is available. The report should give the deck builder every useful option."))
     boundaries_card.body.addWidget(window.default_note(
         "Collection Source default lives in Settings. Collection Mode lives here because it changes the current review run."
     ))
@@ -176,34 +175,18 @@ def build_review_setup_page(window):
     summary.body.addWidget(summary_label)
     summary.body.addWidget(window.default_note("Auto-staged: changes update this summary immediately. No Apply button required."))
 
-    # ------------------------------------------------------------------
-    # Safety note.
-    # ------------------------------------------------------------------
-    note = ReportCard("Safety Boundary", window.theme)
-    safety_text = window.make_text(
-        "These choices guide the generated review. The Dragon's Touch does not automatically edit deck files. "
-        "Settings controls app-wide defaults; Review Setup controls this run.",
-        paper=True,
-    )
-    safety_text.setMinimumHeight(120)
-    safety_text.setStyleSheet("""
-        QPlainTextEdit {
-            color: #1f1208;
-            background-color: rgba(246, 226, 170, 235);
-            border: 1px solid rgba(126, 75, 26, 130);
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 12px;
-        }
-    """)
-    note.body.addWidget(safety_text)
+    # The "Safety Boundary" card was removed per tester feedback (no longer
+    # needed for shipping). The no-auto-edit guarantee still holds and is noted
+    # at the actual run step (guarded confirmation).
 
-    # v0.10.5.4.2 dashboard-fit layout:
-    # four readable sections in a 2x2 grid with no oversized side badges.
+    # Run Settings Summary is Developer-Mode only (tester: redundant with the
+    # button confirmations). User Mode = just Review Basics + Boundaries, compact.
     grid.addWidget(basics_card, 0, 0)
-    grid.addWidget(summary, 0, 1)
-    grid.addWidget(boundaries_card, 1, 0)
-    grid.addWidget(note, 1, 1)
+    if window.is_dev_mode():
+        grid.addWidget(summary, 0, 1)
+        grid.addWidget(boundaries_card, 1, 0, 1, 2)
+    else:
+        grid.addWidget(boundaries_card, 0, 1)
 
     def auto_stage_review():
         window.stage_review_settings(
