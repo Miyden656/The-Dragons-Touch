@@ -20,6 +20,32 @@ except ImportError:  # Allows direct local execution from inside the ui/ folder.
     from widgets import add_shadow, TexturedPanel, ReportCard
 
 
+def _maybe_open_persona_intake(window, label):
+    """Open the pilot-intent intake dialog for the selected subtype, if it needs one,
+    and store the result on the staged AppState. Defensive: never breaks the dropdown."""
+    try:
+        from ui.dialogs.persona_intake_dialogs import (
+            open_persona_intake,
+            persona_needs_intake,
+            resolve_persona_key,
+        )
+    except Exception:
+        return
+    key = resolve_persona_key(label)
+    if not persona_needs_intake(key):
+        return
+    try:
+        # Optional: prefill card pickers from a parsed decklist if the app exposes one.
+        deck_cards = getattr(window.state, "intake_deck_cards", None) or ()
+        result = open_persona_intake(key, parent=window, deck_cards=deck_cards, current=window.state)
+        if result:
+            for field_name, value in result.items():
+                setattr(window.state, field_name, value)
+    except Exception:
+        # An intake failure must never block philosophy selection.
+        return
+
+
 def build_philosophy_lens_page(window):
     """Build the Philosophy Lens page while keeping behavior on MainWindow."""
     page, layout = window.page_container(
@@ -71,6 +97,13 @@ def build_philosophy_lens_page(window):
     subtype_combo.setCurrentText(window.state.philosophy_subtype)
     window.configure_combo_popup(subtype_combo)
     subtype_combo.currentTextChanged.connect(window.stage_philosophy_subtype)
+    # Pop the pilot-intent intake window for the five guides whose need is
+    # user-declared (Pet Card / Constraint / Weird Card Rescuer / Theme Mechanic
+    # Inventor / Theme-Vibe). Connected AFTER staging so state.philosophy_subtype is
+    # current first. No-op for the other guides.
+    subtype_combo.currentTextChanged.connect(
+        lambda label: _maybe_open_persona_intake(window, label)
+    )
     subtype_card.body.addWidget(subtype_combo)
     subtype_card.body.addWidget(window.default_note("Default: None / top-level only. Subtype bridge is optional and only used when this dropdown is changed."))
     body_layout.addWidget(subtype_card)

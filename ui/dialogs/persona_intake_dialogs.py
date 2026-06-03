@@ -45,6 +45,27 @@ def persona_needs_intake(persona_key: str) -> bool:
     return str(persona_key or "").strip() in PERSONA_INTAKE
 
 
+def resolve_persona_key(value: str) -> str:
+    """Resolve a persona key from either a key (e.g. 'pet_card') or a UI subtype
+    LABEL (e.g. 'Milo / Mia — Pet Card'). Robust to em-dash vs hyphen. Returns '' if
+    the value isn't one of the five intake personas."""
+    v = str(value or "").strip()
+    if v in PERSONA_INTAKE:
+        return v
+    low = v.lower()
+    if "pet card" in low:
+        return "pet_card"
+    if "constraint" in low:
+        return "constraint_builder"
+    if "weird card" in low:
+        return "weird_card_rescuer"
+    if "theme mechanic" in low:
+        return "theme_mechanic_inventor"
+    if "theme / vibe" in low or "theme/vibe" in low or "theme vibe" in low:
+        return "theme_vibe"
+    return ""
+
+
 class _BaseIntakeDialog(QDialog):
     def __init__(self, title: str, blurb: str, parent=None, stylesheet: str = ""):
         super().__init__(parent)
