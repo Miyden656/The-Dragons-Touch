@@ -221,6 +221,25 @@ def _v1120_build_persona_opening(context: dict[str, Any]) -> str:
         return fallback
 
 
+def _v1121_build_pilot_intent_block(context: dict[str, Any]) -> str:
+    """Render the player-facing Pilot Intent section from the run's intake inputs.
+
+    Presentation-only: surfaces pet cards / constraint / rescue target / themes the
+    pilot declared before the run. Returns '' when nothing was declared. Never raises.
+    """
+    try:
+        from analysis.pilot_intent import (
+            pilot_intent_from_runtime_config,
+            render_pilot_intent_report_block,
+        )
+        runtime_config = context.get("runtime_config")
+        return render_pilot_intent_report_block(
+            pilot_intent_from_runtime_config(runtime_config)
+        )
+    except Exception:
+        return ""
+
+
 def _possible_companion_names_from_reference(context: dict[str, Any]) -> list[str]:
     parsed = context["parsed_deck"]
     command_zone = context.get("command_zone")
@@ -2426,6 +2445,9 @@ def build_normal_report(context: dict[str, Any]) -> str:
         "",
         _v1120_build_persona_opening(context),
     ]
+    _pilot_intent_block = _v1121_build_pilot_intent_block(context)
+    if _pilot_intent_block:
+        lines.extend(["", _pilot_intent_block])
 
     lines += _section("Run Settings")
     lines.extend([

@@ -81,6 +81,9 @@ class CommanderAIContext:
     guide_style: str = "adventurer"
     pet_cards: list = field(default_factory=list)
     user_constraints: list = field(default_factory=list)
+    rescue_cards: list = field(default_factory=list)       # weird card(s) being rescued
+    hybrid_themes: list = field(default_factory=list)      # two themes to bridge
+    theme_intent: str = ""                                 # the pilot's stated theme/vibe
 
     win_conditions: list = field(default_factory=list)
     uncertainties: list = field(default_factory=list)

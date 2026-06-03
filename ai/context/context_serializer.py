@@ -90,6 +90,20 @@ def serialize_context(
     persona_view = _build_persona_view(philosophy_context)
     resolved_style = normalize_guide_style(request.guide_style or guide_style)
 
+    # Pilot intent: user-declared inputs from the run config (intake windows) merged
+    # with anything passed on the chat request. Lets the guide see pet cards, the
+    # self-imposed rule, rescue targets, and theme/vibe even outside a chat turn.
+    from analysis.pilot_intent import pilot_intent_from_runtime_config
+
+    intent = pilot_intent_from_runtime_config(runtime_config)
+
+    def _merge(primary: Any, extra: tuple) -> list[str]:
+        out: list[str] = []
+        for item in [as_str(p) for p in as_list(primary)] + [as_str(e) for e in extra]:
+            if item and item not in out:
+                out.append(item)
+        return out
+
     win_conditions = win_conditions_from_roles(role_summary)
 
     ctx = CommanderAIContext(
@@ -109,8 +123,11 @@ def serialize_context(
         combo=combo_view,
         persona=persona_view,
         guide_style=resolved_style,
-        pet_cards=[as_str(p) for p in as_list(request.pet_cards) if as_str(p)],
-        user_constraints=[as_str(c) for c in as_list(request.constraints) if as_str(c)],
+        pet_cards=_merge(request.pet_cards, intent.pet_cards),
+        user_constraints=_merge(request.constraints, intent.constraints),
+        rescue_cards=list(intent.rescue_cards),
+        hybrid_themes=list(intent.hybrid_themes),
+        theme_intent=intent.theme_intent,
         win_conditions=win_conditions,
         uncertainties=[],
         warnings=[],

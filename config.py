@@ -299,6 +299,15 @@ class RuntimeConfig:
     combo_report_section_potential_limit: int = 10
     combo_breakdown_potential_limit: int = 25
 
+    # Pilot-declared intent captured by the per-guide intake windows (presentation/
+    # context only; see analysis/pilot_intent.py). All optional and additive — they
+    # carry user intent the decklist can't reveal into the report + the AI guide.
+    pet_cards: tuple[str, ...] = ()            # cards the pilot will never cut
+    declared_constraints: tuple[str, ...] = ()  # self-imposed rules (free text)
+    rescue_cards: tuple[str, ...] = ()         # weird card(s) being built around
+    hybrid_themes: tuple[str, ...] = ()        # two themes to bridge
+    theme_intent: str = ""                     # the theme/vibe the pilot is shooting for
+
 
 
 def yes_no_to_bool(value: object, default: bool = False) -> bool:

@@ -149,6 +149,23 @@ def build_user_prompt(
         parts.append("## User constraints")
         parts.extend(f"- {c}" for c in context.user_constraints)
 
+    # Pilot intent the decklist can't reveal (from the per-guide intake windows).
+    if context.rescue_cards:
+        parts.append(
+            "## Rescue target (build the deck to make these work; do not suggest cutting them)\n"
+            + ", ".join(context.rescue_cards)
+        )
+    if context.hybrid_themes:
+        parts.append(
+            "## Themes to bridge (find the cards that serve BOTH; flag single-side cards)\n"
+            + " + ".join(context.hybrid_themes)
+        )
+    if context.theme_intent:
+        parts.append(
+            "## Theme / vibe the pilot is going for (judge identity against THIS, not a guess)\n"
+            + context.theme_intent
+        )
+
     # Pod-value focus: surface the engine's verified 4-player facts as plain text
     # for the modes where multiplayer reasoning matters most. Grounds claims about
     # sweeper value, single-target trades, table reach, and archenemy risk.
