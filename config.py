@@ -604,6 +604,11 @@ def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_car
             combo_report_section_complete_limit=runtime_config.combo_report_section_complete_limit,
             combo_report_section_potential_limit=runtime_config.combo_report_section_potential_limit,
             combo_breakdown_potential_limit=runtime_config.combo_breakdown_potential_limit,
+            pet_cards=runtime_config.pet_cards,
+            declared_constraints=runtime_config.declared_constraints,
+            rescue_cards=runtime_config.rescue_cards,
+            hybrid_themes=runtime_config.hybrid_themes,
+            theme_intent=runtime_config.theme_intent,
         )
 
     cut_config = dict(runtime_config.cut_depth_config)
@@ -643,6 +648,11 @@ def resolve_runtime_config_for_deck_size(runtime_config: RuntimeConfig, deck_car
         combo_report_section_complete_limit=runtime_config.combo_report_section_complete_limit,
         combo_report_section_potential_limit=runtime_config.combo_report_section_potential_limit,
         combo_breakdown_potential_limit=runtime_config.combo_breakdown_potential_limit,
+        pet_cards=runtime_config.pet_cards,
+        declared_constraints=runtime_config.declared_constraints,
+        rescue_cards=runtime_config.rescue_cards,
+        hybrid_themes=runtime_config.hybrid_themes,
+        theme_intent=runtime_config.theme_intent,
     )
 
 
@@ -837,6 +847,13 @@ def get_collection_settings_from_user(review_direction: str) -> tuple[str, str, 
     return mode, str(COLLECTION_FOLDER), "entire_collection_folder", files
 
 
+def _env_pipe_list(name: str) -> tuple[str, ...]:
+    """Read a pipe-delimited env var into a clean tuple (pipe, not comma, because
+    card names contain commas)."""
+    raw = os.environ.get(name, "")
+    return tuple(part.strip() for part in raw.split("|") if part.strip())
+
+
 def get_runtime_config() -> RuntimeConfig:
     output_mode = get_output_mode_from_user()
     review_direction = get_review_direction_from_user()
@@ -870,6 +887,13 @@ def get_runtime_config() -> RuntimeConfig:
     collection_mode, collection_file, collection_source_mode, collection_files = get_collection_settings_from_user(review_direction)
     budget_note = os.environ.get("MTG_BUDGET_NOTE", "").strip() or "No budget note provided"
     intended_bracket = os.environ.get("MTG_INTENDED_BRACKET", "").strip() or "Not sure yet"
+    # Pilot-intent intake (from the per-guide UI windows). Pipe-delimited because card
+    # names contain commas (e.g. "Krenko, Mob Boss"). All optional/additive.
+    pet_cards = _env_pipe_list("MTG_PET_CARDS")
+    declared_constraints = _env_pipe_list("MTG_DECLARED_CONSTRAINTS")
+    rescue_cards = _env_pipe_list("MTG_RESCUE_CARDS")
+    hybrid_themes = _env_pipe_list("MTG_HYBRID_THEMES")
+    theme_intent = os.environ.get("MTG_THEME_INTENT", "").strip()
     (
         combo_awareness_enabled,
         combo_awareness_artifact,
@@ -897,6 +921,11 @@ def get_runtime_config() -> RuntimeConfig:
         combo_report_section_complete_limit=combo_report_section_complete_limit,
         combo_report_section_potential_limit=combo_report_section_potential_limit,
         combo_breakdown_potential_limit=combo_breakdown_potential_limit,
+        pet_cards=pet_cards,
+        declared_constraints=declared_constraints,
+        rescue_cards=rescue_cards,
+        hybrid_themes=hybrid_themes,
+        theme_intent=theme_intent,
     )
 
 

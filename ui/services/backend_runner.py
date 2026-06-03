@@ -57,6 +57,14 @@ def environment_values(state) -> dict[str, str]:
         "MTG_INTENDED_BRACKET": state.intended_bracket,
         "MTG_COMBO_AWARENESS_ENABLED": "1" if combo_awareness_enabled(state) else "0",
         "MTG_COMBO_AWARENESS_ARTIFACT": combo_awareness_artifact_value(state),
+        # Pilot-intent intake (from the per-guide windows). Lists are pipe-delimited
+        # because card names contain commas (e.g. "Krenko, Mob Boss"). config.py reads
+        # these back via _env_pipe_list into the RuntimeConfig intent fields.
+        "MTG_PET_CARDS": "|".join(getattr(state, "pet_cards", None) or []),
+        "MTG_DECLARED_CONSTRAINTS": getattr(state, "declared_constraints", "") or "",
+        "MTG_RESCUE_CARDS": "|".join(getattr(state, "rescue_cards", None) or []),
+        "MTG_HYBRID_THEMES": "|".join(getattr(state, "hybrid_themes", None) or []),
+        "MTG_THEME_INTENT": getattr(state, "theme_intent", "") or "",
     }
     return values
 
