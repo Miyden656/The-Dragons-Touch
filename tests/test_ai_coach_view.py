@@ -179,6 +179,14 @@ def main() -> None:
     t.true("build_up leads with building",
            bu_text.index("would build up") < bu_text.index("would look at cutting"))
 
+    # --- Phase 2: reframed() flips direction WITHOUT recomputing card data ---
+    flipped = cut_down.reframed(DIRECTION_BUILD_UP)
+    t.eq("reframed flips direction", flipped.direction, DIRECTION_BUILD_UP)
+    t.true("reframed reuses cut data (same objects)", flipped.cuts is cut_down.cuts)
+    t.eq("reframed matches a fresh build_up text", flipped.to_text(), build_up.to_text())
+    t.true("reframed updates the framing line", "build-up mode" in flipped.direction_frame)
+    t.true("reframe to same direction is a no-op", cut_down.reframed(DIRECTION_CUT_DOWN) is cut_down)
+
     # --- two personas produce DIFFERENT voice (the checkpoint, in code) ---
     spike = build_coach_view(analysis, philosophy_key="competitive_closer")
     pet = build_coach_view(analysis, philosophy_key="pet_card")

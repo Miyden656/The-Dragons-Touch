@@ -128,6 +128,34 @@ class CoachView:
     add_cards: list[CoachCard] = field(default_factory=list)
     meta: dict[str, Any] = field(default_factory=dict)
 
+    # --- Phase 2: cut-down <-> build-up toggle ----------------------------
+
+    def reframed(self, direction: str) -> "CoachView":
+        """Return a copy framed for the other review direction.
+
+        Phase 2's toggle: the cut / protect / add data is direction-INDEPENDENT
+        (only section order + the framing line change), so this re-frames WITHOUT
+        re-running the engine or the voiced-narration wiring. The Qt page calls
+        this on a toggle for an instant flip; lists are shared read-only.
+        """
+        new_dir = direction if direction in (DIRECTION_CUT_DOWN, DIRECTION_BUILD_UP) else self.direction
+        if new_dir == self.direction:
+            return self
+        guide = self.persona.get("guide_name") or ""
+        return CoachView(
+            persona=self.persona,
+            opening=self.opening,
+            disclaimer=self.disclaimer,
+            direction=new_dir,
+            direction_frame=_build_direction_frame(guide, new_dir),
+            deck_plan=self.deck_plan,
+            cuts=self.cuts,
+            protects=self.protects,
+            add_directions=self.add_directions,
+            add_cards=self.add_cards,
+            meta=self.meta,
+        )
+
     # --- serialization ----------------------------------------------------
 
     def to_dict(self) -> dict[str, Any]:

@@ -11,10 +11,20 @@ from ai.coach.coach_view import (
     CoachView,
     build_coach_view,
 )
+from ai.coach.coach_picks import (
+    CoachPicks,
+    build_request,
+    picks_to_request_inputs,
+    picks_to_runtime_overlay,
+)
 
 __all__ = [
     "CoachCard",
     "CoachDirection",
     "CoachView",
     "build_coach_view",
+    "CoachPicks",
+    "build_request",
+    "picks_to_request_inputs",
+    "picks_to_runtime_overlay",
 ]
