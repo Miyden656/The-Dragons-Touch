@@ -69,6 +69,7 @@ try:
     from ui.pages.settings_page import build_settings_content
     from ui.pages.commander_ai_panel import build_commander_ai_panel
     from ui.pages.training_review_page import build_training_review_page
+    from ui.pages.deck_coach_page import build_deck_coach_page
 except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
     from constants import (
         APP_VERSION, APP_PHASE, BACKEND_STATUS, LOCKED_BACKEND_VERSION,
@@ -97,6 +98,7 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
     from pages.settings_page import build_settings_content
     from pages.commander_ai_panel import build_commander_ai_panel
     from pages.training_review_page import build_training_review_page
+    from pages.deck_coach_page import build_deck_coach_page
 
 
 try:
@@ -152,7 +154,7 @@ class MainWindow(QMainWindow):
     # drawer / embedded panel on Report Viewer + Commander's Call (no standalone page).
     # SETTINGS removed as a stack page — it is now a slide-over overlay drawer
     # (open_settings_drawer) so closing returns to the exact prior page.
-    DECK_SELECTION, REVIEW_SETUP, PHILOSOPHY, RUN_ANALYSIS, REPORT, COMMANDER_DISCOVERY, COLLECTION, BATCH_REPORTS, TRAINING_REVIEW = range(9)
+    DECK_SELECTION, REVIEW_SETUP, PHILOSOPHY, RUN_ANALYSIS, REPORT, COMMANDER_DISCOVERY, COLLECTION, BATCH_REPORTS, TRAINING_REVIEW, DECK_COACH = range(10)
 
     # v0.6.7.1 shell aliases kept for low-risk page wiring during the first UI patch.
     DECK_INPUT = DECK_SELECTION
@@ -546,6 +548,11 @@ class MainWindow(QMainWindow):
         act_view_report = menu.addAction("📜  View current report")
         act_view_report.triggered.connect(lambda checked=False: self.go_to(self.REPORT))
         self._view_report_menu_action = act_view_report
+        # Deck Coach Workbench — a readable, persona-voiced view of the engine's
+        # reasoning + a card-picking steering wheel. Real user feature (both modes).
+        act_coach = menu.addAction("🧭  Deck Coach Workbench")
+        act_coach.triggered.connect(lambda checked=False: self.go_to(self.DECK_COACH))
+        self._deck_coach_menu_action = act_coach
         # Dev-only Training Review (re-homes the old sidebar entry). The action
         # always exists so Settings' interface-mode toggle can show/hide it live.
         self._training_review_separator = menu.addSeparator()
@@ -936,6 +943,7 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.page_batch_reports())
         # Settings is no longer a stack page — it's the slide-over drawer.
         self.stack.addWidget(self.page_training_review())   # index 8 = TRAINING_REVIEW (dev-only nav; page always in stack so indices stay stable)
+        self.stack.addWidget(self.page_deck_coach())        # index 9 = DECK_COACH (visible in both modes)
 
     def apply_theme(self):
         self.root.setStyleSheet(self.qss(self.theme()))
@@ -2956,6 +2964,9 @@ class MainWindow(QMainWindow):
 
     def page_training_review(self):
         return build_training_review_page(self)
+
+    def page_deck_coach(self):
+        return build_deck_coach_page(self)
 
     def collection_settings_summary_text(self):
         if self.state.collection_source_mode == "Select collection files":
