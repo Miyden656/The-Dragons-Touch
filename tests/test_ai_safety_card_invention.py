@@ -45,6 +45,18 @@ def main() -> None:
     t.true("real split card in a suggestion not flagged",
            not _card_flags("Try running *Fast // Furious* as a finisher.", lookup))
 
+    # --- precision tightening (false positives found in the 114-deck shakedown) ---
+    t.true("curly-apostrophe real card not flagged",
+           not _card_flags("Consider adding *Ashnod’s Transmogrant* for ramp.", lookup))
+    t.true("real card containing a concept word not flagged",
+           not _card_flags("You could add *Mana Drain* as interaction.", lookup))
+    t.true("slash-joined concept label not flagged",
+           not _card_flags("Lean into strategies like *Token Combat / Go-Wide-Go-Tall*.", lookup))
+    t.true("strategy concept phrase not flagged",
+           not _card_flags("Consider a plan such as *Life Total Politics*.", lookup))
+    t.true("genuine invented card still flagged after tightening",
+           "Sundering Vortex" in _card_flags("Swap it for *Sundering Vortex* as a finisher.", lookup))
+
     # --- no lookup -> cannot verify -> never emits a card_not_found flag ---
     no_lookup = verify_response("Swap it for *Sundering Blade*.", None, scryfall_lookup=None, strict=False)
     t.true("no Scryfall lookup -> no card_not_found flags",

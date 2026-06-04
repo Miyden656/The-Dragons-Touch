@@ -120,6 +120,36 @@ _NON_CARD_LEAD = {
     "step", "tip", "tips", "pros", "cons", "verdict", "caveat", "reminder",
 }
 _CONNECTOR_TOKENS = {"of", "the", "and", "to", "in", "a", "an", "for", "on", "//", "the,"}
+# Strategy/concept words the model bolds as labels ("Token Combat / Go-Wide", "Life
+# Total Politics", "Mana Development") — these are NOT cards. Used ONLY to suppress a
+# flag AFTER a phrase fails to resolve to a real card, so real cards that happen to
+# contain such a word (e.g. "Mana Drain") are unaffected (they resolve first).
+_CONCEPT_WORDS = {
+    "combat", "politics", "value", "acceleration", "interaction", "engine", "setup",
+    "development", "mana", "resource", "pressure", "ramp", "removal", "protection",
+    "tempo", "advantage", "control", "aggro", "midrange", "synergy", "payoff", "wide",
+    "tall", "tablewide", "table-wide", "go-wide", "go-tall", "recursion", "lifegain",
+    "tokens", "token", "sacrifice", "stax", "wincon", "strategy", "strategies", "plan",
+    "package", "subtheme", "theme", "archetype", "manabase", "fixing", "draw",
+}
+# Curly punctuation -> ascii, so a real card with a smart apostrophe/quote ("Ashnod's
+# Transmogrant") resolves instead of being mis-flagged as invented.
+_UNICODE_PUNCT = {"’": "'", "‘": "'", "ʼ": "'", "´": "'", "`": "'",
+                  "“": '"', "”": '"', "„": '"', "–": "-", "—": "-"}
+
+
+def _normalize_card_text(s: str) -> str:
+    for a, b in _UNICODE_PUNCT.items():
+        s = s.replace(a, b)
+    return s
+
+
+def _is_concept_phrase(phrase: str) -> bool:
+    """A bolded strategy/concept LABEL (not a card): slash-joined, or contains a
+    strategy word. Only consulted for phrases that already failed to resolve."""
+    if " / " in phrase:
+        return True
+    return any(t.strip(",./-").lower() in _CONCEPT_WORDS for t in phrase.split())
 
 _STOPWORD_NAMES = {
     "the", "this", "that", "your", "you", "it", "if", "based", "use", "do", "don",
@@ -358,14 +388,18 @@ def _check_unverified_cards(sentence: str, scryfall_lookup: dict | None) -> list
         if not phrase or low in seen or not _looks_like_card_name(phrase):
             continue
         seen.add(low)
+        norm = _normalize_card_text(phrase)  # curly apostrophes/quotes -> ascii so real cards resolve
         try:
             real = (
-                lookup_card_facts(phrase, scryfall_lookup) is not None
-                or bool(find_known_card_names(phrase, scryfall_lookup))
+                lookup_card_facts(norm, scryfall_lookup) is not None
+                or bool(find_known_card_names(norm, scryfall_lookup))
             )
         except Exception:  # noqa: BLE001 - a lookup error must never produce a false flag
             real = True
         if real:
+            continue
+        # Didn't resolve — but a bolded strategy/concept label isn't an invented CARD.
+        if _is_concept_phrase(phrase):
             continue
         out.append(
             FlaggedClaim(

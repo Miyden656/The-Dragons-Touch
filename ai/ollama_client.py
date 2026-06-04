@@ -53,6 +53,10 @@ class OllamaAvailability:
 
 Message = dict  # {"role": "system"|"user"|"assistant", "content": str}
 
+# Absolute ceiling for the adaptive num_ctx bump — keeps a pathological prompt from
+# requesting a context window that would OOM the GPU. ~24.5k holds the largest decks.
+_NUM_CTX_HARD_MAX = 24576
+
 
 class OllamaClient:
     """A thin, offline-safe wrapper over the Ollama chat API."""
@@ -215,20 +219,28 @@ class OllamaClient:
         stream: bool,
     ) -> dict:
         temp = self.config.temperature if temperature is None else temperature
-        # num_ctx: the grounded prompt is large (~15-18k tokens for a full deck).
-        # Ollama defaults to ~4096 and SILENTLY TRUNCATES, dropping the deck context
-        # (and even system guardrails) the model needs. Send the configured window so
-        # the model actually receives the grounding the engine produced.
-        # think=False: reasoning models (e.g. qwen3) otherwise route their output into
-        # a separate "thinking" channel and can leave message.content EMPTY on a large
-        # grounded prompt — and the chain-of-thought is wasted tokens + latency here.
-        # We want a direct grounded answer; harmless no-op for non-reasoning models.
+        msgs = list(messages)
+        # num_ctx: the grounded prompt is large (~11k tokens for a full deck, up to
+        # ~18k for the biggest). Ollama defaults to ~4096 and SILENTLY TRUNCATES,
+        # dropping the deck context (and even system guardrails) the model needs.
+        # We send the configured window (default 16384) so the model receives the full
+        # grounding — and ADAPTIVELY bump it for an unusually large deck so its prompt
+        # (plus room to answer; num_ctx covers prompt + generation) still fits instead
+        # of truncating to an empty answer. Normal decks keep the fast default window.
+        # think=False: reasoning models (e.g. qwen3) otherwise route output into a
+        # separate "thinking" channel and can leave message.content EMPTY on a large
+        # grounded prompt — wasted tokens + latency here; we want a direct answer.
+        est_tokens = sum(len(str(m.get("content", ""))) for m in msgs) // 4
+        num_ctx = self.config.num_ctx
+        needed = est_tokens + 2560  # headroom for the generated answer
+        if needed > num_ctx:
+            num_ctx = min(_NUM_CTX_HARD_MAX, needed)
         return {
             "model": self.config.model,
-            "messages": list(messages),
+            "messages": msgs,
             "stream": stream,
             "think": False,
-            "options": {"temperature": temp, "num_ctx": self.config.num_ctx},
+            "options": {"temperature": temp, "num_ctx": num_ctx},
         }
 
     def _get(self, url: str, *, timeout: float | None = None) -> str:
