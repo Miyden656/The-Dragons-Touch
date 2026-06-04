@@ -69,7 +69,7 @@ try:
     from ui.pages.settings_page import build_settings_content
     from ui.pages.commander_ai_panel import build_commander_ai_panel
     from ui.pages.training_review_page import build_training_review_page
-    from ui.pages.deck_coach_page import build_deck_coach_page
+    from ui.pages.deck_coach_page import build_deck_coach_page, refresh_deck_coach_deck_label
 except ImportError:  # Allows direct execution from inside the ui/ folder during local testing.
     from constants import (
         APP_VERSION, APP_PHASE, BACKEND_STATUS, LOCKED_BACKEND_VERSION,
@@ -98,7 +98,7 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
     from pages.settings_page import build_settings_content
     from pages.commander_ai_panel import build_commander_ai_panel
     from pages.training_review_page import build_training_review_page
-    from pages.deck_coach_page import build_deck_coach_page
+    from pages.deck_coach_page import build_deck_coach_page, refresh_deck_coach_deck_label
 
 
 try:
@@ -1073,6 +1073,8 @@ class MainWindow(QMainWindow):
         if index == self.REPORT:
             self.refresh_report_viewer_mode_controls()
             self.refresh_report_viewer_file_list()
+        if index == self.DECK_COACH:
+            refresh_deck_coach_deck_label(self)
 
     def is_guarded_run_active(self):
         """Return True only while a guarded backend process is actively running."""

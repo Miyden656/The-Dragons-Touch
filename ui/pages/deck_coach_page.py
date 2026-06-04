@@ -163,17 +163,23 @@ class _CoachWorker(QObject):
 
 
 class _CoachBridge(QObject):
-    def __init__(self, output, status, build_button, export_button, store):
+    def __init__(self, output, status, buttons, export_button, store):
         super().__init__()
         self.output = output
         self.status = status
-        self.build_button = build_button
+        self.buttons = list(buttons)
         self.export_button = export_button
         self.store = store
 
+    def _reenable(self):
+        for b in self.buttons:
+            if b is not None:
+                b.setEnabled(True)
+        self.store["running"] = False
+
     @Slot(object)
     def on_finished(self, result):
-        self.build_button.setEnabled(True)
+        self._reenable()
         if result.ok:
             self.output.setPlainText(result.text)
             self.store["last_result"] = result
@@ -186,19 +192,25 @@ class _CoachBridge(QObject):
 
     @Slot(str)
     def on_failed(self, message):
-        self.build_button.setEnabled(True)
+        self._reenable()
         self.output.setPlainText(f"Something went wrong: {message}")
         self.status.setText("Error.")
 
     @Slot()
     def release_refs(self):
-        if self.build_button is not None:
-            self.build_button._coach_thread = None
-            self.build_button._coach_worker = None
-            self.build_button._coach_bridge = None
+        # Clear the thread/worker/bridge refs only after the thread has finished, so
+        # the QThread is never garbage-collected while still running (that crashes Qt).
+        self.store["_thread"] = None
+        self.store["_worker"] = None
+        self.store["_bridge"] = None
 
 
-def _run_build(window, persona_combo, direction_combo, picks_inputs, output, status, build_button, export_button, store):
+def _run_build(window, persona_combo, direction_combo, picks_inputs, output, status, buttons, export_button, store):
+    # Re-entrancy guard: if a build is already in flight, ignore the click. Without
+    # this, a second click would overwrite the live thread refs and Qt would crash
+    # ("QThread: Destroyed while thread is still running").
+    if store.get("running"):
+        return
     persona = _PERSONA_BY_DISPLAY.get(persona_combo.currentText(), "") if persona_combo is not None else ""
     direction = _DIRECTION_BY_DISPLAY.get(direction_combo.currentText(), "cut_down")
     picks = _Picks(
@@ -208,7 +220,10 @@ def _run_build(window, persona_combo, direction_combo, picks_inputs, output, sta
         note=picks_inputs["note"].text().strip(),
     )
 
-    build_button.setEnabled(False)
+    store["running"] = True
+    for b in buttons:
+        if b is not None:
+            b.setEnabled(False)
     export_button.setEnabled(False)
     steer = "" if picks.is_empty() else "  (steering with your picks)"
     output.setPlainText(f"Building the coach view...{steer}  (the first build loads card data and can take a few seconds)")
@@ -216,7 +231,7 @@ def _run_build(window, persona_combo, direction_combo, picks_inputs, output, sta
 
     thread = QThread()
     worker = _CoachWorker(window, persona, direction, picks)
-    bridge = _CoachBridge(output, status, build_button, export_button, store)
+    bridge = _CoachBridge(output, status, buttons, export_button, store)
     worker.moveToThread(thread)
 
     worker.finished.connect(bridge.on_finished)
@@ -228,9 +243,11 @@ def _run_build(window, persona_combo, direction_combo, picks_inputs, output, sta
     thread.finished.connect(bridge.release_refs)
     thread.finished.connect(thread.deleteLater)
 
-    build_button._coach_thread = thread
-    build_button._coach_worker = worker
-    build_button._coach_bridge = bridge
+    # Hold the live objects on the (stable) store dict so they survive until the
+    # thread finishes; release_refs clears them only after thread.finished.
+    store["_thread"] = thread
+    store["_worker"] = worker
+    store["_bridge"] = bridge
     thread.start()
 
 
@@ -291,6 +308,15 @@ def _build_page(window) -> QWidget:
     ))
 
     store: dict = {}
+
+    # Shows which deck the coach view will read. Refreshed on navigation by the
+    # workstation's go_to hook (refresh_deck_coach_page) since this page is built
+    # once at startup, before any deck is selected.
+    deck_label = QLabel(_deck_label_text(window))
+    deck_label.setObjectName("helperText")
+    deck_label.setWordWrap(True)
+    card.body.addWidget(deck_label)
+    window._deck_coach_deck_label = deck_label
 
     # --- controls: persona + direction + build ---
     controls = QHBoxLayout()
@@ -380,7 +406,8 @@ def _build_page(window) -> QWidget:
 
     # --- wiring ---
     def _build():
-        _run_build(window, persona_combo, direction_combo, picks_inputs, output, status, build_button, export_button, store)
+        _run_build(window, persona_combo, direction_combo, picks_inputs, output, status,
+                   [build_button, rerun_button], export_button, store)
 
     build_button.clicked.connect(_build)
     rerun_button.clicked.connect(_build)
@@ -400,5 +427,25 @@ def _preselect_persona(window, persona_combo) -> None:
             if key == staged:
                 persona_combo.setCurrentIndex(i)
                 return
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _deck_label_text(window) -> str:
+    """One-line 'which deck' label for the page header."""
+    path = str(getattr(getattr(window, "state", None), "selected_deck_path", "") or "")
+    if not path or path == _NO_DECK:
+        return "No deck selected yet — pick one in Deck Selection, then click Build coach view."
+    return f"Coaching the deck: {Path(path).name}"
+
+
+def refresh_deck_coach_deck_label(window) -> None:
+    """Update the page's deck label to the currently selected deck. Called by the
+    workstation's go_to hook each time the Deck Coach page is shown (the page is
+    built once at startup, so the label would otherwise be stale). Never raises."""
+    try:
+        label = getattr(window, "_deck_coach_deck_label", None)
+        if label is not None:
+            label.setText(_deck_label_text(window))
     except Exception:  # noqa: BLE001
         pass
