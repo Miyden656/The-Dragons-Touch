@@ -167,8 +167,27 @@ def infer_card_type_tags(card: dict[str, Any]) -> list[str]:
 
 
 def build_scryfall_lookup(cards: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    """Build a lower-case name lookup for Scryfall card records."""
-    return {card["name"].lower(): card for card in cards if card.get("name")}
+    """Build a lower-case name lookup for Scryfall card records.
+
+    Double-faced / modal-DFC / Adventure / split / Battle cards are stored by their
+    full ``"Front // Back"`` name, but decklists very often list only the front face
+    (e.g. ``"Darkbore Pathway"`` for ``"Darkbore Pathway // Slitherbore Pathway"``).
+    Without an alias those cards resolve to nothing, so the engine marks them
+    "not found in Scryfall", tags them role-uncertain, and may recommend cutting a
+    real dual land. We add per-face aliases so a front-face-only name resolves to
+    the full card. Full names are inserted first and the aliases use ``setdefault``,
+    so a genuine standalone card that happens to share a face name always wins.
+    """
+    lookup = {card["name"].lower(): card for card in cards if card.get("name")}
+
+    for card in cards:
+        for face in card.get("card_faces", []) or []:
+            if not isinstance(face, dict):
+                continue
+            face_name = face.get("name")
+            if face_name:
+                lookup.setdefault(str(face_name).lower(), card)
+    return lookup
 
 
 def lookup_card(name: object, scryfall_lookup: dict[str, dict[str, Any]]) -> dict[str, Any] | None:
