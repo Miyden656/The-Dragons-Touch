@@ -101,6 +101,20 @@ def main() -> None:
     t.true("no protected names -> unchanged",
            apply_pilot_protection_to_cuts(cuts_obj, ()) is cuts_obj)
 
+    # --- declared-plan headline: leads the Strategy Read with the pilot's plan ---
+    from reports.report_builder import _v1124_declared_plan_line
+    t.eq("hybrid themes joined as the declared plan",
+         _v1124_declared_plan_line({"runtime_config": NS(
+             hybrid_themes=("Tokens / Go-Wide Combat", "Spellslinger / Noncreature Spells"),
+             theme_intent="")}),
+         "Tokens / Go-Wide Combat + Spellslinger / Noncreature Spells")
+    t.eq("theme-vibe used when no hybrid themes",
+         _v1124_declared_plan_line({"runtime_config": NS(hybrid_themes=(), theme_intent="lifegain matters")}),
+         "lifegain matters")
+    t.eq("no declared intent -> empty (report unchanged)",
+         _v1124_declared_plan_line({"runtime_config": NS(hybrid_themes=(), theme_intent="")}), "")
+    t.eq("missing runtime_config -> empty, no crash", _v1124_declared_plan_line({}), "")
+
     t.report_and_exit()
 
 

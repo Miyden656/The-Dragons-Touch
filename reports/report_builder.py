@@ -240,6 +240,30 @@ def _v1121_build_pilot_intent_block(context: dict[str, Any]) -> str:
         return ""
 
 
+def _v1124_declared_plan_line(context: dict[str, Any]) -> str:
+    """Return the pilot's declared deck plan (hybrid themes / theme-vibe), joined for
+    a one-line headline, or '' if none was declared. Presentation-only, never raises.
+
+    Used to LEAD the Strategy Read with what the player said they want, so the
+    engine's detected label is framed as a read rather than the last word — the
+    engine can only infer the plan from cards, while the pilot stated it directly.
+    """
+    try:
+        from analysis.pilot_intent import pilot_intent_from_runtime_config
+
+        intent = pilot_intent_from_runtime_config(context.get("runtime_config"))
+        parts: list[str] = []
+        themes = [str(t).strip() for t in (getattr(intent, "hybrid_themes", ()) or ()) if str(t).strip()]
+        if themes:
+            parts.append(" + ".join(themes))
+        theme_intent = str(getattr(intent, "theme_intent", "") or "").strip()
+        if theme_intent and theme_intent not in parts:
+            parts.append(theme_intent)
+        return "; ".join(parts)
+    except Exception:
+        return ""
+
+
 def _possible_companion_names_from_reference(context: dict[str, Any]) -> list[str]:
     parsed = context["parsed_deck"]
     command_zone = context.get("command_zone")
@@ -2554,8 +2578,12 @@ def build_normal_report(context: dict[str, Any]) -> str:
     lines.extend(_build_reference_cards_section(context))
 
     lines += _section("Strategy Read")
+    _declared_plan = _v1124_declared_plan_line(context)
+    if _declared_plan:
+        lines.append(f"- Your declared plan: {_declared_plan}")
+        lines.append("- The detected read below is the engine's inference from the cards; your declared plan leads and takes precedence where they differ.")
     lines.extend([
-        f"- Primary strategy: {strategy.primary_strategy}",
+        f"- Primary strategy{' (engine detected)' if _declared_plan else ''}: {strategy.primary_strategy}",
         f"- Secondary strategy: {strategy.secondary_strategy}",
         f"- Strategy confidence: {strategy.confidence}",
     ])
