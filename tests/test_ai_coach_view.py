@@ -209,6 +209,35 @@ def main() -> None:
     t.true("garbage degrades to balanced", garbage.persona.get("key") == "balanced_unknown")
     t.true("garbage renders", bool(garbage.to_text()))
 
+    # --- oversize deck: required-cut context + reframed build-up section ---
+    oversize_analysis = _sample_analysis()
+    oversize_analysis["parsed_deck"] = NS(commander_name="Krenko, Mob Boss", deck_card_count=155)
+    oversize_analysis["cut_pressure"] = NS(required_cuts=55)
+    oversize_analysis["possible_cuts"] = NS(
+        required_cut_candidates=[
+            NS(card_name="Random Dragon", cut_confidence="medium", cut_type="off-plan",
+               reasons=["off-theme"]),
+        ],
+        optional_cut_candidates=[], manual_review_candidates=[], playtest_first_candidates=[],
+        protected_from_cut=[], notes=[],
+    )
+    ov = build_coach_view(oversize_analysis, philosophy_key="pet_card")
+    t.true("cut_summary oversize", ov.cut_summary.get("oversize") is True)
+    t.eq("cut_summary required_needed", ov.cut_summary.get("required_needed"), 55)
+    t.eq("cut_summary over_by", ov.cut_summary.get("over_by"), 55)
+    t.eq("cut_summary confident", ov.cut_summary.get("confident_candidates"), 1)
+    # The required tier is softened to a candidate label, not a mandate.
+    t.eq("required tier relabeled", ov.cuts[0].tier, "required-cut candidate")
+    ov_text = ov.to_text()
+    t.true("cut section has oversize context", "needs about 55 cuts" in ov_text)
+    t.true("not per-card mandate wording", "not per-card mandates" in ov_text)
+    # The build-up section is reframed to role gaps (you're trimming, not adding).
+    t.true("adds reframed to role gaps", "Role gaps" in ov_text)
+    t.true("adds reframe explains trimming", "isn't about adding cards yet" in ov_text)
+
+    # A legal-size deck keeps the normal build-up framing.
+    t.true("legal deck not oversize", build_coach_view(_sample_analysis(), philosophy_key="pet_card").cut_summary.get("oversize") is False)
+
     t.report_and_exit()
 
 

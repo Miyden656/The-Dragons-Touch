@@ -48,8 +48,10 @@ DIRECTION_BUILD_UP = "build_up"
 
 # The cut tiers the engine separates, paired with how the coach view labels them.
 # Order matters: required first, then optional, then the softer review buckets.
+# "required-cut candidate" (not "required") because these are CANDIDATES that help
+# reach the required count — never a per-card mandate.
 _CUT_TIERS: tuple[tuple[str, str], ...] = (
-    ("required_cuts", "required"),
+    ("required_cuts", "required-cut candidate"),
     ("optional_cuts", "optional"),
     ("manual_review", "manual review"),
     ("playtest_first", "playtest first"),
@@ -126,6 +128,7 @@ class CoachView:
     protects: list[CoachCard] = field(default_factory=list)
     add_directions: list[CoachDirection] = field(default_factory=list)
     add_cards: list[CoachCard] = field(default_factory=list)
+    cut_summary: dict[str, Any] = field(default_factory=dict)  # oversize/required-cut context
     meta: dict[str, Any] = field(default_factory=dict)
 
     # --- Phase 2: cut-down <-> build-up toggle ----------------------------
@@ -153,6 +156,7 @@ class CoachView:
             protects=self.protects,
             add_directions=self.add_directions,
             add_cards=self.add_cards,
+            cut_summary=self.cut_summary,
             meta=self.meta,
         )
 
@@ -170,6 +174,7 @@ class CoachView:
             "protects": [c.to_dict() for c in self.protects],
             "add_directions": [d.to_dict() for d in self.add_directions],
             "add_cards": [c.to_dict() for c in self.add_cards],
+            "cut_summary": dict(self.cut_summary),
             "meta": dict(self.meta),
         }
 
@@ -242,6 +247,17 @@ class CoachView:
         if not self.cuts:
             return ""
         out = [f"## What {guide} would look at cutting"]
+        # When the deck is oversize, be explicit that the engine has fewer CONFIDENT
+        # calls than required cuts — the rest are the pilot's judgment, not a mandate.
+        cs = self.cut_summary or {}
+        if cs.get("oversize") and cs.get("required_needed"):
+            needed = cs["required_needed"]
+            confident = cs.get("confident_candidates", 0)
+            out.append(
+                f"_The deck is {cs.get('over_by', needed)} over 100, so it needs about "
+                f"{needed} cuts for legality. Only {confident} are confident calls below — "
+                f"the rest are candidates for your judgment, not per-card mandates._"
+            )
         for c in self.cuts:
             header = f"- **{c.card}** ({c.tier}"
             if c.engine_confidence:
@@ -268,7 +284,17 @@ class CoachView:
     def _render_adds(self, guide: str) -> str:
         if not self.add_directions and not self.add_cards:
             return ""
-        out = [f"## Where {guide} would build up"]
+        # When the deck is oversize you're trimming, not adding — so reframe the
+        # build-up section as role GAPS to protect from cuts, not new cards to add.
+        oversize = bool((self.cut_summary or {}).get("oversize"))
+        if oversize:
+            out = [f"## Role gaps {guide} would cover from the cards you keep"]
+            out.append(
+                "_You're over 100, so this isn't about adding cards yet — it's the roles to "
+                "make sure you DON'T cut, so the deck still does these jobs after the trim._"
+            )
+        else:
+            out = [f"## Where {guide} would build up"]
         for d in self.add_directions:
             prio = f" ({d.priority})" if d.priority else ""
             out.append(f"- **{d.category}**{prio}")
@@ -341,6 +367,7 @@ def build_coach_view(
     cuts = _build_cuts(analysis, wiring_config)
     protects = _build_protects(analysis, wiring_config)
     add_directions, add_cards = _build_adds(analysis, wiring_config)
+    cut_summary = _build_cut_summary(analysis, deck_plan, cuts)
 
     meta = {
         "schema": "coach_view/v1",
@@ -361,11 +388,42 @@ def build_coach_view(
         protects=protects,
         add_directions=add_directions,
         add_cards=add_cards,
+        cut_summary=cut_summary,
         meta=meta,
     )
 
 
 # --- builder internals ----------------------------------------------------
+
+def _build_cut_summary(analysis: dict, deck_plan: dict, cuts: list[CoachCard]) -> dict[str, Any]:
+    """Oversize / required-cut context: how many cuts legality needs vs how many the
+    engine is confident about. Prefers the engine's cut-pressure summary; falls back
+    to deck size over 100. Defensive — never raises."""
+    deck_count = 0
+    try:
+        deck_count = int(deck_plan.get("deck_card_count") or 0)
+    except (TypeError, ValueError):
+        deck_count = 0
+
+    required_needed = 0
+    cp = analysis.get("cut_pressure")
+    if cp is not None:
+        try:
+            required_needed = int(getattr(cp, "required_cuts", 0) or 0)
+        except (TypeError, ValueError):
+            required_needed = 0
+    over_by = max(0, deck_count - 100)
+    if not required_needed:
+        required_needed = over_by
+
+    confident = sum(1 for c in cuts if c.tier == "required-cut candidate")
+    return {
+        "deck_card_count": deck_count,
+        "required_needed": required_needed,
+        "over_by": over_by,
+        "confident_candidates": confident,
+        "oversize": required_needed > 0 or over_by > 0,
+    }
 
 def _resolve_direction(direction: Optional[str], analysis: dict) -> str:
     if direction in (DIRECTION_CUT_DOWN, DIRECTION_BUILD_UP):
