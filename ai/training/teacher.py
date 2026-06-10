@@ -43,8 +43,11 @@ class TeacherResult:
     error: str = ""
     kind: str = ""                       # "no_key" | "http_error" | "offline" | "bad_response"
     usage: dict = field(default_factory=dict)  # raw usage block from the API
+    cost: float | None = None            # provider-computed cost; None -> price usage at Opus rates
 
     def cost_usd(self) -> float:
+        if self.cost is not None:
+            return self.cost
         u = self.usage or {}
         inp = u.get("input_tokens", 0) or 0
         out = u.get("output_tokens", 0) or 0

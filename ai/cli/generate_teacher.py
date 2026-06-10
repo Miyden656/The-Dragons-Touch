@@ -8,11 +8,14 @@ gold training data. The local qwen2.5:7b is later fine-tuned to imitate them.
     py -3 -m ai.cli.generate_teacher --limit 2          # try 2 decks first
     py -3 -m ai.cli.generate_teacher                    # all decks in Decklists/
     py -3 -m ai.cli.generate_teacher --personas balanced_unknown,pet_card
+    py -3 -m ai.cli.generate_teacher --provider gemini --limit 2   # free-tier Gemini teacher
 
 Needs ANTHROPIC_API_KEY (console.anthropic.com) — this calls the paid Claude API.
 Each gold answer costs roughly $0.10-0.20; the tool prints the running total so
-there are no surprises. Survivors are saved approved=True (already curated by
-the teacher + the safety net); review them anytime with manage_corpus.
+there are no surprises. With --provider gemini it needs GEMINI_API_KEY instead
+(aistudio.google.com, free tier — calls are paced and cost $0.00). Survivors are
+saved approved=True (already curated by the teacher + the safety net); review
+them anytime with manage_corpus.
 """
 
 from __future__ import annotations
@@ -37,6 +40,10 @@ from ai.training.persona_affinity import (  # noqa: E402
     INTENT_PERSONAS,
     derive_personas_for_deck,
     intent_persona_sample,
+)
+from ai.training.gemini_teacher import (  # noqa: E402
+    GEMINI_TEACHER_MODEL,
+    GeminiTeacherClient,
 )
 from ai.training.teacher import (  # noqa: E402
     TEACHER_MODEL,
@@ -92,11 +99,16 @@ def main(argv: list[str] | None = None) -> int:
                         help="Pick each deck's personas from its engine analysis (Balanced + top 2 fit) instead of --personas")
     parser.add_argument("--intent-sample", type=int, default=12, metavar="N",
                         help="With --deck-derived: also run the 4 intent personas across N sampled decks (0 = off)")
-    parser.add_argument("--model", type=str, default=TEACHER_MODEL, help=f"Teacher model (default {TEACHER_MODEL})")
+    parser.add_argument("--provider", type=str, choices=("claude", "gemini"), default="claude",
+                        help="Teacher provider: claude (paid, default) or gemini (free tier, paced)")
+    parser.add_argument("--model", type=str, default="",
+                        help=f"Teacher model (default {TEACHER_MODEL} for claude, {GEMINI_TEACHER_MODEL} for gemini)")
     parser.add_argument("--out", type=str, default="", help="Corpus file to append to")
     parser.add_argument("--max-cost", type=float, default=0.0, metavar="USD", help="Stop once estimated spend exceeds this (0 = no cap)")
     parser.add_argument("--estimate", action="store_true", help="Preview the cost WITHOUT calling the API or spending anything (no key needed)")
     args = parser.parse_args(argv)
+    if not args.model:
+        args.model = TEACHER_MODEL if args.provider == "claude" else GEMINI_TEACHER_MODEL
 
     config = _load_config()
 
@@ -104,11 +116,16 @@ def main(argv: list[str] | None = None) -> int:
     if args.estimate:
         return _estimate(args, config)
 
-    teacher = TeacherClient(model=args.model)
+    teacher = GeminiTeacherClient(model=args.model) if args.provider == "gemini" else TeacherClient(model=args.model)
     if not teacher.available():
-        print("ANTHROPIC_API_KEY is not set — this tool calls the paid Claude API.")
-        print("  1. Get a key at https://console.anthropic.com (Settings -> API Keys).")
-        print("  2. PowerShell:  setx ANTHROPIC_API_KEY \"sk-ant-...\"   (then reopen the terminal)")
+        if args.provider == "gemini":
+            print("GEMINI_API_KEY is not set — this tool calls the Gemini API (free tier, $0.00).")
+            print("  1. Get a free key at https://aistudio.google.com (Get API key).")
+            print("  2. PowerShell:  setx GEMINI_API_KEY \"AIza...\"   (then reopen the terminal)")
+        else:
+            print("ANTHROPIC_API_KEY is not set — this tool calls the paid Claude API.")
+            print("  1. Get a key at https://console.anthropic.com (Settings -> API Keys).")
+            print("  2. PowerShell:  setx ANTHROPIC_API_KEY \"sk-ant-...\"   (then reopen the terminal)")
         print("\nTip: run with --estimate first to see the cost — it spends nothing and needs no key.")
         return 0
 
@@ -195,6 +212,10 @@ def _estimate(args, config) -> int:
         except Exception:  # noqa: BLE001 - skip un-estimable decks
             continue
     print(f"\nEstimated GOLD examples: ~{n}")
+    if args.provider == "gemini":
+        print("Estimated cost: $0.00  (Gemini free tier — calls are paced ~9/minute instead)")
+        print(f"Rough wall-clock at that pace: ~{n * 6.5 / 60.0:.0f} min")
+        return 0
     print(f"Estimated MAX cost: ~${total:.2f}  (conservative — real cost is usually lower)")
     print(f"Per example: ~${(total / n):.3f}" if n else "")
     print("\nThis is a CEILING estimate. To stay safe:")
