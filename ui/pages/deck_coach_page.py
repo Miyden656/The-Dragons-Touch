@@ -81,7 +81,7 @@ def _split_csv(text: str) -> list:
     return [part.strip() for part in (text or "").split(",") if part.strip()]
 
 
-def _build_coach(window, persona_key: str, direction: str, picks: _Picks) -> _CoachResult:
+def _build_coach(window, persona_key: str, direction: str, picks: _Picks, progress=None) -> _CoachResult:
     """Full pipeline (worker thread): analysis -> coach view. No Ollama, no cost."""
     import main
     from config import RuntimeConfig
@@ -98,11 +98,15 @@ def _build_coach(window, persona_key: str, direction: str, picks: _Picks) -> _Co
 
     lookup = getattr(window, "_commander_ai_scryfall_lookup", None)
     if not lookup:
+        if progress is not None:
+            progress("Loading the card database — first time only, a few seconds...")
         _cards, lookup, err = main.load_scryfall_or_none()
         if err or not lookup:
             return _CoachResult(ok=False, error="Card data isn't loaded. Use Settings -> Data Setup to download Scryfall data.")
         window._commander_ai_scryfall_lookup = lookup
 
+    if progress is not None:
+        progress("Reading your deck through the chosen lens...")
     parsed = parse_deck_file(Path(deck_path), scryfall_lookup=lookup)
 
     # The user's picks steer the REFINED run via the existing intent channels:
@@ -147,6 +151,7 @@ def _build_coach(window, persona_key: str, direction: str, picks: _Picks) -> _Co
 class _CoachWorker(QObject):
     finished = Signal(object)  # _CoachResult
     failed = Signal(str)
+    progress = Signal(str)
 
     def __init__(self, window, persona_key, direction, picks):
         super().__init__()
@@ -157,7 +162,9 @@ class _CoachWorker(QObject):
 
     def run(self):
         try:
-            self.finished.emit(_build_coach(self._window, self._persona_key, self._direction, self._picks))
+            self.finished.emit(
+                _build_coach(self._window, self._persona_key, self._direction, self._picks, progress=self.progress.emit)
+            )
         except Exception as exc:  # noqa: BLE001 - surfaced to the page, never crashes the app.
             self.failed.emit(str(exc))
 
@@ -195,6 +202,10 @@ class _CoachBridge(QObject):
         self._reenable()
         self.output.setPlainText(f"Something went wrong: {message}")
         self.status.setText("Error.")
+
+    @Slot(str)
+    def on_progress(self, message):
+        self.status.setText(message)
 
     @Slot()
     def release_refs(self):
@@ -236,6 +247,7 @@ def _run_build(window, persona_combo, direction_combo, picks_inputs, output, sta
 
     worker.finished.connect(bridge.on_finished)
     worker.failed.connect(bridge.on_failed)
+    worker.progress.connect(bridge.on_progress)
     worker.finished.connect(thread.quit)
     worker.failed.connect(thread.quit)
     thread.started.connect(worker.run)

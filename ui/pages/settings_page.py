@@ -25,6 +25,7 @@ try:
     )
     from ui.styles.theme import ADVENTURERS_MAP, DRAGON_FORGE
     from ui.widgets import add_shadow, ReportCard, TexturedPanel
+    from ui.services.async_worker import run_in_worker
     from data.data_setup_service import get_data_setup_status, download_scryfall_cards, download_commander_spellbook_combo_bulk
 except ImportError:
     from PySide6.QtCore import Qt, QObject, QThread, Signal, Slot
@@ -38,6 +39,7 @@ except ImportError:
     )
     from styles.theme import ADVENTURERS_MAP, DRAGON_FORGE
     from widgets import add_shadow, ReportCard, TexturedPanel
+    from services.async_worker import run_in_worker
     from data.data_setup_service import get_data_setup_status, download_scryfall_cards, download_commander_spellbook_combo_bulk
 
 
@@ -436,158 +438,167 @@ def _download_scryfall_data_guarded(status_widget, action_button=None):
     _run_scryfall_download_in_worker(status_widget, action_button)
 
 
-def _download_combo_data_guarded(status_widget):
-    """Download/update Commander Spellbook combo data after explicit user confirmation."""
+def _download_combo_data_guarded(status_widget, action_button=None):
+    """Download/update Commander Spellbook combo data in a background worker."""
     if not _confirm_data_setup_action(
         "Download / Update Combo Data",
         "This will download or replace the local Commander Spellbook combo data file. "
-        "The download is large and the app may appear busy until it finishes.\n\n"
+        "The app stays responsive while the download runs.\n\n"
         "This does not build combo indexes yet. Continue?",
     ):
         return
 
-    try:
-        path = download_commander_spellbook_combo_bulk(overwrite=True)
+    _append_status_note(
+        status_widget,
+        "Combo data download is running. The app should remain responsive.",
+    )
+
+    def _on_done(path):
         _refresh_data_setup_status_widget(status_widget)
         _show_data_setup_message(
             "Combo Data Updated",
             f"Commander Spellbook combo data was downloaded successfully.\n\n{path}\n\n"
             "Next step: build the combo index.",
         )
-    except Exception as exc:
+
+    def _on_error(message):
         _refresh_data_setup_status_widget(status_widget)
         _show_data_setup_message(
             "Combo Data Download Failed",
-            str(exc),
+            message,
             error=True,
         )
 
+    run_in_worker(
+        action_button if action_button is not None else status_widget,
+        lambda: download_commander_spellbook_combo_bulk(overwrite=True),
+        on_done=_on_done,
+        on_error=_on_error,
+        buttons=(action_button,),
+        busy_text="Downloading Combo Data...",
+        key="_combo_download",
+    )
 
-def _build_combo_index_guarded(status_widget):
-    """Build the normal Commander Spellbook combo index after explicit user confirmation."""
+
+def _build_combo_index_guarded(status_widget, action_button=None):
+    """Build the normal Commander Spellbook combo index in a background worker."""
     if not _confirm_data_setup_action(
         "Build Combo Index",
         "This will rebuild the local Commander Spellbook combo index used by Combo Awareness. "
-        "The app may appear busy until it finishes.\n\n"
+        "The app stays responsive while it runs.\n\n"
         "This builds the normal user-facing combo_index.json only, not the parity index. Continue?",
     ):
         return
 
-    try:
-        import runpy
-        import subprocess
-        import sys
-        from pathlib import Path
+    status = get_data_setup_status()
 
-        status = get_data_setup_status()
+    if not status.commander_spellbook_bulk.exists:
+        _show_data_setup_message(
+            "Combo Index Build Blocked",
+            "Commander Spellbook combo bulk data is missing.\n\n"
+            "Run Download / Update Combo Data first.",
+            error=True,
+        )
+        _refresh_data_setup_status_widget(status_widget)
+        return
 
-        if not status.commander_spellbook_bulk.exists:
-            _show_data_setup_message(
-                "Combo Index Build Blocked",
-                "Commander Spellbook combo bulk data is missing.\n\n"
-                "Run Download / Update Combo Data first.",
-                error=True,
-            )
-            _refresh_data_setup_status_widget(status_widget)
-            return
+    project_root = Path(status.runtime_root)
+    internal_root = project_root / "_internal"
+    meipass_root = Path(getattr(sys, "_MEIPASS", internal_root))
 
-        project_root = Path(status.runtime_root)
-        internal_root = project_root / "_internal"
-        meipass_root = Path(getattr(sys, "_MEIPASS", internal_root))
+    build_script_candidates = [
+        project_root / "tools" / "build_combo_index.py",
+        internal_root / "tools" / "build_combo_index.py",
+        meipass_root / "tools" / "build_combo_index.py",
+    ]
 
-        build_script_candidates = [
-            project_root / "tools" / "build_combo_index.py",
-            internal_root / "tools" / "build_combo_index.py",
-            meipass_root / "tools" / "build_combo_index.py",
-        ]
+    build_script = next((candidate for candidate in build_script_candidates if candidate.exists()), None)
 
-        build_script = next((candidate for candidate in build_script_candidates if candidate.exists()), None)
+    if build_script is None:
+        candidate_text = "\n".join(str(candidate) for candidate in build_script_candidates)
+        _show_data_setup_message(
+            "Combo Index Build Blocked",
+            "Could not find combo index builder script in any expected runtime location:\n\n"
+            f"{candidate_text}",
+            error=True,
+        )
+        _refresh_data_setup_status_widget(status_widget)
+        return
 
-        if build_script is None:
-            candidate_text = "\n".join(str(candidate) for candidate in build_script_candidates)
-            _show_data_setup_message(
-                "Combo Index Build Blocked",
-                "Could not find combo index builder script in any expected runtime location:\n\n"
-                f"{candidate_text}",
-                error=True,
-            )
-            _refresh_data_setup_status_widget(status_widget)
-            return
+    output_path = Path(status.combo_index.path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        output_path = Path(status.combo_index.path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+    command_args = [
+        str(build_script),
+        "--input",
+        status.commander_spellbook_bulk.path,
+        "--output",
+        str(output_path),
+    ]
 
-        command_args = [
-            str(build_script),
-            "--input",
-            status.commander_spellbook_bulk.path,
-            "--output",
-            str(output_path),
-        ]
+    _append_status_note(
+        status_widget,
+        "Combo index build is running. The app should remain responsive.",
+    )
 
+    def _build_index():
         if getattr(sys, "frozen", False):
+            import runpy
+
+            # sys.argv is process-global; nothing else reads it while the app runs.
             old_argv = sys.argv[:]
             try:
                 sys.argv = command_args[:]
                 try:
                     runpy.run_path(str(build_script), run_name="__main__")
-                    return_code = 0
                 except SystemExit as exc:
                     return_code = exc.code if isinstance(exc.code, int) else 0
+                    if return_code not in (0, None):
+                        raise RuntimeError(
+                            f"The combo index builder stopped with error code {return_code}."
+                        )
             finally:
                 sys.argv = old_argv
-
-            _refresh_data_setup_status_widget(status_widget)
-
-            if return_code not in (0, None):
-                _show_data_setup_message(
-                    "Combo Index Build Failed",
-                    f"Combo index builder exited with code {return_code}.\n\nScript:\n{build_script}",
-                    error=True,
-                )
-                return
         else:
-            command = [sys.executable] + command_args
             result = subprocess.run(
-                command,
+                [sys.executable] + command_args,
                 cwd=str(project_root),
                 capture_output=True,
                 text=True,
             )
-
-            _refresh_data_setup_status_widget(status_widget)
-
             if result.returncode != 0:
-                details = "\n".join([
-                    "Combo index build failed.",
-                    "",
-                    "Command:",
-                    " ".join(command),
-                    "",
-                    "STDOUT:",
-                    result.stdout or "(none)",
-                    "",
-                    "STDERR:",
-                    result.stderr or "(none)",
-                ])
-                _show_data_setup_message(
-                    "Combo Index Build Failed",
-                    details,
-                    error=True,
+                detail = (result.stderr or result.stdout or "").strip()
+                detail = detail[-800:] if detail else "(no details reported)"
+                raise RuntimeError(
+                    "The combo index builder reported an error.\n\n"
+                    f"Technical details:\n{detail}"
                 )
-                return
+        return output_path
 
+    def _on_done(path):
+        _refresh_data_setup_status_widget(status_widget)
         _show_data_setup_message(
             "Combo Index Built",
-            f"Combo index was built successfully.\n\n{output_path}",
+            f"Combo index was built successfully.\n\n{path}",
         )
-    except Exception as exc:
+
+    def _on_error(message):
         _refresh_data_setup_status_widget(status_widget)
         _show_data_setup_message(
             "Combo Index Build Failed",
-            str(exc),
+            message,
             error=True,
         )
+
+    run_in_worker(
+        action_button if action_button is not None else status_widget,
+        _build_index,
+        on_done=_on_done,
+        on_error=_on_error,
+        buttons=(action_button,),
+        busy_text="Building Combo Index...",
+        key="_combo_index_build",
+    )
 
 
 # --- Local Commander AI (v1.7 Phase 5a) -----------------------------------
@@ -749,18 +760,32 @@ def build_commander_ai_settings_card(window):
     ))
 
     # Editable dropdown of installed models (still type-able for models not yet
-    # pulled or when Ollama is offline).
+    # pulled or when Ollama is offline). The installed-model list comes from a
+    # network call to Ollama, so it's fetched on a worker — opening Settings
+    # must never wait on Ollama.
     current_model = str(window.app_settings.get("commander_ai_model", "llama3.1"))
     model_combo = QComboBox()
     model_combo.setEditable(True)
     model_combo.setMinimumWidth(260)
     window.configure_combo_popup(model_combo)
-    model_items = [current_model] if current_model else []
-    for name in _installed_ollama_models(window):
-        if name not in model_items:
-            model_items.append(name)
-    model_combo.addItems(model_items)
+    if current_model:
+        model_combo.addItem(current_model)
     model_combo.setCurrentText(current_model)
+
+    def _add_installed_models(names):
+        typed = model_combo.currentText()
+        existing = {model_combo.itemText(i) for i in range(model_combo.count())}
+        for name in names:
+            if name not in existing:
+                model_combo.addItem(name)
+        model_combo.setCurrentText(typed)
+
+    run_in_worker(
+        model_combo,
+        lambda: _installed_ollama_models(window),
+        on_done=_add_installed_models,
+        key="_model_list_fetch",
+    )
 
     def _save_model():
         _save_ai_setting(window, "commander_ai_model", model_combo.currentText().strip() or "llama3.1")
@@ -1006,14 +1031,16 @@ def build_settings_content(window):
         lambda: _download_scryfall_data_guarded(_DataSetupRefreshProxy(_refresh_data_setup_views), scryfall_download_button)
     )
     data_setup_guarded_actions.addWidget(scryfall_download_button)
-    data_setup_guarded_actions.addWidget(_make_data_setup_button(
-        "Download / Update Combo Data",
-        lambda: _download_combo_data_guarded(_DataSetupRefreshProxy(_refresh_data_setup_views)),
-    ))
-    data_setup_guarded_actions.addWidget(_make_data_setup_button(
-        "Build Combo Index",
-        lambda: _build_combo_index_guarded(_DataSetupRefreshProxy(_refresh_data_setup_views)),
-    ))
+    combo_download_button = _make_data_setup_button("Download / Update Combo Data", lambda: None)
+    combo_download_button.clicked.connect(
+        lambda: _download_combo_data_guarded(_DataSetupRefreshProxy(_refresh_data_setup_views), combo_download_button)
+    )
+    data_setup_guarded_actions.addWidget(combo_download_button)
+    combo_index_button = _make_data_setup_button("Build Combo Index", lambda: None)
+    combo_index_button.clicked.connect(
+        lambda: _build_combo_index_guarded(_DataSetupRefreshProxy(_refresh_data_setup_views), combo_index_button)
+    )
+    data_setup_guarded_actions.addWidget(combo_index_button)
     data_setup_card.body.addLayout(data_setup_guarded_actions)
     b_layout.addWidget(data_setup_card)
 

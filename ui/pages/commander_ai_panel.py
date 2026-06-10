@@ -170,7 +170,7 @@ def _select_default_persona(window, persona_combo) -> None:
         pass
 
 
-def _do_ask(window, question: str, mode: str, persona: str = "") -> _AskResult:
+def _do_ask(window, question: str, mode: str, persona: str = "", progress=None) -> _AskResult:
     """Full pipeline (runs on the worker thread): context -> service -> response."""
     from ai.commander_ai_config import from_settings
     from ai.commander_ai_service import CommanderAIService
@@ -192,11 +192,15 @@ def _do_ask(window, question: str, mode: str, persona: str = "") -> _AskResult:
     # Cache the (large) Scryfall lookup on the window after the first load.
     lookup = getattr(window, "_commander_ai_scryfall_lookup", None)
     if not lookup:
+        if progress is not None:
+            progress("Loading the card database — first time only, a few seconds...")
         _cards, lookup, err = main.load_scryfall_or_none()
         if err or not lookup:
             return _AskResult(ok=False, error="Card data isn't loaded. Use Settings -> Data Setup to download Scryfall data.")
         window._commander_ai_scryfall_lookup = lookup
 
+    if progress is not None:
+        progress("Reading your deck and building the analysis...")
     parsed = parse_deck_file(Path(deck_path), scryfall_lookup=lookup)
     runtime = RuntimeConfig(
         output_mode="normal", review_direction="both", build_up_config={},
@@ -211,6 +215,8 @@ def _do_ask(window, question: str, mode: str, persona: str = "") -> _AskResult:
     service = CommanderAIService(config, scryfall_lookup=lookup)
     request = CommanderAIRequest(user_text=question, mode=mode)
     ctx, _messages = service.build(request, analysis)  # for the grounded training record
+    if progress is not None:
+        progress("Asking the guide — this usually takes about 25 seconds...")
     response = service.answer(request, analysis)
 
     if not response.ok:
@@ -233,6 +239,7 @@ def _do_ask(window, question: str, mode: str, persona: str = "") -> _AskResult:
 class _AskWorker(QObject):
     finished = Signal(object)  # _AskResult
     failed = Signal(str)
+    progress = Signal(str)
 
     def __init__(self, window, question, mode, persona=""):
         super().__init__()
@@ -243,7 +250,9 @@ class _AskWorker(QObject):
 
     def run(self):
         try:
-            self.finished.emit(_do_ask(self._window, self._question, self._mode, self._persona))
+            self.finished.emit(
+                _do_ask(self._window, self._question, self._mode, self._persona, progress=self.progress.emit)
+            )
         except Exception as exc:  # noqa: BLE001 - surfaced to the panel, never crashes the app.
             self.failed.emit(str(exc))
 
@@ -278,6 +287,10 @@ class _AskBridge(QObject):
         self.output.setPlainText(f"Something went wrong: {message}")
         self.status.setText("Error.")
 
+    @Slot(str)
+    def on_progress(self, message):
+        self.status.setText(message)
+
     @Slot()
     def release_refs(self):
         if self.ask_button is not None:
@@ -306,6 +319,7 @@ def _run_ask(window, question_edit, mode_combo, persona_combo, output, status, a
 
     worker.finished.connect(bridge.on_finished)
     worker.failed.connect(bridge.on_failed)
+    worker.progress.connect(bridge.on_progress)
     worker.finished.connect(thread.quit)
     worker.failed.connect(thread.quit)
     thread.started.connect(worker.run)

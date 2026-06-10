@@ -58,6 +58,7 @@ try:
     )
     from ui.state import AppState
     from ui.services import report_detector, cli_bridge, backend_runner, user_settings
+    from ui.services.async_worker import run_in_worker
     from ui.pages.deck_selection_page import build_deck_selection_page
     from ui.pages.review_setup_page import build_review_setup_page
     from ui.pages.philosophy_lens_page import build_philosophy_lens_page
@@ -87,6 +88,7 @@ except ImportError:  # Allows direct execution from inside the ui/ folder during
     )
     from state import AppState
     from services import report_detector, cli_bridge, backend_runner, user_settings
+    from services.async_worker import run_in_worker
     from pages.deck_selection_page import build_deck_selection_page
     from pages.review_setup_page import build_review_setup_page
     from pages.philosophy_lens_page import build_philosophy_lens_page
@@ -261,6 +263,10 @@ class MainWindow(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_progress_mock)
         self.timer.start(600)
+        # Pre-build the Settings drawer content shortly after the window shows,
+        # so the first click on the cog opens it instantly instead of paying the
+        # one-time construction cost.
+        QTimer.singleShot(800, self._prewarm_settings_drawer)
 
     def theme(self):
         return self.state.theme
@@ -815,12 +821,20 @@ class MainWindow(QMainWindow):
         # Settings is dense — wider than the AI drawer (~half, clamped 480–760px).
         self._position_drawer(getattr(self, "settings_drawer", None), 0.5, 480, 760)
 
-    def open_settings_drawer(self):
-        if getattr(self, "settings_drawer", None) is None:
-            return
+    def _ensure_settings_drawer_content(self):
         if self._settings_drawer_content is None:
             self._settings_drawer_content = build_settings_content(self)
             self._settings_drawer_body.addWidget(self._settings_drawer_content, stretch=1)
+
+    def _prewarm_settings_drawer(self):
+        if getattr(self, "settings_drawer", None) is None:
+            return
+        self._ensure_settings_drawer_content()
+
+    def open_settings_drawer(self):
+        if getattr(self, "settings_drawer", None) is None:
+            return
+        self._ensure_settings_drawer_content()
         self.close_ai_drawer()  # never stack the two overlays
         self._position_settings_drawer()
         self.settings_drawer.show()
@@ -2722,20 +2736,31 @@ class MainWindow(QMainWindow):
         return path.read_text(errors="replace")
 
     def load_report_file_into_viewer(self, path_text):
+        # The file read runs on a worker so a large report never freezes the
+        # window; while one load is in flight, further clicks are ignored.
         path = Path(path_text)
-        try:
-            text = self.read_report_file_text(path_text)
+
+        def _apply(text, status):
             self.state.report_viewer_current_file = str(path)
             self.state.report_viewer_current_text = text
-            self.state.report_viewer_current_status = f"Loaded report file: {path.name}"
-        except Exception as exc:
-            self.state.report_viewer_current_file = str(path)
-            self.state.report_viewer_current_text = f"Could not load report file:\n{path}\n\n{exc}"
-            self.state.report_viewer_current_status = "Report file load failed."
-        if self.report_viewer_text_box is not None:
-            self.report_viewer_text_box.setPlainText(self.state.report_viewer_current_text)
-            self.apply_report_viewer_readability_settings()
-        self.refresh_report_viewer_current_file_controls()
+            self.state.report_viewer_current_status = status
+            if self.report_viewer_text_box is not None:
+                self.report_viewer_text_box.setPlainText(text)
+                self.apply_report_viewer_readability_settings()
+            self.refresh_report_viewer_current_file_controls()
+
+        started = run_in_worker(
+            self,
+            lambda: self.read_report_file_text(path_text),
+            on_done=lambda text: _apply(text, f"Loaded report file: {path.name}"),
+            on_error=lambda message: _apply(
+                f"Could not load report file:\n{path}\n\n{message}",
+                "Report file load failed.",
+            ),
+            key="_report_viewer_load",
+        )
+        if started and self.report_viewer_text_box is not None:
+            self.report_viewer_text_box.setPlainText(f"Loading {path.name}...")
 
     def apply_report_viewer_readability_settings(self):
         """Apply report-reader wrapping. Font sizing is deferred to Settings later."""
