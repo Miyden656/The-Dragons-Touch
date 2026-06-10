@@ -11,6 +11,7 @@ from deck_import.types import (
     DeckImportResult,
     ImportedCard,
     ERROR_KINDS,
+    clean_decklist_text,
 )
 from deck_import.url_importer import (
     import_from_url,
@@ -22,6 +23,7 @@ __all__ = [
     "DeckImportResult",
     "ImportedCard",
     "ERROR_KINDS",
+    "clean_decklist_text",
     "import_from_url",
     "detect_source",
     "SUPPORTED_SOURCES",

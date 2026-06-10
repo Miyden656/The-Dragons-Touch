@@ -19,6 +19,7 @@ from _test_helpers import TestRun
 
 from deck_import import (
     DeckImportResult,
+    clean_decklist_text,
     detect_source,
     import_from_url,
     SUPPORTED_SOURCES,
@@ -413,6 +414,23 @@ def main() -> None:
         t.in_set("engine identified Atraxa as commander",
                  "Atraxa, Praetors' Voice", parsed.commander_names)
         t.eq("engine set commander_name", parsed.commander_name, "Atraxa, Praetors' Voice")
+
+    # ------------------------------------------------------------------
+    # clean_decklist_text — hand-pasted text hygiene (HTML entities)
+    # ------------------------------------------------------------------
+    t.eq("entity apostrophe decoded",
+         clean_decklist_text("1 Atraxa, Praetors&#39; Voice"),
+         "1 Atraxa, Praetors' Voice")
+    t.eq("named entity decoded",
+         clean_decklist_text("1 Hide &amp; Seek"),
+         "1 Hide & Seek")
+    t.eq("bare ampersand in a real card name untouched",
+         clean_decklist_text("1 Minsc & Boo, Timeless Heroes"),
+         "1 Minsc & Boo, Timeless Heroes")
+    plain = "Commander\n1 Krenko, Mob Boss\n\nDeck\n1 Sol Ring\n"
+    t.true("entity-free text returned unchanged (identity fast path)",
+           clean_decklist_text(plain) is plain)
+    t.eq("empty string passes through", clean_decklist_text(""), "")
 
     t.report_and_exit()
 

@@ -36,7 +36,7 @@ except ImportError:  # Allows direct local execution from inside the ui/ folder.
     from constants import APP_VERSION, ARCHIDEKT_EXPORT_HELP_TEXT
     from widgets import add_shadow, TexturedPanel, ReportCard
 
-from deck_import import SUPPORTED_SOURCES, detect_source, import_from_url
+from deck_import import SUPPORTED_SOURCES, clean_decklist_text, detect_source, import_from_url
 
 
 def _deck_selection_intro_text():
@@ -85,7 +85,7 @@ def _update_deck_selection_preview(window):
 
 def _paste_deck_text(window):
     box = getattr(window, "paste_decklist_text_box", None)
-    return box.toPlainText().strip() if box is not None else ""
+    return clean_decklist_text(box.toPlainText().strip()) if box is not None else ""
 
 
 def _clear_pasted_decklist(window):

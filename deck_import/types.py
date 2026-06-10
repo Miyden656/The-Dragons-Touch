@@ -6,6 +6,7 @@ becomes ok=False with a short user-facing message and a machine
 error_kind so the UI can branch on it.
 """
 
+import html
 from dataclasses import dataclass, field
 from typing import Iterable
 
@@ -107,6 +108,20 @@ def normalize_section(raw: str) -> str:
     if "token" in s:
         return "Tokens"
     return "Mainboard"
+
+
+def clean_decklist_text(text: str) -> str:
+    """Decode HTML entities a website copy-paste can carry into card names.
+
+    Deck sites escape special characters in exported/copied text (e.g.
+    `Atraxa, Praetors&#39; Voice`), and the literal entity then fails card
+    resolution everywhere downstream. The URL importers already decode
+    per-name; this is the same hygiene for hand-pasted decklist text.
+    A no-op on already-clean text ('&' alone is never a valid entity).
+    """
+    if "&" not in (text or ""):
+        return text
+    return html.unescape(text)
 
 
 def cards_to_decklist_text(cards: Iterable[ImportedCard]) -> str:
