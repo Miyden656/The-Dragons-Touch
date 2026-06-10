@@ -270,7 +270,8 @@ def generate_teacher_for_deck(
         if not report.ok:
             stats["dropped"] += 1
             if on_event:
-                on_event("drop", deck=str(deck_path), mode=mode, reason="teacher answer failed safety check")
+                kinds = ", ".join(sorted(report.kinds())) or "unspecified"
+                on_event("drop", deck=str(deck_path), mode=mode, reason=f"failed safety check ({kinds})")
             continue
 
         kept.append({
@@ -283,6 +284,7 @@ def generate_teacher_for_deck(
             "context": ctx.to_json(),
             "approved": True,            # gold + safety-verified -> training-ready
             "source": "teacher",
+            "teacher_model": getattr(teacher, "model", ""),
         })
         stats["kept"] += 1
         if on_event:

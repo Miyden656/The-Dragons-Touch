@@ -94,6 +94,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate gold training examples with a teacher model")
     parser.add_argument("--decks-dir", type=str, default="Decklists")
     parser.add_argument("--limit", type=int, default=0, metavar="N", help="Only the first N decks (0 = all)")
+    parser.add_argument("--decks", type=str, default="",
+                        help="Comma-separated name filters; keep only decklists whose filename contains one of them")
     parser.add_argument("--personas", type=str, default="balanced_unknown", help="Comma-separated philosophy keys (ignored when --deck-derived)")
     parser.add_argument("--deck-derived", action="store_true",
                         help="Pick each deck's personas from its engine analysis (Balanced + top 2 fit) instead of --personas")
@@ -136,6 +138,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     decks = sorted(Path(args.decks_dir).glob("*.txt"))
+    if args.decks:
+        wanted = [w.strip().lower() for w in args.decks.split(",") if w.strip()]
+        decks = [d for d in decks if any(w in d.name.lower() for w in wanted)]
     if args.limit > 0:
         decks = decks[: args.limit]
     if not decks:
@@ -165,6 +170,7 @@ def main(argv: list[str] | None = None) -> int:
             kept, stats = generate_teacher_for_deck(
                 deck, teacher=teacher, config=config, scryfall_lookup=lookup,
                 persona=persona, prompt_plan=DEFAULT_PROMPT_PLAN,
+                on_event=_print_drop,
             )
         except Exception as exc:  # noqa: BLE001
             totals["errors"] += 1
@@ -189,6 +195,9 @@ def _estimate(args, config) -> int:
         print(f"Cannot estimate: Scryfall data not loaded ({err}).")
         return 0
     decks = sorted(Path(args.decks_dir).glob("*.txt"))
+    if args.decks:
+        wanted = [w.strip().lower() for w in args.decks.split(",") if w.strip()]
+        decks = [d for d in decks if any(w in d.name.lower() for w in wanted)]
     if args.limit > 0:
         decks = decks[: args.limit]
     if not decks:
@@ -224,6 +233,16 @@ def _estimate(args, config) -> int:
     print("  • Run a tiny batch first:  --limit 2")
     print("  • Cap a run:  --max-cost 5")
     return 0
+
+
+def _print_drop(event: str, **info) -> None:
+    """Surface per-prompt drop reasons so a high drop count is actionable."""
+    if event != "drop":
+        return
+    detail = str(info.get("reason"))
+    if info.get("kind"):
+        detail = f"{info.get('kind')}: {detail}"
+    print(f"      drop [{info.get('mode')}]: {detail[:200]}")
 
 
 def _summarize(totals: dict, out_path) -> None:
