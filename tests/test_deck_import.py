@@ -80,12 +80,39 @@ def _moxfield_payload():
 def _archidekt_payload():
     return {
         "name": "Krenko Goblins",
+        # Category definitions carry Archidekt's includedInDeck flag; a custom
+        # cut pile is flagged out exactly like the built-in Maybeboard.
+        "categories": [
+            {"name": "Commander", "includedInDeck": True},
+            {"name": "Ramp", "includedInDeck": True},
+            {"name": "Creature", "includedInDeck": True},
+            {"name": "TDT recommended Cut", "includedInDeck": False},
+            {"name": "Maybeboard", "includedInDeck": False},
+        ],
         "cards": [
             {"quantity": 1, "categories": ["Commander"], "card": {"oracleCard": {"name": "Krenko, Mob Boss"}}},
             {"quantity": 1, "categories": ["Ramp"], "card": {"oracleCard": {"name": "Sol Ring"}}},
             {"quantity": 1, "categories": [], "card": {"oracleCard": {"name": "Goblin Chieftain"}}},
             {"quantity": 1, "categories": ["Maybeboard"], "card": {"oracleCard": {"name": "Skirk Prospector"}}},
+            # Tagged with an included category AND a cut pile: Archidekt
+            # does not count it, so neither do we.
+            {"quantity": 1, "categories": ["Creature", "TDT recommended Cut"],
+             "card": {"oracleCard": {"name": "Goblin Piledriver"}}},
             {"quantity": 0, "categories": [], "card": {"oracleCard": {"name": "Ignored Zero"}}},
+        ],
+    }
+
+
+def _archidekt_payload_no_category_defs():
+    # Older/partial responses omit the top-level category list; the built-in
+    # Maybeboard / Sideboard must still be set aside.
+    return {
+        "name": "No Defs",
+        "cards": [
+            {"quantity": 1, "categories": ["Commander"], "card": {"oracleCard": {"name": "Krenko, Mob Boss"}}},
+            {"quantity": 1, "categories": ["Creature"], "card": {"oracleCard": {"name": "Goblin Chieftain"}}},
+            {"quantity": 1, "categories": ["Sideboard"], "card": {"oracleCard": {"name": "Pyroblast"}}},
+            {"quantity": 1, "categories": ["Maybeboard"], "card": {"oracleCard": {"name": "Skirk Prospector"}}},
         ],
     }
 
@@ -260,6 +287,26 @@ def main() -> None:
            "Maybeboard" in r.decklist_text and "Skirk Prospector" in r.decklist_text,
            r.decklist_text)
     t.true("Archidekt zero-qty filtered", "Ignored Zero" not in r.decklist_text)
+    cut = [c for c in r.cards if c.name == "Goblin Piledriver"]
+    t.eq("Archidekt custom includedInDeck=false category -> Maybeboard section",
+         cut[0].section if cut else None, "Maybeboard")
+    t.true("Archidekt cut-pile card kept in the text (nothing silently lost)",
+           "Goblin Piledriver" in r.decklist_text, r.decklist_text)
+    t.eq("Archidekt mainboard count excludes the cut pile", r.mainboard_count(), 2)
+    t.eq("Archidekt included custom category stays Mainboard",
+         [c.section for c in r.cards if c.name == "Sol Ring"], ["Mainboard"])
+
+    # Archidekt: no top-level category definitions -> built-ins still excluded
+    fetcher_nodefs = _make_fetcher({
+        "https://archidekt.com/api/decks/5151/": FetchResult(
+            ok=True, status=200, text=json.dumps(_archidekt_payload_no_category_defs())),
+    })
+    r = import_from_url("https://archidekt.com/decks/5151", fetcher=fetcher_nodefs)
+    sections = {c.name: c.section for c in r.cards}
+    t.eq("Archidekt (no defs) Sideboard keeps its own section", sections.get("Pyroblast"), "Sideboard")
+    t.eq("Archidekt (no defs) Maybeboard still excluded", sections.get("Skirk Prospector"), "Maybeboard")
+    t.eq("Archidekt (no defs) unknown category is Mainboard", sections.get("Goblin Chieftain"), "Mainboard")
+    t.eq("Archidekt (no defs) mainboard count", r.mainboard_count(), 1)
 
     # Archidekt: blocked (private deck)
     fetcher_blk = _make_fetcher({
